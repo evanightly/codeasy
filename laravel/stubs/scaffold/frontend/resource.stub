@@ -1,0 +1,4 @@
+import { {{ modelName }} } from '@/Support/Interfaces/Models';
+import { Resource } from '@/Support/Interfaces/Resources';
+
+export interface {{ modelName }}Resource extends Resource, {{ modelName }} {}

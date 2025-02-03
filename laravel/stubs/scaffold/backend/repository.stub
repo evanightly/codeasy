@@ -1,0 +1,12 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\{{ modelName }};
+use App\Support\Interfaces\Repositories\{{ modelName }}RepositoryInterface;
+
+class {{ modelName }}Repository extends BaseRepository implements {{ modelName }}RepositoryInterface {
+    protected function getModelClass(): string {
+        return {{ modelName }}::class;
+    }
+}

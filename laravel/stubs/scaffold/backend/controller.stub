@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\{{ modelName }}\Store{{ modelName }}Request;
+use App\Http\Requests\{{ modelName }}\Update{{ modelName }}Request;
+use App\Http\Resources\{{ modelName }}Resource;
+use App\Models\{{ modelName }};
+use App\Support\Interfaces\Services\{{ modelName }}ServiceInterface;
+use Illuminate\Http\Request;
+
+class {{ modelName }}Controller extends Controller {
+    public function __construct(protected {{ modelName }}ServiceInterface ${{ modelNameCamel }}Service) {}
+
+    public function index(Request $request) {
+        $perPage = $request->get('perPage', 10);
+        $data = {{ modelName }}Resource::collection($this->{{ modelNameCamel }}Service->getAllPaginated($request->query(), $perPage));
+
+        if ($this->ajax()) {
+            return $data;
+        }
+
+        return inertia('{{ modelName }}/Index');
+    }
+
+    public function create() {
+        return inertia('{{ modelName }}/Create');
+    }
+
+    public function store(Store{{ modelName }}Request $request) {
+        if ($this->ajax()) {
+            return $this->{{ modelNameCamel }}Service->create($request->validated());
+        }
+    }
+
+    public function show({{ modelName }} ${{ modelNameCamel }}) {
+        $data = {{ modelName }}Resource::make(${{ modelNameCamel }});
+
+        if ($this->ajax()) {
+            return $data;
+        }
+
+        return inertia('{{ modelName }}/Show', compact('data'));
+    }
+
+    public function edit({{ modelName }} ${{ modelNameCamel }}) {
+        $data = {{ modelName }}Resource::make(${{ modelNameCamel }});
+
+        return inertia('{{ modelName }}/Edit', compact('data'));
+    }
+
+    public function update(Update{{ modelName }}Request $request, {{ modelName }} ${{ modelNameCamel }}) {
+        if ($this->ajax()) {
+            return $this->{{ modelNameCamel }}Service->update(${{ modelNameCamel }}, $request->validated());
+        }
+    }
+
+    public function destroy({{ modelName }} ${{ modelNameCamel }}) {
+        if ($this->ajax()) {
+            return $this->{{ modelNameCamel }}Service->delete(${{ modelNameCamel }});
+        }
+    }
+}

@@ -1,0 +1,12 @@
+import { ROUTES } from '@/Support/Constants/routes';
+import { serviceHooksFactory } from '@/Services/serviceHooksFactory';
+import { {{ modelName }}Resource } from '@/Support/Interfaces/Resources';
+
+export const {{ modelCamel }}ServiceHook = {
+    ...serviceHooksFactory<{{ modelName }}Resource>({
+        baseRoute: ROUTES.{{ modelUpperSnake }}S
+    }),
+    customFunctionExample: async () => {
+        console.log('custom function');
+    },
+};
