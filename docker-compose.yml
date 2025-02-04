@@ -58,5 +58,6 @@ networks:
   app-network:
     driver: bridge
 
+# TODO: Concern untuk persistensi data / backup db
 volumes:
   mariadb_data:
