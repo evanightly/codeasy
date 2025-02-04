@@ -14,6 +14,26 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/test-fastapi', function () {
+    try {
+        // Memanggil service "fastapi" sesuai nama container di docker-compose
+        $response = Http::get('http://fastapi:8000/test');
+
+        if ($response->successful()) {
+            // Kembalikan isi response
+            return $response->json();
+        } else {
+            return response()->json([
+                'message' => 'Failed to call FastAPI'
+            ], 500);
+        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
 Route::inertia('/sandbox', 'Sandbox/Index');
 
 Route::get('/dashboard', function () {
