@@ -8,56 +8,58 @@ services:
       - MYSQL_USER=codeasy
       - MYSQL_PASSWORD=secretpass
     ports:
-      - "4001:3306"
+      - "4001:3306"            # Host port 4001 -> Container port 3306
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
       - app-network
 
-  # --- NGINX untuk serve Laravel di port 80 ---
-  nginx:
-    image: nginx:stable-alpine
-    container_name: nginx_laravel
-    ports:
-      - "8080:80"
-    volumes:
-      - ./laravel:/var/www/html
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - laravel
-    networks:
-      - app-network
-
-  # --- LARAVEL (PHP-FPM) ---
   laravel:
     build:
-      context: ./laravel
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/laravel.Dockerfile
     container_name: laravel
     volumes:
       - ./laravel:/var/www/html
     networks:
       - app-network
+    # Kita expose port 9001 dan 9002 agar "artisan serve" (9001) & "vite dev" (9002) bisa diakses
+    ports:
+      - "9001:9001"
+      - "9002:9002"
+    depends_on:
+      - mariadb
 
-  # --- FASTAPI ---
   fastapi:
     build:
-      context: ./fastapi
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/fastapi.Dockerfile
     container_name: fastapi
-    ports:
-      - "8000:8000"
     volumes:
       - ./fastapi:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8001:8001"            # Gunakan 8001 di host
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
     networks:
       - app-network
 
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx_laravel
+    depends_on:
+      - laravel
+      - fastapi
+    volumes:
+      - ./laravel:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"              # Akses http://localhost:8080 untuk Nginx
+    networks:
+      - app-network
 
 networks:
   app-network:
     driver: bridge
 
-# TODO: Concern untuk persistensi data / backup db
 volumes:
   mariadb_data:
