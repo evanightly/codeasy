@@ -18,7 +18,7 @@ Route::get('/test-fastapi', function () {
     try {
         // Memanggil service "fastapi" sesuai nama container di docker-compose
         // TODO: Concern deployment, ganti URL dengan URL FastAPI di production
-        $response = Http::get('http://fastapi:8000/test');
+        $response = Http::get('http://fastapi:8001/test');
 
         if ($response->successful()) {
             // Kembalikan isi response
