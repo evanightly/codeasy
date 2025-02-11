@@ -36,6 +36,7 @@
         "vite": "^6.0"
     },
     "dependencies": {
-        "@monaco-editor/react": "^4.6.0"
+        "@codemirror/lang-python": "^6.1.7",
+        "@uiw/react-codemirror": "^4.23.8"
     }
 }
