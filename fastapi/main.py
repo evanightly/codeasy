@@ -95,19 +95,27 @@ def test_code(input: CodeTestInput):
             if not os.path.exists(visual_dir):
                 os.makedirs(visual_dir)
 
+            # Override plt.show to capture each plot separately
+            original_show = plt.show
+            def custom_show():
+                nonlocal outputs
+                image_filename = f"visual_{uuid.uuid4().hex}.png"
+                image_path = os.path.join(visual_dir, image_filename)
+                plt.savefig(image_path)
+                plt.close()
+                outputs.append({
+                    "type": "image",
+                    "content": f"/storage/visualizations/{image_filename}"
+                })
+
+            plt.show = custom_show
+
             # Execute the user's matplotlib code
             exec(input.code)
             
-            # Save the current figure
-            image_filename = f"visual_{uuid.uuid4().hex}.png"
-            image_path = os.path.join(visual_dir, image_filename)
-            plt.savefig(image_path)
-            plt.close()
+            # Restore original plt.show
+            plt.show = original_show
 
-            outputs.append({
-                "type": "image",
-                "content": f"/storage/visualizations/{image_filename}"
-            })
         except Exception as e:
             outputs.append({
                 "type": "image",
