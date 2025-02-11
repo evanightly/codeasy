@@ -5,6 +5,7 @@ from typing import Optional, List
 import os
 import uuid
 import base64
+import json
 
 app = FastAPI()
 
@@ -81,45 +82,61 @@ async def test_code(input: CodeInput):
         outputs = kernel_mgr.execute_code(input.code)
         
         if input.testcases:
-            test_code = """
-import unittest
-import io
-import sys
+            # Setup test environment
+            setup_code = """
+            import unittest
+            import io
+            import sys
+            import json
 
-class TestUserCode(unittest.TestCase):
-"""
-            # Create separate test method for each test case
+            class TestUserCode(unittest.TestCase):
+                pass
+            """
+            kernel_mgr.execute_code(setup_code)
+            
+            # Add test methods
             for i, tc in enumerate(input.testcases):
-                test_code += f"""
-    def test_case_{i}(self):
-        {tc}
-"""
+                test_method = f"""
+                def test_{i}(self):
+                    {tc}
+                TestUserCode.test_{i} = test_{i}
+                """
+                kernel_mgr.execute_code(test_method)
             
-            test_code += """
-if __name__ == '__main__':
-    stream = io.StringIO()
-    runner = unittest.TextTestRunner(stream=stream)
-    result = runner.run(unittest.makeSuite(TestUserCode))
-    output = stream.getvalue()
-    print(f"TEST_RESULTS:{result.wasSuccessful()}:{output}")
-"""
+            # Run tests with combined JSON output
+            run_code = """
+            # Run tests
+            stream = io.StringIO()
+            runner = unittest.TextTestRunner(stream=stream)
+            result = runner.run(unittest.makeSuite(TestUserCode))
+
+            # Combine test stats and results
+            test_output = stream.getvalue()
+            combined_results = {
+                "stats": {
+                    "type": "test_stats",
+                    "total_tests": result.testsRun,
+                    "success": result.testsRun - len(result.failures) - len(result.errors),
+                    "fail": len(result.failures) + len(result.errors)
+                },
+                "results": {
+                    "type": "test_result",
+                    "status": "passed" if result.wasSuccessful() else "failed",
+                    "content": test_output
+                }
+            }
+
+            # Print as single JSON string
+            print("TEST_OUTPUT:" + json.dumps(combined_results))
+            """
+            test_outputs = kernel_mgr.execute_code(run_code)
             
-            test_outputs = kernel_mgr.execute_code(test_code)
-            
+            # Process outputs
             for output in test_outputs:
-                if output['type'] == 'text' and output['content'].startswith('TEST_RESULTS:'):
-                    _, success, test_output = output['content'].split(':', 2)
-                    outputs.append({
-                        "type": "test_result",
-                        "status": "passed" if success == "True" else "failed",
-                        "content": test_output.strip()
-                    })
-                elif output['type'] == 'error':
-                    outputs.append({
-                        "type": "test_result",
-                        "status": "failed",
-                        "content": output['content']
-                    })
+                if output['type'] == 'text' and output['content'].startswith('TEST_OUTPUT:'):
+                    results = json.loads(output['content'][12:])  # Skip "TEST_OUTPUT:"
+                    outputs.append(results['stats'])
+                    outputs.append(results['results'])
         
         return outputs
         

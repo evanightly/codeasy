@@ -10,7 +10,6 @@ export default function Index() {
         e.preventDefault();
         const res = await window.axios.post(route('sandbox.store'), {
             code,
-            testcases: ["self.assertTrue('Arin' in 'nama saya Arin')"],
         });
         console.log(res);
 

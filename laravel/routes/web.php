@@ -30,9 +30,7 @@ Route::get('/test-fastapi', function () {
         if ($response->successful()) {
             return $response->json();
         } else {
-            return response()->json([
-                'message' => 'Failed to call FastAPI'
-            ], 500);
+            return response()->json([$response->json(), $response->status()], 500);
         }
     } catch (\Exception $e) {
         return response()->json([
