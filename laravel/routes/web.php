@@ -15,13 +15,18 @@ Route::get('/', function () {
 });
 
 Route::get('/test-fastapi', function () {
-    try {
-        // Memanggil service "fastapi" sesuai nama container di docker-compose
-        // TODO: Concern deployment, ganti URL dengan URL FastAPI di production
-        $response = Http::get('http://fastapi:8001/test');
+    // Contoh data payload, seharusnya diisi dengan kode siswa dan testcase yang sesuai
+    $payload = [
+        "code" => "print('nama saya Arin')\nimport matplotlib.pyplot as plt\nplt.plot([25,231,32])\nplt.title('Visualisasi Siswa')\nplt.show()",
+        "testcases" => [
+            "self.assertEqual(2+2, 4)",
+            "self.assertTrue('Arin' in 'nama saya Arin')"
+        ]
+    ];
 
+    try {
+        $response = Http::post('http://fastapi:8001/test', $payload);
         if ($response->successful()) {
-            // Kembalikan isi response
             return $response->json();
         } else {
             return response()->json([
