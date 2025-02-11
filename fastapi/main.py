@@ -95,11 +95,10 @@ def test_code(input: CodeTestInput):
             if not os.path.exists(visual_dir):
                 os.makedirs(visual_dir)
 
-            plt.figure()
-            # Eksekusi ulang kode plotting untuk mendapatkan grafik, atau buat contoh
-            # Di sini, contoh mengeksekusi ulang hanya jika user menyisipkan plt
-            plt.plot([25, 231, 32])
-            plt.title("Visualisasi Siswa")
+            # Execute the user's matplotlib code
+            exec(input.code)
+            
+            # Save the current figure
             image_filename = f"visual_{uuid.uuid4().hex}.png"
             image_path = os.path.join(visual_dir, image_filename)
             plt.savefig(image_path)
