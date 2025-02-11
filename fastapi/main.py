@@ -83,15 +83,44 @@ async def test_code(input: CodeInput):
         if input.testcases:
             test_code = """
 import unittest
-class TestCode(unittest.TestCase):
-    def runTest(self):
+import io
+import sys
+
+class TestUserCode(unittest.TestCase):
 """
-            for tc in input.testcases:
-                test_code += f"        {tc}\n"
+            # Create separate test method for each test case
+            for i, tc in enumerate(input.testcases):
+                test_code += f"""
+    def test_case_{i}(self):
+        {tc}
+"""
+            
+            test_code += """
+if __name__ == '__main__':
+    stream = io.StringIO()
+    runner = unittest.TextTestRunner(stream=stream)
+    result = runner.run(unittest.makeSuite(TestUserCode))
+    output = stream.getvalue()
+    print(f"TEST_RESULTS:{result.wasSuccessful()}:{output}")
+"""
             
             test_outputs = kernel_mgr.execute_code(test_code)
-            outputs.extend(test_outputs)
             
+            for output in test_outputs:
+                if output['type'] == 'text' and output['content'].startswith('TEST_RESULTS:'):
+                    _, success, test_output = output['content'].split(':', 2)
+                    outputs.append({
+                        "type": "test_result",
+                        "status": "passed" if success == "True" else "failed",
+                        "content": test_output.strip()
+                    })
+                elif output['type'] == 'error':
+                    outputs.append({
+                        "type": "test_result",
+                        "status": "failed",
+                        "content": output['content']
+                    })
+        
         return outputs
         
     except Exception as e:
