@@ -26,6 +26,10 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 RUN composer install --no-interaction --no-scripts --no-autoloader
 
+# Copy file package.json & package-lock.json, lalu install depedensi
+# COPY package.json package-lock.json ./
+# RUN npm install
+
 # Copy seluruh source code Laravel ke dalam container
 COPY . .
 
