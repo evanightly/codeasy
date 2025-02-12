@@ -21,8 +21,8 @@ import {
    useState,
 } from "react"
 import scrollIntoView from "scroll-into-view-if-needed"
-import { useAnchorObserver } from "@/hooks/use-anchor-observer"
-import { useOnChange } from "@/hooks/use-on-change"
+import { useAnchorObserver } from "@/Hooks/use-anchor-observer"
+import { useOnChange } from "@/Hooks/use-on-change"
 import { ny } from "@/Lib/Utils"
 import {
    Popover,
