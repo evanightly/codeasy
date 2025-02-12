@@ -2,7 +2,7 @@
 import { motion, useAnimation } from "framer-motion"
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface ScratchToRevealProps {
    children: React.ReactNode

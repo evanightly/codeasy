@@ -2,7 +2,7 @@
 
 import type { Variants } from "framer-motion"
 import { AnimatePresence, motion } from "framer-motion"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface GradualSpacingProps {
    text: string

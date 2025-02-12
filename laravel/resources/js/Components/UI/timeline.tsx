@@ -3,7 +3,7 @@ import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
 import React from "react"
 
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 const timelineVariants = cva("grid", {
    variants: {

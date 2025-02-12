@@ -1,4 +1,4 @@
-import { ny } from "@/Lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface RetroGridProps extends React.HTMLAttributes<HTMLDivElement> {
    /**

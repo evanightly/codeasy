@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react"
-import { ny } from "@/Lib/utils"
+import { ny } from "@/Lib/Utils"
 
 const morphTime = 1.5
 const cooldownTime = 0.5

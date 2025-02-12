@@ -1,5 +1,5 @@
 import { motion, useScroll, useSpring } from "framer-motion"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface ScrollProgressProps {
    className?: string

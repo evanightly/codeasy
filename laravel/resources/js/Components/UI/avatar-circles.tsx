@@ -1,5 +1,5 @@
 import React from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface AvatarCirclesProps {
    className?: string

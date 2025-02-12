@@ -7,7 +7,7 @@ import {
    motion,
 } from "motion/react"
 import type { ElementType } from "react"
-import { ny } from "@/Lib/utils"
+import { ny } from "@/Lib/Utils"
 
 type AnimationType = "text" | "word" | "character" | "line"
 type AnimationVariant =

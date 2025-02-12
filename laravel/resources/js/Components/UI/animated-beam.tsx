@@ -1,7 +1,7 @@
 import { motion } from "framer-motion"
 import type { RefObject } from "react"
 import { useEffect, useId, useState } from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 export interface AnimatedBeamProps {
    className?: string

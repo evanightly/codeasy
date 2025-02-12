@@ -1,6 +1,6 @@
 import type { Variants } from "framer-motion"
 import { motion } from "framer-motion"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface WordPullUpProps {
    words: string

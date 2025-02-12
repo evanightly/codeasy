@@ -3,7 +3,7 @@ import type { LucideIcon } from "lucide-react"
 import { CheckIcon, Loader2, X } from "lucide-react"
 import * as React from "react"
 
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 import { Button } from "@/Components/UI/button"
 import {
    Collapsible,

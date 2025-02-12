@@ -1,6 +1,6 @@
 import type React from "react"
 import { useState } from "react"
-import { ny } from "@/Lib/utils"
+import { ny } from "@/Lib/Utils"
 
 /**
  * InteractiveGridPattern is a component that renders a grid pattern with interactive squares.

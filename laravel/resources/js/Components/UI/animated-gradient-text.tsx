@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 export default function AnimatedGradientText({
    children,

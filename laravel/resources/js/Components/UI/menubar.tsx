@@ -8,7 +8,7 @@ import {
 import * as MenubarPrimitive from "@radix-ui/react-menubar"
 import * as React from "react"
 
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 const MenubarMenu = MenubarPrimitive.Menu
 

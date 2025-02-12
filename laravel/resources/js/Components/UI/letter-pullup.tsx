@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface LetterPullupProps {
    className?: string

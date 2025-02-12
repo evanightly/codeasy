@@ -3,7 +3,7 @@ import { StarIcon } from "lucide-react"
 import type { Dispatch, SetStateAction } from "react"
 import type React from "react"
 
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface StarWrapperProps {
    value?: number

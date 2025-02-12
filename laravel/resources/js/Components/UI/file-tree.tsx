@@ -10,7 +10,7 @@ import {
    useState,
 } from "react"
 
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 import { Button } from "@/Components/UI/button"
 import { ScrollArea } from "@/Components/UI/scroll-area"
 

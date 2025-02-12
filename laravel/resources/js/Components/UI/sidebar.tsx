@@ -5,7 +5,7 @@ import { PanelLeft } from "lucide-react"
 import * as React from "react"
 
 import { useIsMobile } from "@/Hooks/use-mobile"
-import { ny } from "@/Lib/utils"
+import { ny } from "@/Lib/Utils"
 import { Button } from "@/Components/UI/button"
 import { Input } from "@/Components/UI/input"
 import { Separator } from "@/Components/UI/separator"

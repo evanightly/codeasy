@@ -5,7 +5,7 @@ import { Command as CommandPrimitive } from "cmdk"
 import { Search } from "lucide-react"
 import * as React from "react"
 
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 import { Dialog, DialogContent } from "@/Components/UI/dialog"
 
 const Command = React.forwardRef<

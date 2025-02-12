@@ -1,4 +1,4 @@
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface Props {
    max: number

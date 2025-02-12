@@ -6,7 +6,7 @@ import {
    enrichTweet,
 } from "react-tweet"
 import { type Tweet, getTweet } from "react-tweet/api"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface TwitterIconProps {
    className?: string

@@ -11,7 +11,7 @@ import {
    useVelocity,
 } from "framer-motion"
 import React, { useEffect, useRef, useState } from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface VelocityScrollProps {
    text: string

@@ -1,6 +1,6 @@
 import type React from "react"
 
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface RainbowButtonProps
    extends React.ButtonHTMLAttributes<HTMLButtonElement> {}

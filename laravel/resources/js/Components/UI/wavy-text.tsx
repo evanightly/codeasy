@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useMemo } from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface WavyTextProps {
    word: string

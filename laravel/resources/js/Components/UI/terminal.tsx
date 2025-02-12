@@ -2,7 +2,7 @@
 
 import { type MotionProps, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface AnimatedSpanProps extends MotionProps {
    children: React.ReactNode

@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform } from "framer-motion"
 import type { FC, ReactNode } from "react"
 import { useRef } from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface TextRevealByWordProps {
    text: string

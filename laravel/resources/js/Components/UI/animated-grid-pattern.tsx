@@ -9,7 +9,7 @@ import {
    useState,
 } from "react"
 
-import { ny } from "@/Lib/utils"
+import { ny } from "@/Lib/Utils"
 
 export interface AnimatedGridPatternProps
    extends ComponentPropsWithoutRef<"svg"> {

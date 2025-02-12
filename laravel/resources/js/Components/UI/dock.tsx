@@ -3,7 +3,7 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
 import type { PropsWithChildren } from "react"
 import React, { useRef } from "react"
 
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 export interface DockProps extends VariantProps<typeof dockVariants> {
    className?: string

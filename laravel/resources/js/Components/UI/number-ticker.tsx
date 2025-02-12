@@ -2,7 +2,7 @@
 
 import { useInView, useMotionValue, useSpring } from "framer-motion"
 import { useEffect, useRef } from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 export default function NumberTicker({
    value,

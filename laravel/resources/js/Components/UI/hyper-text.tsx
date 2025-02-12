@@ -4,7 +4,7 @@ import type { Variants } from "framer-motion"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface HyperTextProps {
    text: string

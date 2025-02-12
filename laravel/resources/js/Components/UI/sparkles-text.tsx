@@ -1,7 +1,7 @@
 import { motion } from "framer-motion"
 import type { CSSProperties, ReactElement } from "react"
 import { useEffect, useState } from "react"
-import { ny } from "@/lib/utils"
+import { ny } from "@/Lib/Utils"
 
 interface Sparkle {
    id: string

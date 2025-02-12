@@ -2,7 +2,7 @@ import { Check, Copy } from "lucide-react"
 import { motion } from "motion/react"
 import { useTheme } from "next-themes"
 import { type HTMLAttributes, useEffect, useState } from "react"
-import { ny } from "@/Lib/utils"
+import { ny } from "@/Lib/Utils"
 import { Button } from "@/Components/UI/button"
 
 interface ScriptCopyBtnProps extends HTMLAttributes<HTMLDivElement> {
