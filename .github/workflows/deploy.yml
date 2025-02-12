@@ -1,0 +1,62 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add SSH Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+        run: |
+          ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
+            # Navigate to project directory
+            cd ~/codeasy
+
+            # Pull latest changes
+            git pull origin main
+
+            # Copy production env
+            echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env
+
+            # Build and restart containers
+            docker compose down
+            docker compose build
+            docker compose up -d
+
+            # Run Laravel migrations and optimization
+            docker compose exec -T laravel composer install --no-dev --optimize-autoloader
+            docker compose exec -T laravel php artisan migrate --force
+            docker compose exec -T laravel php artisan config:cache
+            docker compose exec -T laravel php artisan route:cache
+            docker compose exec -T laravel php artisan view:cache
+
+            # Build frontend assets
+            docker compose exec -T laravel npm install
+            docker compose exec -T laravel npm run build
+          ENDSSH
+      
+      - name: Health Check
+        run: |
+          # Wait for services to start
+          sleep 30
+          
+          # Check if services are running
+          curl -f http://${{ secrets.SSH_HOST }} || exit 1
+          curl -f http://${{ secrets.SSH_HOST }}/api/health || exit 1
