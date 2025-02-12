@@ -51,9 +51,7 @@ services:
       - redis
 
   laravel:
-    build:
-      context: .
-      dockerfile: docker/laravel.Dockerfile
+    image: ghcr.io/evanightly/codeasy:latest
     container_name: laravel
     volumes:
       - ./laravel:/var/www/html

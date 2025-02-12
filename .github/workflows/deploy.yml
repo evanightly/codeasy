@@ -10,6 +10,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.IMAGE_REPOSITORY_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/codeasy:latest .
+          docker push ghcr.io/${{ github.repository_owner }}/codeasy:latest
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -53,7 +61,8 @@ jobs:
             fi
 
             # Build and start containers
-            docker compose build
+            docker compose pull
+            docker compose up -d
             docker compose up -d
 
             # Wait for containers to be ready
