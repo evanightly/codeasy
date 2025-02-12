@@ -15,3 +15,10 @@ declare global {
 declare module '@inertiajs/core' {
     interface PageProps extends InertiaPageProps, AppPageProps {}
 }
+
+declare module 'react' {
+    interface StyleHTMLAttributes<T> extends React.HTMLAttributes<T> {
+      jsx?: boolean;
+      global?: boolean;
+    }
+  }

@@ -19,7 +19,7 @@ export default function Index() {
         setOutput(res.data);
     };
 
-    const onChange = useCallback((val, viewUpdate) => {
+    const onChange = useCallback((val: any, viewUpdate: any) => {
         console.log('val:', val);
         setCode(val);
     }, []);
@@ -43,12 +43,12 @@ export default function Index() {
                 onChange={onChange}
             />
 
-            <Button onClick={handleSubmit} type="submit" className='w-24'>
+            <Button onClick={handleSubmit} type="submit" className="w-24">
                 Run
             </Button>
 
             <div className="flex flex-col gap-2">
-                {output.map((out, i) => {
+                {output.map((out: any, i) => {
                     if (out.type === 'image') {
                         return (
                             <img
@@ -69,4 +69,4 @@ export default function Index() {
             </div>
         </div>
     );
-};
+}
