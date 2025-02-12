@@ -43,7 +43,7 @@ export default function Index() {
                 onChange={onChange}
             />
 
-            <Button onClick={handleSubmit} type="submit">
+            <Button onClick={handleSubmit} type="submit" className='w-24'>
                 Run
             </Button>
 
@@ -68,3 +68,5 @@ export default function Index() {
                 })}
             </div>
         </div>
+    );
+};
