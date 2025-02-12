@@ -25,3 +25,6 @@ WORKDIR /var/www/html
 EXPOSE 9000 9001 9002
 
 CMD ["php-fpm", "-F"]
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD php artisan health:check || exit 1

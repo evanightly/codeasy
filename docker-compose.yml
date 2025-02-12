@@ -14,6 +14,42 @@ services:
     networks:
       - app-network
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/laravel.Dockerfile
+    container_name: laravel_queue
+    command: php artisan queue:work
+    volumes:
+      - ./laravel:/var/www/html
+    networks:
+      - app-network
+    depends_on:
+      - mariadb
+      - redis
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/laravel.Dockerfile
+    container_name: laravel_scheduler
+    command: php artisan schedule:work
+    volumes:
+      - ./laravel:/var/www/html
+    networks:
+      - app-network
+    depends_on:
+      - mariadb
+      - redis
+
   laravel:
     build:
       context: .
