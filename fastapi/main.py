@@ -12,6 +12,7 @@ app = FastAPI()
 class CodeInput(BaseModel):
     code: str
     testcases: Optional[List[str]] = None
+    type: Optional[str] = None  # Add type field
 
 class JupyterKernelManager:
     def __init__(self):
@@ -20,7 +21,7 @@ class JupyterKernelManager:
         self.kc = self.km.client()
         self.kc.start_channels()
 
-    def execute_code(self, code: str):
+    def execute_code(self, code: str, is_sandbox: bool = False):
         outputs = []
         msg_id = self.kc.execute(code)
         
@@ -39,7 +40,15 @@ class JupyterKernelManager:
                 elif msg_type == 'display_data' or msg_type == 'execute_result':
                     if 'image/png' in content.get('data', {}):
                         image_data = content['data']['image/png']
-                        image_filename = f"visual_{uuid.uuid4().hex}.png"
+                        # Add sandbox_ prefix for temporary files
+                        prefix = "sandbox_" if is_sandbox else "visual_"
+                        image_filename = f"{prefix}{uuid.uuid4().hex}.png"
+
+                        # Create visualization directory if it doesn't exist
+                        visualization_dir = "/var/www/html/storage/app/public/visualizations"
+                        if not os.path.exists(visualization_dir):
+                            os.makedirs(visualization_dir, exist_ok=True)
+
                         image_path = f"/var/www/html/storage/app/public/visualizations/{image_filename}"
                         
                         # Decode base64 image data correctly
@@ -49,7 +58,8 @@ class JupyterKernelManager:
                         
                         outputs.append({
                             "type": "image",
-                            "content": f"/storage/visualizations/{image_filename}"
+                            "content": f"/storage/visualizations/{image_filename}",
+                            "is_temporary": is_sandbox
                         })
                     elif 'text/plain' in content.get('data', {}):
                         outputs.append({
@@ -79,7 +89,8 @@ kernel_mgr = JupyterKernelManager()
 @app.post("/test")
 async def test_code(input: CodeInput):
     try:
-        outputs = kernel_mgr.execute_code(input.code)
+        is_sandbox = input.type == "sandbox"
+        outputs = kernel_mgr.execute_code(input.code, is_sandbox)
         
         if input.testcases:
             # Setup test environment

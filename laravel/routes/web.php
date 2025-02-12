@@ -18,7 +18,8 @@ Route::get('/', function () {
 Route::get('/test-fastapi', function () {
     // Contoh data payload, seharusnya diisi dengan kode siswa dan testcase yang sesuai
     $payload = [
-        "code" => "print('nama saya Arin')\nimport matplotlib.pyplot as plt\nplt.plot([25,231,32])\nplt.title('Visualisasi Siswa')\nplt.show()",
+        "type" => "sandbox",
+        "code" => "print('nama saya Arin')\nimport matplotlib.pyplot as plt\nplt.plot([25,231,32])\nplt.title('Visualisasi Siswa')\nplt.show()\nprint('okokokok')",
         "testcases" => [
             "self.assertEqual(2+2, 4)",
             "self.assertTrue('Arin' in 'nama saya Arin')"
