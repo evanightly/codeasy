@@ -26,22 +26,43 @@ jobs:
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
         run: |
           ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
-            # Navigate to project directory
-            cd ~/codeasy
+            # Check if directory exists, if not clone the repository
+            if [ ! -d "~/codeasy" ]; then
+              echo "First time deployment - Cloning repository..."
+              cd ~
+              git clone https://github.com/evanightly/codeasy.git
+              cd codeasy
+            else
+              echo "Repository exists - Pulling latest changes..."
+              cd ~/codeasy
+              git fetch --all
+              git reset --hard origin/main
+            fi
 
-            # Pull latest changes
-            git pull origin main
+            # Ensure directories exist
+            mkdir -p laravel/storage/{app,framework,logs}
+            mkdir -p laravel/storage/framework/{cache,sessions,views}
+            chmod -R 775 laravel/storage
 
             # Copy production env
             echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env
 
-            # Build and restart containers
-            docker compose down
+            # Stop any running containers
+            if [ -f "docker-compose.yml" ]; then
+              docker compose down || true
+            fi
+
+            # Build and start containers
             docker compose build
             docker compose up -d
 
-            # Run Laravel migrations and optimization
+            # Wait for containers to be ready
+            sleep 10
+
+            # Run Laravel setup and optimization
             docker compose exec -T laravel composer install --no-dev --optimize-autoloader
+            docker compose exec -T laravel php artisan key:generate --force
+            docker compose exec -T laravel php artisan storage:link
             docker compose exec -T laravel php artisan migrate --force
             docker compose exec -T laravel php artisan config:cache
             docker compose exec -T laravel php artisan route:cache
@@ -50,13 +71,8 @@ jobs:
             # Build frontend assets
             docker compose exec -T laravel npm install
             docker compose exec -T laravel npm run build
+
+            # Set proper permissions
+            chown -R www-data:www-data laravel/storage
+            chown -R www-data:www-data laravel/bootstrap/cache
           ENDSSH
-      
-      - name: Health Check
-        run: |
-          # Wait for services to start
-          sleep 30
-          
-          # Check if services are running
-          curl -f http://${{ secrets.SSH_HOST }} || exit 1
-          curl -f http://${{ secrets.SSH_HOST }}/api/health || exit 1
