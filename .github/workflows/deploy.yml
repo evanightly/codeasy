@@ -10,8 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.IMAGE_REPOSITORY_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
 
       - name: Build and Push Docker Image
         run: |
