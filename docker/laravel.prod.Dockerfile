@@ -28,8 +28,8 @@ WORKDIR /var/www/html
 # RUN rm -rf node_modules
 
 # Copy entrypoint script
-COPY docker/entrypoint/laravel-entrypoint.sh /usr/local/bin/laravel-entrypoint.sh
-RUN chmod +x /usr/local/bin/laravel-entrypoint.sh
+COPY docker/entrypoint/laravel-prod-entrypoint.sh /usr/local/bin/laravel-prod-entrypoint.sh
+RUN chmod +x /usr/local/bin/laravel-prod-entrypoint.sh
 
 EXPOSE 9000
-CMD ["laravel-entrypoint.sh"]
+CMD ["laravel-prod-entrypoint.sh"]

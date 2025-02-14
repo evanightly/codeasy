@@ -35,7 +35,7 @@ services:
   queue:
     build:
       context: .
-      dockerfile: docker/laravel.Dockerfile
+      dockerfile: docker/laravel.prod.Dockerfile
     container_name: laravel_queue
     command: php artisan queue:work
     volumes:
@@ -53,7 +53,7 @@ services:
   scheduler:
     build:
       context: .
-      dockerfile: docker/laravel.Dockerfile
+      dockerfile: docker/laravel.prod.Dockerfile
     container_name: laravel_scheduler
     command: php artisan schedule:work
     volumes:

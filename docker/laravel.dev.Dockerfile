@@ -27,5 +27,3 @@ WORKDIR /var/www/html
 EXPOSE 9001 9002
 
 CMD ["php-fpm", "-F"]
-
-RUN composer run dev
