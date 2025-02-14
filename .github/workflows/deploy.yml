@@ -2,42 +2,49 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]  # Hanya jalankan di push ke main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Login to GitHub Container Registry
+    steps:
+      # 1. Checkout code
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      # 2. Login to GHCR
+      - name: Login to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
 
-      - name: Build and Push Docker Image
+      # 3. Build & push image production
+      - name: Build & Push Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/codeasy:latest -f docker/laravel.Dockerfile . || {
-            echo "Failed to build image"
-            exit 1
-          }
-          docker push ghcr.io/${{ github.repository_owner }}/codeasy:latest || {
-            echo "Failed to push image"
-            exit 1
-          }
+          # Build pakai laravel.prod.Dockerfile
+          docker build \
+            -t ghcr.io/${{ github.repository_owner }}/codeasy:latest \
+            -f docker/laravel.prod.Dockerfile .
+          
+          # Push
+          docker push ghcr.io/${{ github.repository_owner }}/codeasy:latest
 
+      # 4. Setup SSH Agent
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      # 5. Add SSH Known Hosts
       - name: Add SSH Known Hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
+      # 6. Deploy to VPS
       - name: Deploy to VPS
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -45,121 +52,43 @@ jobs:
           CR_PAT: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          DOCKER_CONFIG_CONTENT="{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)\"}}}"
-          
+          # (Opsional) buat config.json di server agar bisa pull GHCR private image
+          # tapi jika package GHCR PUBLIC, sebetulnya tak perlu auth
+          DOCKER_CONFIG_CONTENT="{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n \"$GITHUB_ACTOR:$CR_PAT\" | base64)\"}}}"
+
+          # Lakukan SSH ke server
           ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
-            set -ex  # Exit on any error
-            exec > >(tee /tmp/deploy.log) 2>&1
+            set -ex
 
-            # Setup Docker auth non-interactively
+            # 1. Setup docker auth (kalau image private GHCR)
             mkdir -p ~/.docker
-            echo "$DOCKER_CONFIG_CONTENT" > ~/.docker/config.json || {
-              echo "Failed to setup Docker authentication"
-              exit 1
-            }
+            echo "$DOCKER_CONFIG_CONTENT" > ~/.docker/config.json
 
-            # Navigate to home directory first
-            cd ~
-
-            # Check and handle repository
-            if [ ! -d "codeasy" ]; then
-              echo "First time deployment - Cloning repository..."
-              git clone https://github.com/evanightly/codeasy.git
+            # 2. Pastikan repo code sudah di-clone
+            #    (Opsional) jika compose file disimpan di GitHub code
+            if [ ! -d "~/codeasy" ]; then
+              git clone https://github.com/evanightly/codeasy.git ~/codeasy
             fi
 
-            # Always navigate to project directory and update
-            cd codeasy
-            echo "Updating repository..."
+            cd ~/codeasy
+
+            # 3. Pull latest code (opsional, kalau docker-compose.yml disimpan di repo)
             git fetch --all
             git reset --hard origin/main
 
-            # Ensure directories exist and set permissions
-            mkdir -p laravel/storage/{app,framework,logs}
-            mkdir -p laravel/storage/framework/{cache,sessions,views}
-            chmod -R 775 laravel/storage || {
-              echo "Failed to set storage permissions"
-              exit 1
-            }
+            # 4. Docker Compose down / up
+            #    Gunakan file docker-compose.prod.yml
+            docker compose -f docker-compose.prod.yml down || echo "No containers to stop"
 
-            # Copy production env
-            echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env || {
-              echo "Failed to create .env file"
-              exit 1
-            }
-
-            # Stop any running containers
-            if [ -f "docker-compose.yml" ]; then
-              docker compose down || echo "Warning: Failed to stop containers"
-            fi
-
-            # Pull and start containers
-            echo "Pulling latest images..."
-            docker compose pull || {
+            docker compose -f docker-compose.prod.yml pull || {
               echo "Failed to pull images"
               exit 1
             }
 
-            echo "Starting containers..."
-            docker compose up -d || {
+            docker compose -f docker-compose.prod.yml up -d || {
               echo "Failed to start containers"
-              docker compose logs
               exit 1
             }
 
-            # Wait for containers to be ready
-            echo "Waiting for containers to be ready..."
-            sleep 10
-
-            # Check if Laravel container is running
-            docker compose ps laravel | grep -q "Up" || {
-              echo "Laravel container failed to start"
-              docker compose logs laravel
-              exit 1
-            }
-
-            # Run Laravel setup and optimization
-            echo "Running Laravel setup..."
-            docker compose exec -T laravel composer install --no-dev --optimize-autoloader || {
-              echo "Failed to install composer dependencies"
-              exit 1
-            }
-
-            docker compose exec -T laravel php artisan key:generate
-            docker compose exec -T laravel php artisan storage:link
-            docker compose exec -T laravel php artisan migrate || {
-              echo "Failed to run migrations"
-              exit 1
-            }
-
-            docker compose exec -T laravel php artisan optimize:clear
-
-            # Build frontend assets
-            echo "Building frontend assets..."
-            docker compose exec -T laravel npm install || {
-              echo "Failed to install npm dependencies"
-              exit 1
-            }
-
-            docker compose exec -T laravel npm run build || {
-              echo "Failed to build frontend assets"
-              exit 1
-            }
-
-            # Set proper permissions
-            chown -R www-data:www-data /var/www/html
-            chmod -R 777 /var/www/html/storage
-            chown -R www-data:www-data laravel/storage
-            chown -R www-data:www-data laravel/bootstrap/cache || {
-              echo "Failed to set permissions"
-              exit 1
-            }
-
-            docker compose exec -T laravel php artisan optimize || {
-              echo "Failed to optimize Laravel"
-              exit 1
-            }
-
-            docker compose exec -T laravel php artisan storage:link
-            
-            echo "Deployment completed successfully!"
+            echo "Deployment completed!"
           ENDSSH
