@@ -53,9 +53,8 @@ services:
   laravel:
     image: ghcr.io/evanightly/codeasy:latest
     container_name: laravel
-    # No Volume (kode dari image)
-    # volumes:
-    #   - ./laravel:/var/www/html
+    volumes:
+      - ./laravel:/var/www/html
     networks:
       - app-network
     # Kita expose port 9001 dan 9002 agar "artisan serve" (9001) & "vite dev" (9002) bisa diakses
