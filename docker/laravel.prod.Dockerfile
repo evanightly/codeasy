@@ -16,10 +16,6 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 # Copy source code
 WORKDIR /var/www/html
-COPY laravel/ ./
-
-# (Opsional) Jalankan composer install (autoloader, dsb)
-RUN composer install --no-dev --optimize-autoloader
 
 # (Opsional) Build assets Vite di local atau pakai multi-stage Node.
 # RUN npm install && npm run build
