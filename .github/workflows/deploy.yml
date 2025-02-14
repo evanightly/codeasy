@@ -2,7 +2,7 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [ main ]  # Jalankan workflow saat push ke branch main
+    branches: [main] # Jalankan workflow saat push ke branch main
 
 jobs:
   deploy:
@@ -28,7 +28,7 @@ jobs:
           docker build \
             -t ghcr.io/${{ github.repository_owner }}/codeasy:latest \
             -f docker/laravel.prod.Dockerfile .
-          
+
           docker push ghcr.io/${{ github.repository_owner }}/codeasy:latest
 
       # 4. Setup SSH Agent (untuk SSH ke VPS)
@@ -63,9 +63,17 @@ jobs:
             echo "$DOCKER_CONFIG_CONTENT" > ~/.docker/config.json
 
             # 2. Clone repo jika belum ada
-            if [ ! -d "~/codeasy" ]; then
-              git clone https://github.com/evanightly/codeasy.git ~/codeasy
+            if [ ! -d "$HOME/codeasy/.git" ]; then
+              echo "Repo not found, cloning..."
+              git clone https://github.com/evanightly/codeasy.git "$HOME/codeasy"
+            else
+              echo "Repo already present, skipping clone."
             fi
+
+            cd "$HOME/codeasy"
+            git fetch --all
+            git reset --hard origin/main
+
 
             cd ~/codeasy
 
