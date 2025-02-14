@@ -5,8 +5,9 @@ set -e
 # Tapi sebelum itu, lakukan perintah laravel
 echo "=== Setting up permissions ==="
 chown -R www-data:www-data /var/www/html
-chmod -R 775 /var/www/html/storage
-chmod -R 775 /var/www/html/bootstrap/cache
+chmod -R 777 /var/www/html/storage
+npm install
+npm run build
 
 echo "=== Running Artisan optimize commands ==="
 php artisan optimize:clear || true
