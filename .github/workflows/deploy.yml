@@ -131,12 +131,6 @@ jobs:
             }
 
             docker compose exec -T laravel php artisan optimize:clear
-            docker compose exec -T laravel chown -R www-data:www-data /var/www/html
-            docker compose exec -T laravel chmod -R 777 /var/www/html/storage
-            docker compose exec -T laravel php artisan optimize || {
-              echo "Failed to optimize Laravel"
-              exit 1
-            }
 
             # Build frontend assets
             echo "Building frontend assets..."
@@ -151,9 +145,16 @@ jobs:
             }
 
             # Set proper permissions
+            chown -R www-data:www-data /var/www/html
+            chmod -R 777 /var/www/html/storage
             chown -R www-data:www-data laravel/storage
             chown -R www-data:www-data laravel/bootstrap/cache || {
               echo "Failed to set permissions"
+              exit 1
+            }
+
+            docker compose exec -T laravel php artisan optimize || {
+              echo "Failed to optimize Laravel"
               exit 1
             }
 
