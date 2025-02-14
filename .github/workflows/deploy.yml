@@ -63,14 +63,14 @@ jobs:
             echo "$DOCKER_CONFIG_CONTENT" > ~/.docker/config.json
 
             # 2. Clone repo jika belum ada
-            if [ ! -d "$HOME/codeasy/.git" ]; then
+            if [ ! -d "codeasy/.git" ]; then
               echo "Repo not found, cloning..."
-              git clone https://github.com/evanightly/codeasy.git "$HOME/codeasy"
+              git clone https://github.com/evanightly/codeasy.git "codeasy"
             else
               echo "Repo already present, skipping clone."
             fi
 
-            cd "$HOME/codeasy"
+            cd "codeasy"
             git fetch --all
             git reset --hard origin/main
 
