@@ -43,6 +43,14 @@ export default {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
+				tertiary: {
+                    DEFAULT: 'hsl(var(--tertiary))',
+                    foreground: 'hsl(var(--tertiary-foreground))',
+                },
+                quaternary: {
+                    DEFAULT: 'hsl(var(--quaternary))',
+                    foreground: 'hsl(var(--quaternary-foreground))',
+                },
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
 					foreground: 'hsl(var(--muted-foreground))'
@@ -51,6 +59,34 @@ export default {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
+                success: {
+                    DEFAULT: 'hsl(var(--success))',
+                    foreground: 'hsl(var(--success-foreground))',
+                },
+                warning: {
+                    DEFAULT: 'hsl(var(--warning))',
+                    foreground: 'hsl(var(--warning-foreground))',
+                },
+                info: {
+                    DEFAULT: 'hsl(var(--info))',
+                    foreground: 'hsl(var(--info-foreground))',
+                },
+                muted: {
+                    DEFAULT: 'hsl(var(--muted))',
+                    foreground: 'hsl(var(--muted-foreground))',
+                },
+                accent: {
+                    DEFAULT: 'hsl(var(--accent))',
+                    foreground: 'hsl(var(--accent-foreground))',
+                },
+                update: {
+                    DEFAULT: 'hsl(var(--update))',
+                    foreground: 'hsl(var(--update-foreground))',
+                },
+                create: {
+                    DEFAULT: 'hsl(var(--create))',
+                    foreground: 'hsl(var(--create-foreground))',
+                },
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
 					foreground: 'hsl(var(--destructive-foreground))'
