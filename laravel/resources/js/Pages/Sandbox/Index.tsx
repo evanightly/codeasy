@@ -74,35 +74,39 @@ export default function Index() {
                     />
 
                     <Button
+                        disabled={isCompiling}
                         onClick={handleSubmit}
                         type="submit"
                         className="ml-auto flex items-center gap-2"
                     >
                         <Redo2 className="h-4 w-4" />
-                        {isCompiling ? 'Compiling...' : 'Run (Ctrl + Enter)'}
+                        {isCompiling ? 'Compiling...' : 'Compile'}
                     </Button>
                 </div>
 
                 <div className="flex flex-1 flex-col">
                     <div className="flex flex-col gap-2">
                         {output.map((out: any, i) => {
-                            if (out.type === 'image') {
-                                return (
-                                    <img
-                                        className="mx-auto w-[30rem] rounded bg-gray-100"
-                                        key={i}
-                                        src={out.content}
-                                        alt="output"
-                                    />
-                                );
-                            }
-
                             return (
                                 <div
                                     key={i}
                                     className="rounded bg-gray-100 p-3"
                                 >
-                                    {out.content}
+                                    {out.type === 'image' ? (
+                                        <img
+                                            className="mx-auto w-[30rem] rounded bg-gray-100"
+                                            key={i}
+                                            src={out.content}
+                                            alt="output"
+                                        />
+                                    ) : (
+                                        <div
+                                            key={i}
+                                            className="rounded bg-gray-100 p-3"
+                                        >
+                                            {out.content}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}
