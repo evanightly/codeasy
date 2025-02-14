@@ -2,7 +2,7 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [ main ]  # Hanya jalankan di push ke main
+    branches: [ main ]  # Jalankan workflow saat push ke branch main
 
 jobs:
   deploy:
@@ -21,30 +21,29 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
 
-      # 3. Build & push image production
+      # 3. Build & Push Docker Image (Production)
       - name: Build & Push Docker Image
         run: |
-          # Build pakai laravel.prod.Dockerfile
+          # Build production image dengan laravel.prod.Dockerfile
           docker build \
             -t ghcr.io/${{ github.repository_owner }}/codeasy:latest \
             -f docker/laravel.prod.Dockerfile .
           
-          # Push
           docker push ghcr.io/${{ github.repository_owner }}/codeasy:latest
 
-      # 4. Setup SSH Agent
+      # 4. Setup SSH Agent (untuk SSH ke VPS)
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # 5. Add SSH Known Hosts
+      # 5. Tambahkan SSH Known Hosts
       - name: Add SSH Known Hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      # 6. Deploy to VPS
+      # 6. Deploy ke VPS
       - name: Deploy to VPS
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -52,43 +51,39 @@ jobs:
           CR_PAT: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          # (Opsional) buat config.json di server agar bisa pull GHCR private image
-          # tapi jika package GHCR PUBLIC, sebetulnya tak perlu auth
+          # Jika GHCR Anda private, siapkan Docker config agar bisa pull.
+          # Jika public, Anda bisa skip pembuatan config.json
           DOCKER_CONFIG_CONTENT="{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n \"$GITHUB_ACTOR:$CR_PAT\" | base64)\"}}}"
 
-          # Lakukan SSH ke server
           ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
-            set -ex
+            set -ex  # -e: stop on error, -x: tampilkan perintah
 
-            # 1. Setup docker auth (kalau image private GHCR)
+            # 1. Buat docker config agar "docker pull" ke GHCR private tidak unauthorized
             mkdir -p ~/.docker
             echo "$DOCKER_CONFIG_CONTENT" > ~/.docker/config.json
 
-            # 2. Pastikan repo code sudah di-clone
-            #    (Opsional) jika compose file disimpan di GitHub code
+            # 2. Clone repo jika belum ada
             if [ ! -d "~/codeasy" ]; then
               git clone https://github.com/evanightly/codeasy.git ~/codeasy
             fi
 
             cd ~/codeasy
 
-            # 3. Pull latest code (opsional, kalau docker-compose.yml disimpan di repo)
+            # 3. Update repo (opsional jika file docker-compose.prod.yml dsb. ada di repo)
             git fetch --all
             git reset --hard origin/main
 
-            # 4. Docker Compose down / up
-            #    Gunakan file docker-compose.prod.yml
+            # 4. Copy content env production (JANGAN DIHAPUS!)
+            #    Misalnya di Secrets: PRODUCTION_ENV berisi isi .env production
+            echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env || {
+              echo "Failed to create .env file"
+              exit 1
+            }
+
+            # 5. Jalankan Docker Compose
             docker compose -f docker-compose.prod.yml down || echo "No containers to stop"
-
-            docker compose -f docker-compose.prod.yml pull || {
-              echo "Failed to pull images"
-              exit 1
-            }
-
-            docker compose -f docker-compose.prod.yml up -d || {
-              echo "Failed to start containers"
-              exit 1
-            }
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
 
             echo "Deployment completed!"
           ENDSSH
