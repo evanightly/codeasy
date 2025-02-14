@@ -50,6 +50,7 @@ jobs:
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           CR_PAT: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           # Jika GHCR Anda private, siapkan Docker config agar bisa pull.
           # Jika public, Anda bisa skip pembuatan config.json
