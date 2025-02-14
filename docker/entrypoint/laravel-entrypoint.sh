@@ -6,6 +6,9 @@ set -e
 echo "=== Setting up permissions ==="
 chown -R www-data:www-data /var/www/html
 chmod -R 777 /var/www/html/storage
+
+echo "=== Running NPM and Composer ==="
+composer install
 npm install
 npm run build
 
