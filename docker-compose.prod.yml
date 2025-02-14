@@ -3,7 +3,7 @@ services:
     image: mariadb:10.8
     container_name: mariadb
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=codeasy
       - MYSQL_USER=codeasy
       - MYSQL_PASSWORD=secretpass
@@ -14,7 +14,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret"]
       interval: 10s
       timeout: 5s
       retries: 5
