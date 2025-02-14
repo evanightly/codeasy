@@ -45,32 +45,31 @@ jobs:
           CR_PAT: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
+          # First, create the Docker config.json content
+          DOCKER_CONFIG_CONTENT="{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)\"}}}"
+          
+          # SSH into VPS and execute deployment
+          ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << ENDSSH
             set -e  # Exit on any error
 
-            # Login to GitHub Container Registry on VPS
-            echo "${CR_PAT}" | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin || {
-              echo "Failed to login to GitHub Container Registry"
+            # Setup Docker auth non-interactively
+            mkdir -p ~/.docker
+            echo '$DOCKER_CONFIG_CONTENT' > ~/.docker/config.json || {
+              echo "Failed to setup Docker authentication"
               exit 1
             }
-  
+
             # Check if directory exists
             if [ ! -d "~/codeasy" ]; then
               echo "First time deployment - Cloning repository..."
               cd ~
-              git clone https://github.com/evanightly/codeasy.git || {
-                echo "Failed to clone repository"
-                exit 1
-              }
+              git clone https://github.com/evanightly/codeasy.git
               cd codeasy
             else
               echo "Repository exists - Pulling latest changes..."
               cd ~/codeasy
               git fetch --all
-              git reset --hard origin/main || {
-                echo "Failed to update repository"
-                exit 1
-              }
+              git reset --hard origin/main
             fi
 
             # Ensure directories exist and set permissions
