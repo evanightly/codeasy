@@ -3,12 +3,9 @@ set -e
 
 # Jalankan php-fpm di background / standard
 # Tapi sebelum itu, lakukan perintah laravel
-echo "=== Setting up permissions ==="
-chown -R www-data:www-data /var/www/html
-chmod -R 777 /var/www/html/storage
 
 echo "=== Running NPM and Composer ==="
-composer install
+composer install --no-dev --optimize-autoloader
 npm install
 npm run build
 
@@ -18,6 +15,10 @@ php artisan optimize:clear || true
 php artisan migrate || true
 php artisan storage:link || true
 php artisan optimize || true
+
+echo "=== Setting up permissions ==="
+chown -R www-data:www-data /var/www/html
+chmod -R 777 /var/www/html/storage
 
 # Lalu exec php-fpm
 exec php-fpm -F
