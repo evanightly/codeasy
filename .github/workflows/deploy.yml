@@ -48,7 +48,8 @@ jobs:
           DOCKER_CONFIG_CONTENT="{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)\"}}}"
           
           ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
-            set -e  # Exit on any error
+            set -ex  # Exit on any error
+            exec > >(tee /tmp/deploy.log) 2>&1
 
             # Setup Docker auth non-interactively
             mkdir -p ~/.docker
