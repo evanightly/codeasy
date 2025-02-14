@@ -45,32 +45,32 @@ jobs:
           CR_PAT: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          # First, create the Docker config.json content
           DOCKER_CONFIG_CONTENT="{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)\"}}}"
           
-          # SSH into VPS and execute deployment
-          ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << ENDSSH
+          ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
             set -e  # Exit on any error
 
             # Setup Docker auth non-interactively
             mkdir -p ~/.docker
-            echo '$DOCKER_CONFIG_CONTENT' > ~/.docker/config.json || {
+            echo "$DOCKER_CONFIG_CONTENT" > ~/.docker/config.json || {
               echo "Failed to setup Docker authentication"
               exit 1
             }
 
-            # Check if directory exists
-            if [ ! -d "~/codeasy" ]; then
+            # Navigate to home directory first
+            cd ~
+
+            # Check and handle repository
+            if [ ! -d "codeasy" ]; then
               echo "First time deployment - Cloning repository..."
-              cd ~
               git clone https://github.com/evanightly/codeasy.git
-              cd codeasy
-            else
-              echo "Repository exists - Pulling latest changes..."
-              cd ~/codeasy
-              git fetch --all
-              git reset --hard origin/main
             fi
+
+            # Always navigate to project directory and update
+            cd codeasy
+            echo "Updating repository..."
+            git fetch --all
+            git reset --hard origin/main
 
             # Ensure directories exist and set permissions
             mkdir -p laravel/storage/{app,framework,logs}
