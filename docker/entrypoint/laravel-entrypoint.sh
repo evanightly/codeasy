@@ -12,5 +12,7 @@ npm run build
 echo "=== Running Artisan optimize commands ==="
 php artisan optimize:clear || true
 php artisan migrate --force || true
+php artisan storage:link || true
+php artisan optimize || true
 # Lalu exec php-fpm
 exec php-fpm -F
