@@ -19,8 +19,14 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/codeasy:latest -f docker/laravel.Dockerfile .
-          docker push ghcr.io/${{ github.repository_owner }}/codeasy:latest
+          docker build -t ghcr.io/${{ github.repository_owner }}/codeasy:latest -f docker/laravel.Dockerfile . || {
+            echo "Failed to build image"
+            exit 1
+          }
+          docker push ghcr.io/${{ github.repository_owner }}/codeasy:latest || {
+            echo "Failed to push image"
+            exit 1
+          }
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.8.0
@@ -36,56 +42,120 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          CR_PAT: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: |
           ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
-            # Check if directory exists, if not clone the repository
+            set -e  # Exit on any error
+
+            # Login to GitHub Container Registry on VPS
+            echo "${CR_PAT}" | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin || {
+              echo "Failed to login to GitHub Container Registry"
+              exit 1
+            }
+  
+            # Check if directory exists
             if [ ! -d "~/codeasy" ]; then
               echo "First time deployment - Cloning repository..."
               cd ~
-              git clone https://github.com/evanightly/codeasy.git
+              git clone https://github.com/evanightly/codeasy.git || {
+                echo "Failed to clone repository"
+                exit 1
+              }
               cd codeasy
             else
               echo "Repository exists - Pulling latest changes..."
               cd ~/codeasy
               git fetch --all
-              git reset --hard origin/main
+              git reset --hard origin/main || {
+                echo "Failed to update repository"
+                exit 1
+              }
             fi
 
-            # Ensure directories exist
+            # Ensure directories exist and set permissions
             mkdir -p laravel/storage/{app,framework,logs}
             mkdir -p laravel/storage/framework/{cache,sessions,views}
-            chmod -R 775 laravel/storage
+            chmod -R 775 laravel/storage || {
+              echo "Failed to set storage permissions"
+              exit 1
+            }
 
             # Copy production env
-            echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env
+            echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env || {
+              echo "Failed to create .env file"
+              exit 1
+            }
 
             # Stop any running containers
             if [ -f "docker-compose.yml" ]; then
-              docker compose down || true
+              docker compose down || echo "Warning: Failed to stop containers"
             fi
 
-            # Build and start containers
-            docker compose pull
-            docker compose up -d
-            docker compose up -d
+            # Pull and start containers
+            echo "Pulling latest images..."
+            docker compose pull || {
+              echo "Failed to pull images"
+              exit 1
+            }
+
+            echo "Starting containers..."
+            docker compose up -d || {
+              echo "Failed to start containers"
+              docker compose logs
+              exit 1
+            }
 
             # Wait for containers to be ready
+            echo "Waiting for containers to be ready..."
             sleep 10
 
+            # Check if Laravel container is running
+            docker compose ps laravel | grep -q "Up" || {
+              echo "Laravel container failed to start"
+              docker compose logs laravel
+              exit 1
+            }
+
             # Run Laravel setup and optimization
-            docker compose exec -T laravel composer install --no-dev --optimize-autoloader
+            echo "Running Laravel setup..."
+            docker compose exec -T laravel composer install --no-dev --optimize-autoloader || {
+              echo "Failed to install composer dependencies"
+              exit 1
+            }
+
             docker compose exec -T laravel php artisan key:generate --force
             docker compose exec -T laravel php artisan storage:link
-            docker compose exec -T laravel php artisan migrate --force
+            docker compose exec -T laravel php artisan migrate --force || {
+              echo "Failed to run migrations"
+              exit 1
+            }
+
             docker compose exec -T laravel php artisan config:cache
             docker compose exec -T laravel php artisan route:cache
-            docker compose exec -T laravel php artisan view:cache
+            docker compose exec -T laravel php artisan view:cache || {
+              echo "Failed to optimize Laravel"
+              exit 1
+            }
 
             # Build frontend assets
-            docker compose exec -T laravel npm install
-            docker compose exec -T laravel npm run build
+            echo "Building frontend assets..."
+            docker compose exec -T laravel npm install || {
+              echo "Failed to install npm dependencies"
+              exit 1
+            }
+
+            docker compose exec -T laravel npm run build || {
+              echo "Failed to build frontend assets"
+              exit 1
+            }
 
             # Set proper permissions
             chown -R www-data:www-data laravel/storage
-            chown -R www-data:www-data laravel/bootstrap/cache
-          ENDSSH
+            chown -R www-data:www-data laravel/bootstrap/cache || {
+              echo "Failed to set permissions"
+              exit 1
+            }
+
+            echo "Deployment completed successfully!"
+ENDSSH
