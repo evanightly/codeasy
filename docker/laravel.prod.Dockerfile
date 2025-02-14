@@ -8,7 +8,13 @@ RUN apk update && apk add --no-cache \
     zip \
     unzip \
     openssl \
-    # *Tanpa* nodejs, npm, dsb.
+    python3 \
+    make \
+    g++ \
+    sqlite-libs \
+    nodejs-current \
+    npm \
+    # DSN
     && docker-php-ext-install pdo pdo_mysql zip
 
 # Copy Composer
