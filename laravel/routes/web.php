@@ -40,7 +40,7 @@ Route::get('/test-fastapi', function () {
     }
 });
 
-Route::inertia('/sandbox', 'Sandbox/Index');
+Route::inertia('/sandbox', 'Sandbox/Index')->name('sandbox.index');
 
 Route::post('/sandbox', function (\Illuminate\Http\Request $request) {
     $payload = $request->all();
