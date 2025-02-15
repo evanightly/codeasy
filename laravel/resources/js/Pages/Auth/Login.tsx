@@ -188,13 +188,35 @@ export default function Login({
                                             autoComplete="current-password"
                                             value={data.password}
                                             className="mt-1 block w-full"
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                setData('password', e.target.value);
+                                            onChange={(
+                                                e: React.ChangeEvent<HTMLInputElement>,
+                                            ) => {
+                                                setData(
+                                                    'password',
+                                                    e.target.value,
+                                                );
                                                 // Check if input is from user interaction
-                                                const inputType = (e.nativeEvent as InputEvent).inputType;
-                                                if (inputType && inputType !== 'insertFromPaste') {
-                                                    console.log('Typed manually');
+                                                const inputType = (
+                                                    e.nativeEvent as InputEvent
+                                                ).inputType;
+                                                if (
+                                                    inputType &&
+                                                    inputType !==
+                                                        'insertFromPaste'
+                                                ) {
                                                     setTypedManually(true);
+                                                }
+                                            }}
+                                            // Add onKeyDown handler for Enter key
+                                            onKeyDown={(
+                                                e: React.KeyboardEvent<HTMLInputElement>,
+                                            ) => {
+                                                if (
+                                                    e.key === 'Enter' &&
+                                                    !processing
+                                                ) {
+                                                    e.preventDefault();
+                                                    signIn();
                                                 }
                                             }}
                                         />
