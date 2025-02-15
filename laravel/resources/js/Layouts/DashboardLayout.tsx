@@ -58,7 +58,7 @@ export default function DashboardLayout({
                                         </BreadcrumbLink>
                                     </BreadcrumbItem>
                                     {breadcrumbs?.map((breadcrumb, index) => (
-                                        <>
+                                        <div key={breadcrumb.url}>
                                             <BreadcrumbItem
                                                 key={breadcrumb.url}
                                             >
@@ -71,7 +71,7 @@ export default function DashboardLayout({
                                             {index < breadcrumbs.length - 1 && (
                                                 <BreadcrumbSeparator />
                                             )}
-                                        </>
+                                        </div>
                                     ))}
                                     <BreadcrumbPage />
                                 </BreadcrumbList>

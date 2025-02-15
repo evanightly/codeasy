@@ -93,12 +93,10 @@ export default function Welcome({
                                 >
                                     Mulai Sekarang
                                 </a>
-                                Atau
                                 <Link 
                                     href={route('sandbox.index')}
-                                    className="inline-block rounded-md bg-white px-5 py-3 font-semibold text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-300"
                                 >
-                                    Coba Sandbox
+                                    Atau Coba Sandbox Dulu
                                 </Link>
                             </div>
                         </div>
@@ -129,9 +127,9 @@ export default function Welcome({
                                 >
                                     <path
                                         d="M4 7h16M4 12h8m-8 5h16"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
                                     />
                                 </svg>
                             </div>
@@ -153,9 +151,9 @@ export default function Welcome({
                                 >
                                     <path
                                         d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 011.553-1.949L9 1m6 0l4.447 2.224A2 2 0 0121 5.618v9.764a2 2 0 01-1.553 1.949L15 20M9 1v19m6-19v19"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
                                     />
                                 </svg>
                             </div>
@@ -177,9 +175,9 @@ export default function Welcome({
                                 >
                                     <path
                                         d="M5 3l14 9-14 9V3z"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
                                     />
                                 </svg>
                             </div>
