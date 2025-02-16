@@ -80,7 +80,7 @@ export default function Login({
                     setAutoSubmitted(true);
                     signIn();
                 }
-            }, 1500);
+            }, 500);
 
             return () => clearTimeout(autoFillTimer);
         }
