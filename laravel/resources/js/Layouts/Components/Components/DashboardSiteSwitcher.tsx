@@ -19,7 +19,7 @@ import {
    useSidebar,
 } from "@/Components/UI/sidebar"
 
-export function TeamSwitcher({
+const DashboardSiteSwitcher = ({
    teams,
 }: {
    teams: {
@@ -27,7 +27,7 @@ export function TeamSwitcher({
       logo: React.ElementType
       plan: string
    }[]
-}) {
+}) => {
    const { isMobile } = useSidebar()
    const [activeTeam, setActiveTeam] = React.useState(teams[0])
 
@@ -93,3 +93,5 @@ export function TeamSwitcher({
       </SidebarMenu>
    )
 }
+
+export { DashboardSiteSwitcher }

@@ -26,8 +26,9 @@ import {
     useSidebar,
 } from '@/Components/UI/sidebar';
 import { Link, router, usePage } from '@inertiajs/react';
+import { DashboardNavbarDarkModeToggler } from './Components/DashboardNavbarDarkModeToggler';
 
-export function NavUser() {
+const DashboardSidebarUser = () => {
     const { isMobile } = useSidebar();
     const {
         auth: { user },
@@ -89,6 +90,7 @@ export function NavUser() {
                                         {user.email}
                                     </span>
                                 </div>
+                                <DashboardNavbarDarkModeToggler />
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
@@ -120,3 +122,5 @@ export function NavUser() {
         </SidebarMenu>
     );
 }
+
+export { DashboardSidebarUser };

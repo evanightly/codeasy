@@ -1,10 +1,10 @@
 import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
 import { Button } from '@/Components/UI/button';
-import DashboardLayout from '@/Layouts/DashboardLayout';
+import DashboardLayout from '@/Layouts/AuthenticatedLayout';
 import { python } from '@codemirror/lang-python';
 import { Head } from '@inertiajs/react';
 import CodeMirror from '@uiw/react-codemirror';
-import { AlertCircle, Loader, Loader2, Redo2 } from 'lucide-react';
+import { AlertCircle, Loader2, Redo2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function Index() {
@@ -51,7 +51,7 @@ export default function Index() {
     }, []);
 
     return (
-        <DashboardLayout breadcrumbs={[{ name: 'Sandbox', url: '#' }]}>
+        <DashboardLayout>
             <Head title="Sandbox" />
             <div className="flex flex-col gap-4">
                 <Alert variant="warning" className="w-full lg:w-1/2">
@@ -79,8 +79,11 @@ export default function Index() {
                         type="submit"
                         className="ml-auto flex items-center gap-2"
                     >
-                        
-                        {isCompiling ? <Loader2 className='size-4 animate-spin'/>: <Redo2 className="size-4" /> }
+                        {isCompiling ? (
+                            <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                            <Redo2 className="size-4" />
+                        )}
                         {isCompiling ? 'Running...' : 'Run (Ctrl + Enter)'}
                     </Button>
                 </div>

@@ -1,0 +1,97 @@
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+import { HTMLAttributes, useEffect } from 'react';
+import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
+import { useForm } from '@inertiajs/react';
+import { Input } from '@/Components/UI/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/Components/UI/select';
+import { ny } from '@/Lib/Utils';
+import { Resource } from '@/Support/Interfaces/Resources';
+import { Search, X } from 'lucide-react';
+import { STYLING } from '@/Support/Constants/styling';
+
+interface GenericFiltersProps<R extends Resource = Resource> {
+    filters: ServiceFilterOptions<R>;
+    setFilters: (filters: ServiceFilterOptions<R>) => void;
+}
+
+export default function GenericFilters<R extends Resource = Resource>({
+    filters,
+    setFilters,
+    children,
+    className,
+}: GenericFiltersProps<R> & HTMLAttributes<HTMLDivElement>) {
+    const isFirstRender = useIsFirstRender();
+    const { data, setData } = useForm({
+        search: filters.search || '',
+        perPage: filters.page_size || 10,
+    });
+
+    const debouncedSearch = useDebounce(data.search, 500);
+
+    useEffect(() => {
+        if (isFirstRender) return;
+        setFilters({
+            ...filters,
+            search: debouncedSearch,
+            page_size: data.perPage,
+        });
+    }, [debouncedSearch, data.perPage]);
+
+    return (
+        <div className={ny('flex items-center gap-4', className)}>
+            <div className="form-control relative w-fit">
+                <Input
+                    value={data.search}
+                    type="text"
+                    placeholder="Search"
+                    onChange={(e) => setData('search', e.target.value)}
+                    className="max-w-full"
+                />
+                {data?.search?.length > 0 ? (
+                    <span
+                        onClick={() => setData('search', '')}
+                        className="absolute inset-y-0 right-4 inline-flex items-center transition-all hover:text-primary">
+                        <X size={STYLING.ICON.SIZE.EXTRA_SMALL} />
+                    </span>
+                ) : (
+                    <span className="absolute inset-y-0 right-4 inline-flex items-center transition-all hover:text-primary">
+                        <Search size={STYLING.ICON.SIZE.EXTRA_SMALL} />
+                    </span>
+                )}
+            </div>
+
+            <Select
+                value={data.perPage === 'all' ? 'all' : data.perPage.toString()}
+                onValueChange={(value) => {
+                    if (value === 'all') {
+                        setData('perPage', value);
+                        return;
+                    }
+                    setData('perPage', +value);
+                }}
+                name="perPage">
+                <SelectTrigger className="w-fit">
+                    <SelectValue placeholder="Item per page" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                    <SelectItem value="200">200</SelectItem>
+                    <SelectItem value="500">500</SelectItem>
+                    <SelectItem value="1000">1000</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
+                </SelectContent>
+            </Select>
+
+            {children}
+        </div>
+    );
+}
