@@ -98,7 +98,7 @@ export default function Login({
 
             <form
                 onSubmit={(e) => e.preventDefault()}
-                className="relative mx-auto mt-8 w-full max-w-md rounded bg-white p-4 shadow"
+                className="relative mx-auto w-full max-w-md rounded bg-white"
             >
                 <AnimatePresence mode="wait">
                     {step === 'authing' ? (
@@ -169,7 +169,7 @@ export default function Login({
                             <div
                                 className={`transition-all duration-300 ${
                                     step === 'passwordStep'
-                                        ? 'mt-4 h-auto opacity-100'
+                                        ? 'h-auto opacity-100'
                                         : 'pointer-events-none h-0 opacity-0'
                                 } `}
                             >
@@ -226,7 +226,7 @@ export default function Login({
                                         />
                                     </div>
 
-                                    <div className="mt-4">
+                                    {/* <div className="mt-4">
                                         <label className="inline-flex items-center">
                                             <input
                                                 type="checkbox"
@@ -243,7 +243,7 @@ export default function Login({
                                                 Remember me
                                             </span>
                                         </label>
-                                    </div>
+                                    </div> */}
 
                                     <div className="mt-4 flex items-center justify-between">
                                         <div className="space-x-4 text-sm">
