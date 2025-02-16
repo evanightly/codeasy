@@ -68,9 +68,7 @@ Route::post('/sandbox', function (\Illuminate\Http\Request $request) {
     }
 })->name('sandbox.store');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::inertia('dashboard', 'Dashboard/Index')->name('dashboard.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
