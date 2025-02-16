@@ -39,6 +39,7 @@ class InitBackendMakeCommand extends Command
         $this->createBaseRepository();
         $this->createRepositoryTraits();
         $this->createServiceTraits();
+        $this->createConfigFiles();
         $this->info('Backend initialized created successfully.');
     }
 
@@ -116,5 +117,15 @@ class InitBackendMakeCommand extends Command
         $handlesPageSizeAllPath = "$serviceTraitPath/HandlesPageSizeAll.php";
         $handlesPageSizeAllStubPath = base_path('stubs/scaffold/initializer/backend/traits/services/handles.page.size.all.stub');
         $this->fileHelper->replaceFileWithStubContent($handlesPageSizeAllPath, $handlesPageSizeAllStubPath);
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    protected function createConfigFiles(): void
+    {
+        $constantsPath = config_path('constants.php');
+        $constantsStubPath = base_path('stubs/scaffold/initializer/backend/config/constants.stub');
+        $this->fileHelper->replaceFileWithStubContent($constantsPath, $constantsStubPath);
     }
 }
