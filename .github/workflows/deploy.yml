@@ -109,28 +109,37 @@ jobs:
           CR_PAT: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          # Create the Docker config content with proper JSON formatting
-          DOCKER_CONFIG_CONTENT='{
-            "auths": {
-              "ghcr.io": {
-                "auth": "'$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)'"
-              }
-            }
-          }'
-
-          # Deploy using SSH with heredoc
-          ssh $SSH_USERNAME@$SSH_HOST bash -s << 'ENDSSH'
+          # Create the Docker config content
+          DOCKER_CONFIG=$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)
+          
+          # Deploy using SSH with heredoc (remove quotes from ENDSSH to allow variable expansion)
+          ssh $SSH_USERNAME@$SSH_HOST bash -s << ENDSSH
             set -ex
             
             # Setup Docker authentication
             mkdir -p ~/.docker
-            echo '$DOCKER_CONFIG_CONTENT' > ~/.docker/config.json
+            echo '{
+              "auths": {
+                "ghcr.io": {
+                  "auth": "${DOCKER_CONFIG}"
+                }
+              }
+            }' > ~/.docker/config.json
+            
             chmod 600 ~/.docker/config.json
 
-            # Verify Docker auth
-            echo "Testing Docker authentication..."
-            if ! docker login ghcr.io; then
-              echo "Failed to authenticate with GHCR"
+            # Verify Docker auth and config
+            echo "Testing Docker configuration..."
+            if ! cat ~/.docker/config.json | jq . > /dev/null 2>&1; then
+              echo "Error: Invalid JSON in config file"
+              cat ~/.docker/config.json
+              exit 1
+            fi
+
+            # Test Docker pull
+            if ! docker pull ghcr.io/$GITHUB_ACTOR/codeasy-prod-laravel-image:latest; then
+              echo "Error: Failed to pull image"
+              cat ~/.docker/config.json
               exit 1
             fi
 
