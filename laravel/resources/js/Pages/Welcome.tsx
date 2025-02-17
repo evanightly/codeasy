@@ -87,12 +87,12 @@ export default function Welcome({
                                 Taxonomy Bloom!
                             </p>
                             <div className='flex justify-center sm:justify-normal gap-4 items-center flex-col sm:flex-row'>
-                                <a
-                                    href="#"
+                                <Link
+                                    href={route('login')}
                                     className="inline-block rounded-md bg-yellow-300 px-5 py-3 font-semibold text-gray-800 hover:bg-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-200"
                                 >
                                     Mulai Sekarang
-                                </a>
+                                </Link>
                                 <Link 
                                     href={route('sandbox.index')}
                                 >
@@ -203,12 +203,12 @@ export default function Welcome({
                         merasakan kemudahan belajar Python untuk Data Science
                         menggunakan platform <strong>Codeasy</strong>.
                     </p>
-                    <a
-                        href="#"
+                    <Link
+                        href={route('register')}
                         className="inline-block rounded-md bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
                     >
                         Daftar Sekarang
-                    </a>
+                    </Link>
                 </div>
             </section>
 
