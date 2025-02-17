@@ -109,33 +109,54 @@ jobs:
           CR_PAT: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          DOCKER_CONFIG_CONTENT="{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n \"$GITHUB_ACTOR:$CR_PAT\" | base64)\"}}}"
+          # Create the Docker config content with proper JSON formatting
+          DOCKER_CONFIG_CONTENT='{
+            "auths": {
+              "ghcr.io": {
+                "auth": "'$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)'"
+              }
+            }
+          }'
 
-          ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
+          # Deploy using SSH with heredoc
+          ssh $SSH_USERNAME@$SSH_HOST bash -s << 'ENDSSH'
             set -ex
+            
+            # Setup Docker authentication
+            mkdir -p ~/.docker
+            echo '$DOCKER_CONFIG_CONTENT' > ~/.docker/config.json
+            chmod 600 ~/.docker/config.json
 
-            mkdir -p ./.docker
-            echo "$DOCKER_CONFIG_CONTENT" > ./.docker/config.json
-
-            if [ ! -d "codeasy/.git" ]; then
-              echo "Repo not found, cloning..."
-              git clone https://github.com/evanightly/codeasy.git "codeasy"
-            else
-              echo "Repo already present, skipping clone."
+            # Verify Docker auth
+            echo "Testing Docker authentication..."
+            if ! docker login ghcr.io; then
+              echo "Failed to authenticate with GHCR"
+              exit 1
             fi
 
-            cd "codeasy"
+            # Clone or update repository
+            if [ ! -d "codeasy/.git" ]; then
+              git clone https://github.com/evanightly/codeasy.git
+            fi
+
+            cd codeasy
             git fetch --all
             git reset --hard origin/main
 
-            echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env || {
-              echo "Failed to create .env file"
-              exit 1
-            }
+            # Setup environment
+            echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env
 
-            docker compose -f docker-compose.prod.yml down || echo "No containers to stop"
+            # Deploy with Docker Compose
+            docker compose -f docker-compose.prod.yml down || true
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
 
-            echo "Deployment completed!"
+            # Verify deployment
+            if ! docker compose -f docker-compose.prod.yml ps | grep -q "running"; then
+              echo "Error: Containers failed to start"
+              docker compose -f docker-compose.prod.yml logs
+              exit 1
+            fi
+
+            echo "Deployment completed successfully!"
           ENDSSH

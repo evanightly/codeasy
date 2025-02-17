@@ -71,7 +71,6 @@ services:
   laravel:
     image: ghcr.io/evanightly/codeasy-prod-laravel-image:latest
     container_name: laravel
-    # Add this for credential helper
     volumes:
       - ./laravel:/var/www/html
     networks:
