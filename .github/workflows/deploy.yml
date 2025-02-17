@@ -29,6 +29,7 @@ jobs:
 
   prettier:
     name: Code Formatting Check
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
