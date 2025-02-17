@@ -51,7 +51,7 @@ jobs:
 
   build-and-push:
     name: Build & Push Docker Image
-    needs: lint
+    needs: [lint, prettier]
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
