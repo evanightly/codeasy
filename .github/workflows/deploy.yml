@@ -72,15 +72,20 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
+          password: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
+
+      - name: Test GHCR Access
+        run: |
+          echo "Testing GHCR authentication..."
+          docker pull ghcr.io/${{ github.repository_owner }}/codeasy-prod-laravel-image:latest || true
 
       - name: Build & Push Docker Image
         run: |
           docker build \
-            -t ghcr.io/${{ github.repository_owner }}/codeasy:latest \
+            -t ghcr.io/${{ github.repository_owner }}/codeasy-prod-laravel-image:latest \
             -f docker/laravel.prod.Dockerfile .
 
-          docker push ghcr.io/${{ github.repository_owner }}/codeasy:latest
+          docker push ghcr.io/${{ github.repository_owner }}/codeasy-prod-laravel-image:latest
 
   deploy:
     name: Deploy to VPS
@@ -101,7 +106,7 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          CR_PAT: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
+          CR_PAT: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
           DOCKER_CONFIG_CONTENT="{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n \"$GITHUB_ACTOR:$CR_PAT\" | base64)\"}}}"

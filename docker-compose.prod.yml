@@ -69,8 +69,10 @@ services:
         condition: service_healthy
 
   laravel:
-    image: ghcr.io/evanightly/codeasy:latest
+    image: ghcr.io/evanightly/codeasy-prod-laravel-image:latest
     container_name: laravel
+    # Add this for credential helper
+    image_pull_policy: always # Always pull the latest image
     volumes:
       - ./laravel:/var/www/html
     networks:
