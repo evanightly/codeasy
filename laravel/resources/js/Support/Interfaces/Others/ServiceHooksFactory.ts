@@ -1,11 +1,11 @@
-import { AxiosRequestConfig } from 'axios';
+import { PaginateResponse } from '@/Support/Interfaces/Others/PaginateResponse';
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others/ServiceFilterOptions';
+import { Resource } from '@/Support/Interfaces/Resources';
 import type {
     UseMutationOptions as ReactQueryUseMutationOptions,
     UseQueryOptions,
 } from '@tanstack/react-query';
-import { PaginateResponse } from '@/Support/Interfaces/Others/PaginateResponse';
-import { ServiceFilterOptions } from '@/Support/Interfaces/Others/ServiceFilterOptions';
-import { Resource } from '@/Support/Interfaces/Resources';
+import { AxiosRequestConfig } from 'axios';
 
 export interface ServiceHooks {
     baseRoute: string;

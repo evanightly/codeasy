@@ -4,8 +4,6 @@ namespace App\Console\Commands;
 
 use App\Helpers\FileHelper;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 
 class ControllerServiceMakeCommand extends Command {
@@ -16,16 +14,12 @@ class ControllerServiceMakeCommand extends Command {
         parent::__construct();
     }
 
-    /**
-     */
     public function handle(): void {
         $name = Str::studly($this->argument('name'));
         $this->createController($name);
         $this->info('Controller and service files created successfully.');
     }
 
-    /**
-     */
     protected function createController(string $name): void {
         $controllerPath = app_path("Http/Controllers/{$name}Controller.php");
         $controllerStubContents = file_get_contents(base_path('stubs/scaffold/backend/controller.stub'));

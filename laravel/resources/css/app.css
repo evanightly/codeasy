@@ -118,7 +118,7 @@
 /* Custom scrollbar */
 
 ::-webkit-scrollbar {
-  @apply h-2 w-2;
+    @apply h-2 w-2;
 }
 
 /* &::-webkit-scrollbar-track {
@@ -126,5 +126,5 @@
 } */
 
 ::-webkit-scrollbar-thumb {
-  @apply w-2 rounded-full bg-border;
+    @apply w-2 rounded-full bg-border;
 }

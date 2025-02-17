@@ -4,8 +4,6 @@ namespace App\Console\Commands;
 
 use App\Helpers\FileHelper;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 
 class ServiceMakeCommand extends Command {
@@ -16,8 +14,6 @@ class ServiceMakeCommand extends Command {
         parent::__construct();
     }
 
-    /**
-     */
     public function handle(): void {
         $name = Str::studly($this->argument('name'));
         $this->createServiceInterface($name);
@@ -25,8 +21,6 @@ class ServiceMakeCommand extends Command {
         $this->info('Service created successfully.');
     }
 
-    /**
-     */
     protected function createServiceInterface(string $name): void {
         $serviceInterfacePath = app_path("Support/Interfaces/Services/{$name}ServiceInterface.php");
         $serviceInterfaceStubContents = file_get_contents(base_path('stubs/scaffold/backend/service.interface.stub'));
@@ -35,8 +29,6 @@ class ServiceMakeCommand extends Command {
         $this->info("Service interface created: {$serviceInterfacePath}");
     }
 
-    /**
-     */
     protected function createService(string $name): void {
         $servicePath = app_path("Services/{$name}Service.php");
         $serviceStubContents = file_get_contents(base_path('stubs/scaffold/backend/service.stub'));

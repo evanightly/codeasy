@@ -9,10 +9,7 @@ interface DashboardLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
     breadcrumbs?: GenericBreadcrumbItem[];
 }
 
-export default function AuthenticatedLayout({
-    children,
-    breadcrumbs,
-}: DashboardLayoutProps) {
+export default function AuthenticatedLayout({ children, breadcrumbs }: DashboardLayoutProps) {
     const { auth } = usePage().props;
 
     return (

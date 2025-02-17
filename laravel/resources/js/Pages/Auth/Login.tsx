@@ -90,16 +90,11 @@ export default function Login({
         <GuestLayout>
             <Head title="Log in" />
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+            {status && <div className="mb-4 text-sm font-medium text-green-600">{status}</div>}
 
             <form
                 onSubmit={(e) => e.preventDefault()}
-                className="relative mx-auto w-full max-w-md rounded bg-white"
-            >
+                className="relative mx-auto w-full max-w-md rounded bg-white">
                 <AnimatePresence mode="wait">
                     {step === 'authing' ? (
                         <motion.div
@@ -109,8 +104,7 @@ export default function Login({
                             exit="exit"
                             variants={variants}
                             transition={{ duration: 0.3 }}
-                            className="flex flex-col items-center justify-center py-8"
-                        >
+                            className="flex flex-col items-center justify-center py-8">
                             <p className="mb-4 text-lg font-semibold text-gray-700">
                                 Authenticating...
                             </p>
@@ -123,21 +117,16 @@ export default function Login({
                             animate="visible"
                             exit="exit"
                             variants={variants}
-                            transition={{ duration: 0.3 }}
-                        >
+                            transition={{ duration: 0.3 }}>
                             {/* Field email */}
                             <div
                                 className={`transition-all duration-300 ${
                                     step === 'emailStep'
                                         ? 'h-auto opacity-100'
                                         : 'pointer-events-none h-0 opacity-0'
-                                } `}
-                            >
+                                } `}>
                                 <div>
-                                    <InputLabel
-                                        htmlFor="email"
-                                        value="Email / Username"
-                                    />
+                                    <InputLabel htmlFor="email" value="Email / Username" />
                                     <TextInput
                                         id="email"
                                         name="email"
@@ -146,20 +135,12 @@ export default function Login({
                                         value={data.email}
                                         autoFocus
                                         className="mt-1 block w-full"
-                                        onChange={(e) =>
-                                            setData('email', e.target.value)
-                                        }
+                                        onChange={(e) => setData('email', e.target.value)}
                                     />
-                                    <InputError
-                                        message={errors.email}
-                                        className="mt-2"
-                                    />
+                                    <InputError message={errors.email} className="mt-2" />
                                 </div>
                                 <div className="mt-4 flex justify-end">
-                                    <PrimaryButton
-                                        onClick={handleNextEmail}
-                                        disabled={processing}
-                                    >
+                                    <PrimaryButton onClick={handleNextEmail} disabled={processing}>
                                         Next
                                     </PrimaryButton>
                                 </div>
@@ -171,14 +152,10 @@ export default function Login({
                                     step === 'passwordStep'
                                         ? 'h-auto opacity-100'
                                         : 'pointer-events-none h-0 opacity-0'
-                                } `}
-                            >
+                                } `}>
                                 <>
                                     <div>
-                                        <InputLabel
-                                            htmlFor="password"
-                                            value="Password"
-                                        />
+                                        <InputLabel htmlFor="password" value="Password" />
                                         <Input
                                             autoFocus
                                             ref={passwordInputRef}
@@ -188,22 +165,12 @@ export default function Login({
                                             autoComplete="current-password"
                                             value={data.password}
                                             className="mt-1 block w-full"
-                                            onChange={(
-                                                e: React.ChangeEvent<HTMLInputElement>,
-                                            ) => {
-                                                setData(
-                                                    'password',
-                                                    e.target.value,
-                                                );
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                setData('password', e.target.value);
                                                 // Check if input is from user interaction
-                                                const inputType = (
-                                                    e.nativeEvent as InputEvent
-                                                ).inputType;
-                                                if (
-                                                    inputType &&
-                                                    inputType !==
-                                                        'insertFromPaste'
-                                                ) {
+                                                const inputType = (e.nativeEvent as InputEvent)
+                                                    .inputType;
+                                                if (inputType && inputType !== 'insertFromPaste') {
                                                     setTypedManually(true);
                                                 }
                                             }}
@@ -211,19 +178,13 @@ export default function Login({
                                             onKeyDown={(
                                                 e: React.KeyboardEvent<HTMLInputElement>,
                                             ) => {
-                                                if (
-                                                    e.key === 'Enter' &&
-                                                    !processing
-                                                ) {
+                                                if (e.key === 'Enter' && !processing) {
                                                     e.preventDefault();
                                                     signIn();
                                                 }
                                             }}
                                         />
-                                        <InputError
-                                            message={errors.password}
-                                            className="mt-2"
-                                        />
+                                        <InputError message={errors.password} className="mt-2" />
                                     </div>
 
                                     {/* <div className="mt-4">
@@ -249,25 +210,20 @@ export default function Login({
                                         <div className="space-x-4 text-sm">
                                             {canResetPassword && (
                                                 <Link
-                                                    href={route(
-                                                        'password.request',
-                                                    )}
-                                                    className="text-gray-600 underline hover:text-gray-900"
-                                                >
+                                                    href={route('password.request')}
+                                                    className="text-gray-600 underline hover:text-gray-900">
                                                     Forgot Password?
                                                 </Link>
                                             )}
                                             <Link
                                                 href={route('register')}
-                                                className="text-gray-600 underline hover:text-gray-900"
-                                            >
+                                                className="text-gray-600 underline hover:text-gray-900">
                                                 Sign Up
                                             </Link>
                                         </div>
                                         <PrimaryButton
                                             onClick={handleSubmitPassword}
-                                            disabled={processing}
-                                        >
+                                            disabled={processing}>
                                             Sign In
                                         </PrimaryButton>
                                     </div>

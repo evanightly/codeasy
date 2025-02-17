@@ -7,7 +7,7 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Artisan::command('sandbox:cleanup', function() {
+Artisan::command('sandbox:cleanup', function () {
     $path = storage_path('app/public/visualizations');
     $files = glob($path . '/sandbox_*.png');
     $count = 0;

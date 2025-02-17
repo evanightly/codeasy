@@ -13,8 +13,7 @@ class ScaffoldMakeCommand extends Command implements PromptsForMissingInput {
     protected $name = 'make:scaffold';
     protected $description = 'Scaffold model, repository, service, controller, api, resource, request files for a model with optional seeder, factory, and Frontend structure generation.';
 
-    public function __construct(protected FileHelper $fileHelper)
-    {
+    public function __construct(protected FileHelper $fileHelper) {
         parent::__construct();
     }
 

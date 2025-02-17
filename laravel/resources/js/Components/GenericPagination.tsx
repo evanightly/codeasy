@@ -17,11 +17,7 @@ interface GenericPaginationProps extends HTMLAttributes<HTMLDivElement> {
     handleChangePage: (page: number) => void;
 }
 
-export default function ({
-    meta,
-    handleChangePage,
-    className,
-}: GenericPaginationProps) {
+export default function ({ meta, handleChangePage, className }: GenericPaginationProps) {
     const fixPagination = (link: string) => {
         // convert link to number, if it's not a number, it's a string
         const pageNumber = Number(link);
@@ -45,13 +41,7 @@ export default function ({
         return <div dangerouslySetInnerHTML={obj}></div>;
     };
 
-    const ConditionallyRenderPagination = ({
-        link,
-        i,
-    }: {
-        link: PaginateMetaLink;
-        i: number;
-    }) => {
+    const ConditionallyRenderPagination = ({ link, i }: { link: PaginateMetaLink; i: number }) => {
         if (!meta) {
             return null;
         }
@@ -93,12 +83,10 @@ export default function ({
                         <PaginationItem
                             onClick={() => {
                                 handleChangePage(
-                                    fixPagination(link.url) ??
-                                        PAGINATION_NAVIGATOR.FIRST_PAGE,
+                                    fixPagination(link.url) ?? PAGINATION_NAVIGATOR.FIRST_PAGE,
                                 );
                             }}
-                            key={link.label}
-                        >
+                            key={link.label}>
                             <PaginationLink isActive={link.active}>
                                 <ParsedPagination html={link.label} />
                             </PaginationLink>
@@ -116,11 +104,7 @@ export default function ({
             <Pagination className={ny('justify-start', className)}>
                 <PaginationContent className="cursor-pointer">
                     {meta.links?.map((link, i) => (
-                        <ConditionallyRenderPagination
-                            link={link}
-                            key={i}
-                            i={i}
-                        />
+                        <ConditionallyRenderPagination link={link} key={i} i={i} />
                     ))}
                 </PaginationContent>
             </Pagination>

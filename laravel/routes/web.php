@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Http;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -18,24 +18,25 @@ Route::get('/', function () {
 Route::get('/test-fastapi', function () {
     // Contoh data payload, seharusnya diisi dengan kode siswa dan testcase yang sesuai
     $payload = [
-        "type" => "sandbox",
-        "code" => "print('nama saya Arin')\nimport matplotlib.pyplot as plt\nplt.plot([25,231,32])\nplt.title('Visualisasi Siswa')\nplt.show()\nprint('okokokok')",
-        "testcases" => [
-            "self.assertEqual(2+2, 4)",
-            "self.assertTrue('Arin' in 'nama saya Arin')"
-        ]
+        'type' => 'sandbox',
+        'code' => "print('nama saya Arin')\nimport matplotlib.pyplot as plt\nplt.plot([25,231,32])\nplt.title('Visualisasi Siswa')\nplt.show()\nprint('okokokok')",
+        'testcases' => [
+            'self.assertEqual(2+2, 4)',
+            "self.assertTrue('Arin' in 'nama saya Arin')",
+        ],
     ];
 
     try {
         $response = Http::post('http://fastapi:8001/test', $payload);
         if ($response->successful()) {
             return $response->json();
-        } else {
-            return response()->json([$response->json(), $response->status()], 500);
         }
+
+        return response()->json([$response->json(), $response->status()], 500);
+
     } catch (\Exception $e) {
         return response()->json([
-            'error' => $e->getMessage()
+            'error' => $e->getMessage(),
         ], 500);
     }
 });
@@ -58,10 +59,13 @@ Route::post('/sandbox', function (\Illuminate\Http\Request $request) {
                     $nginxUrl = env('NGINX_URL', env('APP_URL'));
                     $item['content'] = rtrim($nginxUrl, '/') . $item['content'];
                 }
+
                 return $item;
             }, $fastApiData);
+
             return response()->json($fullData);
         }
+
         return response()->json(['message' => 'Failed to call FastAPI', 'response' => $response], 500);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);

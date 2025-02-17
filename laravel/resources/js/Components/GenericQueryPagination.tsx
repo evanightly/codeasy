@@ -1,5 +1,3 @@
-import { PaginateMeta, PaginateMetaLink, ServiceFilterOptions } from '@/Support/Interfaces/Others';
-import { PAGINATION_NAVIGATOR } from '@/Support/Constants/paginationNavigator';
 import {
     Pagination,
     PaginationContent,
@@ -9,11 +7,13 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/Components/UI/pagination';
-import { ny } from '@/Lib/Utils';
-import { HTMLAttributes } from 'react';
-import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { generateUseGetAllQueryKey } from '@/Helpers';
+import { ny } from '@/Lib/Utils';
+import { PAGINATION_NAVIGATOR } from '@/Support/Constants/paginationNavigator';
+import { PaginateMeta, PaginateMetaLink, ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { Resource } from '@/Support/Interfaces/Resources';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
+import { HTMLAttributes } from 'react';
 import { toast } from 'sonner';
 
 interface GenericQueryPaginationProps<R extends Resource = any> {
