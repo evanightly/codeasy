@@ -6,6 +6,7 @@ on:
 
 jobs:
   codefixing:
+    name: CodeFixing
     runs-on: ubuntu-latest
     defaults:
       run:
