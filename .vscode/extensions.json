@@ -11,6 +11,7 @@
       "esbenp.prettier-vscode",
       "ms-python.python",
       "ms-python.debugpy",
-      "bradlc.vscode-tailwindcss"
+      "bradlc.vscode-tailwindcss",
+      "open-southeners.laravel-pint"
     ]
 }

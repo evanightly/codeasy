@@ -17,4 +17,10 @@
     "prettier.printWidth": 120,
     "prettier.htmlWhitespaceSensitivity": "ignore",
     "prettier.bracketSameLine": true,
+    "laravel-pint.configPath": "./laravel/pint.json",
+    "laravel-pint.executablePath": "./laravel/vendor/bin/pint",
+    "laravel-pint.enableDebugLogs": true,
+    "[php]": {
+        "editor.defaultFormatter": "open-southeners.laravel-pint"
+    },
 }
