@@ -7,12 +7,15 @@ on:
 jobs:
   format:
     name: Format Code
+    # Skip if commit is from github-actions bot to prevent infinite loop
+    if: github.actor != 'github-actions[bot]'
     uses: ./.github/workflows/codefixing.yml
     secrets: inherit
 
   build-and-push:
     name: Build & Push Docker Image
     needs: format
+    if: always() && (needs.format.result == 'success' || needs.format.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -36,6 +39,7 @@ jobs:
   deploy:
     name: Deploy to VPS
     needs: build-and-push
+    if: needs.build-and-push.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Setup SSH
