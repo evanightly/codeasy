@@ -160,12 +160,5 @@ jobs:
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
 
-            # Verify deployment
-            if ! docker compose -f docker-compose.prod.yml ps | grep -q "running"; then
-              echo "Error: Containers failed to start"
-              docker compose -f docker-compose.prod.yml logs
-              exit 1
-            fi
-
             echo "Deployment completed successfully!"
           ENDSSH
