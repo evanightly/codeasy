@@ -2,18 +2,61 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [main] # Jalankan workflow saat push ke branch main
+    branches: [main]
 
 jobs:
-  deploy:
+  lint:
+    name: Code Quality Check
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Checkout code
       - name: Check out code
         uses: actions/checkout@v3
 
-      # 2. Login to GHCR
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './laravel/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./laravel
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./laravel
+        run: npm run lint
+
+  prettier:
+    name: Code Formatting Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './laravel/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./laravel
+        run: npm ci
+
+      - name: Run Prettier
+        working-directory: ./laravel
+        run: npm run prettier
+
+  build-and-push:
+    name: Build & Push Docker Image
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
       - name: Login to GHCR
         uses: docker/login-action@v2
         with:
@@ -21,29 +64,29 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
 
-      # 3. Build & Push Docker Image (Production)
       - name: Build & Push Docker Image
         run: |
-          # Build production image dengan laravel.prod.Dockerfile
           docker build \
             -t ghcr.io/${{ github.repository_owner }}/codeasy:latest \
             -f docker/laravel.prod.Dockerfile .
 
           docker push ghcr.io/${{ github.repository_owner }}/codeasy:latest
 
-      # 4. Setup SSH Agent (untuk SSH ke VPS)
+  deploy:
+    name: Deploy to VPS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # 5. Tambahkan SSH Known Hosts
       - name: Add SSH Known Hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      # 6. Deploy ke VPS
       - name: Deploy to VPS
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -51,18 +94,14 @@ jobs:
           CR_PAT: ${{ secrets.IMAGE_REPOSITORY_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          # Jika GHCR Anda private, siapkan Docker config agar bisa pull.
-          # Jika public, Anda bisa skip pembuatan config.json
           DOCKER_CONFIG_CONTENT="{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n \"$GITHUB_ACTOR:$CR_PAT\" | base64)\"}}}"
 
           ssh $SSH_USERNAME@$SSH_HOST 'bash -s' << 'ENDSSH'
-            set -ex  # -e: stop on error, -x: tampilkan perintah
+            set -ex
 
-            # 1. Buat docker config agar "docker pull" ke GHCR private tidak unauthorized
             mkdir -p ~/.docker
             echo "$DOCKER_CONFIG_CONTENT" > ~/.docker/config.json
 
-            # 2. Clone repo jika belum ada
             if [ ! -d "codeasy/.git" ]; then
               echo "Repo not found, cloning..."
               git clone https://github.com/evanightly/codeasy.git "codeasy"
@@ -74,21 +113,11 @@ jobs:
             git fetch --all
             git reset --hard origin/main
 
-
-            cd ~/codeasy
-
-            # 3. Update repo (opsional jika file docker-compose.prod.yml dsb. ada di repo)
-            git fetch --all
-            git reset --hard origin/main
-
-            # 4. Copy content env production (JANGAN DIHAPUS!)
-            #    Misalnya di Secrets: PRODUCTION_ENV berisi isi .env production
             echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env || {
               echo "Failed to create .env file"
               exit 1
             }
 
-            # 5. Jalankan Docker Compose
             docker compose -f docker-compose.prod.yml down || echo "No containers to stop"
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
