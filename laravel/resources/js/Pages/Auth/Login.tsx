@@ -49,7 +49,7 @@ export default function Login({
         window.axios
             .post(route('login'), data)
             .then(() => {
-                router.visit(route('dashboard'));
+                router.visit(route('dashboard.index'));
                 setAutoSubmitted(false);
                 setTypedManually(false);
             })
