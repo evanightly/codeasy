@@ -12,9 +12,7 @@ interface GenericBreadcrumbProps {
     breadcrumbs?: GenericBreadcrumbItem[];
 }
 
-export default function GenericBreadcrumb({
-    breadcrumbs,
-}: GenericBreadcrumbProps) {
+export default function GenericBreadcrumb({ breadcrumbs }: GenericBreadcrumbProps) {
     return (
         breadcrumbs && (
             <Breadcrumb>
@@ -26,9 +24,7 @@ export default function GenericBreadcrumb({
                                     {breadcrumb.name}
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
-                            {index < breadcrumbs.length - 1 && (
-                                <BreadcrumbSeparator />
-                            )}
+                            {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
                         </Fragment>
                     ))}
                 </BreadcrumbList>

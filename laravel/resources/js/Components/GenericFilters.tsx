@@ -1,7 +1,3 @@
-import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
-import { HTMLAttributes, useEffect } from 'react';
-import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
-import { useForm } from '@inertiajs/react';
 import { Input } from '@/Components/UI/input';
 import {
     Select,
@@ -11,9 +7,13 @@ import {
     SelectValue,
 } from '@/Components/UI/select';
 import { ny } from '@/Lib/Utils';
-import { Resource } from '@/Support/Interfaces/Resources';
-import { Search, X } from 'lucide-react';
 import { STYLING } from '@/Support/Constants/styling';
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+import { Resource } from '@/Support/Interfaces/Resources';
+import { useForm } from '@inertiajs/react';
+import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
+import { Search, X } from 'lucide-react';
+import { HTMLAttributes, useEffect } from 'react';
 
 interface GenericFiltersProps<R extends Resource = Resource> {
     filters: ServiceFilterOptions<R>;

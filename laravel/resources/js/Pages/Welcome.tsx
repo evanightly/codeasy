@@ -9,13 +9,9 @@ export default function Welcome({
     phpVersion,
 }: PageProps<{ laravelVersion: string; phpVersion: string }>) {
     const handleImageError = () => {
-        document
-            .getElementById('screenshot-container')
-            ?.classList.add('!hidden');
+        document.getElementById('screenshot-container')?.classList.add('!hidden');
         document.getElementById('docs-card')?.classList.add('!row-span-1');
-        document
-            .getElementById('docs-card-content')
-            ?.classList.add('!flex-row');
+        document.getElementById('docs-card-content')?.classList.add('!flex-row');
         document.getElementById('background')?.classList.add('!hidden');
     };
 
@@ -30,34 +26,24 @@ export default function Welcome({
                             src="https://via.placeholder.com/40"
                             alt="Logo"
                         /> */}
-                        <span className="text-xl font-bold text-blue-600">
-                            Codeasy
-                        </span>
+                        <span className="text-xl font-bold text-blue-600">Codeasy</span>
                     </div>
                     <nav className="hidden space-x-6 md:block">
-                        <Link
-                            href={route('login')}
-                            className="text-gray-700 hover:text-blue-600"
-                        >
+                        <Link href={route('login')} className="text-gray-700 hover:text-blue-600">
                             Login
                         </Link>
                         <Link
                             href={route('register')}
                             className={buttonVariants({
                                 className: '!bg-blue-600 text-white',
-                            })}
-                        >
+                            })}>
                             Register
                         </Link>
                     </nav>
                     <button
                         className="inline-block text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 md:hidden"
-                        aria-label="Toggle Navigation"
-                    >
-                        <svg
-                            className="h-6 w-6 fill-current"
-                            viewBox="0 0 24 24"
-                        >
+                        aria-label="Toggle Navigation">
+                        <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
                             <path d="M4 5h16M4 12h16M4 19h16" />
                         </svg>
                     </button>
@@ -81,23 +67,17 @@ export default function Welcome({
                                 Berbasis Python
                             </h1>
                             <p className="mb-6 text-lg text-white/90 md:text-xl">
-                                Tingkatkan pemahaman Anda dalam pemrograman
-                                Python untuk Data Science. Dilengkapi
-                                autograding &amp; analisis otomatis berbasis
+                                Tingkatkan pemahaman Anda dalam pemrograman Python untuk Data
+                                Science. Dilengkapi autograding &amp; analisis otomatis berbasis
                                 Taxonomy Bloom!
                             </p>
-                            <div className='flex justify-center sm:justify-normal gap-4 items-center flex-col sm:flex-row'>
+                            <div className="flex justify-center sm:justify-normal gap-4 items-center flex-col sm:flex-row">
                                 <Link
                                     href={route('login')}
-                                    className="inline-block rounded-md bg-yellow-300 px-5 py-3 font-semibold text-gray-800 hover:bg-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-200"
-                                >
+                                    className="inline-block rounded-md bg-yellow-300 px-5 py-3 font-semibold text-gray-800 hover:bg-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-200">
                                     Mulai Sekarang
                                 </Link>
-                                <Link 
-                                    href={route('sandbox.index')}
-                                >
-                                    Atau Coba Sandbox Dulu
-                                </Link>
+                                <Link href={route('sandbox.index')}>Atau Coba Sandbox Dulu</Link>
                             </div>
                         </div>
                         {/* <div className="mt-8 flex justify-center md:mt-0 md:w-1/2">
@@ -123,8 +103,7 @@ export default function Welcome({
                                     className="mx-auto h-12 w-12"
                                     fill="none"
                                     stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
+                                    viewBox="0 0 24 24">
                                     <path
                                         d="M4 7h16M4 12h8m-8 5h16"
                                         strokeWidth="2"
@@ -133,12 +112,10 @@ export default function Welcome({
                                     />
                                 </svg>
                             </div>
-                            <h3 className="mb-2 text-xl font-semibold">
-                                Autograding Realtime
-                            </h3>
+                            <h3 className="mb-2 text-xl font-semibold">Autograding Realtime</h3>
                             <p className="text-gray-600">
-                                Dapatkan umpan balik instan ketika Anda
-                                menuliskan kode Python untuk Data Science.
+                                Dapatkan umpan balik instan ketika Anda menuliskan kode Python untuk
+                                Data Science.
                             </p>
                         </div>
                         <div className="rounded-lg bg-white p-6 shadow transition hover:shadow-md">
@@ -147,8 +124,7 @@ export default function Welcome({
                                     className="mx-auto h-12 w-12"
                                     fill="none"
                                     stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
+                                    viewBox="0 0 24 24">
                                     <path
                                         d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 011.553-1.949L9 1m6 0l4.447 2.224A2 2 0 0121 5.618v9.764a2 2 0 01-1.553 1.949L15 20M9 1v19m6-19v19"
                                         strokeWidth="2"
@@ -157,12 +133,10 @@ export default function Welcome({
                                     />
                                 </svg>
                             </div>
-                            <h3 className="mb-2 text-xl font-semibold">
-                                Analisis Pemahaman Siswa
-                            </h3>
+                            <h3 className="mb-2 text-xl font-semibold">Analisis Pemahaman Siswa</h3>
                             <p className="text-gray-600">
-                                Klasifikasi otomatis berdasarkan Taksonomi Bloom
-                                untuk mengukur tingkat kognitif Anda.
+                                Klasifikasi otomatis berdasarkan Taksonomi Bloom untuk mengukur
+                                tingkat kognitif Anda.
                             </p>
                         </div>
                         <div className="rounded-lg bg-white p-6 shadow transition hover:shadow-md">
@@ -171,8 +145,7 @@ export default function Welcome({
                                     className="mx-auto h-12 w-12"
                                     fill="none"
                                     stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
+                                    viewBox="0 0 24 24">
                                     <path
                                         d="M5 3l14 9-14 9V3z"
                                         strokeWidth="2"
@@ -181,12 +154,10 @@ export default function Welcome({
                                     />
                                 </svg>
                             </div>
-                            <h3 className="mb-2 text-xl font-semibold">
-                                Kurikulum Berbasis SKKNI
-                            </h3>
+                            <h3 className="mb-2 text-xl font-semibold">Kurikulum Berbasis SKKNI</h3>
                             <p className="text-gray-600">
-                                Materi dan modul disusun sesuai Standar
-                                Kompetensi Kerja Nasional Indonesia.
+                                Materi dan modul disusun sesuai Standar Kompetensi Kerja Nasional
+                                Indonesia.
                             </p>
                         </div>
                     </div>
@@ -199,14 +170,13 @@ export default function Welcome({
                         Siap Menjadi Data Scientist Handal?
                     </h2>
                     <p className="mb-8 text-lg text-gray-700">
-                        Bergabunglah dengan ratusan siswa lain yang telah
-                        merasakan kemudahan belajar Python untuk Data Science
-                        menggunakan platform <strong>Codeasy</strong>.
+                        Bergabunglah dengan ratusan siswa lain yang telah merasakan kemudahan
+                        belajar Python untuk Data Science menggunakan platform{' '}
+                        <strong>Codeasy</strong>.
                     </p>
                     <Link
                         href={route('register')}
-                        className="inline-block rounded-md bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
-                    >
+                        className="inline-block rounded-md bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300">
                         Daftar Sekarang
                     </Link>
                 </div>
@@ -214,9 +184,7 @@ export default function Welcome({
 
             <footer className="bg-gray-900 py-8 text-gray-300">
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between px-4 sm:px-6 md:flex-row lg:px-8">
-                    <p className="mb-4 md:mb-0">
-                        &copy; 2025 Codeasy. All rights reserved.
-                    </p>
+                    <p className="mb-4 md:mb-0">&copy; 2025 Codeasy. All rights reserved.</p>
                     <div className="space-x-4">
                         <a href="#" className="hover:text-white">
                             Kebijakan Privasi

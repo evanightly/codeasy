@@ -5,17 +5,13 @@ namespace App\Helpers;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
 
-class FileHelper
-{
-    public function __construct(protected Filesystem $files)
-    {
-    }
+class FileHelper {
+    public function __construct(protected Filesystem $files) {}
 
     /**
      * @throws FileNotFoundException
      */
-    public function replaceFileWithStubContent(string $path, string $stubPath, bool $forceReplace = false): void
-    {
+    public function replaceFileWithStubContent(string $path, string $stubPath, bool $forceReplace = false): void {
         $this->createDirectoryIfNotExists($path);
 
         if ($forceReplace || !$this->files->exists($path)) {
@@ -24,8 +20,7 @@ class FileHelper
         }
     }
 
-    public function replaceFileWithContent(string $path, string $content, bool $forceReplace = false): void
-    {
+    public function replaceFileWithContent(string $path, string $content, bool $forceReplace = false): void {
         $this->createDirectoryIfNotExists($path);
 
         if ($forceReplace || !$this->files->exists($path)) {
@@ -33,12 +28,11 @@ class FileHelper
         }
     }
 
-    public function checkFileExistence(string $path): bool
-    {
+    public function checkFileExistence(string $path): bool {
         if ($this->files->exists($path)) {
-//            // Assuming you have access to the console command's warn method
-//            // You might need to pass the command instance to this helper if needed
-//            echo "Frontend file already exists: {$path}\n";
+            //            // Assuming you have access to the console command's warn method
+            //            // You might need to pass the command instance to this helper if needed
+            //            echo "Frontend file already exists: {$path}\n";
 
             return true;
         }
@@ -46,12 +40,7 @@ class FileHelper
         return false;
     }
 
-    /**
-     * @param string $path
-     * @return void
-     */
-    public function createDirectoryIfNotExists(string $path): void
-    {
+    public function createDirectoryIfNotExists(string $path): void {
         $directory = dirname($path);
 
         if (!$this->files->exists($directory)) {

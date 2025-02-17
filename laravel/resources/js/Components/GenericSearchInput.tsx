@@ -1,7 +1,7 @@
-import { ChangeEvent, Dispatch, memo, ReactNode, SetStateAction, useEffect, useState } from 'react';
-import { useDebounce } from '@uidotdev/usehooks';
-import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { Input } from '@/Components/UI/input';
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+import { useDebounce } from '@uidotdev/usehooks';
+import { ChangeEvent, Dispatch, memo, ReactNode, SetStateAction, useEffect, useState } from 'react';
 
 interface GenericSearchInputProps {
     setFilters: Dispatch<SetStateAction<any>>; // Function to set filters

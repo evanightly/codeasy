@@ -189,8 +189,7 @@ class InitFrontendMakeCommand extends Command {
     /**
      * @throws FileNotFoundException
      */
-    protected function createVitePlugins(): void
-    {
+    protected function createVitePlugins(): void {
         $libColorsPath = base_path('vite_plugins/lib/colors.js');
         $libColorsStubPath = base_path('stubs/scaffold/initializer/frontend/vite_plugins/lib/colors.stub');
         $this->fileHelper->replaceFileWithStubContent($libColorsPath, $libColorsStubPath);
@@ -244,7 +243,7 @@ class InitFrontendMakeCommand extends Command {
         $tanstackQueryHelpersStubPath = base_path('stubs/scaffold/initializer/frontend/helpers/tanstack.query.helpers.stub');
         $this->fileHelper->replaceFileWithStubContent($tanstackQueryHelpersPath, $tanstackQueryHelpersStubPath);
         $this->info("Frontend helper tanstackQueryHelpers created: {$tanstackQueryHelpersPath}");
-        
+
         $indexPath = resource_path('js/Helpers/index.ts');
         $indexStubPath = base_path('stubs/scaffold/initializer/frontend/helpers/index.stub');
         $this->fileHelper->replaceFileWithStubContent($indexPath, $indexStubPath);

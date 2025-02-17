@@ -21,9 +21,9 @@ import {
     SidebarHeader,
     SidebarRail,
 } from '@/Components/UI/sidebar';
-import { DashboardSiteSwitcher } from './Components/DashboardSiteSwitcher';
 import { DashboardSidebarHeader } from './Components/DashboardSidebarHeader';
 import { DashboardSidebarUser } from './Components/DashboardSidebarUser';
+import { DashboardSiteSwitcher } from './Components/DashboardSiteSwitcher';
 // This is sample data.
 const data = {
     user: {

@@ -7,8 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
 
-class InitBackendMakeCommand extends Command
-{
+class InitBackendMakeCommand extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -23,17 +22,16 @@ class InitBackendMakeCommand extends Command
      */
     protected $description = 'Initialize backend files for a model';
 
-    public function __construct(protected Filesystem $files, protected FileHelper $fileHelper)
-    {
+    public function __construct(protected Filesystem $files, protected FileHelper $fileHelper) {
         parent::__construct();
     }
 
     /**
      * Execute the console command.
+     *
      * @throws FileNotFoundException
      */
-    public function handle(): void
-    {
+    public function handle(): void {
         $this->createRepositoryServiceProvider();
         $this->createJsonResourceTraits();
         $this->createBaseRepository();
@@ -46,8 +44,7 @@ class InitBackendMakeCommand extends Command
     /**
      * @throws FileNotFoundException
      */
-    protected function createRepositoryServiceProvider(): void
-    {
+    protected function createRepositoryServiceProvider(): void {
         $repositoryServiceProviderPath = app_path('Providers/RepositoryServiceProvider.php');
         $repositoryServiceProviderStubPath = base_path('stubs/scaffold/initializer/backend/repository.service.provider.stub');
 
@@ -58,8 +55,7 @@ class InitBackendMakeCommand extends Command
     /**
      * @throws FileNotFoundException
      */
-    protected function createJsonResourceTraits(): void
-    {
+    protected function createJsonResourceTraits(): void {
         $jsonResourceTraitPathDir = app_path('Traits/Resource/JsonResource');
         $handlesResourceDataSelectionPath = "$jsonResourceTraitPathDir/HandlesResourceDataSelection.php";
         $handlesResourceDataSelectionStubPath = base_path('stubs/scaffold/initializer/backend/traits/json_resource/handles.resource.data.selection.stub');
@@ -70,8 +66,7 @@ class InitBackendMakeCommand extends Command
     /**
      * @throws FileNotFoundException
      */
-    protected function createBaseRepository(): void
-    {
+    protected function createBaseRepository(): void {
         $baseRepositoryInterfacePath = app_path('Support/Interfaces/Repositories/BaseRepositoryInterface.php');
         $baseRepositoryInterfaceStubPath = base_path('stubs/scaffold/initializer/backend/base.repository.interface.stub');
         $this->fileHelper->replaceFileWithStubContent($baseRepositoryInterfacePath, $baseRepositoryInterfaceStubPath);
@@ -86,8 +81,7 @@ class InitBackendMakeCommand extends Command
     /**
      * @throws FileNotFoundException
      */
-    protected function createRepositoryTraits(): void
-    {
+    protected function createRepositoryTraits(): void {
         $repositoryTraitPath = app_path('Traits/Repositories');
 
         $handlesFilteringPath = "$repositoryTraitPath/HandlesFiltering.php";
@@ -110,8 +104,7 @@ class InitBackendMakeCommand extends Command
     /**
      * @throws FileNotFoundException
      */
-    protected function createServiceTraits(): void
-    {
+    protected function createServiceTraits(): void {
         $serviceTraitPath = app_path('Traits/Services');
 
         $handlesPageSizeAllPath = "$serviceTraitPath/HandlesPageSizeAll.php";
@@ -122,8 +115,7 @@ class InitBackendMakeCommand extends Command
     /**
      * @throws FileNotFoundException
      */
-    protected function createConfigFiles(): void
-    {
+    protected function createConfigFiles(): void {
         $constantsPath = config_path('constants.php');
         $constantsStubPath = base_path('stubs/scaffold/initializer/backend/config/constants.stub');
         $this->fileHelper->replaceFileWithStubContent($constantsPath, $constantsStubPath);

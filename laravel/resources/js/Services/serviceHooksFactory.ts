@@ -1,5 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Resource } from '@/Support/Interfaces/Resources';
+import { generateUseGetAllQueryKey, generateUseGetQueryKey } from '@/Helpers';
 import {
     PaginateResponse,
     ServiceHooks,
@@ -9,7 +8,8 @@ import {
     UseGetOptions,
     UseUpdateOptions,
 } from '@/Support/Interfaces/Others';
-import { generateUseGetAllQueryKey, generateUseGetQueryKey } from '@/Helpers';
+import { Resource } from '@/Support/Interfaces/Resources';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function serviceHooksFactory<T extends Resource>({ baseKey, baseRoute }: ServiceHooks) {
     if (!baseKey) baseKey = baseRoute;

@@ -10,8 +10,7 @@ class ResourceServiceMakeCommand extends Command {
     protected $signature = 'make:resource-service {name}';
     protected $description = 'Generate a resource service for a model';
 
-    public function __construct(protected FileHelper $fileHelper)
-    {
+    public function __construct(protected FileHelper $fileHelper) {
         parent::__construct();
     }
 

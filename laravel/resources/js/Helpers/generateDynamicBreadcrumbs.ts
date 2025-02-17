@@ -1,6 +1,6 @@
+import { ROUTES } from '@/Support/Constants/routes';
 import { GenericBreadcrumbItem } from '@/Support/Interfaces/Others';
 import { usePage } from '@inertiajs/react';
-import { ROUTES } from '@/Support/Constants/routes';
 
 function generateDynamicBreadcrumbs(): GenericBreadcrumbItem[] {
     const { url } = usePage(); // Get the current URL path from Inertia.js

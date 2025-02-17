@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Helpers\FileHelper;
-use File;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 

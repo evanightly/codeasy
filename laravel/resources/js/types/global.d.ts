@@ -18,7 +18,7 @@ declare module '@inertiajs/core' {
 
 declare module 'react' {
     interface StyleHTMLAttributes<T> extends React.HTMLAttributes<T> {
-      jsx?: boolean;
-      global?: boolean;
+        jsx?: boolean;
+        global?: boolean;
     }
-  }
+}
