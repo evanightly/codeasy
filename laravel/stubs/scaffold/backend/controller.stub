@@ -19,7 +19,7 @@ class {{ modelName }}Controller extends Controller {
             new Middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_CREATE->value, only: ['create', 'store']),
             new Middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_UPDATE->value, only: ['edit', 'update']),
             new Middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_READ->value, only: ['index', 'show']),
-            new Middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_DELETE->value, only: 'destroy'),
+            new Middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_DELETE->value, only: ['destroy']),
         ];
     }
 
