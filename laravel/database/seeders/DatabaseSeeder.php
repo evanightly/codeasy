@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder {
     public function run(): void {
         // User::factory(10)->create();
 
-        if(app()->isProduction()) {
+        if (app()->isProduction()) {
             $this->call([
                 PermissionSeeder::class,
             ]);

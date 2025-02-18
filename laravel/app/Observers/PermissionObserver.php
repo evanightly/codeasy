@@ -10,8 +10,7 @@ class PermissionObserver {
     /**
      * Set the permission group based on name
      */
-    private function setPermissionGroup(Permission $permission): void
-    {
+    private function setPermissionGroup(Permission $permission): void {
         $validator = \Validator::make(
             ['name' => $permission->name],
             ['name' => new PermissionNameValidation],
