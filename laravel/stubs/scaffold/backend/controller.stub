@@ -8,13 +8,19 @@ use App\Http\Resources\{{ modelName }}Resource;
 use App\Models\{{ modelName }};
 use App\Support\Interfaces\Services\{{ modelName }}ServiceInterface;
 use Illuminate\Http\Request;
+use App\Support\Enums\PermissionEnum;
+use Illuminate\Routing\Controllers\Middleware;
 
 class {{ modelName }}Controller extends Controller {
-    public function __construct(protected {{ modelName }}ServiceInterface ${{ modelNameCamel }}Service) {
-        $this->middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_CREATE->value)->only(['create', 'store']);
-        $this->middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_UPDATE->value)->only(['edit', 'update']);
-        $this->middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_READ->value)->only(['index', 'show']);
-        $this->middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_DELETE->value)->only('destroy');
+    public function __construct(protected {{ modelName }}ServiceInterface ${{ modelNameCamel }}Service) {}
+
+    public static function middleware(): array {
+        return [
+            new Middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_CREATE->value, only: ['create', 'store']),
+            new Middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_UPDATE->value, only: ['edit', 'update']),
+            new Middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_READ->value, only: ['index', 'show']),
+            new Middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_DELETE->value, only: 'destroy'),
+        ];
     }
 
     public function index(Request $request) {
