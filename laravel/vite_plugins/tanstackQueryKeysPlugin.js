@@ -1,13 +1,13 @@
+import chokidar from 'chokidar';
 import fs from 'fs';
 import path from 'path';
-import chokidar from 'chokidar';
-import { generatePrefixText } from '../lib/generatePrefixText.js';
+import { generatePrefixText } from './lib/generatePrefixText';
 
 const tanstackKeysFilePath = path.resolve(
     __dirname,
-    '../../resources/js/Support/Constants/tanstackQueryKeys.ts',
+    '../resources/js/Support/Constants/tanstackQueryKeys.ts',
 );
-const routesFilePath = path.resolve(__dirname, '../../resources/js/Support/Constants/routes.ts');
+const routesFilePath = path.resolve(__dirname, '../resources/js/Support/Constants/routes.ts');
 
 function parseKeys(fileContent) {
     const matches = fileContent.match(/(\w+):\s*['"`]\w+['"`]/g);

@@ -3,8 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { generatePrefixText } from './lib/generatePrefixText';
 
-const phpEnumFilePath = path.resolve(__dirname, '../app/Support/Enums/IntentEnum.php');
-const tsEnumFilePath = path.resolve(__dirname, '../resources/js/Support/Enums/intentEnum.ts');
+const phpEnumFilePath = path.resolve(__dirname, '../app/Support/Enums/RoleEnum.php');
+const tsEnumFilePath = path.resolve(__dirname, '../resources/js/Support/Enums/roleEnum.ts');
 
 function parsePhpEnum(fileContent) {
     const enumMatches = fileContent.match(/case\s+(\w+)\s*=\s*['"](.*?)['"];/g);
@@ -20,7 +20,7 @@ function parsePhpEnum(fileContent) {
 function generateTsEnum(enumObject) {
     const lines = Object.entries(enumObject).map(([key, value]) => `    ${key}: '${value}',`);
 
-    return `const intents = {\n${lines.join('\n')}\n};\n\nexport const IntentEnum = intents;\n\nexport type IntentEnum = (typeof intents)[keyof typeof intents];\n`;
+    return `const roles = {\n${lines.join('\n')}\n};\n\nexport const RoleEnum = roles;\n\nexport type RoleEnum = (typeof roles)[keyof typeof roles];\n`;
 }
 
 function updateTsFile() {
@@ -30,19 +30,19 @@ function updateTsFile() {
 
     fs.writeFileSync(tsEnumFilePath, tsContent, 'utf8');
     const msg = generatePrefixText({
-        label: 'Transform Intent Enum',
+        label: 'Transform Role Enum',
         text: `Updated TypeScript file: ${tsEnumFilePath}`,
     });
     console.log(msg);
 }
 
-export default function intentEnumPlugin() {
+export default function roleEnumPlugin() {
     return {
-        name: 'vite-plugin-intent-enum',
+        name: 'vite-plugin-role-enum',
         buildStart() {
             chokidar.watch(phpEnumFilePath).on('change', () => {
                 const msg = generatePrefixText({
-                    label: 'Transform Intent Enum',
+                    label: 'Transform Role Enum',
                     text: `Detected changes in ${phpEnumFilePath}`,
                 });
                 console.log(msg);
