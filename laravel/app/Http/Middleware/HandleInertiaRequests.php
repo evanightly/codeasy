@@ -28,6 +28,18 @@ class HandleInertiaRequests extends Middleware {
     public function share(Request $request): array {
         return [
             ...parent::share($request),
+            'env' => [
+                'appName' => config('app.name'),
+                'appEnv' => config('app.env'),
+                // 'appUrl' => config('app.url'),
+                // 'appLocale' => config('app.locale'),
+                // 'appDebug' => config('app.debug'),
+                // 'csrfToken' => csrf_token(),
+                // 'inertia' => array_merge(
+                //     parent::share($request)['page'],
+                //     ['resolveComponent' => $request->route()->getAction('component')],
+                // ),
+            ],
             'auth' => [
                 'user' => array_merge(
                     optional($request->user())->toArray() ?? [],

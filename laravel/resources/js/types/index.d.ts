@@ -9,13 +9,16 @@ export interface User {
 
 interface AuthenticatedUser extends User {
     role: string;
-    initials: string;x
+    initials: string;
     image: string;
     permissions: PERMISSION_ENUM[];
 }
 
-
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
+    env: {
+        appName: string;
+        appEnv: string;
+    };
     auth: {
         user: AuthenticatedUser;
     };
