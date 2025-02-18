@@ -10,7 +10,12 @@ use App\Support\Interfaces\Services\{{ modelName }}ServiceInterface;
 use Illuminate\Http\Request;
 
 class {{ modelName }}Controller extends Controller {
-    public function __construct(protected {{ modelName }}ServiceInterface ${{ modelNameCamel }}Service) {}
+    public function __construct(protected {{ modelName }}ServiceInterface ${{ modelNameCamel }}Service) {
+        $this->middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_CREATE->value)->only(['create', 'store']);
+        $this->middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_UPDATE->value)->only(['edit', 'update']);
+        $this->middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_READ->value)->only(['index', 'show']);
+        $this->middleware('permission:' . PermissionEnum::{{ modelNameUpper }}_DELETE->value)->only('destroy');
+    }
 
     public function index(Request $request) {
         $perPage = $request->get('perPage', 10);
