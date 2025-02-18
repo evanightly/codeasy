@@ -1,10 +1,18 @@
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
+import tanstackQueryKeysPlugin from './vite_plugins/tanstackQueryKeysPlugin.js';
 import intentEnumPlugin from './vite_plugins/transformIntentEnumPlugin.js';
 import permissionEnumPlugin from './vite_plugins/transformPermissionEnumPlugin.js';
 import roleEnumPlugin from './vite_plugins/transformRoleEnumPlugin.js';
-import tanstackQueryKeysPlugin from './vite_plugins/tanstackQueryKeysPlugin.js';
+
+// Read environment variable
+const isProduction = process.env.APP_ENV === 'production';
+
+// Conditionally load custom plugins
+const customDevPlugins = isProduction
+    ? []
+    : [permissionEnumPlugin(), roleEnumPlugin(), intentEnumPlugin(), tanstackQueryKeysPlugin()];
 
 export default defineConfig({
     server: {
@@ -29,9 +37,6 @@ export default defineConfig({
             },
         }),
         react(),
-        permissionEnumPlugin(),
-        roleEnumPlugin(),
-        intentEnumPlugin(),
-        tanstackQueryKeysPlugin(),
+        ...customDevPlugins,
     ],
 });
