@@ -87,7 +87,6 @@ export default function GenericFilters<R extends Resource = Resource>({
                     <SelectItem value="200">200</SelectItem>
                     <SelectItem value="500">500</SelectItem>
                     <SelectItem value="1000">1000</SelectItem>
-                    <SelectItem value="all">All</SelectItem>
                 </SelectContent>
             </Select>
 
