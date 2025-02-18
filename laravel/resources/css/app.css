@@ -128,3 +128,24 @@
 ::-webkit-scrollbar-thumb {
     @apply w-2 rounded-full bg-border;
 }
+
+.ripple {
+    position: relative;
+    overflow: hidden; /* Ensures the ripple stays within the element */
+}
+
+.ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple-animation 600ms linear;
+    background: rgba(255, 255, 255, 0.6); /* Semi-transparent white */
+    pointer-events: none; /* Prevent interaction with the ripple */
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4); /* Ripple grows */
+        opacity: 0; /* Ripple fades out */
+    }
+}
