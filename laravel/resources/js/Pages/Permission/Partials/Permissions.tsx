@@ -1,10 +1,10 @@
+import { DataTable } from '@/Components/UI/data-table';
+import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
+import { PaginateMeta, PaginateResponse, ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { PermissionResource } from '@/Support/Interfaces/Resources';
+import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useMemo } from 'react';
-import { DataTable } from '@/Components/UI/data-table';
-import { PaginateMeta, PaginateResponse, ServiceFilterOptions } from '@/Support/Interfaces/Others';
-import { UseQueryResult } from '@tanstack/react-query';
-import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
 
 interface PermissionsProps {
     response?: UseQueryResult<PaginateResponse<PermissionResource>, Error>;
@@ -15,13 +15,7 @@ interface PermissionsProps {
     baseKey: string;
 }
 
-const Permissions = ({
-    response,
-    filters,
-    setFilters,
-    baseKey,
-    baseRoute,
-}: PermissionsProps) => {
+const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: PermissionsProps) => {
     const columnHelper = createColumnHelper<PermissionResource>();
 
     const columns = [
