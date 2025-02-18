@@ -32,6 +32,17 @@ class ScaffoldMakeCommand extends Command implements PromptsForMissingInput {
             $this->input->setOption('migration', true);
             $this->input->setOption('seed', true);
             $this->input->setOption('controller', true);
+            $this->input->setOption('service-repository', true);
+            $this->input->setOption('frontend', true);
+            $this->input->setOption('resource', true);
+            $this->input->setOption('requests', true);
+        }
+
+        if ($this->option('all-with-api')) {
+            $this->input->setOption('factory', true);
+            $this->input->setOption('migration', true);
+            $this->input->setOption('seed', true);
+            $this->input->setOption('controller', true);
             $this->input->setOption('api-controller', true);
             $this->input->setOption('service-repository', true);
             $this->input->setOption('frontend', true);
@@ -214,6 +225,7 @@ class ScaffoldMakeCommand extends Command implements PromptsForMissingInput {
     protected function getOptions(): array {
         return [
             ['all', 'a', InputOption::VALUE_NONE, 'Generate all possible files for the model.'],
+            ['all-with-api', 'aa', InputOption::VALUE_NONE, 'Generate all possible files for the model with API controller.'],
             ['migration', 'm', InputOption::VALUE_NONE, 'Create a new migration file for the model.'],
             ['seed', 's', InputOption::VALUE_NONE, 'Create a new seeder file for the model.'],
             ['factory', 'f', InputOption::VALUE_NONE, 'Create a new factory file for the model.'],
@@ -227,7 +239,6 @@ class ScaffoldMakeCommand extends Command implements PromptsForMissingInput {
             ['resource', 'rs', InputOption::VALUE_NONE, 'Indicates if the generated controller should be a resource controller.'],
             ['api', 'api', InputOption::VALUE_NONE, 'Indicates if the generated controller should be an API controller.'],
             ['requests', 'req', InputOption::VALUE_NONE, 'Create form request files for the model.'],
-
             ['pest', 'pest', InputOption::VALUE_NONE, 'Create a new Pest test file for the model.'],
         ];
     }
