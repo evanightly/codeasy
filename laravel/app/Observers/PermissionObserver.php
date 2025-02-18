@@ -8,10 +8,10 @@ use Illuminate\Validation\ValidationException;
 
 class PermissionObserver {
     /**
-     * Handle the Permission "created" event.
+     * Set the permission group based on name
      */
-    public function created(Permission $permission): void {
-
+    private function setPermissionGroup(Permission $permission): void
+    {
         $validator = \Validator::make(
             ['name' => $permission->name],
             ['name' => new PermissionNameValidation],
@@ -22,17 +22,34 @@ class PermissionObserver {
         }
 
         // Split the name by hyphens and set the group to the part before the action
-        $parts = preg_split('/-(create|import|read|read-all|read-partial|download|update|delete|import|export)$/', $permission->name, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $parts = preg_split(
+            '/-(create|import|read|read-all|read-partial|download|update|delete|import|export)$/',
+            $permission->name,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE
+        );
+
         $group = $parts[0];
-        $permission->group = $group;
-        $permission->save();
+
+        // Use updateQuietly to prevent infinite loop
+        $permission->updateQuietly(['group' => $group]);
+    }
+
+    /**
+     * Handle the Permission "created" event.
+     */
+    public function created(Permission $permission): void {
+        $this->setPermissionGroup($permission);
     }
 
     /**
      * Handle the Permission "updated" event.
      */
     public function updated(Permission $permission): void {
-        //
+        // Check if name was changed before setting group
+        if ($permission->isDirty('name')) {
+            $this->setPermissionGroup($permission);
+        }
     }
 
     /**

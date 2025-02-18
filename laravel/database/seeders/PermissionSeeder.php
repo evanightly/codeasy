@@ -16,7 +16,10 @@ class PermissionSeeder extends Seeder {
         $permissions = PermissionEnum::cases();
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission->value]);
+            Permission::updateOrCreate(
+                ['name' => $permission->value],
+                ['guard_name' => 'web']
+            );
         }
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
