@@ -56,7 +56,7 @@ class InitBackendMakeCommand extends Command {
      * @throws FileNotFoundException
      */
     protected function createJsonResourceTraits(): void {
-        $jsonResourceTraitPathDir = app_path('Traits/Resource/JsonResource');
+        $jsonResourceTraitPathDir = app_path('Traits/Resources/JsonResource');
         $handlesResourceDataSelectionPath = "$jsonResourceTraitPathDir/HandlesResourceDataSelection.php";
         $handlesResourceDataSelectionStubPath = base_path('stubs/scaffold/initializer/backend/traits/json_resource/handles.resource.data.selection.stub');
         $this->fileHelper->replaceFileWithStubContent($handlesResourceDataSelectionPath, $handlesResourceDataSelectionStubPath);
