@@ -1,4 +1,4 @@
 export const ROUTES = {
     DASHBOARD: 'dashboard',
-	PERMISSIONS: 'permissions',
+    PERMISSIONS: 'permissions',
 };

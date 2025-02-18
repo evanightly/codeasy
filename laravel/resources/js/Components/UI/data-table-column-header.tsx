@@ -1,7 +1,7 @@
+import { Button } from '@/Components/UI/button';
+import { ny } from '@/Lib/Utils';
 import { Column } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp } from 'lucide-react';
-import { ny } from '@/Lib/Utils';
-import { Button } from '@/Components/UI/button';
 
 interface DataTableColumnHeaderProps<TData, TValue> extends React.HTMLAttributes<HTMLDivElement> {
     column: Column<TData, TValue>;
@@ -24,7 +24,7 @@ export function DataTableColumnHeader<TData, TValue>({
                 onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                 className="group-[.table-compact]:h-8 group-[.table-compact]:p-0 group-[.table-compact]:px-4">
                 {title}
-                {column.getIsSorted() === 'asc' ? <ArrowUp  /> : <ArrowDown  />}
+                {column.getIsSorted() === 'asc' ? <ArrowUp /> : <ArrowDown />}
             </Button>
         </div>
     );
