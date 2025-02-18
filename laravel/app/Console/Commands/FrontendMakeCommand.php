@@ -56,7 +56,10 @@ class FrontendMakeCommand extends Command {
      * @throws FileNotFoundException
      */
     protected function createFrontendService(string $name): void {
-        $path = resource_path("js/Services/{$name}Service.ts");
+        // Convert the service name to camelCase
+        $serviceFileName = Str::camel($name) . 'ServiceHook';
+        $path = resource_path("js/Services/{$serviceFileName}.ts");
+
         $stub = $this->files->get(base_path('stubs/scaffold/frontend/service.hook.stub'));
         $content = str_replace(
             ['{{ modelName }}', '{{ modelCamel }}', '{{ modelUpperSnake }}'],
