@@ -12,11 +12,12 @@ interface AnimatedSpanProps extends MotionProps {
 
 export const AnimatedSpan = ({ children, delay = 0, className, ...props }: AnimatedSpanProps) => (
     <motion.div
-        initial={{ opacity: 0, y: -5 }}
-        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: delay / 1000 }}
+        initial={{ opacity: 0, y: -5 }}
         className={ny('grid text-sm font-normal tracking-tight', className)}
-        {...props}>
+        animate={{ opacity: 1, y: 0 }}
+        {...props}
+    >
         {children}
     </motion.div>
 );
@@ -78,7 +79,8 @@ export const TypingAnimation = ({
         <MotionComponent
             ref={elementRef}
             className={ny('text-sm font-normal tracking-tight', className)}
-            {...props}>
+            {...props}
+        >
             {displayedText}
         </MotionComponent>
     );
@@ -95,16 +97,17 @@ export const Terminal = ({ children, className }: TerminalProps) => {
             className={ny(
                 'z-0 h-full max-h-[400px] w-full max-w-lg rounded-xl border border-border bg-background',
                 className,
-            )}>
-            <div className="flex flex-col gap-y-2 border-b border-border p-4">
-                <div className="flex flex-row gap-x-2">
-                    <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                    <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
-                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
+            )}
+        >
+            <div className='flex flex-col gap-y-2 border-b border-border p-4'>
+                <div className='flex flex-row gap-x-2'>
+                    <div className='h-2 w-2 rounded-full bg-red-500'></div>
+                    <div className='h-2 w-2 rounded-full bg-yellow-500'></div>
+                    <div className='h-2 w-2 rounded-full bg-green-500'></div>
                 </div>
             </div>
-            <pre className="p-4">
-                <code className="grid gap-y-1 overflow-auto">{children}</code>
+            <pre className='p-4'>
+                <code className='grid gap-y-1 overflow-auto'>{children}</code>
             </pre>
         </div>
     );

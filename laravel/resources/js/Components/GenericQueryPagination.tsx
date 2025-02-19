@@ -161,7 +161,8 @@ export default function <R extends Resource = any>({
                         <PaginationItem
                             onMouseEnter={prefetchLink.bind(null, link)} // Prefetch on hover
                             onClick={navigateToLink.bind(null, link)}
-                            key={link.label}>
+                            key={link.label}
+                        >
                             <PaginationLink isActive={link.active}>
                                 <ParsedPagination html={link.label} />
                             </PaginationLink>
@@ -177,7 +178,7 @@ export default function <R extends Resource = any>({
     return (
         meta && (
             <Pagination className={ny('justify-start', className)}>
-                <PaginationContent className="cursor-pointer">
+                <PaginationContent className='cursor-pointer'>
                     {meta.links?.map((link, index) => (
                         <ConditionallyRenderPagination link={link} key={index} index={index} />
                     ))}

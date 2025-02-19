@@ -25,6 +25,7 @@ export function LineShadowText({
     return (
         <MotionComponent
             style={{ '--shadow-color': shadowColor } as React.CSSProperties}
+            data-text={content}
             className={ny(
                 'relative z-0 inline-flex',
                 'after:absolute after:left-[0.04em] after:top-[0.04em] after:content-[attr(data-text)]',
@@ -33,8 +34,8 @@ export function LineShadowText({
                 'after:animate-line-shadow',
                 className,
             )}
-            data-text={content}
-            {...props}>
+            {...props}
+        >
             {content}
         </MotionComponent>
     );

@@ -42,11 +42,11 @@ export default function NumberTicker({
 
     return (
         <span
+            ref={ref}
             className={ny(
                 'inline-block tabular-nums tracking-wider text-black dark:text-white',
                 className,
             )}
-            ref={ref}
         />
     );
 }

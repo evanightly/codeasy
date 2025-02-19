@@ -94,23 +94,23 @@ const Texts: React.FC<Pick<MorphingTextProps, 'texts'>> = ({ texts }) => {
     const { text1Ref, text2Ref } = useMorphingText(texts);
     return (
         <>
-            <span className="absolute inset-x-0 top-0 m-auto inline-block w-full" ref={text1Ref} />
-            <span className="absolute inset-x-0 top-0 m-auto inline-block w-full" ref={text2Ref} />
+            <span ref={text1Ref} className='absolute inset-x-0 top-0 m-auto inline-block w-full' />
+            <span ref={text2Ref} className='absolute inset-x-0 top-0 m-auto inline-block w-full' />
         </>
     );
 };
 
 const SvgFilters: React.FC = () => (
-    <svg id="filters" className="fixed h-0 w-0" preserveAspectRatio="xMidYMid slice">
+    <svg preserveAspectRatio='xMidYMid slice' id='filters' className='fixed h-0 w-0'>
         <defs>
-            <filter id="threshold">
+            <filter id='threshold'>
                 <feColorMatrix
-                    in="SourceGraphic"
-                    type="matrix"
-                    values="1 0 0 0 0
+                    values='1 0 0 0 0
                   0 1 0 0 0
                   0 0 1 0 0
-                  0 0 0 255 -140"
+                  0 0 0 255 -140'
+                    type='matrix'
+                    in='SourceGraphic'
                 />
             </filter>
         </defs>
@@ -122,7 +122,8 @@ export const MorphingText: React.FC<MorphingTextProps> = ({ texts, className }) 
         className={ny(
             'relative mx-auto h-16 w-full max-w-screen-md text-center font-sans text-[40pt] font-bold leading-none [filter:url(#threshold)_blur(0.6px)] md:h-24 lg:text-[6rem]',
             className,
-        )}>
+        )}
+    >
         <Texts texts={texts} />
         <SvgFilters />
     </div>

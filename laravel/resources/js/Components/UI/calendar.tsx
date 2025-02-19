@@ -13,7 +13,10 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
     return (
         <DayPicker
             showOutsideDays={showOutsideDays}
-            className={ny('p-3', className)}
+            components={{
+                IconLeft: ({ ...props }) => <ChevronLeftIcon className='size-4' />,
+                IconRight: ({ ...props }) => <ChevronRightIcon className='size-4' />,
+            }}
             classNames={{
                 months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
                 month: 'space-y-4',
@@ -52,10 +55,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
                 day_hidden: 'invisible',
                 ...classNames,
             }}
-            components={{
-                IconLeft: ({ ...props }) => <ChevronLeftIcon className="size-4" />,
-                IconRight: ({ ...props }) => <ChevronRightIcon className="size-4" />,
-            }}
+            className={ny('p-3', className)}
             {...props}
         />
     );

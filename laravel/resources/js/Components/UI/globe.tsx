@@ -98,19 +98,20 @@ export default function Globe({
 
     return (
         <div
-            className={ny('absolute inset-0 mx-auto aspect-[1/1] w-full max-w-[600px]', className)}>
+            className={ny('absolute inset-0 mx-auto aspect-[1/1] w-full max-w-[600px]', className)}
+        >
             <canvas
-                className={ny(
-                    'size-full opacity-0 transition-opacity duration-500 [contain:layout_paint_size]',
-                )}
                 ref={canvasRef}
+                onTouchMove={(e) => e.touches[0] && updateMovement(e.touches[0].clientX)}
+                onPointerUp={() => updatePointerInteraction(null)}
+                onPointerOut={() => updatePointerInteraction(null)}
                 onPointerDown={(e) =>
                     updatePointerInteraction(e.clientX - pointerInteractionMovement.current)
                 }
-                onPointerUp={() => updatePointerInteraction(null)}
-                onPointerOut={() => updatePointerInteraction(null)}
                 onMouseMove={(e) => updateMovement(e.clientX)}
-                onTouchMove={(e) => e.touches[0] && updateMovement(e.touches[0].clientX)}
+                className={ny(
+                    'size-full opacity-0 transition-opacity duration-500 [contain:layout_paint_size]',
+                )}
             />
         </div>
     );

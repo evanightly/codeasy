@@ -98,7 +98,6 @@ const NeonGradientCard: React.FC<NeonGradientCardProps> = ({
 
     return (
         <div
-            ref={containerRef}
             style={
                 {
                     '--border-size': `${borderSize}px`,
@@ -114,8 +113,10 @@ const NeonGradientCard: React.FC<NeonGradientCardProps> = ({
                     '--after-blur': `${dimensions.width / 3}px`,
                 } as CSSProperties
             }
+            ref={containerRef}
             className={ny('relative z-10 size-full rounded-[var(--border-radius)]', className)}
-            {...props}>
+            {...props}
+        >
             <div
                 className={ny(
                     'relative size-full min-h-[inherit] rounded-[var(--card-content-radius)] bg-gray-100 p-6',
@@ -128,7 +129,8 @@ const NeonGradientCard: React.FC<NeonGradientCardProps> = ({
                     'after:bg-[linear-gradient(0deg,var(--neon-first-color),var(--neon-second-color))] after:bg-[length:100%_200%] after:opacity-80',
                     'after:animate-background-position-spin',
                     'dark:bg-neutral-900',
-                )}>
+                )}
+            >
                 {children}
             </div>
         </div>

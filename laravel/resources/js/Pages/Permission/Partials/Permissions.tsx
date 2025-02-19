@@ -23,10 +23,10 @@ const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: Perm
             meta: {
                 title: 'Name',
             },
-            header: ({ column }) => <DataTableColumnHeader title="Name" column={column} />,
+            header: ({ column }) => <DataTableColumnHeader title='Name' column={column} />,
         }),
         columnHelper.accessor('group', {
-            header: ({ column }) => <DataTableColumnHeader title="Group" column={column} />,
+            header: ({ column }) => <DataTableColumnHeader title='Group' column={column} />,
         }),
     ] as Array<ColumnDef<PermissionResource, PermissionResource>>;
 

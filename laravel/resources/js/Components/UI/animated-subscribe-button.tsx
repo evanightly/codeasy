@@ -22,36 +22,40 @@ export const AnimatedSubscribeButton: React.FC<AnimatedSubscribeButtonProps> = (
     const [isSubscribed, setIsSubscribed] = useState<boolean>(subscribeStatus);
 
     return (
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode='wait'>
             {isSubscribed ? (
                 <motion.button
-                    className="relative flex h-[46px] w-[200px] items-center justify-center overflow-hidden rounded-md bg-white p-[10px] outline outline-1 outline-black"
                     onClick={() => setIsSubscribed(false)}
                     initial={{ opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    className='relative flex h-[46px] w-[200px] items-center justify-center overflow-hidden rounded-md bg-white p-[10px] outline outline-1 outline-black'
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}>
+                >
                     <motion.span
-                        key="action"
-                        className="relative block size-full font-semibold"
+                        style={{ color: buttonColor }}
+                        key='action'
                         initial={{ y: -50 }}
+                        className='relative block size-full font-semibold'
                         animate={{ y: 0 }}
-                        style={{ color: buttonColor }}>
+                    >
                         {changeText}
                     </motion.span>
                 </motion.button>
             ) : (
                 <motion.button
-                    className="relative flex w-[200px] cursor-pointer items-center justify-center rounded-md border-none p-[10px]"
                     style={{ backgroundColor: buttonColor, color: buttonTextColor }}
                     onClick={() => setIsSubscribed(true)}
                     initial={{ opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    className='relative flex w-[200px] cursor-pointer items-center justify-center rounded-md border-none p-[10px]'
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}>
+                >
                     <motion.span
-                        key="reaction"
-                        className="relative block font-semibold"
+                        key='reaction'
                         initial={{ x: 0 }}
-                        exit={{ x: 50, transition: { duration: 0.1 } }}>
+                        exit={{ x: 50, transition: { duration: 0.1 } }}
+                        className='relative block font-semibold'
+                    >
                         {initialText}
                     </motion.span>
                 </motion.button>

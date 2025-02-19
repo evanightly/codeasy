@@ -176,12 +176,12 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
     return (
         <div ref={containerRef} className={ny(`h-full w-full ${className}`)} {...props}>
             <canvas
-                ref={canvasRef}
-                className="pointer-events-none"
                 style={{
                     width: canvasSize.width,
                     height: canvasSize.height,
                 }}
+                ref={canvasRef}
+                className='pointer-events-none'
             />
         </div>
     );

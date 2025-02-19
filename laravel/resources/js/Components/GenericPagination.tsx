@@ -86,7 +86,8 @@ export default function ({ meta, handleChangePage, className }: GenericPaginatio
                                     fixPagination(link.url) ?? PAGINATION_NAVIGATOR.FIRST_PAGE,
                                 );
                             }}
-                            key={link.label}>
+                            key={link.label}
+                        >
                             <PaginationLink isActive={link.active}>
                                 <ParsedPagination html={link.label} />
                             </PaginationLink>
@@ -102,7 +103,7 @@ export default function ({ meta, handleChangePage, className }: GenericPaginatio
     return (
         meta && (
             <Pagination className={ny('justify-start', className)}>
-                <PaginationContent className="cursor-pointer">
+                <PaginationContent className='cursor-pointer'>
                     {meta.links?.map((link, i) => (
                         <ConditionallyRenderPagination link={link} key={i} i={i} />
                     ))}

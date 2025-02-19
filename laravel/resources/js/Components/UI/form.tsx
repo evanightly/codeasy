@@ -78,8 +78,8 @@ const FormLabel = React.forwardRef<
     return (
         <Label
             ref={ref}
-            className={ny(error && 'text-destructive', className)}
             htmlFor={formItemId}
+            className={ny(error && 'text-destructive', className)}
             {...props}
         />
     );
@@ -96,10 +96,10 @@ const FormControl = React.forwardRef<
         <Slot
             ref={ref}
             id={formItemId}
+            aria-invalid={!!error}
             aria-describedby={
                 !error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`
             }
-            aria-invalid={!!error}
             {...props}
         />
     );
@@ -116,7 +116,7 @@ const FormDescription = React.forwardRef<
         <p
             ref={ref}
             id={formDescriptionId}
-            className={ny('text-muted-foreground text-[0.8rem]', className)}
+            className={ny('text-[0.8rem] text-muted-foreground', className)}
             {...props}
         />
     );
@@ -136,8 +136,9 @@ const FormMessage = React.forwardRef<
         <p
             ref={ref}
             id={formMessageId}
-            className={ny('text-destructive text-[0.8rem] font-medium', className)}
-            {...props}>
+            className={ny('text-[0.8rem] font-medium text-destructive', className)}
+            {...props}
+        >
             {body}
         </p>
     );
@@ -153,7 +154,7 @@ const FormGlobalError = React.forwardRef<
     if (!rootError) return null;
 
     return (
-        <p ref={ref} className={ny('text-destructive text-sm font-medium', className)} {...props}>
+        <p ref={ref} className={ny('text-sm font-medium text-destructive', className)} {...props}>
             {rootError.message}
         </p>
     );

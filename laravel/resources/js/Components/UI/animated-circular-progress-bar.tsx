@@ -23,7 +23,6 @@ export default function AnimatedCircularProgressBar({
 
     return (
         <div
-            className={ny('relative size-40 text-2xl font-semibold', className)}
             style={
                 {
                     '--circle-size': '100px',
@@ -37,18 +36,12 @@ export default function AnimatedCircularProgressBar({
                     '--percent-to-deg': '3.6deg',
                     transform: 'translateZ(0)',
                 } as React.CSSProperties
-            }>
-            <svg fill="none" className="size-full" strokeWidth="2" viewBox="0 0 100 100">
+            }
+            className={ny('relative size-40 text-2xl font-semibold', className)}
+        >
+            <svg viewBox='0 0 100 100' strokeWidth='2' fill='none' className='size-full'>
                 {currentPercent <= 90 && currentPercent >= 0 && (
                     <circle
-                        cx="50"
-                        cy="50"
-                        r="45"
-                        strokeWidth="10"
-                        strokeDashoffset="0"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className=" opacity-100"
                         style={
                             {
                                 stroke: gaugeSecondaryColor,
@@ -63,17 +56,17 @@ export default function AnimatedCircularProgressBar({
                                     'calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)',
                             } as React.CSSProperties
                         }
+                        strokeWidth='10'
+                        strokeLinejoin='round'
+                        strokeLinecap='round'
+                        strokeDashoffset='0'
+                        r='45'
+                        cy='50'
+                        cx='50'
+                        className='opacity-100'
                     />
                 )}
                 <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    strokeWidth="10"
-                    strokeDashoffset="0"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="opacity-100"
                     style={
                         {
                             stroke: gaugePrimaryColor,
@@ -89,11 +82,20 @@ export default function AnimatedCircularProgressBar({
                                 'calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)',
                         } as React.CSSProperties
                     }
+                    strokeWidth='10'
+                    strokeLinejoin='round'
+                    strokeLinecap='round'
+                    strokeDashoffset='0'
+                    r='45'
+                    cy='50'
+                    cx='50'
+                    className='opacity-100'
                 />
             </svg>
             <span
                 data-current-value={currentPercent}
-                className="animate-in fade-in absolute inset-0 m-auto size-fit delay-[var(--delay)] duration-[var(--transition-length)] ease-linear">
+                className='delay-[var(--delay)] duration-[var(--transition-length)] absolute inset-0 m-auto size-fit ease-linear animate-in fade-in'
+            >
                 {currentPercent}
             </span>
         </div>

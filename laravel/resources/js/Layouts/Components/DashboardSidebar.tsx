@@ -158,7 +158,7 @@ interface AppSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const DashboardSidebar = ({ ...props }: AppSidebarProps) => {
     return (
-        <Sidebar collapsible="icon" {...props}>
+        <Sidebar collapsible='icon' {...props}>
             <SidebarHeader>
                 <DashboardSiteSwitcher teams={data.teams} />
             </SidebarHeader>

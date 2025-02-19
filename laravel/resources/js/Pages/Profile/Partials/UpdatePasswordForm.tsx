@@ -39,71 +39,72 @@ export default function UpdatePasswordForm({ className = '' }: { className?: str
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">Update Password</h2>
+                <h2 className='text-lg font-medium text-gray-900'>Update Password</h2>
 
-                <p className="mt-1 text-sm text-gray-600">
+                <p className='mt-1 text-sm text-gray-600'>
                     Ensure your account is using a long, random password to stay secure.
                 </p>
             </header>
 
-            <form onSubmit={updatePassword} className="mt-6 space-y-6">
+            <form onSubmit={updatePassword} className='mt-6 space-y-6'>
                 <div>
-                    <InputLabel htmlFor="current_password" value="Current Password" />
+                    <InputLabel value='Current Password' htmlFor='current_password' />
 
                     <TextInput
-                        id="current_password"
-                        ref={currentPasswordInput}
                         value={data.current_password}
+                        type='password'
+                        ref={currentPasswordInput}
                         onChange={(e) => setData('current_password', e.target.value)}
-                        type="password"
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
+                        id='current_password'
+                        className='mt-1 block w-full'
+                        autoComplete='current-password'
                     />
 
-                    <InputError message={errors.current_password} className="mt-2" />
+                    <InputError message={errors.current_password} className='mt-2' />
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password" value="New Password" />
+                    <InputLabel value='New Password' htmlFor='password' />
 
                     <TextInput
-                        id="password"
-                        ref={passwordInput}
                         value={data.password}
+                        type='password'
+                        ref={passwordInput}
                         onChange={(e) => setData('password', e.target.value)}
-                        type="password"
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
+                        id='password'
+                        className='mt-1 block w-full'
+                        autoComplete='new-password'
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className='mt-2' />
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
+                    <InputLabel value='Confirm Password' htmlFor='password_confirmation' />
 
                     <TextInput
-                        id="password_confirmation"
                         value={data.password_confirmation}
+                        type='password'
                         onChange={(e) => setData('password_confirmation', e.target.value)}
-                        type="password"
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
+                        id='password_confirmation'
+                        className='mt-1 block w-full'
+                        autoComplete='new-password'
                     />
 
-                    <InputError message={errors.password_confirmation} className="mt-2" />
+                    <InputError message={errors.password_confirmation} className='mt-2' />
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className='flex items-center gap-4'>
                     <PrimaryButton disabled={processing}>Save</PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}
-                        enter="transition ease-in-out"
-                        enterFrom="opacity-0"
-                        leave="transition ease-in-out"
-                        leaveTo="opacity-0">
-                        <p className="text-sm text-gray-600">Saved.</p>
+                        leaveTo='opacity-0'
+                        leave='transition ease-in-out'
+                        enterFrom='opacity-0'
+                        enter='transition ease-in-out'
+                    >
+                        <p className='text-sm text-gray-600'>Saved.</p>
                     </Transition>
                 </div>
             </form>

@@ -39,8 +39,8 @@ const TooltipContent = React.forwardRef<
     TooltipProps
 >(({ className, variant, sideOffset = 4, ...props }, ref) => (
     <TooltipPrimitive.Content
-        ref={ref}
         sideOffset={sideOffset}
+        ref={ref}
         className={ny(tooltipVariants({ variant, className }))}
         {...props}
     />

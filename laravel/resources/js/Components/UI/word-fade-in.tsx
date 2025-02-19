@@ -29,14 +29,15 @@ export default function WordFadeIn({
     return (
         <motion.h1
             variants={variants}
-            initial="hidden"
-            animate="visible"
+            initial='hidden'
             className={ny(
-                'font-display text-center text-4xl font-bold tracking-[-0.02em] text-black drop-shadow-sm md:text-7xl md:leading-[5rem] dark:text-white',
+                'font-display text-center text-4xl font-bold tracking-[-0.02em] text-black drop-shadow-sm dark:text-white md:text-7xl md:leading-[5rem]',
                 className,
-            )}>
+            )}
+            animate='visible'
+        >
             {_words.map((word, i) => (
-                <motion.span key={word} variants={variants} custom={i}>
+                <motion.span variants={variants} key={word} custom={i}>
                     {word}{' '}
                 </motion.span>
             ))}

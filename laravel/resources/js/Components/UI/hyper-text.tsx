@@ -71,14 +71,16 @@ export default function HyperText({
 
     return (
         <div
-            className="flex scale-100 cursor-default overflow-hidden py-2"
-            onMouseEnter={triggerAnimation}>
-            <AnimatePresence mode="wait">
+            onMouseEnter={triggerAnimation}
+            className='flex scale-100 cursor-default overflow-hidden py-2'
+        >
+            <AnimatePresence mode='wait'>
                 {displayText.map((letter, i) => (
                     <motion.h1
                         key={i}
                         className={ny('font-mono', letter === ' ' ? 'w-3' : '', className)}
-                        {...framerProps}>
+                        {...framerProps}
+                    >
                         {letter.toUpperCase()}
                     </motion.h1>
                 ))}

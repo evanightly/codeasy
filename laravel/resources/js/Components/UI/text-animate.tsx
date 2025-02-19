@@ -357,24 +357,26 @@ export function TextAnimate({
     }
 
     return (
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode='popLayout'>
             <MotionComponent
-                variants={finalVariants.container}
-                initial="hidden"
                 whileInView={startOnView ? 'show' : undefined}
-                animate={startOnView ? undefined : 'show'}
-                exit="exit"
+                variants={finalVariants.container}
+                initial='hidden'
+                exit='exit'
                 className={ny('whitespace-pre-wrap', className)}
-                {...props}>
+                animate={startOnView ? undefined : 'show'}
+                {...props}
+            >
                 {segments.map((segment, i) => (
                     <motion.span
-                        key={`${by}-${segment}-${i}`}
                         variants={finalVariants.item}
+                        key={`${by}-${segment}-${i}`}
                         custom={i * staggerTimings[by]}
                         className={ny(
                             by === 'line' ? 'block' : 'inline-block whitespace-pre',
                             segmentClassName,
-                        )}>
+                        )}
+                    >
                         {segment}
                     </motion.span>
                 ))}

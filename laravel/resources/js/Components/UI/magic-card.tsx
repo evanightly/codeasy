@@ -89,7 +89,7 @@ function MagicContainer({ children, className }: MagicContainerProps) {
     };
 
     return (
-        <div className={ny('size-full', className)} ref={containerRef}>
+        <div ref={containerRef} className={ny('size-full', className)}>
             {children}
         </div>
     );
@@ -185,11 +185,12 @@ const MagicCard: React.FC<MagicCardProps> = ({
                 'bg-[radial-gradient(var(--mask-size)_circle_at_var(--mouse-x)_var(--mouse-y),var(--border-color),transparent_100%)]',
                 className,
             )}
-            {...props}>
+            {...props}
+        >
             {children}
 
             {/* Background */}
-            <div className="absolute inset-px -z-20 rounded-2xl bg-white dark:bg-black/95" />
+            <div className='absolute inset-px -z-20 rounded-2xl bg-white dark:bg-black/95' />
         </div>
     );
 };

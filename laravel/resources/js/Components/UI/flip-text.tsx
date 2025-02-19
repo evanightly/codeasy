@@ -23,17 +23,18 @@ export default function SlightFlip({
     className,
 }: SlightFlipProps) {
     return (
-        <div className="flex justify-center space-x-2">
-            <AnimatePresence mode="wait">
+        <div className='flex justify-center space-x-2'>
+            <AnimatePresence mode='wait'>
                 {word.split('').map((char, i) => (
                     <motion.span
-                        key={i}
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
                         variants={framerProps}
                         transition={{ duration, delay: i * delayMultiple }}
-                        className={ny('origin-center drop-shadow-sm', className)}>
+                        key={i}
+                        initial='hidden'
+                        exit='hidden'
+                        className={ny('origin-center drop-shadow-sm', className)}
+                        animate='visible'
+                    >
                         {char}
                     </motion.span>
                 ))}

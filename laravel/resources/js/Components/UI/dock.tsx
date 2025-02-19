@@ -58,7 +58,8 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
                     'items-start': direction === 'top',
                     'items-center': direction === 'middle',
                     'items-end': direction === 'bottom',
-                })}>
+                })}
+            >
                 {renderChildren()}
             </motion.div>
         );
@@ -104,13 +105,14 @@ function DockIcon({
 
     return (
         <motion.div
-            ref={ref}
             style={{ width }}
+            ref={ref}
             className={ny(
                 'flex aspect-square cursor-pointer items-center justify-center rounded-full',
                 className,
             )}
-            {...props}>
+            {...props}
+        >
             {children}
         </motion.div>
     );

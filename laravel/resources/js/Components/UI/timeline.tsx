@@ -25,7 +25,7 @@ interface TimelineProps
 const Timeline = React.forwardRef<HTMLUListElement, TimelineProps>(
     ({ children, className, positions, ...props }, ref) => {
         return (
-            <ul className={ny(timelineVariants({ positions }), className)} ref={ref} {...props}>
+            <ul ref={ref} className={ny(timelineVariants({ positions }), className)} {...props}>
                 {children}
             </ul>
         );
@@ -51,7 +51,7 @@ interface TimelineItemProps
 
 const TimelineItem = React.forwardRef<HTMLLIElement, TimelineItemProps>(
     ({ className, status, ...props }, ref) => (
-        <li className={ny(timelineItemVariants({ status }), className)} ref={ref} {...props} />
+        <li ref={ref} className={ny(timelineItemVariants({ status }), className)} {...props} />
     ),
 );
 TimelineItem.displayName = 'TimelineItem';
@@ -84,13 +84,14 @@ interface TimelineDotProps
 const TimelineDot = React.forwardRef<HTMLDivElement, TimelineDotProps>(
     ({ className, status, customIcon, ...props }, ref) => (
         <div
-            role="status"
-            className={ny('timeline-dot', timelineDotVariants({ status }), className)}
+            role='status'
             ref={ref}
-            {...props}>
-            <div className="radix-circle size-2.5 rounded-full" />
-            <CheckIcon className="radix-check size-3" />
-            <Cross1Icon className="radix-cross size-2.5" />
+            className={ny('timeline-dot', timelineDotVariants({ status }), className)}
+            {...props}
+        >
+            <div className='radix-circle size-2.5 rounded-full' />
+            <CheckIcon className='radix-check size-3' />
+            <Cross1Icon className='radix-cross size-2.5' />
             {customIcon}
         </div>
     ),
@@ -115,7 +116,7 @@ interface TimelineConentProps
 
 const TimelineContent = React.forwardRef<HTMLDivElement, TimelineConentProps>(
     ({ className, side, ...props }, ref) => (
-        <div className={ny(timelineContentVariants({ side }), className)} ref={ref} {...props} />
+        <div ref={ref} className={ny(timelineContentVariants({ side }), className)} {...props} />
     ),
 );
 TimelineContent.displayName = 'TimelineContent';
@@ -144,10 +145,10 @@ interface TimelineHeadingProps
 const TimelineHeading = React.forwardRef<HTMLParagraphElement, TimelineHeadingProps>(
     ({ className, side, variant, ...props }, ref) => (
         <p
-            role="heading"
-            aria-level={variant === 'primary' ? 2 : 3}
-            className={ny(timelineHeadingVariants({ side, variant }), className)}
+            role='heading'
             ref={ref}
+            className={ny(timelineHeadingVariants({ side, variant }), className)}
+            aria-level={variant === 'primary' ? 2 : 3}
             {...props}
         />
     ),
@@ -162,14 +163,14 @@ const TimelineLine = React.forwardRef<HTMLHRElement, TimelineLineProps>(
     ({ className, done = false, ...props }, ref) => {
         return (
             <hr
-                role="separator"
-                aria-orientation="vertical"
+                role='separator'
+                ref={ref}
                 className={ny(
                     'col-start-2 col-end-3 row-start-2 row-end-2 mx-auto flex h-full min-h-16 w-0.5 justify-center rounded-full',
                     done ? 'bg-primary' : 'bg-muted',
                     className,
                 )}
-                ref={ref}
+                aria-orientation='vertical'
                 {...props}
             />
         );

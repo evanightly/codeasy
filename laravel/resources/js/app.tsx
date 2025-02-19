@@ -45,7 +45,7 @@ createInertiaApp({
                                 // https://github.com/shadcn-ui/ui/issues/2234
                             }
                         }
-                        theme="light"
+                        theme='light'
                         richColors
                         duration={2000}
                         closeButton

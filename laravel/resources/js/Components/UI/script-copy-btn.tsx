@@ -59,39 +59,40 @@ export function ScriptCopyBtn({
 
     return (
         <div className={ny('mx-auto flex max-w-md items-center justify-center', className)}>
-            <div className="w-full space-y-2">
-                <div className="mb-2 flex items-center justify-between">
+            <div className='w-full space-y-2'>
+                <div className='mb-2 flex items-center justify-between'>
                     {showMultiplePackageOptions && (
-                        <div className="relative">
-                            <div className="inline-flex overflow-hidden rounded-md border border-border text-xs">
+                        <div className='relative'>
+                            <div className='inline-flex overflow-hidden rounded-md border border-border text-xs'>
                                 {packageManagers.map((pm, index) => (
-                                    <div key={pm} className="flex items-center">
+                                    <div key={pm} className='flex items-center'>
                                         {index > 0 && (
                                             <div
-                                                className="h-4 w-px bg-border"
-                                                aria-hidden="true"
+                                                className='h-4 w-px bg-border'
+                                                aria-hidden='true'
                                             />
                                         )}
                                         <Button
-                                            variant="ghost"
-                                            size="sm"
+                                            variant='ghost'
+                                            size='sm'
+                                            onClick={() => setPackageManager(pm)}
                                             className={`relative rounded-none bg-background px-2 py-1 hover:bg-background ${
                                                 packageManager === pm
                                                     ? 'text-primary'
                                                     : 'text-muted-foreground'
                                             }`}
-                                            onClick={() => setPackageManager(pm)}>
+                                        >
                                             {pm}
                                             {packageManager === pm && (
                                                 <motion.div
-                                                    className="absolute inset-x-0 bottom-[1px] mx-auto h-0.5 w-[90%] bg-primary"
-                                                    layoutId="activeTab"
-                                                    initial={false}
                                                     transition={{
                                                         type: 'spring',
                                                         stiffness: 500,
                                                         damping: 30,
                                                     }}
+                                                    layoutId='activeTab'
+                                                    initial={false}
+                                                    className='absolute inset-x-0 bottom-[1px] mx-auto h-0.5 w-[90%] bg-primary'
                                                 />
                                             )}
                                         </Button>
@@ -101,28 +102,29 @@ export function ScriptCopyBtn({
                         </div>
                     )}
                 </div>
-                <div className="relative flex items-center">
-                    <div className="min-w-[300px] grow font-mono">
+                <div className='relative flex items-center'>
+                    <div className='min-w-[300px] grow font-mono'>
                         {highlightedCode ? (
                             <div
+                                dangerouslySetInnerHTML={{ __html: highlightedCode }}
                                 className={`[&>pre]:overflow-x-auto [&>pre]:rounded-md [&>pre]:p-2 [&>pre]:px-4 [&>pre]:font-mono ${
                                     theme === 'dark' ? 'dark' : 'light'
                                 }`}
-                                dangerouslySetInnerHTML={{ __html: highlightedCode }}
                             />
                         ) : (
-                            <pre className="rounded-md border border-border bg-white p-2 px-4 font-mono dark:bg-black">
+                            <pre className='rounded-md border border-border bg-white p-2 px-4 font-mono dark:bg-black'>
                                 {command}
                             </pre>
                         )}
                     </div>
                     <Button
-                        variant="outline"
-                        size="icon"
-                        className="relative ml-2 rounded-md"
+                        variant='outline'
+                        size='icon'
                         onClick={copyToClipboard}
-                        aria-label={copied ? 'Copied' : 'Copy to clipboard'}>
-                        <span className="sr-only">{copied ? 'Copied' : 'Copy'}</span>
+                        className='relative ml-2 rounded-md'
+                        aria-label={copied ? 'Copied' : 'Copy to clipboard'}
+                    >
+                        <span className='sr-only'>{copied ? 'Copied' : 'Copy'}</span>
                         <Copy
                             className={`h-4 w-4 transition-all duration-300 ${
                                 copied ? 'scale-0' : 'scale-100'

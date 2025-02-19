@@ -143,11 +143,11 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="ml-auto">
+                            <Button variant='outline' className='ml-auto'>
                                 Columns Visibility <Eye opacity={0.5} />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align='end'>
                             {table
                                 .getAllColumns()
                                 .filter((column) => column.getCanHide())
@@ -159,8 +159,9 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
                                                 column.toggleVisibility(value)
                                             }
                                             key={column.id}
-                                            className="capitalize"
-                                            checked={column.getIsVisible()}>
+                                            className='capitalize'
+                                            checked={column.getIsVisible()}
+                                        >
                                             {column.columnDef.meta?.title ?? column.id}
                                         </DropdownMenuCheckboxItem>
                                     );
@@ -191,7 +192,7 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
                                 </TableRow>
                             ))}
                         </TableHeader>
-                        <TableBody className="relative h-full">
+                        <TableBody className='relative h-full'>
                             {virtualizer.getVirtualItems().map((virtualRow, index) => {
                                 const row = rows[virtualRow.index];
                                 return (
@@ -203,7 +204,8 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
                                             }px)`,
                                         }}
                                         key={row.id}
-                                        data-state={row.getIsSelected() && 'selected'}>
+                                        data-state={row.getIsSelected() && 'selected'}
+                                    >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell key={cell.id}>
                                                 {flexRender(
@@ -220,9 +222,9 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
                 </div>
             </div>
 
-            <div className="flex flex-1 items-center justify-end space-x-2 py-4">
+            <div className='flex flex-1 items-center justify-end space-x-2 py-4'>
                 {tableOptions?.enableRowSelection && (
-                    <div className="flex-1 text-sm text-muted-foreground">
+                    <div className='flex-1 text-sm text-muted-foreground'>
                         {table.getFilteredSelectedRowModel().rows.length} of{' '}
                         {table.getFilteredRowModel().rows.length} row(s) selected.
                     </div>
@@ -233,7 +235,7 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
                         meta={meta}
                         handleChangePage={handlePageChange}
                         filters={filters}
-                        className="w-fit justify-end"
+                        className='w-fit justify-end'
                         baseRoute={baseRoute}
                         baseKey={baseKey}
                     />

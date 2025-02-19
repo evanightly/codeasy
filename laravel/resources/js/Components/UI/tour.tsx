@@ -121,27 +121,29 @@ export function TourFactory<T extends string>(order: T[]) {
 
         return createPortal(
             <div
-                id="tour"
+                id='tour'
                 className={ny(
                     'pointer-events-auto fixed left-0 top-0 h-screen w-screen transition-none',
                     !ctx.show ? 'invisible' : 'visible',
-                )}>
+                )}
+            >
                 <div
-                    ref={ref}
-                    className={ny(`absolute z-50 transition-all duration-500 ease-in-out`)}
                     style={{
                         ...closest(),
-                    }}>
+                    }}
+                    ref={ref}
+                    className={ny(`absolute z-50 transition-all duration-500 ease-in-out`)}
+                >
                     {currentElement.render}
                 </div>
                 <div
-                    className="absolute z-40 h-screen w-screen overflow-hidden opacity-80 shadow-[0_0_0_100vw_rgba(0,0,0,.99)] transition-all duration-500 ease-in-out"
                     style={{
                         height: currentElementRect.height,
                         width: currentElementRect.width,
                         left: currentElementRect.x,
                         top: currentElementRect.y,
                     }}
+                    className='absolute z-40 h-screen w-screen overflow-hidden opacity-80 shadow-[0_0_0_100vw_rgba(0,0,0,.99)] transition-all duration-500 ease-in-out'
                 />
             </div>,
             document.body,
@@ -186,7 +188,8 @@ export function TourFactory<T extends string>(order: T[]) {
                         open: () => {
                             setShow(true);
                         },
-                    }}>
+                    }}
+                >
                     <TourPortal />
                     {props.children}
                 </tourContext.Provider>
@@ -206,7 +209,8 @@ export function TourFactory<T extends string>(order: T[]) {
                                 name: props.name,
                             });
                         }
-                    }}>
+                    }}
+                >
                     {props.children}
                 </div>
             );

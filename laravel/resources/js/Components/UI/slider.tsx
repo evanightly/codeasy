@@ -62,28 +62,30 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
 
         return (
             <SliderPrimitive.Root
+                value={localValues}
+                step={step}
                 ref={ref}
+                onValueChange={(value) => handleValueChange(value)}
+                min={min}
+                max={max}
                 className={ny(
                     'relative flex cursor-pointer touch-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                     orientation === 'horizontal' ? 'w-full items-center' : 'h-full justify-center',
                     className,
                 )}
-                min={min}
-                max={max}
-                step={step}
-                value={localValues}
-                onValueChange={(value) => handleValueChange(value)}
                 {...props}
                 onFocus={() => setHoveredThumbIndex(true)}
-                onBlur={() => setHoveredThumbIndex(false)}>
+                onBlur={() => setHoveredThumbIndex(false)}
+            >
                 <SliderPrimitive.Track
                     className={ny(
-                        'bg-primary/20 relative grow overflow-hidden rounded-full',
+                        'relative grow overflow-hidden rounded-full bg-primary/20',
                         orientation === 'horizontal' ? 'h-1.5 w-full' : 'h-full w-1.5',
-                    )}>
+                    )}
+                >
                     <SliderPrimitive.Range
                         className={ny(
-                            'bg-primary absolute',
+                            'absolute bg-primary',
                             orientation === 'horizontal' ? 'h-full' : 'w-full',
                         )}
                     />
@@ -96,13 +98,17 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
                             const adjustedPosition = 50 + (positionPercentage - 50) * 0.96;
                             return (
                                 <div
+                                    style={{
+                                        [orientation === 'vertical' ? 'bottom' : 'left']:
+                                            `${adjustedPosition}%`,
+                                    }}
                                     key={index}
                                     className={ny(
                                         {
-                                            'w-0.5 h-2': orientation !== 'vertical',
-                                            'w-2 h-0.5': orientation === 'vertical',
+                                            'h-2 w-0.5': orientation !== 'vertical',
+                                            'h-0.5 w-2': orientation === 'vertical',
                                         },
-                                        'bg-muted-foreground absolute',
+                                        'absolute bg-muted-foreground',
                                         {
                                             'left-1':
                                                 orientation === 'vertical' && showSteps === 'half',
@@ -116,10 +122,6 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
                                             '-translate-y-1/2': orientation === 'vertical',
                                         },
                                     )}
-                                    style={{
-                                        [orientation === 'vertical' ? 'bottom' : 'left']:
-                                            `${adjustedPosition}%`,
-                                    }}
                                 />
                             );
                         })}
@@ -128,8 +130,9 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
                     <SliderPrimitive.Thumb
                         key={index}
                         className={ny(
-                            'border-primary/50 bg-background focus-visible:ring-ring block size-4 rounded-full border shadow transition-colors focus-visible:outline-none focus-visible:ring-1',
-                        )}>
+                            'block size-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                        )}
+                    >
                         {hoveredThumbIndex && formatLabel && (
                             <div
                                 className={ny(
@@ -138,7 +141,7 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
                                             formatLabelSide === 'top',
                                     },
                                     {
-                                        'top-8 left-1/2 -translate-x-1/2':
+                                        'left-1/2 top-8 -translate-x-1/2':
                                             formatLabelSide === 'bottom',
                                     },
                                     {
@@ -147,8 +150,9 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
                                     {
                                         'left-8 -translate-y-1/4': formatLabelSide === 'right',
                                     },
-                                    'bg-popover text-popover-foreground absolute z-30 w-max items-center justify-items-center rounded-md border px-2 py-1 text-center shadow-sm',
-                                )}>
+                                    'absolute z-30 w-max items-center justify-items-center rounded-md border bg-popover px-2 py-1 text-center text-popover-foreground shadow-sm',
+                                )}
+                            >
                                 {formatLabel(numberStep)}
                             </div>
                         )}

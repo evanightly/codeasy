@@ -31,7 +31,8 @@ export default function TypingAnimation({ text, duration = 200, className }: Typ
             className={ny(
                 'font-display text-center text-4xl font-bold leading-[5rem] tracking-[-0.02em] drop-shadow-sm',
                 className,
-            )}>
+            )}
+        >
             {displayedText || text}
         </h1>
     );

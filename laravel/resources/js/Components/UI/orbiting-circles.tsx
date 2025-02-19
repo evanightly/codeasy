@@ -21,16 +21,17 @@ export default function OrbitingCircles({
         <>
             {path && (
                 <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    version="1.1"
-                    className="pointer-events-none absolute inset-0 size-full">
+                    xmlns='http://www.w3.org/2000/svg'
+                    version='1.1'
+                    className='pointer-events-none absolute inset-0 size-full'
+                >
                     <circle
-                        className="stroke-black/10 stroke-1 dark:stroke-white/10"
-                        cx="50%"
-                        cy="50%"
+                        strokeDasharray='4 4'
                         r={radius}
-                        fill="none"
-                        strokeDasharray="4 4"
+                        fill='none'
+                        cy='50%'
+                        cx='50%'
+                        className='stroke-black/10 stroke-1 dark:stroke-white/10'
                     />
                 </svg>
             )}
@@ -44,10 +45,11 @@ export default function OrbitingCircles({
                     } as React.CSSProperties
                 }
                 className={ny(
-                    'animate-orbit absolute flex size-full transform-gpu items-center justify-center rounded-full border bg-black/10 [animation-delay:calc(var(--delay)*1000ms)] dark:bg-white/10',
+                    'absolute flex size-full transform-gpu animate-orbit items-center justify-center rounded-full border bg-black/10 [animation-delay:calc(var(--delay)*1000ms)] dark:bg-white/10',
                     { '[animation-direction:reverse]': reverse },
                     className,
-                )}>
+                )}
+            >
                 {children}
             </div>
         </>

@@ -17,8 +17,8 @@ export default function Index() {
     const permissionResponse = permissionServiceHook.useGetAll({ filters });
 
     return (
-        <AuthenticatedLayout title="Permission">
-            <div className="flex flex-col gap-4">
+        <AuthenticatedLayout title='Permission'>
+            <div className='flex flex-col gap-4'>
                 <Suspense fallback={'Loading...'}>
                     <Permissions
                         setFilters={setFilters}

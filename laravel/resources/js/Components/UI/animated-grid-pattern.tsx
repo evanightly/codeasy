@@ -96,47 +96,49 @@ export function AnimatedGridPattern({
     return (
         <svg
             ref={containerRef}
-            aria-hidden="true"
             className={ny(
                 'pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30',
                 className,
             )}
-            {...props}>
+            aria-hidden='true'
+            {...props}
+        >
             <defs>
                 <pattern
-                    id={id}
-                    width={width}
-                    height={height}
-                    patternUnits="userSpaceOnUse"
+                    y={y}
                     x={x}
-                    y={y}>
+                    width={width}
+                    patternUnits='userSpaceOnUse'
+                    id={id}
+                    height={height}
+                >
                     <path
-                        d={`M.5 ${height}V.5H${width}`}
-                        fill="none"
                         strokeDasharray={strokeDasharray}
+                        fill='none'
+                        d={`M.5 ${height}V.5H${width}`}
                     />
                 </pattern>
             </defs>
-            <rect width="100%" height="100%" fill={`url(#${id})`} />
-            <svg x={x} y={y} className="overflow-visible">
+            <rect width='100%' height='100%' fill={`url(#${id})`} />
+            <svg y={y} x={x} className='overflow-visible'>
                 {squares.map(({ pos: [x, y], id }, index) => (
                     <motion.rect
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: maxOpacity }}
+                        y={y * height + 1}
+                        x={x * width + 1}
+                        width={width - 1}
                         transition={{
                             duration,
                             repeat: 1,
                             delay: index * 0.1,
                             repeatType: 'reverse',
                         }}
+                        strokeWidth='0'
                         onAnimationComplete={() => updateSquarePosition(id)}
                         key={`${x}-${y}-${index}`}
-                        width={width - 1}
+                        initial={{ opacity: 0 }}
                         height={height - 1}
-                        x={x * width + 1}
-                        y={y * height + 1}
-                        fill="currentColor"
-                        strokeWidth="0"
+                        fill='currentColor'
+                        animate={{ opacity: maxOpacity }}
                     />
                 ))}
             </svg>

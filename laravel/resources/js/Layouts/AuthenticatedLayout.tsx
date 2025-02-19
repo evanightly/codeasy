@@ -24,7 +24,7 @@ export default function AuthenticatedLayout({
 
     return (
         <>
-            {env.appEnv === 'local' && <ReactQueryDevtools buttonPosition="top-right" />}
+            {env.appEnv === 'local' && <ReactQueryDevtools buttonPosition='top-right' />}
             <Head title={title} />
             <SidebarProvider>
                 {auth.user && <DashboardSidebar />}

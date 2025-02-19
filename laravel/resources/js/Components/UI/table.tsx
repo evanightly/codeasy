@@ -4,7 +4,7 @@ import { ny } from '@/Lib/Utils';
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
     ({ className, ...props }, ref) => (
-        <div className="relative w-full overflow-auto">
+        <div className='relative w-full overflow-auto'>
             <table
                 ref={ref}
                 className={ny('w-full caption-bottom text-sm', className)}
@@ -37,7 +37,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <tfoot
         ref={ref}
-        className={ny('bg-muted/50 border-t font-medium [&>tr]:last:border-b-0', className)}
+        className={ny('border-t bg-muted/50 font-medium [&>tr]:last:border-b-0', className)}
         {...props}
     />
 ));
@@ -48,7 +48,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
         <tr
             ref={ref}
             className={ny(
-                'hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors',
+                'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',
                 className,
             )}
             {...props}
@@ -64,7 +64,7 @@ const TableHead = React.forwardRef<
     <th
         ref={ref}
         className={ny(
-            'text-muted-foreground h-10 px-2 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
+            'h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
             className,
         )}
         {...props}
@@ -91,7 +91,7 @@ const TableCaption = React.forwardRef<
     HTMLTableCaptionElement,
     React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => (
-    <caption ref={ref} className={ny('text-muted-foreground mt-4 text-sm', className)} {...props} />
+    <caption ref={ref} className={ny('mt-4 text-sm text-muted-foreground', className)} {...props} />
 ));
 TableCaption.displayName = 'TableCaption';
 

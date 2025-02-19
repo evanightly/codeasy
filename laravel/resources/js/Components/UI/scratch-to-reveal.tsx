@@ -138,20 +138,22 @@ const ScratchToReveal: React.FC<ScratchToRevealProps> = ({
 
     return (
         <motion.div
-            className={ny('relative select-none', className)}
             style={{
                 width,
                 height,
                 cursor: "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgc3R5bGU9ImZpbGw6I2ZmZjtzdHJva2U6IzAwMDtzdHJva2Utd2lkdGg6MXB4OyIgLz4KPC9zdmc+'), auto",
             }}
-            animate={controls}>
+            className={ny('relative select-none', className)}
+            animate={controls}
+        >
             <canvas
-                ref={canvasRef}
                 width={width}
-                height={height}
-                className="absolute left-0 top-0"
+                ref={canvasRef}
+                onTouchStart={handleTouchStart}
                 onMouseDown={handleMouseDown}
-                onTouchStart={handleTouchStart}></canvas>
+                height={height}
+                className='absolute left-0 top-0'
+            ></canvas>
             {children}
         </motion.div>
     );

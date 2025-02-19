@@ -32,19 +32,21 @@ export function SeparateAway({
     return (
         <div>
             <motion.h1
-                custom={-1}
                 variants={separate}
-                initial="hidden"
-                animate="visible"
-                className={ny(className)}>
+                initial='hidden'
+                custom={-1}
+                className={ny(className)}
+                animate='visible'
+            >
                 {upper_text}
             </motion.h1>
             <motion.h1
-                custom={1}
                 variants={separate}
-                initial="hidden"
-                animate="visible"
-                className={ny(className)}>
+                initial='hidden'
+                custom={1}
+                className={ny(className)}
+                animate='visible'
+            >
                 {lower_text}
             </motion.h1>
         </div>

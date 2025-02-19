@@ -24,18 +24,19 @@ export default function LetterPullup({ className, words, delay }: LetterPullupPr
     };
 
     return (
-        <div className="flex justify-center">
+        <div className='flex justify-center'>
             {letters.map((letter, i) => (
                 <motion.h1
-                    key={i}
                     variants={pullupVariant}
-                    initial="initial"
-                    animate="animate"
+                    key={i}
+                    initial='initial'
                     custom={i}
                     className={ny(
-                        'font-display text-center text-4xl font-bold tracking-[-0.02em] text-black drop-shadow-sm md:text-4xl md:leading-[5rem] dark:text-white',
+                        'font-display text-center text-4xl font-bold tracking-[-0.02em] text-black drop-shadow-sm dark:text-white md:text-4xl md:leading-[5rem]',
                         className,
-                    )}>
+                    )}
+                    animate='animate'
+                >
                     {letter === ' ' ? <span>&nbsp;</span> : letter}
                 </motion.h1>
             ))}

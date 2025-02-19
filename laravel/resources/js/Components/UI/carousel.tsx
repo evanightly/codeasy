@@ -158,14 +158,16 @@ const Carousel = React.forwardRef<
                     canScrollNext,
                     totalSlides,
                     currentIndex,
-                }}>
+                }}
+            >
                 <div
+                    role='region'
                     ref={ref}
                     onKeyDownCapture={handleKeyDown}
                     className={ny('relative', className)}
-                    role="region"
-                    aria-roledescription="carousel"
-                    {...props}>
+                    aria-roledescription='carousel'
+                    {...props}
+                >
                     {children}
                 </div>
             </CarouselContext.Provider>
@@ -179,7 +181,7 @@ const CarouselContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
         const { carouselRef, orientation } = useCarousel();
 
         return (
-            <div ref={carouselRef} className="overflow-hidden">
+            <div ref={carouselRef} className='overflow-hidden'>
                 <div
                     ref={ref}
                     className={ny(
@@ -201,14 +203,14 @@ const CarouselItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
 
         return (
             <div
+                role='group'
                 ref={ref}
-                role="group"
-                aria-roledescription="slide"
                 className={ny(
                     'min-w-0 shrink-0 grow-0 basis-full',
                     orientation === 'horizontal' ? 'pl-4' : 'pt-4',
                     className,
                 )}
+                aria-roledescription='slide'
                 {...props}
             />
         );
@@ -222,21 +224,22 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
 
         return (
             <Button
-                ref={ref}
                 variant={variant}
                 size={size}
+                ref={ref}
+                onClick={scrollPrev}
+                disabled={!canScrollPrev}
                 className={ny(
-                    'absolute  size-8 rounded-full',
+                    'absolute size-8 rounded-full',
                     orientation === 'horizontal'
                         ? '-left-12 top-1/2 -translate-y-1/2'
                         : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
                     className,
                 )}
-                disabled={!canScrollPrev}
-                onClick={scrollPrev}
-                {...props}>
-                <ArrowLeftIcon className="size-4" />
-                <span className="sr-only">Previous slide</span>
+                {...props}
+            >
+                <ArrowLeftIcon className='size-4' />
+                <span className='sr-only'>Previous slide</span>
             </Button>
         );
     },
@@ -249,9 +252,11 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
 
         return (
             <Button
-                ref={ref}
                 variant={variant}
                 size={size}
+                ref={ref}
+                onClick={scrollNext}
+                disabled={!canScrollNext}
                 className={ny(
                     'absolute size-8 rounded-full',
                     orientation === 'horizontal'
@@ -259,11 +264,10 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
                         : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
                     className,
                 )}
-                disabled={!canScrollNext}
-                onClick={scrollNext}
-                {...props}>
-                <ArrowRightIcon className="size-4" />
-                <span className="sr-only">Next slide</span>
+                {...props}
+            >
+                <ArrowRightIcon className='size-4' />
+                <span className='sr-only'>Next slide</span>
             </Button>
         );
     },
@@ -333,8 +337,8 @@ const CarouselDots = React.forwardRef<HTMLDivElement, CarouselDotsProps>(
 
         return (
             <div
+                role='tablist'
                 ref={ref}
-                role="tablist"
                 className={ny(
                     dotsContainerVariants({
                         orientation,
@@ -344,18 +348,19 @@ const CarouselDots = React.forwardRef<HTMLDivElement, CarouselDotsProps>(
                     }),
                     className,
                 )}
-                {...props}>
+                {...props}
+            >
                 {Array.from({ length: totalSlides }).map((_, index) => (
                     <button
-                        key={index}
-                        role="tab"
-                        aria-selected={currentIndex === index}
-                        aria-label={`Go to slide ${index + 1}`}
+                        role='tab'
                         onClick={() => scrollTo(index)}
+                        key={index}
                         className={ny(
                             dotsVariants({ size }),
                             currentIndex === index ? 'bg-card-foreground' : 'bg-muted',
                         )}
+                        aria-selected={currentIndex === index}
+                        aria-label={`Go to slide ${index + 1}`}
                     />
                 ))}
             </div>

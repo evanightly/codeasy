@@ -114,57 +114,59 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
 
     return (
         <svg
-            fill="none"
+            xmlns='http://www.w3.org/2000/svg'
             width={svgDimensions.width}
+            viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
             height={svgDimensions.height}
-            xmlns="http://www.w3.org/2000/svg"
+            fill='none'
             className={ny(
                 'pointer-events-none absolute left-0 top-0 transform-gpu stroke-2',
                 className,
             )}
-            viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}>
+        >
             <path
-                d={pathD}
-                stroke={pathColor}
                 strokeWidth={pathWidth}
                 strokeOpacity={pathOpacity}
-                strokeLinecap="round"
+                strokeLinecap='round'
+                stroke={pathColor}
+                d={pathD}
             />
             <path
-                d={pathD}
                 strokeWidth={pathWidth}
+                strokeOpacity='1'
+                strokeLinecap='round'
                 stroke={`url(#${id})`}
-                strokeOpacity="1"
-                strokeLinecap="round"
+                d={pathD}
             />
             <defs>
                 <motion.linearGradient
-                    className="transform-gpu"
-                    id={id}
-                    gradientUnits="userSpaceOnUse"
-                    initial={{
-                        x1: '0%',
-                        x2: '0%',
-                        y1: '0%',
-                        y2: '0%',
-                    }}
-                    animate={{
-                        x1: gradientCoordinates.x1,
-                        x2: gradientCoordinates.x2,
-                        y1: gradientCoordinates.y1,
-                        y2: gradientCoordinates.y2,
-                    }}
                     transition={{
                         delay,
                         duration,
                         ease: [0.16, 1, 0.3, 1], // https://easings.net/#easeOutExpo
                         repeat: Number.POSITIVE_INFINITY,
                         repeatDelay: 0,
-                    }}>
-                    <stop stopColor={gradientStartColor} stopOpacity="0"></stop>
+                    }}
+                    initial={{
+                        x1: '0%',
+                        x2: '0%',
+                        y1: '0%',
+                        y2: '0%',
+                    }}
+                    id={id}
+                    gradientUnits='userSpaceOnUse'
+                    className='transform-gpu'
+                    animate={{
+                        x1: gradientCoordinates.x1,
+                        x2: gradientCoordinates.x2,
+                        y1: gradientCoordinates.y1,
+                        y2: gradientCoordinates.y2,
+                    }}
+                >
+                    <stop stopOpacity='0' stopColor={gradientStartColor}></stop>
                     <stop stopColor={gradientStartColor}></stop>
-                    <stop offset="32.5%" stopColor={gradientStopColor}></stop>
-                    <stop offset="100%" stopColor={gradientStopColor} stopOpacity="0"></stop>
+                    <stop stopColor={gradientStopColor} offset='32.5%'></stop>
+                    <stop stopOpacity='0' stopColor={gradientStopColor} offset='100%'></stop>
                 </motion.linearGradient>
             </defs>
         </svg>

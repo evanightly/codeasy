@@ -21,7 +21,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <SheetPrimitive.Overlay
         className={ny(
-            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0  fixed inset-0 z-50 bg-black/80',
+            'fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             className,
         )}
         {...props}
@@ -60,10 +60,11 @@ const SheetContent = React.forwardRef<
         <SheetPrimitive.Content
             ref={ref}
             className={ny(sheetVariants({ side }), className)}
-            {...props}>
-            <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute end-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none">
-                <Cross2Icon className="size-4" />
-                <span className="sr-only">Close</span>
+            {...props}
+        >
+            <SheetPrimitive.Close className='absolute end-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary'>
+                <Cross2Icon className='size-4' />
+                <span className='sr-only'>Close</span>
             </SheetPrimitive.Close>
             {children}
         </SheetPrimitive.Content>
@@ -100,7 +101,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <SheetPrimitive.Title
         ref={ref}
-        className={ny('text-foreground text-lg font-semibold', className)}
+        className={ny('text-lg font-semibold text-foreground', className)}
         {...props}
     />
 ));
@@ -112,7 +113,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <SheetPrimitive.Description
         ref={ref}
-        className={ny('text-muted-foreground text-sm', className)}
+        className={ny('text-sm text-muted-foreground', className)}
         {...props}
     />
 ));

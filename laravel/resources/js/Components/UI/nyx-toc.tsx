@@ -47,7 +47,7 @@ const ScrollArea = React.forwardRef<
     <ScrollAreaPrimitive.Root ref={ref} className={ny('overflow-hidden', className)} {...props}>
         {children}
         <ScrollAreaPrimitive.Corner />
-        <ScrollBar orientation="vertical" />
+        <ScrollBar orientation='vertical' />
     </ScrollAreaPrimitive.Root>
 ));
 
@@ -60,7 +60,8 @@ const ScrollViewport = React.forwardRef<
     <ScrollAreaPrimitive.Viewport
         ref={ref}
         className={ny('size-full rounded-[inherit]', className)}
-        {...props}>
+        {...props}
+    >
         {children}
     </ScrollAreaPrimitive.Viewport>
 ));
@@ -80,8 +81,9 @@ const ScrollBar = React.forwardRef<
             orientation === 'horizontal' && 'h-1.5 flex-col',
             className,
         )}
-        {...props}>
-        <ScrollAreaPrimitive.ScrollAreaThumb className="bg-fd-border relative flex-1 rounded-full" />
+        {...props}
+    >
+        <ScrollAreaPrimitive.ScrollAreaThumb className='bg-fd-border relative flex-1 rounded-full' />
     </ScrollAreaPrimitive.Scrollbar>
 ));
 ScrollBar.displayName = ScrollAreaPrimitive.Scrollbar.displayName;
@@ -266,12 +268,12 @@ export function TocThumb({
         update(thumbRef.current, calc(containerRef.current, active));
     });
 
-    return <div ref={thumbRef} role="none" {...props} />;
+    return <div role='none' ref={thumbRef} {...props} />;
 }
 
 export function TocItemsEmpty() {
     return (
-        <div className="bg-card text-muted-foreground rounded-lg border p-3 text-xs">
+        <div className='rounded-lg border bg-card p-3 text-xs text-muted-foreground'>
             No headings found
         </div>
     );
@@ -282,21 +284,22 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
 
     return (
         <div
-            id="nyx-toc"
+            id='nyx-toc'
             {...props}
-            className={ny(
-                'top-nyx-layout-top sticky h-[var(--nyx-toc-height)] pb-2 pt-12',
-                toc,
-                props.className,
-            )}
             style={
                 {
                     ...props.style,
                     '--nyx-toc-height':
                         'calc(100dvh - var(--nyx-banner-height) - var(--nyx-nav-height))',
                 } as any
-            }>
-            <div className="flex h-full w-[var(--nyx-width)] max-w-full flex-col gap-3 pe-4">
+            }
+            className={ny(
+                'sticky top-nyx-layout-top h-[var(--nyx-toc-height)] pb-2 pt-12',
+                toc,
+                props.className,
+            )}
+        >
+            <div className='flex h-full w-[var(--nyx-width)] max-w-full flex-col gap-3 pe-4'>
                 {props.children}
             </div>
         </div>
@@ -370,16 +373,15 @@ export function NyxTOCItems({
     return (
         <>
             {label && (
-                <h3 className="text-muted-foreground -ms-0.5 inline-flex items-center gap-1.5 text-sm">
-                    <AlignLeft className="size-4" />
+                <h3 className='-ms-0.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground'>
+                    <AlignLeft className='size-4' />
                     {label}
                 </h3>
             )}
             <ScrollArea className={ny('flex flex-col', isMenu && '-ms-3')}>
-                <ScrollViewport className="relative min-h-0" ref={viewRef}>
+                <ScrollViewport ref={viewRef} className='relative min-h-0'>
                     {svg ? (
                         <div
-                            className="absolute start-0 top-0 rtl:-scale-x-100"
                             style={{
                                 width: svg.width,
                                 height: svg.height,
@@ -389,21 +391,23 @@ export function NyxTOCItems({
                                         `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="1" fill="none" /></svg>`,
                                     )
                                 }")`,
-                            }}>
+                            }}
+                            className='absolute start-0 top-0 rtl:-scale-x-100'
+                        >
                             <TocThumb
                                 containerRef={containerRef}
-                                className="bg-primary mt-[var(--nyx-top)] h-[var(--nyx-height)] transition-all"
+                                className='mt-[var(--nyx-top)] h-[var(--nyx-height)] bg-primary transition-all'
                             />
                         </div>
                     ) : null}
                     <ScrollProvider containerRef={viewRef}>
-                        <div className="flex flex-col" ref={containerRef}>
+                        <div ref={containerRef} className='flex flex-col'>
                             {items.map((item, i) => (
                                 <LocalTOCItem
-                                    key={item.url}
-                                    item={item}
                                     upper={items[i - 1]?.depth}
                                     lower={items[i + 1]?.depth}
+                                    key={item.url}
+                                    item={item}
                                 />
                             ))}
                         </div>
@@ -432,13 +436,14 @@ export function TocPopoverTrigger({
             className={ny(
                 'inline-flex items-center gap-2 text-nowrap px-4 py-2 text-start',
                 props.className,
-            )}>
-            <AlignLeft className="size-4 shrink-0" />
+            )}
+        >
+            <AlignLeft className='size-4 shrink-0' />
             Table of Contents
             {current && (
                 <>
-                    <ChevronRight className="text-muted-foreground -mx-1.5 size-4 shrink-0" />
-                    <span className="text-muted-foreground truncate">{current}</span>
+                    <ChevronRight className='-mx-1.5 size-4 shrink-0 text-muted-foreground' />
+                    <span className='truncate text-muted-foreground'>{current}</span>
                 </>
             )}
         </PopoverTrigger>
@@ -448,16 +453,17 @@ export function TocPopoverTrigger({
 export function TocPopoverContent(props: PopoverContentProps) {
     return (
         <PopoverContent
+            side='bottom'
             hideWhenDetached
+            data-toc-popover=''
             alignOffset={16}
-            align="start"
-            side="bottom"
-            data-toc-popover=""
+            align='start'
             {...props}
             className={ny(
                 'flex max-h-[var(--radix-popover-content-available-height)] w-[260px] flex-col gap-4 p-3',
                 props.className,
-            )}>
+            )}
+        >
             {props.children}
         </PopoverContent>
     );
@@ -478,35 +484,37 @@ function LocalTOCItem({
 
     return (
         <TOCItem
-            href={item.url}
             style={{
                 paddingInlineStart: getItemOffset(item.depth),
             }}
-            className="prose text-muted-foreground data-[active=true]:text-primary relative py-1.5 text-sm transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0">
+            href={item.url}
+            className='prose relative py-1.5 text-sm text-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-primary'
+        >
             {offset !== upperOffset ? (
                 <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
-                    className="absolute -top-1.5 start-0 size-4 rtl:-scale-x-100">
+                    xmlns='http://www.w3.org/2000/svg'
+                    viewBox='0 0 16 16'
+                    className='absolute -top-1.5 start-0 size-4 rtl:-scale-x-100'
+                >
                     <line
-                        x1={upperOffset}
-                        y1="0"
+                        y2='12'
+                        y1='0'
                         x2={offset}
-                        y2="12"
-                        className="stroke-foreground/10"
-                        strokeWidth="1"
+                        x1={upperOffset}
+                        strokeWidth='1'
+                        className='stroke-foreground/10'
                     />
                 </svg>
             ) : null}
             <div
-                className={ny(
-                    'bg-foreground/10 absolute inset-y-0 w-px',
-                    offset !== upperOffset && 'top-1.5',
-                    offset !== lowerOffset && 'bottom-1.5',
-                )}
                 style={{
                     insetInlineStart: offset,
                 }}
+                className={ny(
+                    'absolute inset-y-0 w-px bg-foreground/10',
+                    offset !== upperOffset && 'top-1.5',
+                    offset !== lowerOffset && 'bottom-1.5',
+                )}
             />
             {item.title}
         </TOCItem>

@@ -28,25 +28,27 @@ export function DotPattern({
 
     return (
         <svg
-            aria-hidden="true"
             className={ny(
                 'pointer-events-none absolute inset-0 h-full w-full fill-neutral-400/80',
                 className,
             )}
-            {...props}>
+            aria-hidden='true'
+            {...props}
+        >
             <defs>
                 <pattern
-                    id={id}
-                    width={width}
-                    height={height}
-                    patternUnits="userSpaceOnUse"
-                    patternContentUnits="userSpaceOnUse"
+                    y={y}
                     x={x}
-                    y={y}>
-                    <circle id="pattern-circle" cx={cx} cy={cy} r={cr} />
+                    width={width}
+                    patternUnits='userSpaceOnUse'
+                    patternContentUnits='userSpaceOnUse'
+                    id={id}
+                    height={height}
+                >
+                    <circle r={cr} id='pattern-circle' cy={cy} cx={cx} />
                 </pattern>
             </defs>
-            <rect width="100%" height="100%" strokeWidth={0} fill={`url(#${id})`} />
+            <rect width='100%' strokeWidth={0} height='100%' fill={`url(#${id})`} />
         </svg>
     );
 }

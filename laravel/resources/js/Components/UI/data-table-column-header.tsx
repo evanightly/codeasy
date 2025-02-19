@@ -20,9 +20,10 @@ export function DataTableColumnHeader<TData, TValue>({
     return (
         <div className={ny('flex items-center space-x-2', className)}>
             <Button
-                variant="ghost"
+                variant='ghost'
                 onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                className="group-[.table-compact]:h-8 group-[.table-compact]:p-0 group-[.table-compact]:px-4">
+                className='group-[.table-compact]:h-8 group-[.table-compact]:p-0 group-[.table-compact]:px-4'
+            >
                 {title}
                 {column.getIsSorted() === 'asc' ? <ArrowUp /> : <ArrowDown />}
             </Button>

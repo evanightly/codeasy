@@ -182,18 +182,19 @@ const MultiSelectTrigger = React.forwardRef<MultiSelectTriggerElement, MultiSele
         return (
             <PopoverPrimitive.Trigger ref={forwardedRef as any} asChild>
                 <div
-                    aria-disabled={disabled}
                     data-disabled={disabled}
+                    aria-disabled={disabled}
                     {...props}
+                    onTouchStart={disabled ? PreventClick : props.onTouchStart}
+                    onClick={disabled ? PreventClick : props.onClick}
                     className={ny(
-                        'border-input ring-offset-background focus:ring-ring flex size-full min-h-10 items-center justify-between whitespace-nowrap rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 [&>span]:line-clamp-1',
+                        'flex size-full min-h-10 items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring [&>span]:line-clamp-1',
                         disabled ? 'cursor-not-allowed opacity-50' : 'cursor-text',
                         className,
                     )}
-                    onClick={disabled ? PreventClick : props.onClick}
-                    onTouchStart={disabled ? PreventClick : props.onTouchStart}>
+                >
                     {children}
-                    <ChevronsUpDown aria-hidden className="size-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className='size-4 shrink-0 opacity-50' aria-hidden />
                 </div>
             </PopoverPrimitive.Trigger>
         );
@@ -223,7 +224,7 @@ const MultiSelectValue = React.forwardRef<
     }, []);
 
     if (!value.length || !firstRendered) {
-        return <span className="text-muted-foreground pointer-events-none">{placeholder}</span>;
+        return <span className='pointer-events-none text-muted-foreground'>{placeholder}</span>;
     }
 
     return (
@@ -234,7 +235,8 @@ const MultiSelectValue = React.forwardRef<
                     className,
                 )}
                 {...props}
-                ref={forwardRef}>
+                ref={forwardRef}
+            >
                 {renderItems.map((value) => {
                     const item = itemCache.get(value);
 
@@ -249,24 +251,25 @@ const MultiSelectValue = React.forwardRef<
 
                     const el = (
                         <Badge
-                            variant="outline"
-                            key={value}
-                            className="group/multi-select-badge cursor-pointer rounded-full pr-1.5"
+                            variant='outline'
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 onDeselect(value, item!);
-                            }}>
+                            }}
+                            key={value}
+                            className='group/multi-select-badge cursor-pointer rounded-full pr-1.5'
+                        >
                             <span>{child}</span>
-                            <X className="text-muted-foreground group-hover/multi-select-badge:text-foreground ml-1 size-3" />
+                            <X className='ml-1 size-3 text-muted-foreground group-hover/multi-select-badge:text-foreground' />
                         </Badge>
                     );
 
                     if (child !== content) {
                         return (
                             <Tooltip key={value}>
-                                <TooltipTrigger className="inline-flex">{el}</TooltipTrigger>
-                                <TooltipContent side="bottom" align="start" className="z-[51]">
+                                <TooltipTrigger className='inline-flex'>{el}</TooltipTrigger>
+                                <TooltipContent side='bottom' className='z-[51]' align='start'>
                                     {content}
                                 </TooltipContent>
                             </Tooltip>
@@ -276,7 +279,7 @@ const MultiSelectValue = React.forwardRef<
                     return el;
                 })}
                 {renderRemain ? (
-                    <span className="text-muted-foreground py-.5 text-xs leading-4">
+                    <span className='py-.5 text-xs leading-4 text-muted-foreground'>
                         +{renderRemain}
                     </span>
                 ) : null}
@@ -332,13 +335,6 @@ const MultiSelectContent = React.forwardRef<
     return (
         <PopoverPrimitive.Portal forceMount>
             <PopoverPrimitive.Content
-                ref={ref}
-                align="start"
-                sideOffset={4}
-                collisionPadding={10}
-                className={ny(
-                    'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-full rounded-md border p-0 shadow-md outline-none',
-                )}
                 style={
                     {
                         '--radix-select-content-transform-origin':
@@ -351,13 +347,22 @@ const MultiSelectContent = React.forwardRef<
                         '--radix-select-trigger-height': 'var(--radix-popper-anchor-height)',
                     } as any
                 }
-                {...props}>
+                sideOffset={4}
+                ref={ref}
+                collisionPadding={10}
+                className={ny(
+                    'z-50 w-full rounded-md border bg-popover p-0 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+                )}
+                align='start'
+                {...props}
+            >
                 <Command
+                    shouldFilter={!context.onSearch}
                     className={ny(
                         'max-h-96 w-full min-w-[var(--radix-select-trigger-width)] px-1',
                         className,
                     )}
-                    shouldFilter={!context.onSearch}>
+                >
                     {children}
                 </Command>
             </PopoverPrimitive.Content>
@@ -426,12 +431,13 @@ const MultiSelectItem = React.forwardRef<
             <CommandItem
                 {...props}
                 value={value}
-                className={ny(disabled && 'text-muted-foreground cursor-not-allowed', className)}
-                disabled={disabled}
+                ref={forwardedRef}
                 onSelect={!disabled && value ? handleClick : undefined}
-                ref={forwardedRef}>
-                <span className="mr-2 truncate">{children || label || value}</span>
-                {selected ? <Check className="ml-auto size-4 shrink-0" /> : null}
+                disabled={disabled}
+                className={ny(disabled && 'cursor-not-allowed text-muted-foreground', className)}
+            >
+                <span className='mr-2 truncate'>{children || label || value}</span>
+                {selected ? <Check className='ml-auto size-4 shrink-0' /> : null}
             </CommandItem>
         );
     },
@@ -496,9 +502,10 @@ function renderMultiSelectOptions(list: MultiSelectOption[]) {
         if ('children' in option) {
             return (
                 <MultiSelectGroup
-                    key={option.value || index}
                     value={option.value}
-                    heading={option.heading}>
+                    key={option.value || index}
+                    heading={option.heading}
+                >
                     {renderMultiSelectOptions(option.children)}
                 </MultiSelectGroup>
             );

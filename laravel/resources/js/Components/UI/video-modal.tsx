@@ -19,7 +19,7 @@ const VideoModalOverlay = React.forwardRef<
     <DialogPrimitive.Overlay
         ref={ref}
         className={ny(
-            'data-[state=closed]:animate-modal-fade-out data-[state=open]:animate-modal-fade-in fixed inset-0 z-50 backdrop-blur-xl',
+            'fixed inset-0 z-50 backdrop-blur-xl data-[state=closed]:animate-modal-fade-out data-[state=open]:animate-modal-fade-in',
             className,
         )}
         {...props}
@@ -37,18 +37,19 @@ const VideoModalContent = React.forwardRef<
             ref={ref}
             className={ny(
                 'fixed left-1/2 top-1/2 z-50 flex h-screen w-screen -translate-x-1/2 -translate-y-1/2 items-center justify-center p-3',
-                'data-[state=closed]:animate-modal-fade-out data-[state=open]:animate-modal-fade-in data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[50%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[50%] transition-all',
+                'transition-all data-[state=closed]:animate-modal-fade-out data-[state=open]:animate-modal-fade-in data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[50%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[50%]',
                 className,
             )}
-            {...props}>
-            <div className="relative mx-auto flex size-full items-center justify-center rounded-2xl border border-gray-950/[.1] bg-gray-50/[.2] dark:border-gray-50/[.1] dark:bg-gray-950/[.5]">
+            {...props}
+        >
+            <div className='relative mx-auto flex size-full items-center justify-center rounded-2xl border border-gray-950/[.1] bg-gray-50/[.2] dark:border-gray-50/[.1] dark:bg-gray-950/[.5]'>
                 {/* Mobile close button */}
                 <CloseIcon isMobile />
 
-                <div className="flex h-4/5 w-full max-w-5xl gap-6">
+                <div className='flex h-4/5 w-full max-w-5xl gap-6'>
                     {/* Desktop close button */}
                     <CloseIcon />
-                    <div className="flex w-full flex-col max-lg:p-4 max-lg:text-center">
+                    <div className='flex w-full flex-col max-lg:p-4 max-lg:text-center'>
                         {children}
                     </div>
                 </div>
@@ -91,7 +92,8 @@ const VideoPreview = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
                 'absolute inset-0 z-10 transition-opacity duration-500 group-[.playing]:pointer-events-none group-[.playing]:opacity-0',
                 className,
             )}
-            {...props}>
+            {...props}
+        >
             {children}
         </div>
     ),
@@ -106,7 +108,8 @@ const VideoPlayButton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
                 'absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 group-[.playing]:pointer-events-none group-[.playing]:opacity-0',
                 className,
             )}
-            {...props}>
+            {...props}
+        >
             {children}
         </div>
     ),
@@ -120,13 +123,14 @@ const VideoPlayer = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
         return (
             <div
                 ref={ref}
+                onClick={() => setIsPlaying(true)}
                 className={ny(
                     'group relative aspect-video max-w-4xl overflow-hidden rounded-xl border border-gray-950/[.1] object-cover dark:border-gray-50/[.1]',
                     isPlaying && 'playing',
                     className,
                 )}
-                onClick={() => setIsPlaying(true)}
-                {...props}>
+                {...props}
+            >
                 {children}
             </div>
         );
@@ -142,7 +146,8 @@ const VideoModalVideo = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
                 'aspect-video max-w-4xl overflow-hidden rounded-xl border border-gray-950/[.1] object-cover shadow-xl dark:border-gray-50/[.1]',
                 className,
             )}
-            {...props}>
+            {...props}
+        >
             {children}
         </div>
     ),
@@ -162,21 +167,24 @@ const CloseIcon = React.forwardRef<
             isMobile ? 'absolute right-4 top-4 lg:hidden' : 'hidden self-start lg:block',
             className,
         )}
-        {...props}>
+        {...props}
+    >
         <svg
-            fill="none"
-            height="12"
-            viewBox="0 0 12 12"
-            width="12"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns='http://www.w3.org/2000/svg'
+            width='12'
+            viewBox='0 0 12 12'
+            height='12'
+            fill='none'
+        >
             <path
-                d="M1 1L11 11M11 1L1 11"
-                className="stroke-current"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.5"></path>
+                strokeWidth='1.5'
+                strokeLinejoin='round'
+                strokeLinecap='round'
+                d='M1 1L11 11M11 1L1 11'
+                className='stroke-current'
+            ></path>
         </svg>
-        <span className="sr-only">Close</span>
+        <span className='sr-only'>Close</span>
     </VideoModalClose>
 ));
 

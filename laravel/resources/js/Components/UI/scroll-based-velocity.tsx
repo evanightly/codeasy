@@ -74,10 +74,10 @@ export function VelocityScroll({ text, default_velocity = 5, className }: Veloci
         });
 
         return (
-            <div className="w-full overflow-hidden whitespace-nowrap" ref={containerRef}>
-                <motion.div className={ny('inline-block', className)} style={{ x }}>
+            <div ref={containerRef} className='w-full overflow-hidden whitespace-nowrap'>
+                <motion.div style={{ x }} className={ny('inline-block', className)}>
                     {Array.from({ length: repetitions }).map((_, i) => (
-                        <span key={i} ref={i === 0 ? textRef : null}>
+                        <span ref={i === 0 ? textRef : null} key={i}>
                             {children}{' '}
                         </span>
                     ))}
@@ -87,11 +87,11 @@ export function VelocityScroll({ text, default_velocity = 5, className }: Veloci
     }
 
     return (
-        <section className="relative w-full">
-            <ParallaxText baseVelocity={default_velocity} className={className}>
+        <section className='relative w-full'>
+            <ParallaxText className={className} baseVelocity={default_velocity}>
                 {text}
             </ParallaxText>
-            <ParallaxText baseVelocity={-default_velocity} className={className}>
+            <ParallaxText className={className} baseVelocity={-default_velocity}>
                 {text}
             </ParallaxText>
         </section>

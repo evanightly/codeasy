@@ -28,10 +28,6 @@ const InputPhone: React.ForwardRefExoticComponent<InputPhoneProps> = React.forwa
 >(({ className, onChange, ...props }, ref) => (
     <RPNInput.default
         ref={ref}
-        className={ny('flex', className)}
-        flagComponent={FlagComponent}
-        countrySelectComponent={CountrySelect}
-        inputComponent={InputComponent}
         /**
          * Handles the onChange event.
          *
@@ -42,6 +38,10 @@ const InputPhone: React.ForwardRefExoticComponent<InputPhoneProps> = React.forwa
          * @param {E164Number | undefined} value - The entered value
          */
         onChange={(value) => onChange?.(value as RPNInput.Value)}
+        inputComponent={InputComponent}
+        flagComponent={FlagComponent}
+        countrySelectComponent={CountrySelect}
+        className={ny('flex', className)}
         {...props}
     />
 ));
@@ -76,11 +76,12 @@ function CountrySelect({ disabled, value, onChange, options }: CountrySelectProp
         <Popover>
             <PopoverTrigger asChild>
                 <Button
-                    type="button"
-                    variant="outline"
+                    variant='outline'
+                    type='button'
+                    disabled={disabled}
                     className={ny('flex gap-1 rounded-e-none rounded-s-lg px-3')}
-                    disabled={disabled}>
-                    <FlagComponent country={value} countryName={value} />
+                >
+                    <FlagComponent countryName={value} country={value} />
                     <CaretSortIcon
                         className={ny(
                             '-mr-2 size-4 opacity-50',
@@ -89,24 +90,25 @@ function CountrySelect({ disabled, value, onChange, options }: CountrySelectProp
                     />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0">
+            <PopoverContent className='w-[300px] p-0'>
                 <Command>
                     <CommandList>
-                        <CommandInput placeholder="Search country..." />
+                        <CommandInput placeholder='Search country...' />
                         <CommandEmpty>No country found.</CommandEmpty>
                         <CommandGroup>
                             {options.map((option) => (
                                 <CommandItem
-                                    className="gap-2"
+                                    onSelect={() => handleSelect(option.value)}
                                     key={option.value || 'ZZ'}
-                                    onSelect={() => handleSelect(option.value)}>
+                                    className='gap-2'
+                                >
                                     <FlagComponent
-                                        country={option.value}
                                         countryName={option.label}
+                                        country={option.value}
                                     />
-                                    <span className="flex-1 text-sm">{option.label}</span>
+                                    <span className='flex-1 text-sm'>{option.label}</span>
                                     {option.value && (
-                                        <span className="text-foreground/50 text-sm">
+                                        <span className='text-sm text-foreground/50'>
                                             {`+${RPNInput.getCountryCallingCode(option.value)}`}
                                         </span>
                                     )}
@@ -130,7 +132,7 @@ function FlagComponent({ country, countryName }: RPNInput.FlagProps) {
     const Flag = flags[country];
 
     return (
-        <span className="bg-foreground/20 flex h-4 w-6 overflow-hidden rounded-sm">
+        <span className='flex h-4 w-6 overflow-hidden rounded-sm bg-foreground/20'>
             {Flag && <Flag title={countryName} />}
         </span>
     );

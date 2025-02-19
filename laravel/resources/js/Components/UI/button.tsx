@@ -70,8 +70,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                     buttonVariants({ variant, size, className }),
                     !disableRipple && 'ripple', // Include the ripple class only if disableRipple is false
                 )}
-                {...props}>
-                {loading && <LoaderCircle className="animate-spin" />}
+                {...props}
+            >
+                {loading && <LoaderCircle className='animate-spin' />}
 
                 {props.children}
             </Comp>

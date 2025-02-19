@@ -23,7 +23,6 @@ export default function GaugeCircle({
 
     return (
         <div
-            className={ny('relative size-40 text-2xl font-semibold', className)}
             style={
                 {
                     '--circle-size': '100px',
@@ -37,18 +36,12 @@ export default function GaugeCircle({
                     '--percent-to-deg': '3.6deg',
                     transform: 'translateZ(0)',
                 } as React.CSSProperties
-            }>
-            <svg fill="none" className="size-full" strokeWidth="2" viewBox="0 0 100 100">
+            }
+            className={ny('relative size-40 text-2xl font-semibold', className)}
+        >
+            <svg viewBox='0 0 100 100' strokeWidth='2' fill='none' className='size-full'>
                 {currentPercent <= 90 && currentPercent >= 0 && (
                     <circle
-                        cx="50"
-                        cy="50"
-                        r="45"
-                        strokeWidth="10"
-                        strokeDashoffset="0"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="opacity-100"
                         style={{
                             stroke: gaugeSecondaryColor,
                             strokeDasharray: `${(90 - currentPercent) * percentPx}px ${circumference}px`,
@@ -56,17 +49,17 @@ export default function GaugeCircle({
                             transition: 'all 1s ease 0s',
                             transformOrigin: '50px 50px',
                         }}
+                        strokeWidth='10'
+                        strokeLinejoin='round'
+                        strokeLinecap='round'
+                        strokeDashoffset='0'
+                        r='45'
+                        cy='50'
+                        cx='50'
+                        className='opacity-100'
                     />
                 )}
                 <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    strokeWidth="10"
-                    strokeDashoffset="0"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="opacity-100"
                     style={{
                         stroke: gaugePrimaryColor,
                         strokeDasharray: `${currentPercent * percentPx}px ${circumference}px`,
@@ -75,14 +68,23 @@ export default function GaugeCircle({
                         transform: 'rotate(calc(-90deg + 5 * 0 * 3.6deg))',
                         transformOrigin: '50px 50px',
                     }}
+                    strokeWidth='10'
+                    strokeLinejoin='round'
+                    strokeLinecap='round'
+                    strokeDashoffset='0'
+                    r='45'
+                    cy='50'
+                    cx='50'
+                    className='opacity-100'
                 />
             </svg>
             <span
-                className="animate-in fade-in absolute inset-0 m-auto size-fit"
                 style={{
                     animationDelay: '0s',
                     transitionDuration: '1s',
-                }}>
+                }}
+                className='absolute inset-0 m-auto size-fit animate-in fade-in'
+            >
                 {Math.round(currentPercent)}
             </span>
         </div>
