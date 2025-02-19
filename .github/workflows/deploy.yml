@@ -157,6 +157,10 @@ jobs:
 
             # Deploy with Docker Compose
             docker compose -f docker-compose.prod.yml down || true
+
+            # Prune old images, containers, volumes
+            docker system prune -af
+
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
 
