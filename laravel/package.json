@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc && vite build",
     "dev": "vite",
-    "lint": "eslint --fix",
+    "lint": "eslint --fix .",
     "prettier": "prettier --write ./resources",
     "prepare": "husky"
   },
