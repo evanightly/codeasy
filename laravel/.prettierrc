@@ -8,12 +8,12 @@
     "bracketSpacing": true,
     "arrowParens": "always",
     "endOfLine": "lf",
-    "jsxSingleQuote": false,
+    "jsxSingleQuote": true,
     "quoteProps": "as-needed",
     "htmlWhitespaceSensitivity": "css",
     "proseWrap": "preserve",
     "embeddedLanguageFormatting": "auto",
     "editorconfig": true,
-    "bracketSameLine": true,
-    "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-organize-imports"]
+    "bracketSameLine": false,
+    "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"]
 }
