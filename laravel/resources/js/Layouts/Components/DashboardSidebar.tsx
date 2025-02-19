@@ -18,26 +18,24 @@ import { DashboardSidebarUser } from './Components/DashboardSidebarUser';
 import { DashboardSiteSwitcher } from './Components/DashboardSiteSwitcher';
 
 const data = {
-    user: {
-        name: 'nyxb',
-        email: 'm@example.com',
-        avatar: '/avatars/nyxb.jpg',
-    },
     teams: [
         {
-            name: 'Acme Inc',
+            name: 'Codeasy',
             logo: GalleryVerticalEnd,
-            plan: 'Enterprise',
+            description: 'The best platform to learn programming',
+            url: '#',
         },
         {
-            name: 'Acme Corp.',
+            name: 'Codeasy (Legacy)',
+            logo: GalleryVerticalEnd,
+            description: 'The best platform to learn programming',
+            url: 'http://localhost:3000',
+        },
+        {
+            name: 'SKKNI',
             logo: AudioWaveform,
-            plan: 'Startup',
-        },
-        {
-            name: 'Evil Corp.',
-            logo: Command,
-            plan: 'Free',
+            description: 'Sistem Kompetensi Keahlian Nasional Indonesia',
+            url: 'http://localhost:3000',
         },
     ],
 };

@@ -25,7 +25,8 @@ const DashboardSiteSwitcher = ({
     teams: {
         name: string;
         logo: React.ElementType;
-        plan: string;
+        description: string;
+        url: string;
     }[];
 }) => {
     const { isMobile } = useSidebar();
@@ -45,7 +46,7 @@ const DashboardSiteSwitcher = ({
                             </div>
                             <div className='grid flex-1 text-left text-sm leading-tight'>
                                 <span className='truncate font-semibold'>{activeTeam.name}</span>
-                                <span className='truncate text-xs'>{activeTeam.plan}</span>
+                                <span className='truncate text-xs'>{activeTeam.description}</span>
                             </div>
                             <ChevronsUpDown className='ml-auto' />
                         </SidebarMenuButton>
@@ -57,7 +58,7 @@ const DashboardSiteSwitcher = ({
                         align='start'
                     >
                         <DropdownMenuLabel className='text-xs text-muted-foreground'>
-                            Teams
+                            Sites
                         </DropdownMenuLabel>
                         {teams.map((team, index) => (
                             <DropdownMenuItem
