@@ -1,0 +1,6 @@
+/public/**/*
+**/vendor
+/resources/js/Support/Enums/intentEnum.ts
+/resources/js/Support/Enums/permissionEnum.ts
+/resources/js/Support/Enums/roleEnum.ts
+
