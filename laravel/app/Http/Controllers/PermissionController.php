@@ -18,11 +18,10 @@ class PermissionController extends Controller implements HasMiddleware {
 
     public static function middleware(): array {
         return [
-            'auth',
-            // new Middleware(PermissionMiddleware::using(PermissionEnum::PERMISSION_CREATE->value), only: ['create', 'store']),
-            // new Middleware(PermissionMiddleware::using(PermissionEnum::PERMISSION_UPDATE->value), only: ['edit', 'update']),
-            // new Middleware(PermissionMiddleware::using(PermissionEnum::PERMISSION_READ->value), only: ['index', 'show']),
-            // new Middleware(PermissionMiddleware::using(PermissionEnum::PERMISSION_DELETE->value), only: ['destroy']),
+            new Middleware(PermissionMiddleware::using(PermissionEnum::PERMISSION_CREATE->value), only: ['create', 'store']),
+            new Middleware(PermissionMiddleware::using(PermissionEnum::PERMISSION_UPDATE->value), only: ['edit', 'update']),
+            new Middleware(PermissionMiddleware::using(PermissionEnum::PERMISSION_READ->value), only: ['index', 'show']),
+            new Middleware(PermissionMiddleware::using(PermissionEnum::PERMISSION_DELETE->value), only: ['destroy']),
         ];
     }
 
