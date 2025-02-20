@@ -13,8 +13,10 @@ class RoleResource extends JsonResource {
             'id' => $this->id,
             'name' => $this->name,
             'guard_name' => $this->guard_name,
+            'users_count' => $this->users_count,
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
+            'deletable' => $this->users_count === 0,
         ];
 
         return $this->filterData($request, $dataSource);

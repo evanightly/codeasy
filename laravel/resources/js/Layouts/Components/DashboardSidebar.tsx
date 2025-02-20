@@ -64,6 +64,13 @@ const menuItems: MenuItem[] = [
                 icon: Frame,
                 permissions: [PermissionEnum.PERMISSION_READ],
             },
+            {
+                type: 'menu',
+                title: 'Roles',
+                url: route(`${ROUTES.ROLES}.index`),
+                icon: Frame,
+                permissions: [PermissionEnum.ROLE_READ],
+            },
         ],
     },
 ];
