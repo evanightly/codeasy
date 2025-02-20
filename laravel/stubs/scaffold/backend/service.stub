@@ -7,6 +7,10 @@ use App\Support\Interfaces\Repositories\{{ modelName }}RepositoryInterface;
 use App\Support\Interfaces\Services\{{ modelName }}ServiceInterface;
 
 class {{ modelName }}Service extends BaseCrudService implements {{ modelName }}ServiceInterface {
+
+    /** @var {{ modelName }}Repository $repository */
+    protected $repository;
+
     protected function getRepositoryClass(): string {
         return {{ modelName }}RepositoryInterface::class;
     }
