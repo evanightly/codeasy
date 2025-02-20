@@ -9,8 +9,7 @@ use App\Support\Interfaces\Services\RoleServiceInterface;
 use Illuminate\Database\Eloquent\Model;
 
 class RoleService extends BaseCrudService implements RoleServiceInterface {
-
-    /** @var RoleRepository $repository */
+    /** @var RoleRepository */
     protected $repository;
 
     public function update($keyOrModel, array $data): ?Model {

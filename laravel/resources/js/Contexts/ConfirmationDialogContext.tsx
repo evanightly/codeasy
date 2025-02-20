@@ -1,3 +1,4 @@
+import { Button } from '@/Components/UI/button';
 import {
     Dialog,
     DialogContent,
@@ -6,7 +7,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/Components/UI/dialog';
-import { Button } from '@/Components/UI/button';
 import { createContext, ReactNode, useContext, useState } from 'react';
 
 interface ConfirmationOptions {
@@ -60,13 +60,13 @@ export const ConfirmationDialogProvider = ({ children }: { children: ReactNode }
         <ConfirmationDialogContext.Provider value={{ showConfirmation }}>
             {children}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="max-w-sm md:max-w-md">
+                <DialogContent className='max-w-sm md:max-w-md'>
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>
-                        <DialogDescription className="text-md">{description}</DialogDescription>
+                        <DialogDescription className='text-md'>{description}</DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsOpen(false)}>
+                        <Button variant='ghost' onClick={() => setIsOpen(false)}>
                             Cancel
                         </Button>
                         <Button onClick={handleConfirm}>Confirm</Button>

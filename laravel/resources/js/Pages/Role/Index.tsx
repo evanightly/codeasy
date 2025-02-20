@@ -12,7 +12,7 @@ export default function Index() {
         perPage: 10,
         sortBy: [['created_at', 'desc']],
         role_resource: 'id,name,guard_name,users_count,deletable',
-        relations_count: 'users'
+        relations_count: 'users',
     });
 
     const rolesResponse = roleServiceHook.useGetAll({ filters });
