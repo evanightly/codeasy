@@ -7,6 +7,7 @@ import { MouseEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import './bootstrap';
+import { ConfirmationDialogProvider } from './Contexts/ConfirmationDialogContext';
 import { addRippleEffect } from './Helpers';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -39,18 +40,20 @@ createInertiaApp({
         root.render(
             <QueryClientProvider client={queryClient}>
                 <DarkModeProvider>
-                    <SonnerToaster
-                        toastOptions={
-                            {
-                                // https://github.com/shadcn-ui/ui/issues/2234
+                    <ConfirmationDialogProvider>
+                        <SonnerToaster
+                            toastOptions={
+                                {
+                                    // https://github.com/shadcn-ui/ui/issues/2234
+                                }
                             }
-                        }
-                        theme='light'
-                        richColors
-                        duration={2000}
-                        closeButton
-                    />
-                    <App {...props} />
+                            theme='light'
+                            richColors
+                            duration={2000}
+                            closeButton
+                        />
+                        <App {...props} />
+                    </ConfirmationDialogProvider>
                 </DarkModeProvider>
             </QueryClientProvider>,
         );
