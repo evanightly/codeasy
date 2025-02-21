@@ -1,6 +1,6 @@
 'use client';
 
-import { AudioWaveform, Frame, GalleryVerticalEnd, PieChart } from 'lucide-react';
+import { AudioWaveform, Frame, GalleryVerticalEnd, Lock, PieChart, ShieldCheck, Users } from 'lucide-react';
 import type * as React from 'react';
 
 import {
@@ -61,21 +61,21 @@ const menuItems: MenuItem[] = [
                 type: 'menu',
                 title: 'Permissions',
                 url: route(`${ROUTES.PERMISSIONS}.index`),
-                icon: Frame,
+                icon: ShieldCheck,
                 permissions: [PermissionEnum.PERMISSION_READ],
             },
             {
                 type: 'menu',
                 title: 'Roles',
                 url: route(`${ROUTES.ROLES}.index`),
-                icon: Frame,
+                icon: Lock,
                 permissions: [PermissionEnum.ROLE_READ],
             },
             {
                 type: 'menu',
                 title: 'Users',
                 url: route(`${ROUTES.USERS}.index`),
-                icon: Frame,
+                icon: Users,
                 permissions: [PermissionEnum.USER_READ],
             },
         ],
