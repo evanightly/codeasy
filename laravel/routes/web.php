@@ -3,6 +3,7 @@
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -78,6 +79,7 @@ Route::middleware('auth')->group(function () {
     Route::inertia('dashboard', 'Dashboard/Index')->name('dashboard.index');
     Route::resource('permissions', PermissionController::class);
     Route::resource('roles', RoleController::class);
+    Route::resource('users', UserController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

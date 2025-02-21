@@ -29,14 +29,10 @@ class DatabaseSeeder extends Seeder {
             return;
         }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
         $this->call([
             PermissionSeeder::class,
             RoleSeeder::class,
+            UserSeeder::class,
         ]);
 
         $this->createSuperAdmin();

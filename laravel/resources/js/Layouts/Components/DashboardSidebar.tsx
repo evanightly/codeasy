@@ -71,6 +71,13 @@ const menuItems: MenuItem[] = [
                 icon: Frame,
                 permissions: [PermissionEnum.ROLE_READ],
             },
+            {
+                type: 'menu',
+                title: 'Users',
+                url: route(`${ROUTES.USERS}.index`),
+                icon: Frame,
+                permissions: [PermissionEnum.USER_READ],
+            },
         ],
     },
 ];
