@@ -6,6 +6,7 @@ import {
     BreadcrumbSeparator,
 } from '@/Components/UI/breadcrumb';
 import { GenericBreadcrumbItem } from '@/Support/Interfaces/Others';
+import { Link } from '@inertiajs/react';
 import { Fragment } from 'react';
 
 interface GenericBreadcrumbProps {
@@ -20,8 +21,8 @@ export default function GenericBreadcrumb({ breadcrumbs }: GenericBreadcrumbProp
                     {breadcrumbs?.map((breadcrumb, index) => (
                         <Fragment key={index}>
                             <BreadcrumbItem>
-                                <BreadcrumbLink href={breadcrumb.link}>
-                                    {breadcrumb.name}
+                                <BreadcrumbLink asChild>
+                                    <Link href={breadcrumb.link}>{breadcrumb.name}</Link>
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                             {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
