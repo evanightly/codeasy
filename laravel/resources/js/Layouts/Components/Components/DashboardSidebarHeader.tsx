@@ -20,6 +20,39 @@ const DashboardSidebarHeader = ({ items }: { items: MenuItem[] }) => {
     const { auth } = usePage().props;
     const userPermissions: string[] = auth?.user?.permissions || [];
 
+    const isUrlActive = (menuUrl: string) => {
+        try {
+            const currentPath = window.location.pathname;
+
+            // Convert route URL to actual path
+            // This handles Laravel's route() helper URLs that might include the base URL
+            const menuPath = new URL(menuUrl, window.location.origin).pathname;
+
+            // Clean both paths (remove trailing slashes and ensure starting slash)
+            const cleanPath = (path: string) => {
+                return '/' + path.split('/').filter(Boolean).join('/');
+            };
+
+            const cleanCurrentPath = cleanPath(currentPath);
+            const cleanMenuPath = cleanPath(menuPath);
+
+            // Exact match
+            if (cleanCurrentPath === cleanMenuPath) {
+                return true;
+            }
+
+            // Check if current path starts with menu path and next char is /
+            if (cleanCurrentPath.startsWith(cleanMenuPath + '/')) {
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.error('Error checking URL active state:', error);
+            return false;
+        }
+    };
+
     const hasPermission = (permissions?: string[]) => {
         if (!permissions) return true;
         return permissions.some((perm) => userPermissions.includes(perm));
@@ -31,7 +64,7 @@ const DashboardSidebarHeader = ({ items }: { items: MenuItem[] }) => {
         if (item.type === 'menu') {
             return (
                 <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton isActive={window.location.toString() === item.url} asChild>
+                    <SidebarMenuButton isActive={isUrlActive(item.url)} asChild>
                         <Link href={item.url}>
                             {item.icon && <item.icon />}
                             <span>{item.title}</span>
