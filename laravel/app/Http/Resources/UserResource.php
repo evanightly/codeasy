@@ -19,6 +19,7 @@ class UserResource extends JsonResource {
             'remember_token' => $this->remember_token,
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
+            'roles' => RoleResource::collection($this->whenLoaded('roles')),
         ];
 
         return $this->filterData($request, $dataSource);

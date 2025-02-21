@@ -1,5 +1,6 @@
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
+import { Checkbox } from '@/Components/UI/checkbox';
 import {
     Form,
     FormControl,
@@ -10,6 +11,7 @@ import {
 } from '@/Components/UI/form';
 import { Input } from '@/Components/UI/input';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { roleServiceHook } from '@/Services/roleServiceHook';
 import { userServiceHook } from '@/Services/userServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { UserResource } from '@/Support/Interfaces/Resources';
@@ -30,16 +32,27 @@ const formSchema = z
         email: z.string().email('Invalid email').min(1, 'Email is required'),
         password: z.string().min(6, 'Password must be at least 6 characters').or(z.literal('')),
         password_confirmation: z.string().or(z.literal('')),
+        role_ids: z.array(z.number()).default([]),
     })
-    .refine((data) => !data.password || data.password === data.password_confirmation, {
-        message: "Passwords don't match",
-        path: ['password_confirmation'],
-    });
+    .refine(
+        (data) => {
+            // Only validate password match if password is provided
+            if (data.password && data.password.length > 0) {
+                return data.password === data.password_confirmation;
+            }
+            return true;
+        },
+        {
+            message: "Passwords don't match",
+            path: ['password_confirmation'],
+        },
+    );
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function Edit({ data: { data: user } }: Props) {
     const updateMutation = userServiceHook.useUpdate();
+    const { data: roles, isLoading } = roleServiceHook.useGetAll();
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -49,20 +62,24 @@ export default function Edit({ data: { data: user } }: Props) {
             email: user.email || '',
             password: '',
             password_confirmation: '',
+            role_ids: user.roles?.map((r) => (typeof r === 'number' ? r : r.id)) || [],
         },
     });
 
     const handleSubmit = async (values: FormData) => {
-        const data: Partial<UserResource> = {
-            ...values,
-            // Only include password fields if they're not empty
-            ...(values.password
-                ? {
-                      password: values.password,
-                      password_confirmation: values.password_confirmation,
-                  }
-                : {}),
+        // Create data object with only the required fields first
+        const data: Record<string, any> = {
+            name: values.name,
+            username: values.username,
+            email: values.email,
+            role_ids: values.role_ids,
         };
+
+        // Only add password fields if password is provided
+        if (values.password && values.password.length > 0) {
+            data.password = values.password;
+            data.password_confirmation = values.password_confirmation;
+        }
 
         toast.promise(
             updateMutation.mutateAsync({
@@ -172,6 +189,47 @@ export default function Edit({ data: { data: user } }: Props) {
                                 name='password_confirmation'
                                 control={form.control}
                             />
+
+                            <div className='space-y-4'>
+                                <h3 className='text-lg font-medium'>Roles</h3>
+                                {isLoading ? (
+                                    <p>Loading...</p>
+                                ) : (
+                                    <FormField
+                                        render={({ field }) => (
+                                            <div className='grid grid-cols-2 gap-2'>
+                                                {roles?.data?.map((role) => (
+                                                    <div
+                                                        key={role.id}
+                                                        className='flex items-center gap-2'
+                                                    >
+                                                        <Checkbox
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    field.onChange([
+                                                                        ...field.value,
+                                                                        role.id,
+                                                                    ]);
+                                                                } else {
+                                                                    field.onChange(
+                                                                        field.value.filter(
+                                                                            (id) => id !== role.id,
+                                                                        ),
+                                                                    );
+                                                                }
+                                                            }}
+                                                            checked={field.value.includes(role.id)}
+                                                        />
+                                                        <label>{role.name}</label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        name='role_ids'
+                                        control={form.control}
+                                    />
+                                )}
+                            </div>
 
                             <Button
                                 variant='update'

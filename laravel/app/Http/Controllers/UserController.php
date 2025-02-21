@@ -45,7 +45,7 @@ class UserController extends Controller {
     }
 
     public function show(User $user) {
-        $data = UserResource::make($user);
+        $data = UserResource::make($user->load('roles'));
 
         if ($this->ajax()) {
             return $data;
@@ -55,14 +55,14 @@ class UserController extends Controller {
     }
 
     public function edit(User $user) {
-        $data = UserResource::make($user);
+        $data = UserResource::make($user->load('roles'));
 
         return inertia('User/Edit', compact('data'));
     }
 
     public function update(UpdateUserRequest $request, User $user) {
         if ($this->ajax()) {
-            return $this->userService->update($user,  $request->validated());
+            return $this->userService->update($user, $request->validated());
         }
     }
 
