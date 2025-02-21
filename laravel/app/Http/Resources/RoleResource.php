@@ -17,6 +17,7 @@ class RoleResource extends JsonResource {
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
             'deletable' => $this->users_count === 0,
+            'permissions' => PermissionResource::collection($this->whenLoaded('permissions')),
         ];
 
         return $this->filterData($request, $dataSource);

@@ -14,11 +14,16 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { permissionServiceHook } from '@/Services/permissionServiceHook';
 import { roleServiceHook } from '@/Services/roleServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { RoleResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+
+interface Props {
+    data: { data: RoleResource };
+}
 
 const formSchema = z.object({
     name: z.string().min(1, 'Name is required'),
@@ -28,37 +33,38 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function Create() {
-    const createMutation = roleServiceHook.useCreate();
+export default function Edit({ data: { data: role } }: Props) {
+    const updateMutation = roleServiceHook.useUpdate();
     const { data: permissions, isLoading } = permissionServiceHook.useGetAll();
+
+    const form = useForm<FormData>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: role.name || '',
+            guard_name: role.guard_name || 'web',
+            permissions: role.permissions?.map((p) => (typeof p === 'number' ? p : p.id)) || [],
+        },
+    });
 
     const handleSubmit = async (values: FormData) => {
         toast.promise(
-            createMutation.mutateAsync({
+            updateMutation.mutateAsync({
+                id: role.id,
                 data: {
                     ...values,
                     permissions: values.permissions,
                 },
             }),
             {
-                loading: 'Creating role...',
+                loading: 'Updating role...',
                 success: () => {
                     router.visit(route(`${ROUTES.ROLES}.index`));
-                    return 'Role created successfully';
+                    return 'Role updated successfully';
                 },
-                error: 'An error occurred while creating role',
+                error: 'An error occurred while updating role',
             },
         );
     };
-
-    const form = useForm<FormData>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: '',
-            guard_name: 'web',
-            permissions: [],
-        },
-    });
 
     // Group permissions by their group property
     const groupedPermissions = permissions?.data?.reduce(
@@ -78,12 +84,10 @@ export default function Create() {
         const currentPermissions = form.getValues('permissions');
 
         if (checked) {
-            // Add all permissions from group
             form.setValue('permissions', [
                 ...new Set([...currentPermissions, ...groupPermissionIds]),
             ]);
         } else {
-            // Remove all permissions from group
             form.setValue(
                 'permissions',
                 currentPermissions.filter((id) => !groupPermissionIds.includes(id)),
@@ -92,10 +96,10 @@ export default function Create() {
     };
 
     return (
-        <AuthenticatedLayout title='Create Role'>
+        <AuthenticatedLayout title={`Edit Role: ${role.name}`}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Create Role</CardTitle>
+                    <CardTitle>Edit Role</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -193,10 +197,10 @@ export default function Create() {
                             <Button
                                 variant='update'
                                 type='submit'
-                                loading={createMutation.isPending}
-                                disabled={createMutation.isPending}
+                                loading={updateMutation.isPending}
+                                disabled={updateMutation.isPending}
                             >
-                                Create Role
+                                Update Role
                             </Button>
                         </form>
                     </Form>

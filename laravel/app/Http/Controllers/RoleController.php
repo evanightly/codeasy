@@ -45,7 +45,7 @@ class RoleController extends Controller {
     }
 
     public function show(Role $role) {
-        $data = RoleResource::make($role);
+        $data = RoleResource::make($role->load('permissions'));
 
         if ($this->ajax()) {
             return $data;
@@ -55,7 +55,7 @@ class RoleController extends Controller {
     }
 
     public function edit(Role $role) {
-        $data = RoleResource::make($role);
+        $data = RoleResource::make($role->load('permissions'));
 
         return inertia('Role/Edit', compact('data'));
     }

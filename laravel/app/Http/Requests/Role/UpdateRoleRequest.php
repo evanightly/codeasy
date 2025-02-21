@@ -8,8 +8,8 @@ class UpdateRoleRequest extends FormRequest {
     public function rules(): array {
         return [
             'name' => 'required|string|max:255',
-            'permissions' => 'required|array',
-            'permissions.*' => 'required|integer|exists:permissions,id',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'nullable|integer|exists:permissions,id',
         ];
     }
 }
