@@ -1,6 +1,14 @@
 'use client';
 
-import { BadgeCheck, Check, ChevronsUpDown, LogOut, Sparkles, SwatchBook } from 'lucide-react';
+import {
+    BadgeCheck,
+    Check,
+    ChevronsUpDown,
+    LogOut,
+    Palette,
+    Sparkles,
+    SwatchBook,
+} from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/Components/UI/avatar';
 import {
@@ -18,6 +26,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/Components/UI/sidebar';
+import { useComponentVariant } from '@/Contexts/ComponentVariantContext';
 import { useTheme } from '@/Contexts/ThemeContext';
 import { Link, usePage } from '@inertiajs/react';
 import { DashboardNavbarDarkModeToggler } from './Components/DashboardNavbarDarkModeToggler';
@@ -30,6 +39,7 @@ const DashboardSidebarUser = () => {
 
     const abbreviatedName = user.name.split(' ').map((n) => n.charAt(0));
     const { isDarkMode, currentTheme, availableThemes, toggleDarkMode, setTheme } = useTheme();
+    const { currentVariant, availableVariants, setVariant } = useComponentVariant();
 
     return (
         <SidebarMenu>
@@ -104,6 +114,27 @@ const DashboardSidebarUser = () => {
                                         >
                                             {theme.name}
                                             {currentTheme?.name === theme.name && (
+                                                <Check className='ml-2 h-4 w-4' />
+                                            )}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <DropdownMenuItem>
+                                        <Palette />
+                                        Component Variant
+                                    </DropdownMenuItem>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align='end'>
+                                    {availableVariants.map((variant) => (
+                                        <DropdownMenuItem
+                                            onClick={() => setVariant(variant)}
+                                            key={variant}
+                                        >
+                                            {variant}
+                                            {currentVariant === variant && (
                                                 <Check className='ml-2 h-4 w-4' />
                                             )}
                                         </DropdownMenuItem>

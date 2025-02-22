@@ -12,6 +12,7 @@ import { Skeleton } from '@/Components/UI/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/UI/tooltip';
 import { useIsMobile } from '@/Hooks/use-mobile';
 import { ny } from '@/Lib/Utils';
+import { useComponentVariant } from '@/Contexts/ComponentVariantContext';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -525,7 +526,7 @@ const SidebarMenuButton = React.forwardRef<
         {
             asChild = false,
             isActive = false,
-            variant = 'default',
+            variant: variantProp,
             size = 'default',
             tooltip,
             className,
@@ -535,6 +536,10 @@ const SidebarMenuButton = React.forwardRef<
     ) => {
         const Comp = asChild ? Slot : 'button';
         const { isMobile, state } = useSidebar();
+
+        const { getVariantForComponent } = useComponentVariant();
+        const componentVariant = getVariantForComponent('button');
+        const variant = variantProp || componentVariant;
 
         const button = (
             <Comp

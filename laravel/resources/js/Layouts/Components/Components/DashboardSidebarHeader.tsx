@@ -64,7 +64,7 @@ const DashboardSidebarHeader = ({ items }: { items: MenuItem[] }) => {
         if (item.type === 'menu') {
             return (
                 <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton variant='windui' isActive={isUrlActive(item.url)} asChild>
+                    <SidebarMenuButton isActive={isUrlActive(item.url)} asChild>
                         <Link href={item.url}>
                             {item.icon && <item.icon />}
                             <span>{item.title}</span>

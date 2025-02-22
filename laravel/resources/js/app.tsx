@@ -1,4 +1,5 @@
 import { Toaster as SonnerToaster } from '@/Components/UI/sonner';
+import { ComponentVariantProvider } from '@/Contexts/ComponentVariantContext';
 import { DarkModeProvider } from '@/Contexts/ThemeContext';
 import { createInertiaApp } from '@inertiajs/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -40,20 +41,22 @@ createInertiaApp({
         root.render(
             <QueryClientProvider client={queryClient}>
                 <DarkModeProvider>
-                    <ConfirmationDialogProvider>
-                        <SonnerToaster
-                            toastOptions={
-                                {
-                                    // https://github.com/shadcn-ui/ui/issues/2234
+                    <ComponentVariantProvider>
+                        <ConfirmationDialogProvider>
+                            <SonnerToaster
+                                toastOptions={
+                                    {
+                                        // https://github.com/shadcn-ui/ui/issues/2234
+                                    }
                                 }
-                            }
-                            theme='light'
-                            richColors
-                            duration={2000}
-                            closeButton
-                        />
-                        <App {...props} />
-                    </ConfirmationDialogProvider>
+                                theme='light'
+                                richColors
+                                duration={2000}
+                                closeButton
+                            />
+                            <App {...props} />
+                        </ConfirmationDialogProvider>
+                    </ComponentVariantProvider>
                 </DarkModeProvider>
             </QueryClientProvider>,
         );
