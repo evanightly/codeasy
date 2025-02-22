@@ -498,7 +498,7 @@ const sidebarMenuButtonVariants = cva(
                 default: 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 outline:
                     'bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
-                windui: 'flex items-center gap-3 rounded px-3 py-6 transition-colors hover:bg-primary/10 hover:text-primary/80 focus:bg-primary/10 data-[active=true]:bg-primary/10 data-[active=true]:text-primary/80 active:bg-primary/20 active:text-primary/70',
+                windui: 'flex items-center gap-3 px-3 py-6 transition-colors hover:bg-primary/10 hover:text-primary/80 focus:bg-primary/10 data-[active=true]:bg-primary/10 data-[active=true]:text-primary/80 active:bg-primary/20 active:text-primary/70',
             },
             size: {
                 default: 'h-8 text-sm',
