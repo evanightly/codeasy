@@ -18,7 +18,7 @@ class SchoolService extends BaseCrudService implements SchoolServiceInterface {
         return parent::getAllPaginated($search, $pageSize);
     }
 
-    /** @var SchoolRepository $repository */
+    /** @var SchoolRepository */
     protected $repository;
 
     protected function getRepositoryClass(): string {

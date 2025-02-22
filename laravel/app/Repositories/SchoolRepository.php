@@ -26,7 +26,7 @@ class SchoolRepository extends BaseRepository implements SchoolRepositoryInterfa
             'email',
             'website',
             'logo',
-            'active'
+            'active',
         ]);
 
         $query = $this->applyResolvedRelations($query, $searchParams);
