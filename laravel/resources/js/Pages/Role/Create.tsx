@@ -14,8 +14,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { permissionServiceHook } from '@/Services/permissionServiceHook';
 import { roleServiceHook } from '@/Services/roleServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -30,7 +32,13 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function Create() {
     const createMutation = roleServiceHook.useCreate();
-    const { data: permissions, isLoading } = permissionServiceHook.useGetAll();
+    const [permissionFilters, _setPermissionFilters] = useState<ServiceFilterOptions>({
+        page: 1,
+        page_size: 'all',
+    });
+    const { data: permissions, isLoading } = permissionServiceHook.useGetAll({
+        filters: permissionFilters,
+    });
 
     const handleSubmit = async (values: FormData) => {
         toast.promise(

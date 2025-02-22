@@ -14,7 +14,7 @@ trait HandlesPageSizeAll {
      */
     public function handlePageSizeAll(): void {
         if (request()->get('page_size') === 'all') {
-            request()->merge(['page_size' => $this->repository->count()]);
+            request()->merge(['page_size' => $this->repository->withTrashed()->count()]);
         }
     }
 }
