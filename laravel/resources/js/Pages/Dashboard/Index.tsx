@@ -41,8 +41,8 @@ import {
 } from '@/Components/UI/chart';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage } from '@inertiajs/react';
 import { RoleEnum } from '@/Support/Enums/roleEnum';
+import { Head, usePage } from '@inertiajs/react';
 
 // Example role-based chart dashboard
 // We'll store each role's dataset. Adjust as needed.
