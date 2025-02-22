@@ -11,7 +11,8 @@ export default function Index() {
         page: 1,
         perPage: 10,
         sortBy: [['created_at', 'desc']],
-        permission_resource: 'name,group',
+        relations_count: 'users,roles',
+        permission_resource: 'id,name,group,users_count,roles_count',
     });
 
     const permissionResponse = permissionServiceHook.useGetAll({ filters });

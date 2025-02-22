@@ -57,9 +57,9 @@ class PermissionController extends Controller implements HasMiddleware {
     }
 
     public function edit(Permission $permission) {
-        $data = PermissionResource::make($permission);
+        // $data = PermissionResource::make($permission);
 
-        return inertia('Permission/Edit', compact('data'));
+        // return inertia('Permission/Edit', compact('data'));
     }
 
     public function update(UpdatePermissionRequest $request, Permission $permission) {

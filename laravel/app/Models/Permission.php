@@ -9,4 +9,8 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 #[ObservedBy([PermissionObserver::class])]
 class Permission extends SpatiePermission {
     protected $fillable = ['name', 'guard_name', 'group'];
+
+    public function canBeDeleted(): bool {
+        return $this->roles->isEmpty() && $this->users->isEmpty();
+    }
 }
