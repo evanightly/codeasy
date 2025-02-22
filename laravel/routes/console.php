@@ -7,8 +7,9 @@ use Illuminate\Support\Facades\Artisan;
 //     $this->comment(Inspiring::quote());
 // })->purpose('Display an inspiring quote')->hourly();
 
-Schedule::command('telescope:prune')->everyFifteenMinutes();
-Schedule::command('telescope:clear')->everyFifteenMinutes();
+Schedule::command('telescope:prune')->everyTwoHours();  
+Schedule::command('telescope:clear')->everyTwoHours();
+Schedule::command('backup:run --only-db --disable-notifications')->hourly();
 
 Artisan::command('sandbox:cleanup', function () {
     $path = storage_path('app/public/visualizations');
