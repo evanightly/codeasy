@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeCheck, ChevronsUpDown, LogOut, Sparkles } from 'lucide-react';
+import { BadgeCheck, Check, ChevronsUpDown, LogOut, Sparkles, SwatchBook } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/Components/UI/avatar';
 import {
@@ -18,6 +18,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/Components/UI/sidebar';
+import { useTheme } from '@/Contexts/ThemeContext';
 import { Link, usePage } from '@inertiajs/react';
 import { DashboardNavbarDarkModeToggler } from './Components/DashboardNavbarDarkModeToggler';
 
@@ -28,6 +29,7 @@ const DashboardSidebarUser = () => {
     } = usePage().props;
 
     const abbreviatedName = user.name.split(' ').map((n) => n.charAt(0));
+    const { isDarkMode, currentTheme, availableThemes, toggleDarkMode, setTheme } = useTheme();
 
     return (
         <SidebarMenu>
@@ -87,6 +89,27 @@ const DashboardSidebarUser = () => {
                                     Profile
                                 </Link>
                             </DropdownMenuItem>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <DropdownMenuItem>
+                                        <SwatchBook />
+                                        Theme
+                                    </DropdownMenuItem>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align='end'>
+                                    {availableThemes.map((theme) => (
+                                        <DropdownMenuItem
+                                            onClick={() => setTheme(theme)}
+                                            key={theme.name}
+                                        >
+                                            {theme.name}
+                                            {currentTheme?.name === theme.name && (
+                                                <Check className='ml-2 h-4 w-4' />
+                                            )}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>

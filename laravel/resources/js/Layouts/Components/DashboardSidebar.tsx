@@ -1,6 +1,13 @@
 'use client';
 
-import { AudioWaveform, Frame, GalleryVerticalEnd, Lock, PieChart, ShieldCheck, Users } from 'lucide-react';
+import {
+    AudioWaveform,
+    GalleryVerticalEnd,
+    Lock,
+    PieChart,
+    ShieldCheck,
+    Users,
+} from 'lucide-react';
 import type * as React from 'react';
 
 import {
