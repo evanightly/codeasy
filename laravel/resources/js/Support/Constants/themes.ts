@@ -404,7 +404,7 @@ export const THEMES: Theme[] = [
             'color-3': '210 100% 63%',
             'color-4': '195 100% 63%',
             'color-5': '90 100% 63%',
-            'radius': '0',
+            radius: '0',
         },
         is_active: false,
     },
