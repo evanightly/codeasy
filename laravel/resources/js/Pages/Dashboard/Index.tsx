@@ -39,13 +39,13 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from '@/Components/UI/chart';
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { Head, usePage } from '@inertiajs/react';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 
 // Example role-based chart dashboard
 // We'll store each role's dataset. Adjust as needed.
-
 const adminBarData = [
     { month: 'January', users: 150 },
     { month: 'February', users: 245 },
@@ -79,6 +79,7 @@ const adminRadarData = [
     { dimension: 'Completed Modules', january: 40, june: 80 },
 ];
 
+/** GURU DATASET */
 const guruBarData = [
     { kelas: 'Kelas A', averageScore: 78 },
     { kelas: 'Kelas B', averageScore: 82 },
@@ -108,6 +109,7 @@ const guruRadialData = [
     { name: 'Top Siswa E', progress: 75, fill: 'hsl(var(--chart-5))' },
 ];
 
+/** SISWA DATASET */
 const siswaAreaData = [
     { date: '2025-01-01', progress: 10 },
     { date: '2025-01-05', progress: 20 },
@@ -124,7 +126,7 @@ const siswaPieData = [
     { level: 'Apply', value: 2, fill: 'hsl(var(--chart-3))' },
     { level: 'Analyze', value: 3, fill: 'hsl(var(--chart-4))' },
     { level: 'Evaluate', value: 1, fill: 'hsl(var(--chart-5))' },
-    { level: 'Create', value: 0, fill: 'hsl(var(--color-1))' },
+    { level: 'Create', value: 0, fill: 'hsl(var(--chart-6))' },
 ];
 
 const siswaBarData = [
@@ -133,6 +135,31 @@ const siswaBarData = [
     { modul: 'Pandas/NumPy', done: 0 },
     { modul: 'Matplotlib', done: 0 },
     { modul: 'ML Dasar', done: 0 },
+];
+
+/** SCHOOL DATASET (NEW) */
+const schoolBarData = [
+    { name: 'Guru', count: 23 },
+    { name: 'Siswa', count: 560 },
+    { name: 'Staff', count: 10 },
+];
+const schoolPieData = [
+    { name: 'Labs/Computers', value: 12, fill: 'hsl(var(--chart-1))' },
+    { name: 'Whiteboards', value: 20, fill: 'hsl(var(--chart-2))' },
+    { name: 'Projectors', value: 10, fill: 'hsl(var(--chart-3))' },
+    { name: 'Others', value: 5, fill: 'hsl(var(--chart-4))' },
+];
+const schoolRadarData = [
+    { dimension: 'Kelas A', january: 20, june: 25 },
+    { dimension: 'Kelas B', january: 22, june: 30 },
+    { dimension: 'Kelas C', january: 27, june: 36 },
+    { dimension: 'Kelas D', january: 15, june: 20 },
+    { dimension: 'Kelas E', january: 10, june: 18 },
+];
+const schoolRadialData = [
+    { name: 'Nilai Rata SD', performance: 70, fill: 'hsl(var(--chart-1))' },
+    { name: 'Nilai Rata SMP', performance: 85, fill: 'hsl(var(--chart-2))' },
+    { name: 'Nilai Rata SMA', performance: 90, fill: 'hsl(var(--chart-3))' },
 ];
 
 const adminConfig: ChartConfig = {
@@ -188,15 +215,38 @@ const siswaConfig: ChartConfig = {
     },
 };
 
+/** New config for SCHOOL admin. */
+const schoolConfig: ChartConfig = {
+    count: {
+        label: 'Count',
+        color: 'hsl(var(--chart-1))',
+    },
+    value: {
+        label: 'Value',
+        color: 'hsl(var(--chart-2))',
+    },
+    january: {
+        label: 'January',
+        color: 'hsl(var(--chart-3))',
+    },
+    june: {
+        label: 'June',
+        color: 'hsl(var(--chart-4))',
+    },
+    performance: {
+        label: 'Performance',
+        color: 'hsl(var(--chart-2))',
+    },
+};
+
 export default function Dashboard() {
-    // Example: Suppose we fetch "role" from some prop or store
-    // For demonstration, let's just pick "admin"
     const { role } = usePage().props.auth.user;
 
     return (
         <AuthenticatedLayout>
             <Head title='Dashboard' />
             <div className='flex w-full flex-col gap-8 p-4'>
+                {/* SUPER ADMIN */}
                 {role === RoleEnum.SUPER_ADMIN && (
                     <>
                         <div className='space-y-2'>
@@ -205,8 +255,8 @@ export default function Dashboard() {
                                 Dashboard ringkasan untuk Administrator
                             </p>
                         </div>
-                        {/* Example Bar Chart for user growth */}
-                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                            {/* Example Bar Chart for user growth */}
                             <Card className='w-full'>
                                 <CardHeader>
                                     <CardTitle>Users (Bar Chart)</CardTitle>
@@ -382,6 +432,193 @@ export default function Dashboard() {
                     </>
                 )}
 
+                {/* SCHOOL ADMIN DASHBOARD (NEW) */}
+                {role === RoleEnum.SCHOOL_ADMIN && (
+                    <>
+                        <div className='space-y-2'>
+                            <h1 className='text-2xl font-bold'>School Admin Overview</h1>
+                            <p className='text-muted-foreground'>
+                                Dashboard ringkasan untuk Sekolah
+                            </p>
+                        </div>
+                        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                            {/* bar chart - total staff, guru, siswa */}
+                            <Card className='w-full'>
+                                <CardHeader>
+                                    <CardTitle>Populasi Sekolah (Bar Chart)</CardTitle>
+                                    <CardDescription>Staff, Guru, Siswa</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ChartContainer
+                                        config={schoolConfig}
+                                        className='h-[300px] w-full'
+                                    >
+                                        <BarChart data={schoolBarData}>
+                                            <CartesianGrid vertical={false} />
+                                            <XAxis dataKey='name' />
+                                            <YAxis />
+                                            <ChartTooltip
+                                                cursor={false}
+                                                content={<ChartTooltipContent />}
+                                            />
+                                            <Bar
+                                                radius={4}
+                                                fill='hsl(var(--chart-1))'
+                                                dataKey='count'
+                                            />
+                                        </BarChart>
+                                    </ChartContainer>
+                                </CardContent>
+                                <CardFooter className='text-sm'>
+                                    <div className='flex gap-2 font-medium leading-none'>
+                                        Current Stats <TrendingUp className='h-4 w-4' />
+                                    </div>
+                                </CardFooter>
+                            </Card>
+
+                            {/* pie chart - inventory/resources */}
+                            <Card className='w-full'>
+                                <CardHeader>
+                                    <CardTitle>Fasilitas Sekolah (Pie)</CardTitle>
+                                    <CardDescription>Lab, Projectors, etc.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ChartContainer
+                                        config={schoolConfig}
+                                        className='mx-auto h-[300px] w-full'
+                                    >
+                                        <PieChart>
+                                            <ChartTooltip
+                                                cursor={false}
+                                                content={
+                                                    <ChartTooltipContent nameKey='name' hideLabel />
+                                                }
+                                            />
+                                            <Pie
+                                                outerRadius={90}
+                                                nameKey='name'
+                                                innerRadius={50}
+                                                dataKey='value'
+                                                data={schoolPieData}
+                                            >
+                                                <Label
+                                                    content={({ viewBox }) => {
+                                                        if (
+                                                            viewBox &&
+                                                            'cx' in viewBox &&
+                                                            'cy' in viewBox
+                                                        ) {
+                                                            const total = schoolPieData.reduce(
+                                                                (acc, cur) => acc + cur.value,
+                                                                0,
+                                                            );
+                                                            return (
+                                                                <text
+                                                                    y={viewBox.cy}
+                                                                    x={viewBox.cx}
+                                                                    textAnchor='middle'
+                                                                    dominantBaseline='middle'
+                                                                >
+                                                                    <tspan
+                                                                        y={viewBox.cy}
+                                                                        x={viewBox.cx}
+                                                                        className='fill-foreground text-2xl font-bold'
+                                                                    >
+                                                                        {total}
+                                                                    </tspan>
+                                                                    <tspan
+                                                                        y={(viewBox.cy || 0) + 18}
+                                                                        x={viewBox.cx}
+                                                                        className='fill-muted-foreground text-xs'
+                                                                    >
+                                                                        Items
+                                                                    </tspan>
+                                                                </text>
+                                                            );
+                                                        }
+                                                    }}
+                                                />
+                                            </Pie>
+                                        </PieChart>
+                                    </ChartContainer>
+                                </CardContent>
+                            </Card>
+
+                            {/* radar chart - comparison january vs june, e.g. total classes? */}
+                            <Card className='w-full'>
+                                <CardHeader>
+                                    <CardTitle>Perkembangan Kelas (Radar)</CardTitle>
+                                    <CardDescription>Januari vs Juni</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ChartContainer
+                                        config={schoolConfig}
+                                        className='mx-auto h-[300px] w-full'
+                                    >
+                                        <RadarChart data={schoolRadarData}>
+                                            <PolarGrid radialLines={false} />
+                                            <PolarAngleAxis dataKey='dimension' />
+                                            <ChartTooltip
+                                                cursor={false}
+                                                content={<ChartTooltipContent indicator='line' />}
+                                            />
+                                            <Radar
+                                                strokeWidth={2}
+                                                stroke='var(--color-january)'
+                                                fillOpacity={0}
+                                                fill='var(--color-january)'
+                                                dataKey='january'
+                                            />
+                                            <Radar
+                                                strokeWidth={2}
+                                                stroke='var(--color-june)'
+                                                fillOpacity={0}
+                                                fill='var(--color-june)'
+                                                dataKey='june'
+                                            />
+                                        </RadarChart>
+                                    </ChartContainer>
+                                </CardContent>
+                            </Card>
+
+                            {/* radial chart - maybe average performance by levels? */}
+                            <Card className='w-full'>
+                                <CardHeader>
+                                    <CardTitle>Performa Nilai (Radial Chart)</CardTitle>
+                                    <CardDescription>SD, SMP, SMA</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ChartContainer
+                                        config={schoolConfig}
+                                        className='mx-auto h-[300px] w-full'
+                                    >
+                                        <RadialBarChart
+                                            startAngle={180}
+                                            outerRadius={100}
+                                            innerRadius={30}
+                                            endAngle={-180}
+                                            data={schoolRadialData}
+                                        >
+                                            <ChartTooltip
+                                                cursor={false}
+                                                content={
+                                                    <ChartTooltipContent
+                                                        nameKey='name'
+                                                        key='performance'
+                                                        hideLabel
+                                                    />
+                                                }
+                                            />
+                                            <RadialBar dataKey='performance' background />
+                                        </RadialBarChart>
+                                    </ChartContainer>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </>
+                )}
+
+                {/* TEACHER */}
                 {role === RoleEnum.TEACHER && (
                     <>
                         <div className='space-y-2'>
@@ -389,8 +626,8 @@ export default function Dashboard() {
                             <p className='text-muted-foreground'>Dashboard ringkasan untuk Guru</p>
                         </div>
 
-                        {/* Kelas average bar chart */}
-                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                            {/* Kelas average bar chart */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Rata-rata Nilai Tiap Kelas</CardTitle>
@@ -504,7 +741,7 @@ export default function Dashboard() {
                                                 content={
                                                     <ChartTooltipContent
                                                         nameKey='name'
-                                                        key={'progress'}
+                                                        key='progress'
                                                         hideLabel
                                                     />
                                                 }
@@ -518,6 +755,7 @@ export default function Dashboard() {
                     </>
                 )}
 
+                {/* STUDENT */}
                 {role === RoleEnum.STUDENT && (
                     <>
                         <div className='space-y-2'>
@@ -527,8 +765,8 @@ export default function Dashboard() {
                             </p>
                         </div>
 
-                        {/* Area chart progress */}
-                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                            {/* Area chart progress */}
                             <Card className='w-full'>
                                 <CardHeader>
                                     <CardTitle>Progress Belajar (Area Chart)</CardTitle>
@@ -621,7 +859,7 @@ export default function Dashboard() {
                             </Card>
 
                             {/* Bar Chart - modul tracking */}
-                            <Card>
+                            <Card className='w-full'>
                                 <CardHeader>
                                     <CardTitle>Modul Belum Dikerjakan (Bar)</CardTitle>
                                     <CardDescription>Progress modul personal</CardDescription>
