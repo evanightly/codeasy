@@ -3,10 +3,10 @@ services:
     image: mariadb:10.8
     container_name: mariadb
     environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=codeasy
-      - MYSQL_USER=codeasy
-      - MYSQL_PASSWORD=secretpass
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
     ports:
       - "4001:3306"            # Host port 4001 -> Container port 3306
     volumes:
@@ -14,7 +14,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5

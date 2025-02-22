@@ -161,8 +161,8 @@ jobs:
             # Prune old images, containers, volumes
             docker system prune -af
 
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose --env-file laravel/.env -f docker-compose.prod.yml pull
+            docker compose --env-file laravel/.env -f docker-compose.prod.yml up -d
 
             echo "Deployment completed successfully!"
           ENDSSH
