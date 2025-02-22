@@ -3,4 +3,5 @@ export const ROUTES = {
     PERMISSIONS: 'permissions',
     ROLES: 'roles',
     USERS: 'users',
+    SCHOOLS: 'schools',
 };

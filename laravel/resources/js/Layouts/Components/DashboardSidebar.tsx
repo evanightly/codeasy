@@ -5,6 +5,7 @@ import {
     GalleryVerticalEnd,
     Lock,
     PieChart,
+    School,
     ShieldCheck,
     Users,
 } from 'lucide-react';
@@ -84,6 +85,18 @@ const menuItems: MenuItem[] = [
                 url: route(`${ROUTES.USERS}.index`),
                 icon: Users,
                 permissions: [PermissionEnum.USER_READ],
+            },
+        ],
+    },
+    {
+        type: 'group',
+        title: 'Academic',
+        items: [
+            {
+                type: 'menu',
+                title: 'Schools',
+                url: route(`${ROUTES.SCHOOLS}.index`),
+                icon: School,
             },
         ],
     },

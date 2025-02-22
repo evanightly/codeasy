@@ -15,8 +15,6 @@ class DatabaseSeeder extends Seeder {
      * Seed the application's database.
      */
     public function run(): void {
-        // User::factory(10)->create();
-
         if (app()->isProduction()) {
             $this->call([
                 PermissionSeeder::class,
@@ -24,7 +22,6 @@ class DatabaseSeeder extends Seeder {
             ]);
 
             $this->createSuperAdmin();
-            $this->assignPermissionsToRole(Role::where('name', RoleEnum::SUPER_ADMIN)->first(), Permission::all());
 
             return;
         }
@@ -33,19 +30,13 @@ class DatabaseSeeder extends Seeder {
             PermissionSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
+            SchoolSeeder::class,
         ]);
 
         $this->createSuperAdmin();
-        $this->assignPermissionsToRole(Role::where('name', RoleEnum::SUPER_ADMIN)->first(), Permission::all());
         $this->createSchoolAdmin();
-        // $this->assignPermissionsToRole(Role::where('name', RoleEnum::SCHOOL_ADMIN)->first(), Permission::query()->where('name', 'like', 'school-%')->get());
-        $this->assignPermissionsToRole(Role::where('name', RoleEnum::SCHOOL_ADMIN)->first(), Permission::query()->whereIn('group', ['school'])->get());
         $this->createTeacher();
-        // $this->assignPermissionsToRole(Role::where('name', RoleEnum::TEACHER)->first(), Permission::query()->where('name', 'like', 'teacher-%')->get());
-        $this->assignPermissionsToRole(Role::where('name', RoleEnum::TEACHER)->first(), Permission::query()->whereIn('group', ['student', 'class', 'subject', 'exam'])->get());
         $this->createStudent();
-        // $this->assignPermissionsToRole(Role::where('name', RoleEnum::STUDENT)->first(), Permission::query()->where('name', 'like', 'student-%')->get());
-        $this->assignPermissionsToRole(Role::where('name', RoleEnum::STUDENT)->first(), Permission::query()->whereIn('group', ['subject', 'exam', 'result'])->get());
     }
 
     private function createSuperAdmin(): void {
@@ -56,6 +47,7 @@ class DatabaseSeeder extends Seeder {
         ]);
 
         $superadmin->assignRole(RoleEnum::SUPER_ADMIN);
+        $this->assignPermissionsToRole(Role::where('name', RoleEnum::SUPER_ADMIN)->first(), Permission::all());
     }
 
     private function createSchoolAdmin(): void {
@@ -66,6 +58,8 @@ class DatabaseSeeder extends Seeder {
         ]);
 
         $schoolAdmin->assignRole(RoleEnum::SCHOOL_ADMIN);
+        // $this->assignPermissionsToRole(Role::where('name', RoleEnum::SCHOOL_ADMIN)->first(), Permission::query()->where('name', 'like', 'school-%')->get());
+        $this->assignPermissionsToRole(Role::where('name', RoleEnum::SCHOOL_ADMIN)->first(), Permission::query()->whereIn('group', ['school'])->get());
     }
 
     private function createTeacher(): void {
@@ -76,6 +70,8 @@ class DatabaseSeeder extends Seeder {
         ]);
 
         $teacher->assignRole(RoleEnum::TEACHER);
+        // $this->assignPermissionsToRole(Role::where('name', RoleEnum::TEACHER)->first(), Permission::query()->where('name', 'like', 'teacher-%')->get());
+        $this->assignPermissionsToRole(Role::where('name', RoleEnum::TEACHER)->first(), Permission::query()->whereIn('group', ['student', 'class', 'subject', 'exam'])->get());
     }
 
     private function createStudent(): void {
@@ -86,6 +82,8 @@ class DatabaseSeeder extends Seeder {
         ]);
 
         $student->assignRole(RoleEnum::STUDENT);
+        // $this->assignPermissionsToRole(Role::where('name', RoleEnum::STUDENT)->first(), Permission::query()->where('name', 'like', 'student-%')->get());
+        $this->assignPermissionsToRole(Role::where('name', RoleEnum::STUDENT)->first(), Permission::query()->whereIn('group', ['subject', 'exam', 'result'])->get());
     }
 
     private function assignPermissionsToRole(Role $role, Collection $permissions): void {
