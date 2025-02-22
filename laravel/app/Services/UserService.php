@@ -9,8 +9,7 @@ use App\Support\Interfaces\Services\UserServiceInterface;
 use Illuminate\Database\Eloquent\Model;
 
 class UserService extends BaseCrudService implements UserServiceInterface {
-
-    /** @var UserRepository $repository */
+    /** @var UserRepository */
     protected $repository;
 
     public function create(array $data): ?Model {
