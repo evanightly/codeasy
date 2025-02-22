@@ -41,7 +41,7 @@ import {
 } from '@/Components/UI/chart';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { RoleEnum } from '@/Support/Enums/roleEnum';
-import { usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 
 // Example role-based chart dashboard
 // We'll store each role's dataset. Adjust as needed.
@@ -195,6 +195,7 @@ export default function Dashboard() {
 
     return (
         <AuthenticatedLayout>
+            <Head title='Dashboard' />
             <div className='flex w-full flex-col gap-8 p-4'>
                 {role === RoleEnum.SUPER_ADMIN && (
                     <>
