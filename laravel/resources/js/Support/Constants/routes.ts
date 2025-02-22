@@ -4,4 +4,5 @@ export const ROUTES = {
     ROLES: 'roles',
     USERS: 'users',
     SCHOOLS: 'schools',
+	SCHOOL_REQUESTS: 'school-requests',
 };

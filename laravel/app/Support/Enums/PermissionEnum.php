@@ -62,4 +62,10 @@ enum PermissionEnum: string {
     case RESULT_READ = 'result-read';
     case RESULT_UPDATE = 'result-update';
     case RESULT_DELETE = 'result-delete';
+
+    // School Requests Management
+    case SCHOOL_REQUEST_CREATE = 'school-request-create';
+    case SCHOOL_REQUEST_READ = 'school-request-read';
+    case SCHOOL_REQUEST_UPDATE = 'school-request-update';
+    case SCHOOL_REQUEST_DELETE = 'school-request-delete';
 }

@@ -39,6 +39,10 @@ const permissions = {
     RESULT_READ: 'result-read',
     RESULT_UPDATE: 'result-update',
     RESULT_DELETE: 'result-delete',
+    SCHOOL_REQUEST_CREATE: 'school-request-create',
+    SCHOOL_REQUEST_READ: 'school-request-read',
+    SCHOOL_REQUEST_UPDATE: 'school-request-update',
+    SCHOOL_REQUEST_DELETE: 'school-request-delete',
 };
 
 export const PermissionEnum = permissions;
