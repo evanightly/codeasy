@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->enum('role', RoleEnum::toArray())->default(RoleEnum::STUDENT); // Will store: 'admin', 'teacher', or 'student'
             $table->timestamps();
-            $table->unique(['school_id', 'user_id']);
+            $table->unique(['school_id', 'user_id', 'role']);
         });
     }
 

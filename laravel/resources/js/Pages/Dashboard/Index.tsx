@@ -240,14 +240,14 @@ const schoolConfig: ChartConfig = {
 };
 
 export default function Dashboard() {
-    const { role } = usePage().props.auth.user;
+    const { roles } = usePage().props.auth.user;
 
     return (
         <AuthenticatedLayout>
             <Head title='Dashboard' />
             <div className='flex w-full flex-col gap-8 p-4'>
                 {/* SUPER ADMIN */}
-                {role === RoleEnum.SUPER_ADMIN && (
+                {roles.includes(RoleEnum.SUPER_ADMIN) && (
                     <>
                         <div className='space-y-2'>
                             <h1 className='text-2xl font-bold'>Admin Overview</h1>
@@ -433,7 +433,7 @@ export default function Dashboard() {
                 )}
 
                 {/* SCHOOL ADMIN DASHBOARD (NEW) */}
-                {role === RoleEnum.SCHOOL_ADMIN && (
+                {roles.includes(RoleEnum.SCHOOL_ADMIN) && (
                     <>
                         <div className='space-y-2'>
                             <h1 className='text-2xl font-bold'>School Admin Overview</h1>
@@ -619,7 +619,7 @@ export default function Dashboard() {
                 )}
 
                 {/* TEACHER */}
-                {role === RoleEnum.TEACHER && (
+                {roles.includes(RoleEnum.TEACHER) && (
                     <>
                         <div className='space-y-2'>
                             <h1 className='text-2xl font-bold'>Guru Overview</h1>
@@ -756,7 +756,7 @@ export default function Dashboard() {
                 )}
 
                 {/* STUDENT */}
-                {role === RoleEnum.STUDENT && (
+                {roles.includes(RoleEnum.STUDENT) && (
                     <>
                         <div className='space-y-2'>
                             <h1 className='text-2xl font-bold'>Siswa Dashboard</h1>

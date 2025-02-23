@@ -7,4 +7,6 @@ export interface User extends Model {
     email_verified_at?: string | null;
     password?: string;
     remember_token?: string | null;
+    image_url?: string | null;
+    image_path?: string | null;
 }

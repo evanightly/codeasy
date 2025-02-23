@@ -1,17 +1,12 @@
-export interface User {
-    id: number;
-    name: string;
-    email: string;
-    email_verified_at?: string;
-    image_url: string;
-    image_path: string;
-}
+import { RoleEnum } from '@/Support/Enums/roleEnum';
+import { User } from '@/Support/Interfaces/Models';
 
 interface AuthenticatedUser extends User {
-    role: string;
+    roles: RoleEnum[];
     initials: string;
     image: string;
     permissions: PERMISSION_ENUM[];
+    administeredSchools: number[];
 }
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {

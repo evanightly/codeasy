@@ -26,6 +26,8 @@ class HandleInertiaRequests extends Middleware {
      * @return array<string, mixed>
      */
     public function share(Request $request): array {
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'env' => [
@@ -42,10 +44,13 @@ class HandleInertiaRequests extends Middleware {
             ],
             'auth' => [
                 'user' => array_merge(
-                    optional($request->user())->toArray() ?? [],
-                    ['image' => optional($request->user())->image ?? null],
-                    ['role' => optional($request->user())->roles?->first()->name ?? null],
-                    ['permissions' => optional($request->user())->getAllPermissions()?->pluck('name')->toArray() ?? []],
+                    optional($user)->toArray() ?? [],
+                    [
+                        'image' => optional($user)->image ?? null,
+                        'roles' => optional($user)->roles?->pluck('name')->toArray() ?? [],
+                        'permissions' => optional($user)->getAllPermissions()?->pluck('name')->toArray() ?? [],
+                        'administeredSchools' => optional($user)?->administeredSchools()?->pluck('schools.id')->toArray() ?? [],
+                    ],
                 ),
             ],
         ];

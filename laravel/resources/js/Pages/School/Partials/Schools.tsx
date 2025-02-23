@@ -32,7 +32,7 @@ interface SchoolsProps {
 }
 
 export function Schools({ response, filters, setFilters, baseKey, baseRoute }: SchoolsProps) {
-    const { role } = usePage().props.auth.user;
+    const { roles } = usePage().props.auth.user;
     const [selectedSchool, setSelectedSchool] = useState<SchoolResource | null>(null);
     const [showAssignAdmin, setShowAssignAdmin] = useState(false);
 
@@ -104,12 +104,12 @@ export function Schools({ response, filters, setFilters, baseKey, baseRoute }: S
                         <DropdownMenuContent align='end'>
                             <DropdownMenuItem
                                 onClick={() => {
-                                    if (role !== RoleEnum.SUPER_ADMIN) return;
+                                    if (!roles.includes(RoleEnum.SUPER_ADMIN)) return;
 
                                     setSelectedSchool(school);
                                     setShowAssignAdmin(true);
                                 }}
-                                disabled={role !== RoleEnum.SUPER_ADMIN}
+                                disabled={!roles.includes(RoleEnum.SUPER_ADMIN)}
                             >
                                 Assign Admin
                             </DropdownMenuItem>

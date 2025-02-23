@@ -20,7 +20,7 @@ class SchoolRequestRepository extends BaseRepository implements SchoolRequestRep
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
-        $query = $this->applyColumnFilters($query, $searchParams, ['user_id', 'created_at', 'updated_at']);
+        $query = $this->applyColumnFilters($query, $searchParams, ['id' ,'user_id', 'school_id', 'status', 'created_at', 'updated_at']);
 
         $query = $this->applySorting($query, $searchParams);
 

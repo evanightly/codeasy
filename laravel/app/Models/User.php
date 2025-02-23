@@ -87,4 +87,9 @@ class User extends Authenticatable {
     public function isSuperAdmin(): bool {
         return $this->hasRole(RoleEnum::SUPER_ADMIN->value);
     }
+
+    public function administeredSchools(): BelongsToMany {
+        return $this->schools()
+            ->wherePivot('role', RoleEnum::SCHOOL_ADMIN->value);
+    }
 }

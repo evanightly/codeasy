@@ -12,6 +12,7 @@ import { useConfirmation } from '@/Contexts/ConfirmationDialogContext';
 import { schoolRequestServiceHook } from '@/Services/schoolRequestServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { RoleEnum } from '@/Support/Enums/roleEnum';
+import { SchoolRequestStatusEnum } from '@/Support/Enums/schoolRequestStatusEnum';
 import { PaginateMeta, PaginateResponse, ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { SchoolRequestResource } from '@/Support/Interfaces/Resources';
 import { Link, usePage } from '@inertiajs/react';
@@ -42,6 +43,8 @@ const SchoolRequests = ({
     const columnHelper = createColumnHelper<SchoolRequestResource>();
 
     const deleteMutation = schoolRequestServiceHook.useDelete();
+    const approveMutation = schoolRequestServiceHook.useApprove();
+    const rejectMutation = schoolRequestServiceHook.useReject();
 
     const handleDelete = async (request: SchoolRequestResource) => {
         if (!request.id) return;
@@ -54,14 +57,44 @@ const SchoolRequests = ({
         });
     };
 
+    const handleApprove = async (request: SchoolRequestResource) => {
+        confirmAction(async () => {
+            toast.promise(
+                approveMutation.mutateAsync({
+                    id: request.id,
+                }),
+                {
+                    loading: 'Approving request...',
+                    success: 'Request approved successfully',
+                    error: 'Failed to approve request',
+                },
+            );
+        });
+    };
+
+    const handleReject = async (request: SchoolRequestResource) => {
+        confirmAction(async () => {
+            toast.promise(
+                rejectMutation.mutateAsync({
+                    id: request.id,
+                }),
+                {
+                    loading: 'Rejecting request...',
+                    success: 'Request rejected successfully',
+                    error: 'Failed to reject request',
+                },
+            );
+        });
+    };
+
     const getStatusBadgeVariant = (status?: string) => {
         if (!status) return 'secondary';
         switch (status.toLowerCase()) {
-            case 'approved':
+            case SchoolRequestStatusEnum.APPROVED:
                 return 'success';
-            case 'pending':
+            case SchoolRequestStatusEnum.PENDING:
                 return 'warning';
-            case 'rejected':
+            case SchoolRequestStatusEnum.REJECTED:
                 return 'destructive';
             default:
                 return 'secondary';
@@ -89,8 +122,27 @@ const SchoolRequests = ({
             id: 'actions',
             cell: ({ row }) => {
                 const request = row.original;
+                const isAdmin =
+                    user.roles.includes(RoleEnum.SUPER_ADMIN) ||
+                    user.roles.includes(RoleEnum.SCHOOL_ADMIN);
+                const isPending = request.status === SchoolRequestStatusEnum.PENDING;
 
-                return (
+                if (!isPending) return null;
+
+                return isAdmin ? (
+                    <div className='flex gap-2'>
+                        <Button variant='success' size='sm' onClick={() => handleApprove(request)}>
+                            Approve
+                        </Button>
+                        <Button
+                            variant='destructive'
+                            size='sm'
+                            onClick={() => handleReject(request)}
+                        >
+                            Reject
+                        </Button>
+                    </div>
+                ) : (
                     user.id === request.user_id && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -127,7 +179,7 @@ const SchoolRequests = ({
             filters={filters}
             filterComponents={(_) => {
                 return (
-                    user.role === RoleEnum.TEACHER && (
+                    user.roles.includes(RoleEnum.TEACHER) && (
                         <Link
                             href={route(`${ROUTES.SCHOOL_REQUESTS}.create`)}
                             className={buttonVariants({ variant: 'create' })}

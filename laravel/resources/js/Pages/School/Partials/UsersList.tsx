@@ -23,7 +23,7 @@ export function UsersList({
     onDelete,
 }: Props) {
     const { user } = usePage().props.auth;
-    const showDeleteButton = canDelete && user.role === RoleEnum.SUPER_ADMIN;
+    const showDeleteButton = canDelete && user.roles.includes(RoleEnum.SUPER_ADMIN);
 
     if (!users?.length) {
         return <p className='text-sm text-muted-foreground'>{emptyMessage}</p>;
