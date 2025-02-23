@@ -11,9 +11,10 @@ import {
 import { useConfirmation } from '@/Contexts/ConfirmationDialogContext';
 import { schoolServiceHook } from '@/Services/schoolServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { PaginateMeta, PaginateResponse, ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { SchoolResource } from '@/Support/Interfaces/Resources';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
@@ -31,6 +32,7 @@ interface SchoolsProps {
 }
 
 export function Schools({ response, filters, setFilters, baseKey, baseRoute }: SchoolsProps) {
+    const { role } = usePage().props.auth.user;
     const [selectedSchool, setSelectedSchool] = useState<SchoolResource | null>(null);
     const [showAssignAdmin, setShowAssignAdmin] = useState(false);
 
@@ -102,9 +104,12 @@ export function Schools({ response, filters, setFilters, baseKey, baseRoute }: S
                         <DropdownMenuContent align='end'>
                             <DropdownMenuItem
                                 onClick={() => {
+                                    if (role !== RoleEnum.SUPER_ADMIN) return;
+
                                     setSelectedSchool(school);
                                     setShowAssignAdmin(true);
                                 }}
+                                disabled={role !== RoleEnum.SUPER_ADMIN}
                             >
                                 Assign Admin
                             </DropdownMenuItem>
