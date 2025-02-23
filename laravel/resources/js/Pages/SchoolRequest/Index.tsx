@@ -3,6 +3,7 @@ import { SchoolRequests } from '@/Pages/SchoolRequest/Partials/SchoolRequests';
 import { schoolRequestServiceHook } from '@/Services/schoolRequestServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { usePage } from '@inertiajs/react';
 import { Suspense, useState } from 'react';
@@ -16,9 +17,12 @@ export default function Index() {
         sortBy: [['created_at', 'desc']],
         school_request_resource: 'id,user_id,school_id,status,message,user,school',
         relations: 'user,school',
-        column_filters: {
-            user_id: user.id,
-        },
+        column_filters:
+            user.role !== RoleEnum.SUPER_ADMIN
+                ? {
+                      user_id: user.id,
+                  }
+                : undefined,
     });
 
     const requestsResponse = schoolRequestServiceHook.useGetAll({ filters });

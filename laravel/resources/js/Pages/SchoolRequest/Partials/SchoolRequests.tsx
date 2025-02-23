@@ -11,9 +11,10 @@ import {
 import { useConfirmation } from '@/Contexts/ConfirmationDialogContext';
 import { schoolRequestServiceHook } from '@/Services/schoolRequestServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { PaginateMeta, PaginateResponse, ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { SchoolRequestResource } from '@/Support/Interfaces/Resources';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
@@ -36,6 +37,7 @@ const SchoolRequests = ({
     baseKey,
     baseRoute,
 }: SchoolRequestsProps) => {
+    const { user } = usePage().props.auth;
     const confirmAction = useConfirmation();
     const columnHelper = createColumnHelper<SchoolRequestResource>();
 
@@ -89,24 +91,28 @@ const SchoolRequests = ({
                 const request = row.original;
 
                 return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant='ghost' className='h-8 w-8 p-0'>
-                                <span className='sr-only'>Open menu</span>
-                                <MoreHorizontal className='h-4 w-4' />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align='end'>
-                            <DropdownMenuItem asChild>
-                                <Link href={route(`${ROUTES.SCHOOL_REQUESTS}.edit`, request.id)}>
-                                    Edit
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDelete(request)}>
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    user.id === request.user_id && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant='ghost' className='h-8 w-8 p-0'>
+                                    <span className='sr-only'>Open menu</span>
+                                    <MoreHorizontal className='h-4 w-4' />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end'>
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href={route(`${ROUTES.SCHOOL_REQUESTS}.edit`, request.id)}
+                                    >
+                                        Edit
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDelete(request)}>
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )
                 );
             },
         }),
@@ -121,12 +127,14 @@ const SchoolRequests = ({
             filters={filters}
             filterComponents={(_) => {
                 return (
-                    <Link
-                        href={route(`${ROUTES.SCHOOL_REQUESTS}.create`)}
-                        className={buttonVariants({ variant: 'create' })}
-                    >
-                        Create Request
-                    </Link>
+                    user.role === RoleEnum.TEACHER && (
+                        <Link
+                            href={route(`${ROUTES.SCHOOL_REQUESTS}.create`)}
+                            className={buttonVariants({ variant: 'create' })}
+                        >
+                            Create Request
+                        </Link>
+                    )
                 );
             }}
             data={response?.data?.data ?? []}
