@@ -7,4 +7,5 @@ export * from './RoleResource';
 export * from './UserResource';
 
 export * from './SchoolResource';
+
 export * from './SchoolRequestResource';

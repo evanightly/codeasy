@@ -6,9 +6,9 @@ use App\Http\Requests\School\StoreSchoolRequest;
 use App\Http\Requests\School\UpdateSchoolRequest;
 use App\Http\Resources\SchoolResource;
 use App\Models\School;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\SchoolServiceInterface;
 use Illuminate\Http\Request;
-use App\Support\Enums\PermissionEnum;
 use Illuminate\Routing\Controllers\Middleware;
 
 class SchoolController extends Controller {

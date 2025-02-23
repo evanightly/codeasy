@@ -1,10 +1,10 @@
-import { ROUTES } from '@/Support/Constants/routes';
 import { serviceHooksFactory } from '@/Services/serviceHooksFactory';
+import { ROUTES } from '@/Support/Constants/routes';
 import { SchoolResource } from '@/Support/Interfaces/Resources';
 
 export const schoolServiceHook = {
     ...serviceHooksFactory<SchoolResource>({
-        baseRoute: ROUTES.SCHOOLS
+        baseRoute: ROUTES.SCHOOLS,
     }),
     customFunctionExample: async () => {
         console.log('custom function');
