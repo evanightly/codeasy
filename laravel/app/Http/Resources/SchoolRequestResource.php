@@ -15,6 +15,8 @@ class SchoolRequestResource extends JsonResource {
             'school_id' => $this->school_id,
             'status' => $this->status,
             'message' => $this->message,
+            'user' => UserResource::make($this->whenLoaded('user')),
+            'school' => SchoolResource::make($this->whenLoaded('school')),
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
         ];

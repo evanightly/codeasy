@@ -2,6 +2,7 @@
 
 import {
     AudioWaveform,
+    FileCheck,
     GalleryVerticalEnd,
     Lock,
     PieChart,
@@ -97,6 +98,12 @@ const menuItems: MenuItem[] = [
                 title: 'Schools',
                 url: route(`${ROUTES.SCHOOLS}.index`),
                 icon: School,
+            },
+            {
+                type: 'menu',
+                title: 'School Requests',
+                url: route(`${ROUTES.SCHOOL_REQUESTS}.index`),
+                icon: FileCheck,
             },
         ],
     },

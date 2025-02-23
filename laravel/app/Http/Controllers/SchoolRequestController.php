@@ -6,9 +6,9 @@ use App\Http\Requests\SchoolRequest\StoreSchoolRequestRequest;
 use App\Http\Requests\SchoolRequest\UpdateSchoolRequestRequest;
 use App\Http\Resources\SchoolRequestResource;
 use App\Models\SchoolRequest;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\SchoolRequestServiceInterface;
 use Illuminate\Http\Request;
-use App\Support\Enums\PermissionEnum;
 use Illuminate\Routing\Controllers\Middleware;
 
 class SchoolRequestController extends Controller {
@@ -22,7 +22,6 @@ class SchoolRequestController extends Controller {
             new Middleware('permission:' . PermissionEnum::SCHOOL_REQUEST_DELETE->value, only: ['destroy']),
         ];
     }
-
 
     public function index(Request $request) {
         $perPage = $request->get('perPage', 10);
@@ -46,7 +45,7 @@ class SchoolRequestController extends Controller {
     }
 
     public function show(SchoolRequest $schoolRequest) {
-        $data = SchoolRequestResource::make($schoolRequest);
+        $data = SchoolRequestResource::make($schoolRequest->load('user', 'school'));
 
         if ($this->ajax()) {
             return $data;
@@ -56,7 +55,7 @@ class SchoolRequestController extends Controller {
     }
 
     public function edit(SchoolRequest $schoolRequest) {
-        $data = SchoolRequestResource::make($schoolRequest);
+        $data = SchoolRequestResource::make($schoolRequest->load('user', 'school'));
 
         return inertia('SchoolRequest/Edit', compact('data'));
     }
