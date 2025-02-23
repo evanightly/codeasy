@@ -33,8 +33,6 @@ class SchoolService extends BaseCrudService implements SchoolServiceInterface {
     }
 
     public function assignSchoolAdmin(School $school, array $validatedRequest): void {
-        dump($validatedRequest);
-
         $userId = $validatedRequest['user_id'];
 
         // Remove any existing admin role for this school if exists
@@ -49,6 +47,19 @@ class SchoolService extends BaseCrudService implements SchoolServiceInterface {
         $user = $this->userService->findOrFail($userId);
         if (!$user->hasRole(RoleEnum::SCHOOL_ADMIN->value)) {
             $user->assignRole(RoleEnum::SCHOOL_ADMIN->value);
+        }
+    }
+
+    public function unassignSchoolAdmin(School $school, array $validatedRequest): void {
+        $userId = $validatedRequest['user_id'];
+
+        // Remove admin role for this school
+        $school->administrators()->detach($userId);
+
+        // Remove School Admin role if user has no other schools where they are admin
+        $user = $this->userService->findOrFail($userId);
+        if (!$user->schools()->wherePivot('role', RoleEnum::SCHOOL_ADMIN->value)->exists()) {
+            $user->removeRole(RoleEnum::SCHOOL_ADMIN->value);
         }
     }
 }

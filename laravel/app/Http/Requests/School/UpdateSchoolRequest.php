@@ -9,10 +9,15 @@ class UpdateSchoolRequest extends FormRequest {
     public function rules(): array {
         $intent = $this->get('intent');
 
-        if ($intent === IntentEnum::SCHOOL_UPDATE_ASSIGN_ADMIN->value) {
-            return [
-                'user_id' => ['required', 'exists:users,id'],
-            ];
+        switch ($intent) {
+            case IntentEnum::SCHOOL_UPDATE_ASSIGN_ADMIN->value:
+                return [
+                    'user_id' => ['required', 'exists:users,id'],
+                ];
+            case IntentEnum::SCHOOL_UPDATE_UNASSIGN_ADMIN->value:
+                return [
+                    'user_id' => ['required', 'exists:users,id'],
+                ];
         }
 
         return [

@@ -6,6 +6,7 @@ use App\Http\Requests\School\StoreSchoolRequest;
 use App\Http\Requests\School\UpdateSchoolRequest;
 use App\Http\Resources\SchoolResource;
 use App\Models\School;
+use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\SchoolServiceInterface;
 use Illuminate\Http\Request;
@@ -61,7 +62,20 @@ class SchoolController extends Controller {
     }
 
     public function update(UpdateSchoolRequest $request, School $school) {
+        $intent = $request->get('intent');
+
         if ($this->ajax()) {
+            switch ($intent) {
+                case IntentEnum::SCHOOL_UPDATE_ASSIGN_ADMIN->value:
+                    $this->schoolService->assignSchoolAdmin($school, $request->validated());
+
+                    return;
+                case IntentEnum::SCHOOL_UPDATE_UNASSIGN_ADMIN->value:
+                    $this->schoolService->unassignSchoolAdmin($school, $request->validated());
+
+                    return;
+            }
+
             return $this->schoolService->update($school, $request->validated());
         }
     }

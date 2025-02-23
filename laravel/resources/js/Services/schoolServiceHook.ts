@@ -25,4 +25,17 @@ export const schoolServiceHook = {
             invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
         });
     },
+    useUnassignAdmin: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number; data: { user_id: number } }) => {
+                return mutationApi({
+                    method: 'patch',
+                    url: route(`${ROUTES.SCHOOLS}.update`, params.id),
+                    data: params.data,
+                    params: { intent: IntentEnum.SCHOOL_UPDATE_UNASSIGN_ADMIN },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
+        });
+    },
 };
