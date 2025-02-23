@@ -22,9 +22,13 @@ function generateDynamicBreadcrumbs(): GenericBreadcrumbItem[] {
     const paths = url.split('/').filter(Boolean); // Split the URL into parts and remove empty elements
 
     const breadcrumbs: GenericBreadcrumbItem[] = paths.map((path, index) => {
-        const isActive = index === paths.length - 1; // The last path part is the active breadcrumb
-        const name = path.charAt(0).toUpperCase() + path.slice(1); // Capitalize the first letter
-        const link = `/${paths.slice(0, index + 1).join('/')}`; // Construct the link for each breadcrumb
+        const isActive = index === paths.length - 1;
+        // Format the name by replacing hyphens with spaces and capitalizing each word
+        const name = path
+            .split('-')
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        const link = `/${paths.slice(0, index + 1).join('/')}`;
 
         return {
             name,
