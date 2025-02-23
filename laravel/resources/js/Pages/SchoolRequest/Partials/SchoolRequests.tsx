@@ -1,3 +1,4 @@
+import { Badge } from '@/Components/UI/badge';
 import { Button, buttonVariants } from '@/Components/UI/button';
 import { DataTable } from '@/Components/UI/data-table';
 import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
@@ -51,6 +52,20 @@ const SchoolRequests = ({
         });
     };
 
+    const getStatusBadgeVariant = (status?: string) => {
+        if (!status) return 'secondary';
+        switch (status.toLowerCase()) {
+            case 'approved':
+                return 'success';
+            case 'pending':
+                return 'warning';
+            case 'rejected':
+                return 'destructive';
+            default:
+                return 'secondary';
+        }
+    };
+
     const columns = [
         columnHelper.accessor('user.name', {
             header: ({ column }) => <DataTableColumnHeader title='User' column={column} />,
@@ -60,6 +75,10 @@ const SchoolRequests = ({
         }),
         columnHelper.accessor('status', {
             header: ({ column }) => <DataTableColumnHeader title='Status' column={column} />,
+            cell: ({ getValue }) => {
+                const status = getValue();
+                return <Badge variant={getStatusBadgeVariant(status)}>{status}</Badge>;
+            },
         }),
         columnHelper.accessor('message', {
             header: ({ column }) => <DataTableColumnHeader title='Message' column={column} />,

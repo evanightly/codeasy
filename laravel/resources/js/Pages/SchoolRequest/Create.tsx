@@ -19,10 +19,9 @@ import { Textarea } from '@/Components/UI/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { schoolRequestServiceHook } from '@/Services/schoolRequestServiceHook';
 import { schoolServiceHook } from '@/Services/schoolServiceHook';
-import { userServiceHook } from '@/Services/userServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -36,14 +35,14 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function Create() {
+    const { user } = usePage().props.auth;
     const createMutation = schoolRequestServiceHook.useCreate();
-    const { data: users } = userServiceHook.useGetAll();
     const { data: schools } = schoolServiceHook.useGetAll();
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            user_id: undefined,
+            user_id: user.id,
             school_id: undefined,
             message: '',
         },
@@ -69,37 +68,6 @@ export default function Create() {
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
-                            <FormField
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>User</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value?.toString()}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder='Select a user' />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {users?.data?.map((user) => (
-                                                    <SelectItem
-                                                        value={user.id.toString()}
-                                                        key={user.id}
-                                                    >
-                                                        {user.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                                name='user_id'
-                                control={form.control}
-                            />
-
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
