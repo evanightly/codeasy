@@ -21,6 +21,10 @@ class SchoolResource extends JsonResource {
             'website' => $this->website,
             'logo' => $this->logo,
             'active' => $this->active,
+            'users' => UserResource::collection($this->whenLoaded('users')),
+            'administrators' => UserResource::collection($this->whenLoaded('administrators')),
+            'teachers' => UserResource::collection($this->whenLoaded('teachers')),
+            'students' => UserResource::collection($this->whenLoaded('students')),
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
         ];

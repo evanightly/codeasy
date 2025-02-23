@@ -2,10 +2,19 @@
 
 namespace App\Http\Requests\School;
 
+use App\Support\Enums\IntentEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSchoolRequest extends FormRequest {
     public function rules(): array {
+        $intent = $this->get('intent');
+
+        if ($intent === IntentEnum::SCHOOL_UPDATE_ASSIGN_ADMIN->value) {
+            return [
+                'user_id' => ['required', 'exists:users,id'],
+            ];
+        }
+
         return [
             'name' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',

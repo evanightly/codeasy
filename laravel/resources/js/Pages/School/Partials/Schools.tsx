@@ -5,6 +5,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/Components/UI/dropdown-menu';
 import { useConfirmation } from '@/Contexts/ConfirmationDialogContext';
@@ -16,8 +17,9 @@ import { Link } from '@inertiajs/react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { AssignAdminDialog } from './AssignAdminDialog';
 
 interface SchoolsProps {
     response?: UseQueryResult<PaginateResponse<SchoolResource>, Error>;
@@ -28,11 +30,15 @@ interface SchoolsProps {
     baseKey: string;
 }
 
-const Schools = ({ response, filters, setFilters, baseKey, baseRoute }: SchoolsProps) => {
+export function Schools({ response, filters, setFilters, baseKey, baseRoute }: SchoolsProps) {
+    const [selectedSchool, setSelectedSchool] = useState<SchoolResource | null>(null);
+    const [showAssignAdmin, setShowAssignAdmin] = useState(false);
+
     const confirmAction = useConfirmation();
     const columnHelper = createColumnHelper<SchoolResource>();
 
     const deleteMutation = schoolServiceHook.useDelete();
+    const assignAdminMutation = schoolServiceHook.useAssignAdmin();
 
     const handleDeleteSchool = async (school: SchoolResource) => {
         if (!school.id) return;
@@ -43,6 +49,25 @@ const Schools = ({ response, filters, setFilters, baseKey, baseRoute }: SchoolsP
                 error: 'An error occurred while deleting school',
             });
         });
+    };
+
+    const handleAssignAdmin = async (userId: number) => {
+        if (!selectedSchool) return;
+
+        toast.promise(
+            assignAdminMutation.mutateAsync({
+                id: selectedSchool.id,
+                data: { user_id: userId },
+            }),
+            {
+                loading: 'Assigning school administrator...',
+                success: () => {
+                    setShowAssignAdmin(false);
+                    return 'School administrator assigned successfully';
+                },
+                error: 'Failed to assign school administrator',
+            },
+        );
     };
 
     const columns = [
@@ -75,6 +100,18 @@ const Schools = ({ response, filters, setFilters, baseKey, baseRoute }: SchoolsP
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setSelectedSchool(school);
+                                    setShowAssignAdmin(true);
+                                }}
+                            >
+                                Assign Admin
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                                <Link href={route(`${ROUTES.SCHOOLS}.show`, school.id)}>Show</Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link href={route(`${ROUTES.SCHOOLS}.edit`, school.id)}>Edit</Link>
                             </DropdownMenuItem>
@@ -91,26 +128,36 @@ const Schools = ({ response, filters, setFilters, baseKey, baseRoute }: SchoolsP
     const memoizedColumns = useMemo(() => columns, []);
 
     return (
-        <DataTable
-            setFilters={setFilters}
-            meta={response?.data?.meta}
-            filters={filters}
-            filterComponents={(_) => {
-                return (
-                    <Link
-                        href={route(`${ROUTES.SCHOOLS}.create`)}
-                        className={buttonVariants({ variant: 'create' })}
-                    >
-                        Create School
-                    </Link>
-                );
-            }}
-            data={response?.data?.data ?? []}
-            columns={memoizedColumns}
-            baseRoute={baseRoute}
-            baseKey={baseKey}
-        />
-    );
-};
+        <>
+            <DataTable
+                setFilters={setFilters}
+                meta={response?.data?.meta}
+                filters={filters}
+                filterComponents={(_) => {
+                    return (
+                        <Link
+                            href={route(`${ROUTES.SCHOOLS}.create`)}
+                            className={buttonVariants({ variant: 'create' })}
+                        >
+                            Create School
+                        </Link>
+                    );
+                }}
+                data={response?.data?.data ?? []}
+                columns={memoizedColumns}
+                baseRoute={baseRoute}
+                baseKey={baseKey}
+            />
 
-export { Schools };
+            <AssignAdminDialog
+                onClose={() => {
+                    setShowAssignAdmin(false);
+                    setSelectedSchool(null);
+                }}
+                onAssign={handleAssignAdmin}
+                loading={assignAdminMutation.isPending}
+                isOpen={showAssignAdmin}
+            />
+        </>
+    );
+}

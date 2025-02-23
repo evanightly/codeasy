@@ -1,4 +1,8 @@
 import { School } from '@/Support/Interfaces/Models';
-import { Resource } from '@/Support/Interfaces/Resources';
+import { Resource, UserResource } from '@/Support/Interfaces/Resources';
 
-export interface SchoolResource extends Resource, School {}
+export interface SchoolResource extends Resource, School {
+    administrators?: UserResource[];
+    teachers?: UserResource[];
+    students?: UserResource[];
+}

@@ -45,7 +45,7 @@ class SchoolController extends Controller {
     }
 
     public function show(School $school) {
-        $data = SchoolResource::make($school);
+        $data = SchoolResource::make($school->load(['administrators', 'teachers', 'students']));
 
         if ($this->ajax()) {
             return $data;

@@ -28,7 +28,7 @@ const DashboardSidebarUser = () => {
         auth: { user },
     } = usePage().props;
 
-    const abbreviatedName = user.name.split(' ').map((n) => n.charAt(0));
+    const abbreviatedName = user?.name?.split(' ').map((n) => n.charAt(0));
     const { isDarkMode, currentTheme, availableThemes, toggleDarkMode, setTheme } = useTheme();
 
     return (
