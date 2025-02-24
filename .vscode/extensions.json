@@ -12,6 +12,7 @@
       "ms-python.python",
       "ms-python.debugpy",
       "bradlc.vscode-tailwindcss",
-      "open-southeners.laravel-pint"
+      "open-southeners.laravel-pint",
+      "onecentlin.laravel5-snippets",
     ]
 }
