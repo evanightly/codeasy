@@ -10,6 +10,7 @@ import {
 import { useConfirmation } from '@/Contexts/ConfirmationDialogContext';
 import { permissionServiceHook } from '@/Services/permissionServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { PermissionEnum } from '@/Support/Enums/permissionEnum';
 import { PaginateMeta, PaginateResponse, ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { PermissionResource } from '@/Support/Interfaces/Resources';
 import { Link } from '@inertiajs/react';
@@ -37,7 +38,7 @@ const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: Perm
     const deleteMutation = permissionServiceHook.useDelete();
 
     const handleDeletePermission = async (permission: PermissionResource) => {
-        if (!permission.id) return;
+        if (!permission.id || Object.values(PermissionEnum).includes(permission?.name ?? '')) return;
         confirmAction(async () => {
             toast.promise(deleteMutation.mutateAsync({ id: permission.id }), {
                 loading: t('pages.permission.common.messages.pending.delete'),
@@ -70,6 +71,7 @@ const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: Perm
             id: 'actions',
             cell: ({ row }) => {
                 const permission = row.original;
+                const isPredefined = Object.values(PermissionEnum).includes(permission?.name ?? '');
 
                 return (
                     <DropdownMenu>
@@ -82,17 +84,20 @@ const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: Perm
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
-                            <DropdownMenuItem disabled asChild>
+                            <DropdownMenuItem disabled={isPredefined} asChild>
                                 <Link href={route(`${ROUTES.PERMISSIONS}.show`, permission.id)}>
                                     {t('action.show')}
                                 </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem disabled asChild>
+                            <DropdownMenuItem disabled={isPredefined} asChild>
                                 <Link href={route(`${ROUTES.PERMISSIONS}.edit`, permission.id)}>
                                     {t('action.edit')}
                                 </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeletePermission(permission)}>
+                            <DropdownMenuItem
+                                onClick={() => handleDeletePermission(permission)}
+                                disabled={isPredefined}
+                            >
                                 {t('action.delete')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
