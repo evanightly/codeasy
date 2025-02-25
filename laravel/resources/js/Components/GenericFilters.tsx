@@ -12,6 +12,7 @@ import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { Resource } from '@/Support/Interfaces/Resources';
 import { useForm } from '@inertiajs/react';
 import { useDebounce, useIsFirstRender } from '@uidotdev/usehooks';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Search, X } from 'lucide-react';
 import { HTMLAttributes, useEffect } from 'react';
 
@@ -26,6 +27,7 @@ export default function GenericFilters<R extends Resource = Resource>({
     children,
     className,
 }: GenericFiltersProps<R> & HTMLAttributes<HTMLDivElement>) {
+    const { t } = useLaravelReactI18n();
     const isFirstRender = useIsFirstRender();
     const { data, setData } = useForm({
         search: filters.search || '',
@@ -49,7 +51,7 @@ export default function GenericFilters<R extends Resource = Resource>({
                 <Input
                     value={data.search}
                     type='text'
-                    placeholder='Search'
+                    placeholder={t('components.generic_filters.fields.search_placeholder')}
                     onChange={(e) => setData('search', e.target.value)}
                     className='max-w-full'
                 />
@@ -79,7 +81,9 @@ export default function GenericFilters<R extends Resource = Resource>({
                 name='perPage'
             >
                 <SelectTrigger className='w-fit'>
-                    <SelectValue placeholder='Item per page' />
+                    <SelectValue
+                        placeholder={t('components.generic_filters.fields.pagination_placeholder')}
+                    />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value='10'>10</SelectItem>
