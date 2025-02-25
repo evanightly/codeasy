@@ -2,7 +2,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuTrigger,
 } from '@/Components/UI/dropdown-menu';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
@@ -28,7 +27,6 @@ export const SetLocalization = () => {
                 </DropdownMenuItem>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
-                <DropdownMenuLabel>Set Language</DropdownMenuLabel>
                 {getLocales().map((locale) => (
                     <DropdownMenuItem
                         onClick={(e) => {
