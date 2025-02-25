@@ -15,10 +15,10 @@ import { RoleResource } from '@/Support/Interfaces/Resources';
 import { Link } from '@inertiajs/react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { MoreHorizontal } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
-import { useLaravelReactI18n } from 'laravel-react-i18n';
 
 interface RolesProps {
     response?: UseQueryResult<PaginateResponse<RoleResource>, Error>;
@@ -55,13 +55,19 @@ const Roles = ({ response, filters, setFilters, baseKey, baseRoute }: RolesProps
         }),
         columnHelper.accessor('guard_name', {
             header: ({ column }) => (
-                <DataTableColumnHeader title={t('pages.role.index.columns.guard_name')} column={column} />
+                <DataTableColumnHeader
+                    title={t('pages.role.index.columns.guard_name')}
+                    column={column}
+                />
             ),
         }),
         columnHelper.accessor('users_count', {
             id: 'users',
             header: ({ column }) => (
-                <DataTableColumnHeader title={t('pages.role.index.columns.users')} column={column} />
+                <DataTableColumnHeader
+                    title={t('pages.role.index.columns.users')}
+                    column={column}
+                />
             ),
         }),
         columnHelper.display({
@@ -73,16 +79,22 @@ const Roles = ({ response, filters, setFilters, baseKey, baseRoute }: RolesProps
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant='ghost' className='h-8 w-8 p-0'>
-                                <span className='sr-only'>{t('components.dropdown_menu.sr_open_menu')}</span>
+                                <span className='sr-only'>
+                                    {t('components.dropdown_menu.sr_open_menu')}
+                                </span>
                                 <MoreHorizontal className='h-4 w-4' />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
                             <DropdownMenuItem asChild>
-                                <Link href={route(`${ROUTES.ROLES}.show`, role.id)}>{t('action.show')}</Link>
+                                <Link href={route(`${ROUTES.ROLES}.show`, role.id)}>
+                                    {t('action.show')}
+                                </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                                <Link href={route(`${ROUTES.ROLES}.edit`, role.id)}>{t('action.edit')}</Link>
+                                <Link href={route(`${ROUTES.ROLES}.edit`, role.id)}>
+                                    {t('action.edit')}
+                                </Link>
                             </DropdownMenuItem>
                             {role?.deletable && (
                                 <DropdownMenuItem onClick={handleDeleteRole.bind(null, role)}>
