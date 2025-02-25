@@ -261,4 +261,124 @@ return [
             ],
         ],
     ],
+    'school' => [
+        'common' => [
+            'fields' => [
+                'name' => 'School Name',
+                'address' => 'Address',
+                'city' => 'City',
+                'state' => 'State',
+                'zip' => 'ZIP Code',
+                'phone' => 'Phone',
+                'email' => 'Email',
+                'website' => 'Website',
+                'active' => 'Active Status',
+            ],
+            'placeholders' => [
+                'name' => 'Enter school name',
+                'address' => 'Enter school address',
+                'city' => 'Enter city',
+                'state' => 'Enter state',
+                'zip' => 'Enter ZIP code',
+                'phone' => 'Enter phone number',
+                'email' => 'Enter school email',
+                'website' => 'Enter school website',
+                'select_user' => 'Select a user',
+            ],
+            'validations' => [
+                'name' => [
+                    'required' => 'School name is required',
+                ],
+                'address' => [
+                    'required' => 'Address is required',
+                ],
+                'email' => [
+                    'invalid' => 'Invalid email format',
+                ],
+            ],
+            'messages' => [
+                'pending' => [
+                    'create' => 'Creating school...',
+                    'update' => 'Updating school...',
+                    'delete' => 'Deleting school...',
+                    'assign_admin' => 'Assigning administrator...',
+                    'unassign_admin' => 'Removing administrator...',
+                ],
+                'success' => [
+                    'create' => 'School created successfully',
+                    'update' => 'School updated successfully',
+                    'delete' => 'School deleted successfully',
+                    'assign_admin' => 'Administrator assigned successfully',
+                    'unassign_admin' => 'Administrator removed successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating school',
+                    'update' => 'Error updating school',
+                    'delete' => 'Error deleting school',
+                    'assign_admin' => 'Error assigning administrator',
+                    'unassign_admin' => 'Error removing administrator',
+                ],
+            ],
+            'sections' => [
+                'information' => 'School Information',
+                'contact_information' => 'Contact Information',
+                'administrators' => 'Administrators',
+                'teachers' => 'Teachers',
+                'students' => 'Students',
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+            'empty_states' => [
+                'no_administrators' => 'No administrators assigned',
+                'no_teachers' => 'No teachers assigned',
+                'no_students' => 'No students enrolled',
+            ],
+        ],
+        'index' => [
+            'title' => 'Schools',
+            'actions' => [
+                'create' => 'Create School',
+                'show' => 'Show Details',
+                'edit' => 'Edit School',
+                'delete' => 'Delete School',
+                'assign_admin' => 'Assign Administrator',
+            ],
+            'columns' => [
+                'name' => 'Name',
+                'address' => 'Address',
+                'city' => 'City',
+                'phone' => 'Phone',
+                'email' => 'Email',
+                'actions' => 'Actions',
+            ],
+        ],
+        'create' => [
+            'title' => 'Create School',
+            'buttons' => [
+                'create' => 'Create School',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit School: :name',
+            'buttons' => [
+                'update' => 'Update School',
+            ],
+        ],
+        'show' => [
+            'title' => 'School Details: :name',
+            'buttons' => [
+                'back' => 'Back to Schools',
+            ],
+        ],
+        'assign_admin' => [
+            'title' => 'Assign School Administrator',
+            'description' => 'Select a user to assign as school administrator',
+            'buttons' => [
+                'assign' => 'Assign Administrator',
+                'cancel' => 'Cancel',
+            ],
+        ],
+    ],
 ];

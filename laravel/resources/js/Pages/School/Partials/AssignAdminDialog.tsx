@@ -16,6 +16,7 @@ import {
 } from '@/Components/UI/select';
 import { userServiceHook } from '@/Services/userServiceHook';
 import { RoleEnum } from '@/Support/Enums/roleEnum';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useEffect, useState } from 'react';
 
 interface Props {
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function AssignAdminDialog({ isOpen, onClose, onAssign, loading }: Props) {
+    const { t } = useLaravelReactI18n();
     const [selectedUserId, setSelectedUserId] = useState<string>('');
 
     // Get potential admin users (excluding existing admins)
@@ -53,15 +55,17 @@ export function AssignAdminDialog({ isOpen, onClose, onAssign, loading }: Props)
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Assign School Administrator</DialogTitle>
+                    <DialogTitle>{t('pages.school.assign_admin.title')}</DialogTitle>
                     <DialogDescription>
-                        Select a user to assign as school administrator.
+                        {t('pages.school.assign_admin.description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                     <SelectTrigger>
-                        <SelectValue placeholder='Select a user' />
+                        <SelectValue
+                            placeholder={t('pages.school.common.placeholders.select_user')}
+                        />
                     </SelectTrigger>
                     <SelectContent>
                         {users?.data?.map((user) => (
@@ -74,7 +78,7 @@ export function AssignAdminDialog({ isOpen, onClose, onAssign, loading }: Props)
 
                 <DialogFooter>
                     <Button variant='outline' onClick={onClose}>
-                        Cancel
+                        {t('pages.school.assign_admin.buttons.cancel')}
                     </Button>
                     <Button
                         variant='default'
@@ -82,7 +86,7 @@ export function AssignAdminDialog({ isOpen, onClose, onAssign, loading }: Props)
                         loading={loading}
                         disabled={!selectedUserId || loading}
                     >
-                        Assign Administrator
+                        {t('pages.school.assign_admin.buttons.assign')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

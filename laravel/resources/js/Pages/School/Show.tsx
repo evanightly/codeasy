@@ -6,6 +6,7 @@ import { schoolServiceHook } from '@/Services/schoolServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { SchoolResource } from '@/Support/Interfaces/Resources';
 import { Link, router } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { SchoolDetails } from './Partials/SchoolDetails';
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function Show({ data: { data: school } }: Props) {
+    const { t } = useLaravelReactI18n();
     const confirmAction = useConfirmation();
     const unassignAdminMutation = schoolServiceHook.useUnassignAdmin();
 
@@ -27,26 +29,26 @@ export default function Show({ data: { data: school } }: Props) {
                     data: { user_id: userId },
                 }),
                 {
-                    loading: 'Removing administrator...',
+                    loading: t('pages.school.common.messages.pending.unassign_admin'),
                     success: () => {
                         router.reload();
-                        return 'Administrator removed successfully';
+                        return t('pages.school.common.messages.success.unassign_admin');
                     },
-                    error: 'Failed to remove administrator',
+                    error: t('pages.school.common.messages.error.unassign_admin'),
                 },
             );
         });
     };
 
     return (
-        <AuthenticatedLayout title={`School Details: ${school.name}`}>
+        <AuthenticatedLayout title={t('pages.school.show.title', { name: school?.name ?? '' })}>
             <div className='space-y-6'>
                 <Link
                     href={route(ROUTES.SCHOOLS + '.index')}
                     className={buttonVariants({ variant: 'outline' })}
                 >
                     <ArrowLeft className='mr-2 h-4 w-4' />
-                    Back to Schools
+                    {t('pages.school.show.buttons.back')}
                 </Link>
 
                 <div className='grid gap-6 md:grid-cols-2'>
@@ -55,13 +57,17 @@ export default function Show({ data: { data: school } }: Props) {
                     <div className='space-y-6'>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Administrators</CardTitle>
+                                <CardTitle>
+                                    {t('pages.school.common.sections.administrators')}
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <UsersList
                                     users={school.administrators}
                                     onDelete={handleUnassignAdmin}
-                                    emptyMessage='No administrators assigned'
+                                    emptyMessage={t(
+                                        'pages.school.common.empty_states.no_administrators',
+                                    )}
                                     canDelete={true}
                                 />
                             </CardContent>
@@ -69,24 +75,24 @@ export default function Show({ data: { data: school } }: Props) {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Teachers</CardTitle>
+                                <CardTitle>{t('pages.school.common.sections.teachers')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <UsersList
                                     users={school.teachers}
-                                    emptyMessage='No teachers assigned'
+                                    emptyMessage={t('pages.school.common.empty_states.no_teachers')}
                                 />
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Students</CardTitle>
+                                <CardTitle>{t('pages.school.common.sections.students')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <UsersList
                                     users={school.students}
-                                    emptyMessage='No students enrolled'
+                                    emptyMessage={t('pages.school.common.empty_states.no_students')}
                                 />
                             </CardContent>
                         </Card>

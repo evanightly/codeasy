@@ -15,26 +15,33 @@ import { schoolServiceHook } from '@/Services/schoolServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-const formSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    address: z.string().min(1, 'Address is required'),
-    city: z.string().optional(),
-    state: z.string().optional(),
-    zip: z.string().optional(),
-    phone: z.string().optional(),
-    email: z.string().email('Invalid email').optional().or(z.literal('')),
-    website: z.string().optional(),
-    logo: z.string().optional(),
-    active: z.boolean().default(true),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
 export default function Create() {
+    const { t } = useLaravelReactI18n();
+
+    const formSchema = z.object({
+        name: z.string().min(1, t('pages.school.common.validations.name.required')),
+        address: z.string().min(1, t('pages.school.common.validations.address.required')),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        zip: z.string().optional(),
+        phone: z.string().optional(),
+        email: z
+            .string()
+            .email(t('pages.school.common.validations.email.invalid'))
+            .optional()
+            .or(z.literal('')),
+        website: z.string().optional(),
+        logo: z.string().optional(),
+        active: z.boolean().default(true),
+    });
+
+    type FormData = z.infer<typeof formSchema>;
+
     const createMutation = schoolServiceHook.useCreate();
 
     const form = useForm<FormData>({
@@ -59,21 +66,21 @@ export default function Create() {
                 data: values,
             }),
             {
-                loading: 'Creating school...',
+                loading: t('pages.school.common.messages.pending.create'),
                 success: () => {
                     router.visit(route(`${ROUTES.SCHOOLS}.index`));
-                    return 'School created successfully';
+                    return t('pages.school.common.messages.success.create');
                 },
-                error: 'An error occurred while creating school',
+                error: t('pages.school.common.messages.error.create'),
             },
         );
     };
 
     return (
-        <AuthenticatedLayout title='Create School'>
+        <AuthenticatedLayout title={t('pages.school.create.title')}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Create School</CardTitle>
+                    <CardTitle>{t('pages.school.create.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -81,9 +88,16 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Name</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.school.common.fields.name')}
+                                        </FormLabel>
                                         <FormControl>
-                                            <Input placeholder='School name' {...field} />
+                                            <Input
+                                                placeholder={t(
+                                                    'pages.school.common.placeholders.name',
+                                                )}
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -95,9 +109,16 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Address</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.school.common.fields.address')}
+                                        </FormLabel>
                                         <FormControl>
-                                            <Input placeholder='School address' {...field} />
+                                            <Input
+                                                placeholder={t(
+                                                    'pages.school.common.placeholders.address',
+                                                )}
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -110,9 +131,16 @@ export default function Create() {
                                 <FormField
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>City</FormLabel>
+                                            <FormLabel>
+                                                {t('pages.school.common.fields.city')}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder='City' {...field} />
+                                                <Input
+                                                    placeholder={t(
+                                                        'pages.school.common.placeholders.city',
+                                                    )}
+                                                    {...field}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -124,9 +152,16 @@ export default function Create() {
                                 <FormField
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>State</FormLabel>
+                                            <FormLabel>
+                                                {t('pages.school.common.fields.state')}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder='State' {...field} />
+                                                <Input
+                                                    placeholder={t(
+                                                        'pages.school.common.placeholders.state',
+                                                    )}
+                                                    {...field}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -140,9 +175,16 @@ export default function Create() {
                                 <FormField
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>ZIP Code</FormLabel>
+                                            <FormLabel>
+                                                {t('pages.school.common.fields.zip')}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder='ZIP code' {...field} />
+                                                <Input
+                                                    placeholder={t(
+                                                        'pages.school.common.placeholders.zip',
+                                                    )}
+                                                    {...field}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -154,9 +196,16 @@ export default function Create() {
                                 <FormField
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Phone</FormLabel>
+                                            <FormLabel>
+                                                {t('pages.school.common.fields.phone')}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder='Phone number' {...field} />
+                                                <Input
+                                                    placeholder={t(
+                                                        'pages.school.common.placeholders.phone',
+                                                    )}
+                                                    {...field}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -169,11 +218,15 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.school.common.fields.email')}
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type='email'
-                                                placeholder='School email'
+                                                placeholder={t(
+                                                    'pages.school.common.placeholders.email',
+                                                )}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -187,9 +240,16 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Website</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.school.common.fields.website')}
+                                        </FormLabel>
                                         <FormControl>
-                                            <Input placeholder='School website' {...field} />
+                                            <Input
+                                                placeholder={t(
+                                                    'pages.school.common.placeholders.website',
+                                                )}
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -203,7 +263,7 @@ export default function Create() {
                                     <FormItem className='flex items-center justify-between rounded-lg border p-4'>
                                         <div className='space-y-0.5'>
                                             <FormLabel className='text-base'>
-                                                Active Status
+                                                {t('pages.school.common.fields.active')}
                                             </FormLabel>
                                         </div>
                                         <FormControl>
@@ -224,7 +284,7 @@ export default function Create() {
                                 loading={createMutation.isPending}
                                 disabled={createMutation.isPending}
                             >
-                                Create School
+                                {t('pages.school.create.buttons.create')}
                             </Button>
                         </form>
                     </Form>
