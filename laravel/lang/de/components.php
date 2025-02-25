@@ -20,6 +20,6 @@ return [
             'subjects' => 'Fächer',
             'exams' => 'Prüfungen',
             'grades' => 'Noten',
-        ]
+        ],
     ],
 ];

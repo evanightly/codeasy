@@ -20,6 +20,6 @@ return [
             'subjects' => 'Mata Pelajaran',
             'exams' => 'Ujian',
             'grades' => 'Nilai',
-        ]
+        ],
     ],
 ];

@@ -17,6 +17,7 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { UserResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -25,34 +26,40 @@ interface Props {
     data: { data: UserResource };
 }
 
-const formSchema = z
-    .object({
-        name: z.string().min(1, 'Name is required'),
-        username: z.string().min(1, 'Username is required'),
-        email: z.string().email('Invalid email').min(1, 'Email is required'),
-        password: z.string().min(6, 'Password must be at least 6 characters').or(z.literal('')),
-        password_confirmation: z.string().or(z.literal('')),
-        role_ids: z.array(z.number()).default([]),
-    })
-    .refine(
-        (data) => {
-            // Only validate password match if password is provided
-            if (data.password && data.password.length > 0) {
-                return data.password === data.password_confirmation;
-            }
-            return true;
-        },
-        {
-            message: "Passwords don't match",
-            path: ['password_confirmation'],
-        },
-    );
-
-type FormData = z.infer<typeof formSchema>;
-
 export default function Edit({ data: { data: user } }: Props) {
+    const { t } = useLaravelReactI18n();
     const updateMutation = userServiceHook.useUpdate();
     const { data: roles, isLoading } = roleServiceHook.useGetAll();
+
+    const formSchema = z
+        .object({
+            name: z.string().min(1, t('pages.user.common.validations.name.required')),
+            username: z.string().min(1, t('pages.user.common.validations.username.required')),
+            email: z
+                .string()
+                .email(t('pages.user.common.validations.email.invalid'))
+                .min(1, t('pages.user.common.validations.email.required')),
+            password: z
+                .string()
+                .min(6, t('pages.user.common.validations.password.min'))
+                .or(z.literal('')),
+            password_confirmation: z.string().or(z.literal('')),
+            role_ids: z.array(z.number()).default([]),
+        })
+        .refine(
+            (data) => {
+                if (data.password && data.password.length > 0) {
+                    return data.password === data.password_confirmation;
+                }
+                return true;
+            },
+            {
+                message: t('pages.user.common.validations.password_confirmation.match'),
+                path: ['password_confirmation'],
+            },
+        );
+
+    type FormData = z.infer<typeof formSchema>;
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -67,7 +74,6 @@ export default function Edit({ data: { data: user } }: Props) {
     });
 
     const handleSubmit = async (values: FormData) => {
-        // Create data object with only the required fields first
         const data: Record<string, any> = {
             name: values.name,
             username: values.username,
@@ -75,33 +81,26 @@ export default function Edit({ data: { data: user } }: Props) {
             role_ids: values.role_ids,
         };
 
-        // Only add password fields if password is provided
         if (values.password && values.password.length > 0) {
             data.password = values.password;
             data.password_confirmation = values.password_confirmation;
         }
 
-        toast.promise(
-            updateMutation.mutateAsync({
-                id: user.id,
-                data,
-            }),
-            {
-                loading: 'Updating user...',
-                success: () => {
-                    router.visit(route(`${ROUTES.USERS}.index`));
-                    return 'User updated successfully';
-                },
-                error: 'An error occurred while updating user',
+        toast.promise(updateMutation.mutateAsync({ id: user.id, data }), {
+            loading: t('pages.user.common.messages.pending.update'),
+            success: () => {
+                router.visit(route(`${ROUTES.USERS}.index`));
+                return t('pages.user.common.messages.success.update');
             },
-        );
+            error: t('pages.user.common.messages.error.update'),
+        });
     };
 
     return (
-        <AuthenticatedLayout title={`Edit User: ${user.name}`}>
+        <AuthenticatedLayout title={t('pages.user.edit.title', { name: user?.name ?? '' })}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Edit User</CardTitle>
+                    <CardTitle>{t('pages.user.edit.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -109,9 +108,14 @@ export default function Edit({ data: { data: user } }: Props) {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Name</FormLabel>
+                                        <FormLabel>{t('pages.user.common.fields.name')}</FormLabel>
                                         <FormControl>
-                                            <Input placeholder='Enter name' {...field} />
+                                            <Input
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.name',
+                                                )}
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -123,9 +127,16 @@ export default function Edit({ data: { data: user } }: Props) {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Username</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.user.common.fields.username')}
+                                        </FormLabel>
                                         <FormControl>
-                                            <Input placeholder='Enter username' {...field} />
+                                            <Input
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.username',
+                                                )}
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -137,11 +148,13 @@ export default function Edit({ data: { data: user } }: Props) {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel>{t('pages.user.common.fields.email')}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type='email'
-                                                placeholder='Enter email'
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.email',
+                                                )}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -155,11 +168,15 @@ export default function Edit({ data: { data: user } }: Props) {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>New Password (optional)</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.user.common.fields.password')}
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type='password'
-                                                placeholder='Enter new password'
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.password',
+                                                )}
                                                 {...field}
                                                 value={field.value ?? ''}
                                             />
@@ -174,11 +191,15 @@ export default function Edit({ data: { data: user } }: Props) {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Confirm New Password</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.user.common.fields.password_confirmation')}
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type='password'
-                                                placeholder='Confirm new password'
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.password_confirmation',
+                                                )}
                                                 {...field}
                                                 value={field.value ?? ''}
                                             />
@@ -191,9 +212,11 @@ export default function Edit({ data: { data: user } }: Props) {
                             />
 
                             <div className='space-y-4'>
-                                <h3 className='text-lg font-medium'>Roles</h3>
+                                <h3 className='text-lg font-medium'>
+                                    {t('pages.user.common.fields.roles')}
+                                </h3>
                                 {isLoading ? (
-                                    <p>Loading...</p>
+                                    <p>{t('action.loading')}</p>
                                 ) : (
                                     <FormField
                                         render={({ field }) => (
@@ -237,7 +260,7 @@ export default function Edit({ data: { data: user } }: Props) {
                                 loading={updateMutation.isPending}
                                 disabled={updateMutation.isPending}
                             >
-                                Update User
+                                {t('pages.user.edit.buttons.update')}
                             </Button>
                         </form>
                     </Form>

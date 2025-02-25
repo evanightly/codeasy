@@ -16,29 +16,34 @@ import { userServiceHook } from '@/Services/userServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-const formSchema = z
-    .object({
-        name: z.string().min(1, 'Name is required'),
-        username: z.string().min(1, 'Username is required'),
-        email: z.string().email('Invalid email').min(1, 'Email is required'),
-        password: z.string().min(6, 'Password must be at least 6 characters'),
-        password_confirmation: z.string(),
-        role_ids: z.array(z.number()).default([]),
-    })
-    .refine((data) => data.password === data.password_confirmation, {
-        message: "Passwords don't match",
-        path: ['password_confirmation'],
-    });
-
-type FormData = z.infer<typeof formSchema>;
-
 export default function Create() {
+    const { t } = useLaravelReactI18n();
     const createMutation = userServiceHook.useCreate();
     const { data: roles, isLoading } = roleServiceHook.useGetAll();
+
+    const formSchema = z
+        .object({
+            name: z.string().min(1, t('pages.user.common.validations.name.required')),
+            username: z.string().min(1, t('pages.user.common.validations.username.required')),
+            email: z
+                .string()
+                .email(t('pages.user.common.validations.email.invalid'))
+                .min(1, t('pages.user.common.validations.email.required')),
+            password: z.string().min(6, t('pages.user.common.validations.password.min')),
+            password_confirmation: z.string(),
+            role_ids: z.array(z.number()).default([]),
+        })
+        .refine((data) => data.password === data.password_confirmation, {
+            message: t('pages.user.common.validations.password_confirmation.match'),
+            path: ['password_confirmation'],
+        });
+
+    type FormData = z.infer<typeof formSchema>;
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -64,21 +69,21 @@ export default function Create() {
                 data,
             }),
             {
-                loading: 'Creating user...',
+                loading: t('pages.user.common.messages.pending.create'),
                 success: () => {
                     router.visit(route(`${ROUTES.USERS}.index`));
-                    return 'User created successfully';
+                    return t('pages.user.common.messages.success.create');
                 },
-                error: 'An error occurred while creating user',
+                error: t('pages.user.common.messages.error.create'),
             },
         );
     };
 
     return (
-        <AuthenticatedLayout title='Create User'>
+        <AuthenticatedLayout title={t('pages.user.create.title')}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Create User</CardTitle>
+                    <CardTitle>{t('pages.user.create.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -86,9 +91,14 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Name</FormLabel>
+                                        <FormLabel>{t('pages.user.common.fields.name')}</FormLabel>
                                         <FormControl>
-                                            <Input placeholder='Enter name' {...field} />
+                                            <Input
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.name',
+                                                )}
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -100,9 +110,16 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Username</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.user.common.fields.username')}
+                                        </FormLabel>
                                         <FormControl>
-                                            <Input placeholder='Enter username' {...field} />
+                                            <Input
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.username',
+                                                )}
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -114,11 +131,13 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel>{t('pages.user.common.fields.email')}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type='email'
-                                                placeholder='Enter email'
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.email',
+                                                )}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -132,11 +151,15 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.user.common.fields.password')}
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type='password'
-                                                placeholder='Enter password'
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.password',
+                                                )}
                                                 {...field}
                                                 value={field.value ?? ''}
                                             />
@@ -151,11 +174,15 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Confirm Password</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.user.common.fields.password_confirmation')}
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type='password'
-                                                placeholder='Confirm password'
+                                                placeholder={t(
+                                                    'pages.user.common.placeholders.password_confirmation',
+                                                )}
                                                 {...field}
                                                 value={field.value ?? ''}
                                             />
@@ -168,9 +195,11 @@ export default function Create() {
                             />
 
                             <div className='space-y-4'>
-                                <h3 className='text-lg font-medium'>Roles</h3>
+                                <h3 className='text-lg font-medium'>
+                                    {t('pages.user.common.fields.roles')}
+                                </h3>
                                 {isLoading ? (
-                                    <p>Loading...</p>
+                                    <p>{t('action.loading')}</p>
                                 ) : (
                                     <FormField
                                         render={({ field }) => (
@@ -214,7 +243,7 @@ export default function Create() {
                                 loading={createMutation.isPending}
                                 disabled={createMutation.isPending}
                             >
-                                Create User
+                                {t('pages.user.create.buttons.create')}
                             </Button>
                         </form>
                     </Form>

@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'dropdown_menu' => [
+        'sr_open_menu' => 'Open Menu',
+    ],
     'dashboard_sidebar' => [
         'dashboard' => 'Dashboard',
         'admin' => [
