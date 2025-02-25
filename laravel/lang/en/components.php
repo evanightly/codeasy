@@ -41,6 +41,6 @@ return [
             'subjects' => 'Subjects',
             'exams' => 'Exams',
             'grades' => 'Grades',
-        ]
+        ],
     ],
 ];

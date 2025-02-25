@@ -38,7 +38,8 @@ const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: Perm
     const deleteMutation = permissionServiceHook.useDelete();
 
     const handleDeletePermission = async (permission: PermissionResource) => {
-        if (!permission.id || Object.values(PermissionEnum).includes(permission?.name ?? '')) return;
+        if (!permission.id || Object.values(PermissionEnum).includes(permission?.name ?? ''))
+            return;
         confirmAction(async () => {
             toast.promise(deleteMutation.mutateAsync({ id: permission.id }), {
                 loading: t('pages.permission.common.messages.pending.delete'),
