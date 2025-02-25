@@ -1,10 +1,13 @@
 <?php
 
 return [
+    'dropdown_menu' => [
+        'sr_open_menu' => 'Menü öffnen',
+    ],
     'dashboard_sidebar' => [
         'dashboard' => 'Dashboard',
         'admin' => [
-            'title' => 'Admin',
+            'title' => 'Administration',
             'users' => 'Benutzer',
             'roles' => 'Rollen',
             'permissions' => 'Berechtigungen',

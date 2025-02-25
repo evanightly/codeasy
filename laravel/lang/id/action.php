@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'edit' => 'Edit',
+    'delete' => 'Hapus',
+    'delete_permanently' => 'Hapus Permanen',
+    'view' => 'Lihat',
+    'add' => 'Tambah',
+    'save' => 'Simpan',
+    'cancel' => 'Batal',
+    'confirm' => 'Konfirmasi',
+    'update' => 'Perbarui',
+    'create' => 'Buat',
+    'back' => 'Kembali',
+    'search' => 'Cari',
+    'reset' => 'Reset',
+    'show' => 'Tampilkan',
+    'hide' => 'Sembunyikan',
+    'submit' => 'Kirim',
+    'close' => 'Tutup',
+    'filter' => 'Filter',
+    'clear' => 'Bersihkan',
+    'select' => 'Pilih',
+    'loading' => 'Memuat...',
+];
