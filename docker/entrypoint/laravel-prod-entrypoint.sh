@@ -11,8 +11,7 @@ npm run build
 
 echo "=== Running Artisan optimize commands ==="
 php artisan optimize:clear || true
-# php artisan migrate --force || true
-php artisan migrate || true
+php artisan migrate --force || true
 php artisan db:seed || true
 php artisan storage:link || true
 php artisan optimize || true
