@@ -160,7 +160,7 @@ const GenericDataSelector = <T extends Resource>({
         if (fetchData && !data) {
             const fetch = async () => {
                 setIsFetching(true);
-                const response = await fetchData({ search: debouncedSearchTerm });
+                const response = await fetchData({ search: debouncedSearchTerm, page_size: 10 });
                 setFetchedData(response);
                 setIsFetching(false);
             };

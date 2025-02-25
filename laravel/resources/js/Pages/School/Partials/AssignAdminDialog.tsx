@@ -1,3 +1,4 @@
+import GenericDataSelector from '@/Components/GenericDataSelector';
 import { Button } from '@/Components/UI/button';
 import {
     Dialog,
@@ -7,15 +8,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/Components/UI/dialog';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/Components/UI/select';
 import { userServiceHook } from '@/Services/userServiceHook';
 import { RoleEnum } from '@/Support/Enums/roleEnum';
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+import { UserResource } from '@/Support/Interfaces/Resources/UserResource';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useEffect, useState } from 'react';
 
@@ -28,26 +24,29 @@ interface Props {
 
 export function AssignAdminDialog({ isOpen, onClose, onAssign, loading }: Props) {
     const { t } = useLaravelReactI18n();
-    const [selectedUserId, setSelectedUserId] = useState<string>('');
+    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
-    // Get potential admin users (excluding existing admins)
-    const { data: users } = userServiceHook.useGetAll({
-        filters: {
-            column_filters: {
-                roles: [RoleEnum.TEACHER, RoleEnum.SCHOOL_ADMIN],
+    const fetchUsers = async (filters: ServiceFilterOptions) => {
+        const response = await userServiceHook.getAll({
+            filters: {
+                ...filters,
+                column_filters: {
+                    roles: [RoleEnum.TEACHER, RoleEnum.SCHOOL_ADMIN].map((role) => role.toString()),
+                },
             },
-        },
-    });
+        });
+        return response.data;
+    };
 
     useEffect(() => {
         if (!isOpen) {
-            setSelectedUserId('');
+            setSelectedUserId(null);
         }
     }, [isOpen]);
 
     const handleAssign = () => {
         if (selectedUserId) {
-            onAssign(parseInt(selectedUserId));
+            onAssign(selectedUserId);
         }
     };
 
@@ -61,20 +60,20 @@ export function AssignAdminDialog({ isOpen, onClose, onAssign, loading }: Props)
                     </DialogDescription>
                 </DialogHeader>
 
-                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-                    <SelectTrigger>
-                        <SelectValue
-                            placeholder={t('pages.school.common.placeholders.select_user')}
-                        />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {users?.data?.map((user) => (
-                            <SelectItem value={user.id.toString()} key={user.id}>
-                                {user.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <GenericDataSelector<UserResource>
+                    setSelectedData={setSelectedUserId}
+                    selectedDataId={selectedUserId}
+                    renderItem={(user) => {
+                        const hasRole = user?.roles?.length;
+                        const roles = hasRole
+                            ? user?.roles?.map((role) => role.name).join(', ')
+                            : '';
+                        return user.name + (hasRole ? ` (${roles})` : '');
+                    }}
+                    placeholder={t('pages.school.common.placeholders.select_user')}
+                    nullable
+                    fetchData={fetchUsers}
+                />
 
                 <DialogFooter>
                     <Button variant='outline' onClick={onClose}>

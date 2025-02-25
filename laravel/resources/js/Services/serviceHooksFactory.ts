@@ -15,6 +15,15 @@ export function serviceHooksFactory<T extends Resource>({ baseKey, baseRoute }: 
     if (!baseKey) baseKey = baseRoute;
 
     return {
+        getAll: async ({ filters, axiosRequestConfig }: UseGetAllOptions<T> = {}) => {
+            const url = route(`${baseRoute}.index`);
+            const response = await window.axios.get(url, {
+                params: filters,
+                ...axiosRequestConfig,
+            });
+            return response.data;
+        },
+
         useGetAll: ({ filters, axiosRequestConfig, useQueryOptions }: UseGetAllOptions<T> = {}) => {
             const url = route(`${baseRoute}.index`);
 
