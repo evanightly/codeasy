@@ -18,6 +18,7 @@ import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { RoleResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -27,15 +28,8 @@ interface Props {
     data: { data: RoleResource };
 }
 
-const formSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    guard_name: z.string().default('web'),
-    permissions: z.array(z.number()).default([]),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
 export default function Edit({ data: { data: role } }: Props) {
+    const { t } = useLaravelReactI18n();
     const updateMutation = roleServiceHook.useUpdate();
     const [permissionFilters, _setPermissionFilters] = useState<ServiceFilterOptions>({
         page: 1,
@@ -44,6 +38,14 @@ export default function Edit({ data: { data: role } }: Props) {
     const { data: permissions, isLoading } = permissionServiceHook.useGetAll({
         filters: permissionFilters,
     });
+
+    const formSchema = z.object({
+        name: z.string().min(1, t('pages.role.common.validations.name.required')),
+        guard_name: z.string().default('web'),
+        permissions: z.array(z.number()).default([]),
+    });
+
+    type FormData = z.infer<typeof formSchema>;
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -64,12 +66,12 @@ export default function Edit({ data: { data: role } }: Props) {
                 },
             }),
             {
-                loading: 'Updating role...',
+                loading: t('pages.role.common.messages.pending.update'),
                 success: () => {
                     router.visit(route(`${ROUTES.ROLES}.index`));
-                    return 'Role updated successfully';
+                    return t('pages.role.common.messages.success.update');
                 },
-                error: 'An error occurred while updating role',
+                error: t('pages.role.common.messages.error.update'),
             },
         );
     };
@@ -104,10 +106,10 @@ export default function Edit({ data: { data: role } }: Props) {
     };
 
     return (
-        <AuthenticatedLayout title={`Edit Role: ${role.name}`}>
+        <AuthenticatedLayout title={t('pages.role.edit.title', { name: role?.name ?? '' })}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Edit Role</CardTitle>
+                    <CardTitle>{t('pages.role.edit.title', { name: role?.name ?? '' })}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -115,9 +117,14 @@ export default function Edit({ data: { data: role } }: Props) {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Role Name</FormLabel>
+                                        <FormLabel>{t('pages.role.common.fields.name')}</FormLabel>
                                         <FormControl>
-                                            <Input placeholder='Enter role name' {...field} />
+                                            <Input
+                                                placeholder={t(
+                                                    'pages.role.common.placeholders.name',
+                                                )}
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -127,9 +134,11 @@ export default function Edit({ data: { data: role } }: Props) {
                             />
 
                             <div className='space-y-4'>
-                                <h3 className='text-lg font-medium'>Permissions</h3>
+                                <h3 className='text-lg font-medium'>
+                                    {t('pages.role.common.fields.permissions')}
+                                </h3>
                                 {isLoading ? (
-                                    <p>Loading...</p>
+                                    <p>{t('action.loading')}</p>
                                 ) : (
                                     <FormField
                                         render={({ field }) => (
@@ -208,7 +217,7 @@ export default function Edit({ data: { data: role } }: Props) {
                                 loading={updateMutation.isPending}
                                 disabled={updateMutation.isPending}
                             >
-                                Update Role
+                                {t('pages.role.edit.buttons.update')}
                             </Button>
                         </form>
                     </Form>

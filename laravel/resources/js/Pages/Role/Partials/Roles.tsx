@@ -18,6 +18,7 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 
 interface RolesProps {
     response?: UseQueryResult<PaginateResponse<RoleResource>, Error>;
@@ -29,6 +30,7 @@ interface RolesProps {
 }
 
 const Roles = ({ response, filters, setFilters, baseKey, baseRoute }: RolesProps) => {
+    const { t } = useLaravelReactI18n();
     const confirmAction = useConfirmation();
     const columnHelper = createColumnHelper<RoleResource>();
 
@@ -38,26 +40,29 @@ const Roles = ({ response, filters, setFilters, baseKey, baseRoute }: RolesProps
         if (!role.id) return;
         confirmAction(async () => {
             toast.promise(deleteMutation.mutateAsync({ id: role.id }), {
-                loading: 'Deleting role...',
-                success: 'Role has been deleted',
-                error: 'An error occurred while deleting role',
+                loading: t('pages.role.common.messages.pending.delete'),
+                success: t('pages.role.common.messages.success.delete'),
+                error: t('pages.role.common.messages.error.delete'),
             });
         });
     };
 
     const columns = [
         columnHelper.accessor('name', {
-            meta: {
-                title: 'Name',
-            },
-            header: ({ column }) => <DataTableColumnHeader title='Name' column={column} />,
+            header: ({ column }) => (
+                <DataTableColumnHeader title={t('pages.role.index.columns.name')} column={column} />
+            ),
         }),
         columnHelper.accessor('guard_name', {
-            header: ({ column }) => <DataTableColumnHeader title='Guard' column={column} />,
+            header: ({ column }) => (
+                <DataTableColumnHeader title={t('pages.role.index.columns.guard_name')} column={column} />
+            ),
         }),
         columnHelper.accessor('users_count', {
             id: 'users',
-            header: ({ column }) => <DataTableColumnHeader title='Users' column={column} />,
+            header: ({ column }) => (
+                <DataTableColumnHeader title={t('pages.role.index.columns.users')} column={column} />
+            ),
         }),
         columnHelper.display({
             id: 'actions',
@@ -68,20 +73,20 @@ const Roles = ({ response, filters, setFilters, baseKey, baseRoute }: RolesProps
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant='ghost' className='h-8 w-8 p-0'>
-                                <span className='sr-only'>Open menu</span>
+                                <span className='sr-only'>{t('components.dropdown_menu.sr_open_menu')}</span>
                                 <MoreHorizontal className='h-4 w-4' />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
                             <DropdownMenuItem asChild>
-                                <Link href={route(`${ROUTES.ROLES}.show`, role.id)}>Show</Link>
+                                <Link href={route(`${ROUTES.ROLES}.show`, role.id)}>{t('action.show')}</Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                                <Link href={route(`${ROUTES.ROLES}.edit`, role.id)}>Edit</Link>
+                                <Link href={route(`${ROUTES.ROLES}.edit`, role.id)}>{t('action.edit')}</Link>
                             </DropdownMenuItem>
                             {role?.deletable && (
                                 <DropdownMenuItem onClick={handleDeleteRole.bind(null, role)}>
-                                    Delete
+                                    {t('action.delete')}
                                 </DropdownMenuItem>
                             )}
                         </DropdownMenuContent>
@@ -104,7 +109,7 @@ const Roles = ({ response, filters, setFilters, baseKey, baseRoute }: RolesProps
                         href={route(`${ROUTES.ROLES}.create`)}
                         className={buttonVariants({ variant: 'create' })}
                     >
-                        Create Role
+                        {t('pages.role.index.actions.create')}
                     </Link>
                 );
             }}

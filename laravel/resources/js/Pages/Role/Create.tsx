@@ -17,20 +17,14 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-const formSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    guard_name: z.string().default('web'),
-    permissions: z.array(z.number()).default([]),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
 export default function Create() {
+    const { t } = useLaravelReactI18n();
     const createMutation = roleServiceHook.useCreate();
     const [permissionFilters, _setPermissionFilters] = useState<ServiceFilterOptions>({
         page: 1,
@@ -39,6 +33,14 @@ export default function Create() {
     const { data: permissions, isLoading } = permissionServiceHook.useGetAll({
         filters: permissionFilters,
     });
+
+    const formSchema = z.object({
+        name: z.string().min(1, t('pages.role.common.validations.name.required')),
+        guard_name: z.string().default('web'),
+        permissions: z.array(z.number()).default([]),
+    });
+
+    type FormData = z.infer<typeof formSchema>;
 
     const handleSubmit = async (values: FormData) => {
         toast.promise(
@@ -49,12 +51,12 @@ export default function Create() {
                 },
             }),
             {
-                loading: 'Creating role...',
+                loading: t('pages.role.common.messages.pending.create'),
                 success: () => {
                     router.visit(route(`${ROUTES.ROLES}.index`));
-                    return 'Role created successfully';
+                    return t('pages.role.common.messages.success.create');
                 },
-                error: 'An error occurred while creating role',
+                error: t('pages.role.common.messages.error.create'),
             },
         );
     };
@@ -100,10 +102,10 @@ export default function Create() {
     };
 
     return (
-        <AuthenticatedLayout title='Create Role'>
+        <AuthenticatedLayout title={t('pages.role.create.title')}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Create Role</CardTitle>
+                    <CardTitle>{t('pages.role.create.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -111,9 +113,14 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Role Name</FormLabel>
+                                        <FormLabel>{t('pages.role.common.fields.name')}</FormLabel>
                                         <FormControl>
-                                            <Input placeholder='Enter role name' {...field} />
+                                            <Input
+                                                placeholder={t(
+                                                    'pages.role.common.placeholders.name',
+                                                )}
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -123,9 +130,11 @@ export default function Create() {
                             />
 
                             <div className='space-y-4'>
-                                <h3 className='text-lg font-medium'>Permissions</h3>
+                                <h3 className='text-lg font-medium'>
+                                    {t('pages.role.common.fields.permissions')}
+                                </h3>
                                 {isLoading ? (
-                                    <p>Loading...</p>
+                                    <p>{t('action.loading')}</p>
                                 ) : (
                                     <FormField
                                         render={({ field }) => (
@@ -204,7 +213,7 @@ export default function Create() {
                                 loading={createMutation.isPending}
                                 disabled={createMutation.isPending}
                             >
-                                Create Role
+                                {t('pages.role.create.buttons.create')}
                             </Button>
                         </form>
                     </Form>

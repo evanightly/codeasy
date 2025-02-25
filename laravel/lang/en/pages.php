@@ -199,4 +199,66 @@ return [
             ],
         ],
     ],
+    'role' => [
+        'common' => [
+            'fields' => [
+                'name' => 'Role Name',
+                'guard_name' => 'Guard Name',
+                'permissions' => 'Permissions',
+            ],
+            'placeholders' => [
+                'name' => 'Enter role name',
+                'guard_name' => 'web',
+            ],
+            'validations' => [
+                'name' => [
+                    'required' => 'Role name is required',
+                ],
+            ],
+            'messages' => [
+                'not_found' => 'Role not found',
+                'pending' => [
+                    'create' => 'Creating role...',
+                    'update' => 'Updating role...',
+                    'delete' => 'Deleting role...',
+                ],
+                'success' => [
+                    'create' => 'Role created successfully',
+                    'update' => 'Role updated successfully',
+                    'delete' => 'Role deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating role',
+                    'update' => 'Error updating role',
+                    'delete' => 'Error deleting role',
+                ],
+            ],
+        ],
+        'index' => [
+            'title' => 'Roles',
+            'actions' => [
+                'create' => 'Create Role',
+                'edit' => 'Edit Role',
+                'delete' => 'Delete Role',
+            ],
+            'columns' => [
+                'name' => 'Name',
+                'guard_name' => 'Guard',
+                'users' => 'Users',
+                'actions' => 'Actions',
+            ],
+        ],
+        'create' => [
+            'title' => 'Create Role',
+            'buttons' => [
+                'create' => 'Create Role',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit Role: :name',
+            'buttons' => [
+                'update' => 'Update Role',
+            ],
+        ],
+    ],
 ];

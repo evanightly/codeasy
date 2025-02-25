@@ -4,9 +4,11 @@ import { roleServiceHook } from '@/Services/roleServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Suspense, useState } from 'react';
 
 export default function Index() {
+    const { t } = useLaravelReactI18n();
     const [filters, setFilters] = useState<ServiceFilterOptions>({
         page: 1,
         perPage: 10,
@@ -18,9 +20,9 @@ export default function Index() {
     const rolesResponse = roleServiceHook.useGetAll({ filters });
 
     return (
-        <AuthenticatedLayout title='Roles'>
+        <AuthenticatedLayout title={t('pages.role.index.title')}>
             <div className='flex flex-col gap-4'>
-                <Suspense fallback={'Loading...'}>
+                <Suspense fallback={t('action.loading')}>
                     <Roles
                         setFilters={setFilters}
                         response={rolesResponse}
