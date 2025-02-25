@@ -135,4 +135,68 @@ return [
             ],
         ],
     ],
+    'permission' => [
+        'common' => [
+            'fields' => [
+                'name' => 'Permission Name',
+                'group' => 'Group',
+            ],
+            'placeholders' => [
+                'name' => 'e.g., users-create, roles-read',
+            ],
+            'help_texts' => [
+                'name_format' => 'Permission name must be in format: resource-action',
+                'valid_actions' => 'Valid actions: :actions',
+            ],
+            'validations' => [
+                'name' => [
+                    'required' => 'Permission name is required',
+                    'format' => 'Invalid permission format. Must be: resource-action where action is one of: :actions',
+                ],
+            ],
+            'messages' => [
+                'not_found' => 'Permission not found',
+                'pending' => [
+                    'create' => 'Creating permission...',
+                    'update' => 'Updating permission...',
+                    'delete' => 'Deleting permission...',
+                ],
+                'success' => [
+                    'create' => 'Permission created successfully',
+                    'update' => 'Permission updated successfully',
+                    'delete' => 'Permission deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating permission',
+                    'update' => 'Error updating permission',
+                    'delete' => 'Error deleting permission',
+                ],
+            ],
+        ],
+        'index' => [
+            'title' => 'Permissions',
+            'actions' => [
+                'create' => 'Create Permission',
+                'edit' => 'Edit Permission',
+                'delete' => 'Delete Permission',
+            ],
+            'columns' => [
+                'name' => 'Name',
+                'group' => 'Group',
+                'actions' => 'Actions',
+            ],
+        ],
+        'create' => [
+            'title' => 'Create Permission',
+            'buttons' => [
+                'create' => 'Create Permission',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit Permission: :name',
+            'buttons' => [
+                'update' => 'Update Permission',
+            ],
+        ],
+    ],
 ];

@@ -15,6 +15,7 @@ import { PermissionResource } from '@/Support/Interfaces/Resources';
 import { Link } from '@inertiajs/react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { MoreHorizontal } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
@@ -29,6 +30,7 @@ interface PermissionsProps {
 }
 
 const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: PermissionsProps) => {
+    const { t } = useLaravelReactI18n();
     const confirmAction = useConfirmation();
     const columnHelper = createColumnHelper<PermissionResource>();
 
@@ -38,57 +40,60 @@ const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: Perm
         if (!permission.id) return;
         confirmAction(async () => {
             toast.promise(deleteMutation.mutateAsync({ id: permission.id }), {
-                loading: 'Deleting permission...',
-                success: 'Permission has been deleted',
-                error: 'An error occurred while deleting permission',
+                loading: t('pages.permission.common.messages.pending.delete'),
+                success: t('pages.permission.common.messages.success.delete'),
+                error: t('pages.permission.common.messages.error.delete'),
             });
         });
     };
 
     const columns = [
         columnHelper.accessor('name', {
-            meta: {
-                title: 'Name',
-            },
-            header: ({ column }) => <DataTableColumnHeader title='Name' column={column} />,
+            id: t('pages.permission.index.columns.name'),
+            header: ({ column }) => (
+                <DataTableColumnHeader
+                    title={t('pages.permission.index.columns.name')}
+                    column={column}
+                />
+            ),
         }),
         columnHelper.accessor('group', {
-            header: ({ column }) => <DataTableColumnHeader title='Group' column={column} />,
-        }),
-        columnHelper.accessor('users_count', {
-            id: 'users count',
-            header: ({ column }) => <DataTableColumnHeader title='Users Count' column={column} />,
-        }),
-        columnHelper.accessor('roles_count', {
-            id: 'roles count',
-            header: ({ column }) => <DataTableColumnHeader title='Roles Count' column={column} />,
+            id: t('pages.permission.index.columns.group'),
+            header: ({ column }) => (
+                <DataTableColumnHeader
+                    title={t('pages.permission.index.columns.group')}
+                    column={column}
+                />
+            ),
         }),
         columnHelper.display({
             id: 'actions',
             cell: ({ row }) => {
                 const permission = row.original;
 
-                const canBeDeleted = permission.roles_count === 0 && permission.users_count === 0;
-
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant='ghost' className='h-8 w-8 p-0'>
-                                <span className='sr-only'>Open menu</span>
+                                <span className='sr-only'>
+                                    {t('components.dropdown_menu.sr_open_menu')}
+                                </span>
                                 <MoreHorizontal className='h-4 w-4' />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
-                            <DropdownMenuItem asChild>
+                            <DropdownMenuItem disabled asChild>
                                 <Link href={route(`${ROUTES.PERMISSIONS}.show`, permission.id)}>
-                                    Show
+                                    {t('action.show')}
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem disabled asChild>
-                                Edit
+                                <Link href={route(`${ROUTES.PERMISSIONS}.edit`, permission.id)}>
+                                    {t('action.edit')}
+                                </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDeletePermission(permission)}>
-                                Delete
+                                {t('action.delete')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -110,7 +115,7 @@ const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: Perm
                         href={route(`${ROUTES.PERMISSIONS}.create`)}
                         className={buttonVariants({ variant: 'create' })}
                     >
-                        Create Permission
+                        {t('pages.permission.index.actions.create')}
                     </Link>
                 );
             }}

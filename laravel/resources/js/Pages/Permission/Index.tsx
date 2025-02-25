@@ -4,26 +4,26 @@ import { permissionServiceHook } from '@/Services/permissionServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Suspense, useState } from 'react';
 
 export default function Index() {
+    const { t } = useLaravelReactI18n();
     const [filters, setFilters] = useState<ServiceFilterOptions>({
         page: 1,
         perPage: 10,
         sortBy: [['created_at', 'desc']],
-        relations_count: 'users,roles',
-        permission_resource: 'id,name,group,users_count,roles_count',
     });
 
-    const permissionResponse = permissionServiceHook.useGetAll({ filters });
+    const permissionsResponse = permissionServiceHook.useGetAll({ filters });
 
     return (
-        <AuthenticatedLayout title='Permission'>
+        <AuthenticatedLayout title={t('pages.permission.index.title')}>
             <div className='flex flex-col gap-4'>
-                <Suspense fallback={'Loading...'}>
+                <Suspense fallback={t('action.loading')}>
                     <Permissions
                         setFilters={setFilters}
-                        response={permissionResponse}
+                        response={permissionsResponse}
                         filters={filters}
                         baseRoute={ROUTES.PERMISSIONS}
                         baseKey={TANSTACK_QUERY_KEYS.PERMISSIONS}

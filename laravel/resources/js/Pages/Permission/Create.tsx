@@ -15,25 +15,28 @@ import { PERMISSION_VALID_ACTIONS } from '@/Support/Constants/permissionValidAct
 import { ROUTES } from '@/Support/Constants/routes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-const formSchema = z.object({
-    name: z
-        .string()
-        .min(1, 'Name is required')
-        .regex(
-            new RegExp(`^[a-z-]+-(?:${PERMISSION_VALID_ACTIONS.join('|')})$`),
-            'Permission name must be in format: resource-action where action is one of: ' +
-                PERMISSION_VALID_ACTIONS.join(', '),
-        ),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
 export default function Create() {
+    const { t } = useLaravelReactI18n();
     const createMutation = permissionServiceHook.useCreate();
+
+    const formSchema = z.object({
+        name: z
+            .string()
+            .min(1, t('pages.permission.common.validations.name.required'))
+            .regex(
+                new RegExp(`^[a-z-]+-(?:${PERMISSION_VALID_ACTIONS.join('|')})$`),
+                t('pages.permission.common.validations.name.format', {
+                    actions: PERMISSION_VALID_ACTIONS.join(', '),
+                }),
+            ),
+    });
+
+    type FormData = z.infer<typeof formSchema>;
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -43,7 +46,6 @@ export default function Create() {
     });
 
     const handleSubmit = async (values: FormData) => {
-        // Extract group from permission name
         const group = values.name.split('-')[0];
 
         toast.promise(
@@ -54,21 +56,21 @@ export default function Create() {
                 },
             }),
             {
-                loading: 'Creating permission...',
+                loading: t('pages.permission.common.messages.pending.create'),
                 success: () => {
                     router.visit(route(`${ROUTES.PERMISSIONS}.index`));
-                    return 'Permission created successfully';
+                    return t('pages.permission.common.messages.success.create');
                 },
-                error: 'An error occurred while creating permission',
+                error: t('pages.permission.common.messages.error.create'),
             },
         );
     };
 
     return (
-        <AuthenticatedLayout title='Create Permission'>
+        <AuthenticatedLayout title={t('pages.permission.create.title')}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Create Permission</CardTitle>
+                    <CardTitle>{t('pages.permission.create.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -76,16 +78,22 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Permission Name</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.permission.common.fields.name')}
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder='e.g., users-create, roles-read'
+                                                placeholder={t(
+                                                    'pages.permission.common.placeholders.name',
+                                                )}
                                                 {...field}
                                             />
                                         </FormControl>
                                         <FormMessage />
                                         <p className='text-sm text-muted-foreground'>
-                                            Valid actions: {PERMISSION_VALID_ACTIONS.join(', ')}
+                                            {t('pages.permission.common.help_texts.valid_actions', {
+                                                actions: PERMISSION_VALID_ACTIONS.join(', '),
+                                            })}
                                         </p>
                                     </FormItem>
                                 )}
@@ -99,7 +107,7 @@ export default function Create() {
                                 loading={createMutation.isPending}
                                 disabled={createMutation.isPending}
                             >
-                                Create Permission
+                                {t('pages.permission.create.buttons.create')}
                             </Button>
                         </form>
                     </Form>
