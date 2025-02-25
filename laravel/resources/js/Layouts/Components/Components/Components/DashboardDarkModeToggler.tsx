@@ -1,6 +1,6 @@
 import { useDarkMode } from '@/Contexts/ThemeContext';
 
-const DashboardNavbarDarkModeToggler = () => {
+const DashboardDarkModeToggler = () => {
     const { isDarkMode, toggleDarkMode } = useDarkMode();
     return (
         <>
@@ -29,4 +29,4 @@ const DashboardNavbarDarkModeToggler = () => {
     );
 };
 
-export { DashboardNavbarDarkModeToggler };
+export { DashboardDarkModeToggler as DashboardNavbarDarkModeToggler };

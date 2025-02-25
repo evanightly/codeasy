@@ -24,5 +24,28 @@
         "editor.defaultFormatter": "open-southeners.laravel-pint"
     },
     "php.suggest.basic": false,
-    "files.associations": { "*.module": "php" }
+    "files.associations": { "*.module": "php" },
+    // "i18n-ally.dirStructure": "dir",
+    // "i18n-ally.localesPaths": [
+    //     "laravel/lang"
+    // ],
+    // "i18n-ally.parsers.typescript.tsNodePath": "./laravel/node_modules/ts-node/dist/bin.js",
+    // "i18n-ally.keystyle": "nested",
+    // "i18n-ally.sourceLanguage": "en",
+    // "i18n-ally.displayLanguage": "en",
+    // "i18n-ally.enabledFrameworks": ["general"],
+    // "i18n-ally.extract.keygenStyle": "nested",
+    // "i18n-ally.namespace": true,
+    "i18n-ally.pathMatcher": "php_{locale}.{ext}",
+    "i18n-ally.localesPaths": [
+        "laravel/lang"
+    ],
+    "i18n-ally.keystyle": "nested",
+    // "i18n-ally.regex.key": "[\\w-.]+",
+    // "i18n-ally.extract.autoDetect": true,
+    // "i18n-ally.localeCountryMap": {
+    //     "en": "php_en",
+    //     "id": "php_id",
+    //     "de": "php_de"
+    // }
 }

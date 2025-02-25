@@ -2,6 +2,7 @@ import { Toaster as SonnerToaster } from '@/Components/UI/sonner';
 import { DarkModeProvider } from '@/Contexts/ThemeContext';
 import { createInertiaApp } from '@inertiajs/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { LaravelReactI18nProvider } from 'laravel-react-i18n';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { MouseEvent } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -38,24 +39,30 @@ createInertiaApp({
         });
 
         root.render(
-            <QueryClientProvider client={queryClient}>
-                <DarkModeProvider>
-                    <ConfirmationDialogProvider>
-                        <SonnerToaster
-                            toastOptions={
-                                {
-                                    // https://github.com/shadcn-ui/ui/issues/2234
+            <LaravelReactI18nProvider
+                locale={'en'}
+                files={import.meta.glob('/lang/*.json')}
+                fallbackLocale={'en'}
+            >
+                <QueryClientProvider client={queryClient}>
+                    <DarkModeProvider>
+                        <ConfirmationDialogProvider>
+                            <SonnerToaster
+                                toastOptions={
+                                    {
+                                        // https://github.com/shadcn-ui/ui/issues/2234
+                                    }
                                 }
-                            }
-                            theme='light'
-                            richColors
-                            duration={2000}
-                            closeButton
-                        />
-                        <App {...props} />
-                    </ConfirmationDialogProvider>
-                </DarkModeProvider>
-            </QueryClientProvider>,
+                                theme='light'
+                                richColors
+                                duration={2000}
+                                closeButton
+                            />
+                            <App {...props} />
+                        </ConfirmationDialogProvider>
+                    </DarkModeProvider>
+                </QueryClientProvider>
+            </LaravelReactI18nProvider>,
         );
     },
     progress: {
