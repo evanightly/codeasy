@@ -2,10 +2,12 @@
 
 import {
     AudioWaveform,
+    Book,
     FileCheck,
     GalleryVerticalEnd,
     Lock,
     PieChart,
+    Presentation,
     School,
     ShieldCheck,
     Users,
@@ -110,6 +112,18 @@ const DashboardSidebar = ({ ...props }: AppSidebarProps) => {
                         title: t('components.dashboard_sidebar.academic.school_requests'),
                         url: route(`${ROUTES.SCHOOL_REQUESTS}.index`),
                         icon: FileCheck,
+                    },
+                    {
+                        type: 'menu',
+                        title: t('components.dashboard_sidebar.academic.class_rooms'),
+                        url: route(`${ROUTES.CLASS_ROOMS}.index`),
+                        icon: Presentation,
+                    },
+                    {
+                        type: 'menu',
+                        title: t('components.dashboard_sidebar.academic.courses'),
+                        url: route(`${ROUTES.COURSES}.index`),
+                        icon: Book,
                     },
                 ],
             },

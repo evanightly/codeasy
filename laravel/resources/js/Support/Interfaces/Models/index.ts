@@ -9,3 +9,8 @@ export * from './User';
 export * from './School';
 
 export * from './SchoolRequest';
+
+export * from './ClassRoom';
+export * from './ClassRoomStudent';
+export * from './Course';
+export * from './Material';

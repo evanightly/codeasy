@@ -9,3 +9,8 @@ export * from './UserResource';
 export * from './SchoolResource';
 
 export * from './SchoolRequestResource';
+
+export * from './ClassRoomResource';
+export * from './ClassRoomStudentResource';
+export * from './CourseResource';
+export * from './MaterialResource';

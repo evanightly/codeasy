@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\ClassRoomController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
@@ -84,6 +87,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('schools', SchoolController::class);
     Route::resource('school-requests', SchoolRequestController::class);
+    // CLASS_ROOMS: 'class-rooms',
+    // CLASS_ROOM_STUDENTS: 'class-room-students',
+    // COURSES: 'courses',
+    // MATERIALS: 'materials',
+    Route::resource('class-rooms', ClassRoomController::class);
+    // Route::resource('class-room-students', ClassRoomStudentController::class);
+    Route::resource('courses', CourseController::class);
+    Route::resource('materials', MaterialController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -68,4 +68,28 @@ enum PermissionEnum: string {
     case SCHOOL_REQUEST_READ = 'school-request-read';
     case SCHOOL_REQUEST_UPDATE = 'school-request-update';
     case SCHOOL_REQUEST_DELETE = 'school-request-delete';
+
+    // Class Room Management
+    case CLASS_ROOM_CREATE = 'classroom-create';
+    case CLASS_ROOM_READ = 'classroom-read';
+    case CLASS_ROOM_UPDATE = 'classroom-update';
+    case CLASS_ROOM_DELETE = 'classroom-delete';
+
+    // Class Room Student Management
+    case CLASS_ROOM_STUDENT_CREATE = 'classroom-student-create';
+    case CLASS_ROOM_STUDENT_READ = 'classroom-student-read';
+    case CLASS_ROOM_STUDENT_UPDATE = 'classroom-student-update';
+    case CLASS_ROOM_STUDENT_DELETE = 'classroom-student-delete';
+
+    // Course Management
+    case COURSE_CREATE = 'course-create';
+    case COURSE_READ = 'course-read';
+    case COURSE_UPDATE = 'course-update';
+    case COURSE_DELETE = 'course-delete';
+
+    // Material Management
+    case MATERIAL_CREATE = 'material-create';
+    case MATERIAL_READ = 'material-read';
+    case MATERIAL_UPDATE = 'material-update';
+    case MATERIAL_DELETE = 'material-delete';
 }
