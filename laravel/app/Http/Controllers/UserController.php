@@ -6,6 +6,7 @@ use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\UserServiceInterface;
 use Illuminate\Http\Request;
@@ -25,7 +26,17 @@ class UserController extends Controller {
 
     public function index(Request $request) {
         $perPage = $request->get('perPage', 10);
-        $data = UserResource::collection($this->userService->getAllPaginated($request->query(), $perPage));
+        $intent = $request->get('intent');
+
+        switch ($intent) {
+            case IntentEnum::USER_INDEX_STUDENTS->value:
+                $data = UserResource::collection($this->userService->getAllPaginated($request->query(), $perPage));
+
+                break;
+            default:
+                $data = UserResource::collection($this->userService->getAllPaginated($request->query(), $perPage));
+                break;
+        }
 
         if ($this->ajax()) {
             return $data;

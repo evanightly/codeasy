@@ -12,8 +12,10 @@ return new class extends Migration {
         Schema::create('class_rooms', function (Blueprint $table) {
             $table->id();
             $table->foreignId('school_id')->constrained();
-            $table->string('grade');
-            $table->string('year');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->string('grade')->nullable();
+            $table->string('year')->nullable();
             $table->boolean('active')->default(true);
             $table->timestamps();
         });

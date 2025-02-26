@@ -74,6 +74,14 @@ class SchoolController extends Controller {
                     $this->schoolService->unassignSchoolAdmin($school, $request->validated());
 
                     return;
+                case IntentEnum::SCHOOL_UPDATE_ASSIGN_STUDENT->value:
+                    $this->schoolService->assignStudent($school, $request->validated());
+
+                    return;
+                case IntentEnum::SCHOOL_UPDATE_UNASSIGN_STUDENT->value:
+                    $this->schoolService->unassignStudent($school, $request->validated());
+
+                    return;
             }
 
             return $this->schoolService->update($school, $request->validated());

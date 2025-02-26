@@ -303,6 +303,8 @@ return [
                     'delete' => 'Deleting school...',
                     'assign_admin' => 'Assigning administrator...',
                     'unassign_admin' => 'Removing administrator...',
+                    'assign_student' => 'Assigning students...',
+                    'unassign_student' => 'Removing student...',
                 ],
                 'success' => [
                     'create' => 'School created successfully',
@@ -310,6 +312,8 @@ return [
                     'delete' => 'School deleted successfully',
                     'assign_admin' => 'Administrator assigned successfully',
                     'unassign_admin' => 'Administrator removed successfully',
+                    'assign_student' => 'Students assigned successfully',
+                    'unassign_student' => 'Student removed successfully',
                 ],
                 'error' => [
                     'create' => 'Error creating school',
@@ -317,6 +321,8 @@ return [
                     'delete' => 'Error deleting school',
                     'assign_admin' => 'Error assigning administrator',
                     'unassign_admin' => 'Error removing administrator',
+                    'assign_student' => 'Error assigning students',
+                    'unassign_student' => 'Error removing student',
                 ],
             ],
             'sections' => [
@@ -344,6 +350,7 @@ return [
                 'edit' => 'Edit School',
                 'delete' => 'Delete School',
                 'assign_admin' => 'Assign Administrator',
+                'assign_student' => 'Assign Students',
             ],
             'columns' => [
                 'name' => 'Name',
@@ -378,6 +385,142 @@ return [
             'buttons' => [
                 'assign' => 'Assign Administrator',
                 'cancel' => 'Cancel',
+            ],
+        ],
+        'assign_student' => [
+            'title' => 'Assign Students',
+            'description' => 'Select students to assign to this school',
+            'buttons' => [
+                'assign' => 'Assign Students',
+            ],
+        ],
+        'assign_student' => [
+            'title' => 'Assign Student',
+            'description' => 'Select a student to assign to this school',
+            'buttons' => [
+                'assign' => 'Assign Student',
+            ],
+        ],
+    ],
+    'classroom' => [
+        'common' => [
+            'fields' => [
+                'school' => 'School',
+                'name' => 'Classroom Name',
+                'description' => 'Description',
+                'grade' => 'Grade',
+                'year' => 'Academic Year',
+                'active' => 'Active Status',
+                'status' => 'Status',
+                'students' => 'Students',
+                'student' => 'Student',
+            ],
+            'placeholders' => [
+                'school' => 'Select a school',
+                'name' => 'Enter classroom name',
+                'description' => 'Enter classroom description',
+                'grade' => 'Select grade',
+                'year' => 'Enter academic year',
+                'active' => 'Select active status',
+                'status' => 'Select status',
+                'students' => 'Select a student',
+                'student' => 'Select a student',
+            ],
+            'validations' => [
+                'school_id' => [
+                    'required' => 'School is required',
+                ],
+                'name' => [
+                    'required' => 'Classroom name is required',
+                ],
+                'grade' => [
+                    'required' => 'Grade is required',
+                ],
+                'year' => [
+                    'required' => 'Academic year is required',
+                ],
+                'students' => [
+                    'required' => 'Please select at least one student',
+                ],
+                'student_id' => [
+                    'required' => 'Please select a student',
+                ],
+            ],
+            'messages' => [
+                'not_found' => 'Classroom not found',
+                'pending' => [
+                    'create' => 'Creating classroom...',
+                    'update' => 'Updating classroom...',
+                    'delete' => 'Deleting classroom...',
+                    'assign_student' => 'Assigning students...',
+                    'remove_student' => 'Removing student...',
+                ],
+                'success' => [
+                    'create' => 'Classroom created successfully',
+                    'update' => 'Classroom updated successfully',
+                    'delete' => 'Classroom deleted successfully',
+                    'assign_student' => 'Students assigned successfully',
+                    'remove_student' => 'Student removed successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating classroom',
+                    'update' => 'Error updating classroom',
+                    'delete' => 'Error deleting classroom',
+                    'unauthorized' => 'You are not authorized to manage classrooms in this school',
+                    'assign_student' => 'Error assigning students',
+                    'remove_student' => 'Error removing student',
+                ],
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+        ],
+        'index' => [
+            'title' => 'Classrooms',
+            'buttons' => [
+                'create' => 'Create Classroom',
+            ],
+            'search_placeholder' => 'Search classrooms...',
+            'empty_state' => 'No classrooms found',
+        ],
+        'create' => [
+            'title' => 'Create Classroom',
+            'buttons' => [
+                'create' => 'Create Classroom',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit Classroom',
+            'buttons' => [
+                'update' => 'Update Classroom',
+            ],
+        ],
+        'show' => [
+            'title' => 'Classroom Details',
+            'sections' => [
+                'information' => 'Information',
+                'students' => 'Students',
+            ],
+            'student_columns' => [
+                'name' => 'Name',
+                'email' => 'Email',
+                'actions' => 'Actions',
+            ],
+            'buttons' => [
+                'assign_student' => 'Assign Students',
+            ],
+            'empty_states' => [
+                'no_students' => 'No students assigned to this classroom',
+            ],
+            'dialogs' => [
+                'assign_student' => [
+                    'title' => 'Assign Students',
+                    'description' => 'Select students to assign to this classroom',
+                    'buttons' => [
+                        'assign' => 'Assign Students',
+                    ],
+                ],
             ],
         ],
     ],

@@ -20,6 +20,7 @@ export default function Show({ data: { data: school } }: Props) {
     const { t } = useLaravelReactI18n();
     const confirmAction = useConfirmation();
     const unassignAdminMutation = schoolServiceHook.useUnassignAdmin();
+    const unassignStudentMutation = schoolServiceHook.useUnassignStudent();
 
     const handleUnassignAdmin = async (userId: number) => {
         confirmAction(async () => {
@@ -35,6 +36,25 @@ export default function Show({ data: { data: school } }: Props) {
                         return t('pages.school.common.messages.success.unassign_admin');
                     },
                     error: t('pages.school.common.messages.error.unassign_admin'),
+                },
+            );
+        });
+    };
+
+    const handleUnassignStudent = async (userId: number) => {
+        confirmAction(async () => {
+            toast.promise(
+                unassignStudentMutation.mutateAsync({
+                    id: school.id,
+                    data: { user_id: userId },
+                }),
+                {
+                    loading: t('pages.school.common.messages.pending.unassign_student'),
+                    success: () => {
+                        router.reload();
+                        return t('pages.school.common.messages.success.unassign_student');
+                    },
+                    error: t('pages.school.common.messages.error.unassign_student'),
                 },
             );
         });
@@ -92,7 +112,9 @@ export default function Show({ data: { data: school } }: Props) {
                             <CardContent>
                                 <UsersList
                                     users={school.students}
+                                    onDelete={handleUnassignStudent}
                                     emptyMessage={t('pages.school.common.empty_states.no_students')}
+                                    canDelete={true}
                                 />
                             </CardContent>
                         </Card>

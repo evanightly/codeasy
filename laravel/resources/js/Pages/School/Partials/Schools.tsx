@@ -22,6 +22,7 @@ import { MoreHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { AssignAdminDialog } from './AssignAdminDialog';
+import { AssignStudentDialog } from './AssignStudentDialog';
 
 interface SchoolsProps {
     response?: UseQueryResult<PaginateResponse<SchoolResource>, Error>;
@@ -37,12 +38,14 @@ export function Schools({ response, filters, setFilters, baseKey, baseRoute }: S
     const { roles } = usePage().props.auth.user;
     const [selectedSchool, setSelectedSchool] = useState<SchoolResource | null>(null);
     const [showAssignAdmin, setShowAssignAdmin] = useState(false);
+    const [showAssignStudent, setShowAssignStudent] = useState(false);
 
     const confirmAction = useConfirmation();
     const columnHelper = createColumnHelper<SchoolResource>();
 
     const deleteMutation = schoolServiceHook.useDelete();
     const assignAdminMutation = schoolServiceHook.useAssignAdmin();
+    const assignStudentMutation = schoolServiceHook.useAssignStudent();
 
     const handleDeleteSchool = async (school: SchoolResource) => {
         if (!school.id) return;
@@ -70,6 +73,25 @@ export function Schools({ response, filters, setFilters, baseKey, baseRoute }: S
                     return t('pages.school.common.messages.success.assign_admin');
                 },
                 error: t('pages.school.common.messages.error.assign_admin'),
+            },
+        );
+    };
+
+    const handleAssignStudent = async (userId: number) => {
+        if (!selectedSchool) return;
+
+        toast.promise(
+            assignStudentMutation.mutateAsync({
+                id: selectedSchool.id,
+                data: { user_id: userId },
+            }),
+            {
+                loading: t('pages.school.common.messages.pending.assign_student'),
+                success: () => {
+                    setShowAssignStudent(false);
+                    return t('pages.school.common.messages.success.assign_student');
+                },
+                error: t('pages.school.common.messages.error.assign_student'),
             },
         );
     };
@@ -141,6 +163,14 @@ export function Schools({ response, filters, setFilters, baseKey, baseRoute }: S
                             >
                                 {t('pages.school.index.actions.assign_admin')}
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setSelectedSchool(school);
+                                    setShowAssignStudent(true);
+                                }}
+                            >
+                                {t('pages.school.index.actions.assign_student')}
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
                                 <Link href={route(`${ROUTES.SCHOOLS}.show`, school.id)}>
@@ -195,6 +225,19 @@ export function Schools({ response, filters, setFilters, baseKey, baseRoute }: S
                 loading={assignAdminMutation.isPending}
                 isOpen={showAssignAdmin}
             />
+
+            {selectedSchool && (
+                <AssignStudentDialog
+                    school={selectedSchool}
+                    onClose={() => {
+                        setShowAssignStudent(false);
+                        setSelectedSchool(null);
+                    }}
+                    onAssign={handleAssignStudent}
+                    loading={assignStudentMutation.isPending}
+                    isOpen={showAssignStudent}
+                />
+            )}
         </>
     );
 }

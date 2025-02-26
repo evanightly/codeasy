@@ -29,10 +29,36 @@ export const schoolServiceHook = {
         return createMutation({
             mutationFn: async (params: { id: number; data: { user_id: number } }) => {
                 return mutationApi({
-                    method: 'patch',
+                    method: 'put',
                     url: route(`${ROUTES.SCHOOLS}.update`, params.id),
                     data: params.data,
                     params: { intent: IntentEnum.SCHOOL_UPDATE_UNASSIGN_ADMIN },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
+        });
+    },
+    useAssignStudent: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number; data: { user_id: number } }) => {
+                return mutationApi({
+                    method: 'put',
+                    url: route(`${ROUTES.SCHOOLS}.update`, params.id),
+                    data: params.data,
+                    params: { intent: IntentEnum.SCHOOL_UPDATE_ASSIGN_STUDENT },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
+        });
+    },
+    useUnassignStudent: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number; data: { user_id: number } }) => {
+                return mutationApi({
+                    method: 'put',
+                    url: route(`${ROUTES.SCHOOLS}.update`, params.id),
+                    data: params.data,
+                    params: { intent: IntentEnum.SCHOOL_UPDATE_UNASSIGN_STUDENT },
                 });
             },
             invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],

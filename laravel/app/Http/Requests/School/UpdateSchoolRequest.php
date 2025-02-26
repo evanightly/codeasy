@@ -18,6 +18,22 @@ class UpdateSchoolRequest extends FormRequest {
                 return [
                     'user_id' => ['required', 'exists:users,id'],
                 ];
+            case IntentEnum::SCHOOL_UPDATE_ASSIGN_TEACHER->value:
+                return [
+                    'user_id' => ['required', 'exists:users,id'],
+                ];
+            case IntentEnum::SCHOOL_UPDATE_UNASSIGN_TEACHER->value:
+                return [
+                    'user_id' => ['required', 'exists:users,id'],
+                ];
+            case IntentEnum::SCHOOL_UPDATE_ASSIGN_STUDENT->value:
+                return [
+                    'user_id' => ['required', 'exists:users,id'],
+                ];
+            case IntentEnum::SCHOOL_UPDATE_UNASSIGN_STUDENT->value:
+                return [
+                    'user_id' => ['required', 'exists:users,id'],
+                ];
         }
 
         return [

@@ -53,6 +53,12 @@ class User extends Authenticatable {
             ->withTimestamps();
     }
 
+    public function classrooms(): BelongsToMany {
+        return $this->belongsToMany(ClassRoom::class, 'class_room_students', 'user_id', 'class_room_id')
+            ->using(ClassRoomStudent::class)
+            ->withTimestamps();
+    }
+
     public function isSchoolAdmin(?School $school = null): bool {
         if ($this->isSuperAdmin()) {
             return true;

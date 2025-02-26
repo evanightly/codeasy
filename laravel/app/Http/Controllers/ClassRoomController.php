@@ -6,9 +6,10 @@ use App\Http\Requests\ClassRoom\StoreClassRoomRequest;
 use App\Http\Requests\ClassRoom\UpdateClassRoomRequest;
 use App\Http\Resources\ClassRoomResource;
 use App\Models\ClassRoom;
+use App\Support\Enums\IntentEnum;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\ClassRoomServiceInterface;
 use Illuminate\Http\Request;
-use App\Support\Enums\PermissionEnum;
 use Illuminate\Routing\Controllers\Middleware;
 
 class ClassRoomController extends Controller {
@@ -45,7 +46,7 @@ class ClassRoomController extends Controller {
     }
 
     public function show(ClassRoom $classRoom) {
-        $data = ClassRoomResource::make($classRoom);
+        $data = ClassRoomResource::make($classRoom->load(['school', 'students', 'courses']));
 
         if ($this->ajax()) {
             return $data;
@@ -61,7 +62,20 @@ class ClassRoomController extends Controller {
     }
 
     public function update(UpdateClassRoomRequest $request, ClassRoom $classRoom) {
+        $intent = $request->get('intent');
+
         if ($this->ajax()) {
+            switch ($intent) {
+                case IntentEnum::CLASS_ROOM_UPDATE_ASSIGN_STUDENT->value:
+                    $this->classRoomService->assignStudent($classRoom, $request->validated());
+
+                    return;
+                case IntentEnum::CLASS_ROOM_UPDATE_UNASSIGN_STUDENT->value:
+                    $this->classRoomService->unassignStudent($classRoom, $request->validated());
+
+                    return;
+            }
+
             return $this->classRoomService->update($classRoom, $request->validated());
         }
     }

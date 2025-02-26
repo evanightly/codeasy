@@ -2,19 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ClassRoomStudent extends Model
-{
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<string>
-     */
-    protected $fillable = ['class_room_id', 'student_id'];
+class ClassRoomStudent extends Pivot {
+    protected $table = 'class_room_students';
+    protected $fillable = [
+        'class_room_id',
+        'user_id',
+    ];
 
-    public function classRoom()
-    {
+    public function classroom() {
         return $this->belongsTo(ClassRoom::class);
+    }
+
+    public function student() {
+        return $this->belongsTo(User::class);
     }
 }
