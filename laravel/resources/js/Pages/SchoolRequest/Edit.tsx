@@ -46,7 +46,7 @@ export default function Edit({ data: { data: request } }: Props) {
         resolver: zodResolver(formSchema),
         defaultValues: {
             school_id: request.school_id,
-            message: request.message,
+            message: request?.message ?? '',
         },
     });
 
