@@ -7,6 +7,7 @@ interface AuthenticatedUser extends User {
     image: string;
     permissions: PERMISSION_ENUM[];
     administeredSchools: number[];
+    teachedSchools: number[];
 }
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {

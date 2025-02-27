@@ -25,13 +25,14 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { SchoolResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 export default function Create() {
+    const { teachedSchools } = usePage().props.auth.user;
     const { t } = useLaravelReactI18n();
     const createMutation = classRoomServiceHook.useCreate();
     const formSchema = z.object({
@@ -79,7 +80,9 @@ export default function Create() {
         const response = await schoolServiceHook.getAll({
             filters: {
                 ...filters,
-                page_size: 'all',
+                column_filters: {
+                    id: teachedSchools,
+                },
             },
         });
         return response.data;

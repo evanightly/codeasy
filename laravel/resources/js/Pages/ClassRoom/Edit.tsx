@@ -64,12 +64,12 @@ export default function Edit({ data: { data } }: Props) {
     useEffect(() => {
         if (data) {
             form.reset({
-                name: data.name,
-                description: data.description,
+                name: data?.name || '',
+                description: data?.description || '',
                 school_id: data?.school_id?.toString(),
                 grade: data?.grade?.toString(),
                 year: data?.year?.toString(),
-                active: data.active,
+                active: data?.active ?? true,
             });
         }
     }, [data]);
@@ -257,7 +257,11 @@ export default function Edit({ data: { data } }: Props) {
                                 control={form.control}
                             />
 
-                            <Button type='submit' disabled={updateMutation.isPending}>
+                            <Button
+                                type='submit'
+                                loading={updateMutation.isPending}
+                                disabled={updateMutation.isPending}
+                            >
                                 {t('pages.classroom.edit.buttons.update')}
                             </Button>
                         </form>

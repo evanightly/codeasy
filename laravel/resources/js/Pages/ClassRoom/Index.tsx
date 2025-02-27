@@ -2,21 +2,41 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { classRoomServiceHook } from '@/Services/classRoomServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+import { usePage } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Suspense, useState } from 'react';
 import { Classrooms } from './Partials/Classrooms';
 
 export default function Index() {
+    const { roles, teachedSchools } = usePage().props.auth.user;
     const { t } = useLaravelReactI18n();
+
     const [filters, setFilters] = useState<ServiceFilterOptions>({
         page: 1,
         perPage: 10,
         sortBy: [['created_at', 'desc']],
         class_room_resource: 'id,name,description,grade,year,active,school',
         relations: 'school',
+        column_filters: (() => {
+            if (roles.includes(RoleEnum.SUPER_ADMIN)) {
+                return undefined;
+            }
+
+            // Single role logic
+            if (roles.includes(RoleEnum.TEACHER)) {
+                return {
+                    school_id: teachedSchools,
+                    // , active: 1
+                };
+            }
+
+            return {};
+        })(),
         school_resource: 'name',
     });
+
     const classRoomResponse = classRoomServiceHook.useGetAll({ filters });
 
     return (

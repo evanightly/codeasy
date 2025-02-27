@@ -98,4 +98,9 @@ class User extends Authenticatable {
         return $this->schools()
             ->wherePivot('role', RoleEnum::SCHOOL_ADMIN->value);
     }
+
+    public function teachedSchools(): BelongsToMany {
+        return $this->schools()
+            ->wherePivot('role', RoleEnum::TEACHER->value);
+    }
 }

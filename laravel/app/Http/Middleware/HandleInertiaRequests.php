@@ -50,6 +50,7 @@ class HandleInertiaRequests extends Middleware {
                         'roles' => optional($user)->roles?->pluck('name')->toArray() ?? [],
                         'permissions' => optional($user)->getAllPermissions()?->pluck('name')->toArray() ?? [],
                         'administeredSchools' => optional($user)?->administeredSchools()?->pluck('schools.id')->toArray() ?? [],
+                        'teachedSchools' => optional($user)?->teachedSchools()?->pluck('schools.id')->toArray() ?? [],
                     ],
                 ),
             ],

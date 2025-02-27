@@ -31,7 +31,7 @@ class SchoolRepository extends BaseRepository implements SchoolRepositoryInterfa
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
-        $query = $this->applyColumnFilters($query, $searchParams, ['created_at', 'updated_at']);
+        $query = $this->applyColumnFilters($query, $searchParams, ['id', 'created_at', 'updated_at']);
 
         $query = $this->applySorting($query, $searchParams);
 

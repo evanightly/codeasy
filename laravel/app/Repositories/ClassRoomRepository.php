@@ -20,7 +20,7 @@ class ClassRoomRepository extends BaseRepository implements ClassRoomRepositoryI
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
-        $query = $this->applyColumnFilters($query, $searchParams, ['created_at', 'updated_at']);
+        $query = $this->applyColumnFilters($query, $searchParams, ['school_id', 'active', 'created_at', 'updated_at']);
 
         $query = $this->applySorting($query, $searchParams);
 
