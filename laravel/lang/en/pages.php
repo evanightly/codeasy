@@ -31,6 +31,51 @@ return [
             'sign_in' => 'Sign In',
         ],
     ],
+    'auth' => [
+        'login' => [
+            'title' => 'Welcome Back',
+            'fields' => [
+                'identifier' => 'Email or Username',
+                'password' => 'Password',
+                'remember' => 'Remember me',
+            ],
+            'buttons' => [
+                'next' => 'Next',
+                'sign_in' => 'Sign In',
+                'sign_up' => 'Sign Up',
+                'forgot_password' => 'Forgot password?',
+                'dont_have_account' => 'Don\'t have an account?',
+            ],
+            'messages' => [
+                'authenticating' => 'Authenticating...',
+                'success' => 'Successfully logged in!',
+                'error' => 'Invalid credentials',
+            ],
+        ],
+        'register' => [
+            'title' => 'Create an Account',
+            'fields' => [
+                'name' => 'Name',
+                'email' => 'Email',
+                'role' => 'Role',
+                'school' => 'School',
+                'password' => 'Password',
+                'password_confirmation' => 'Confirm Password',
+                'already_registered' => 'Already registered?',
+                'select_role' => 'Select a role',
+                'select_school' => 'Select a school',
+                'reset_role' => 'Clear selection',
+            ],
+            'buttons' => [
+                'register' => 'Register',
+            ],
+            'messages' => [
+                'pending' => 'Creating your account...',
+                'success' => 'Account created successfully!',
+                'error' => 'There was a problem creating your account',
+            ],
+        ],
+    ],
     'user' => [
         'common' => [
             'fields' => [

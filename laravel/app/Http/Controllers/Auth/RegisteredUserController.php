@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\SchoolRequest;
 use App\Models\User;
+use App\Support\Enums\RoleEnum;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,22 +30,48 @@ class RegisteredUserController extends Controller {
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse {
-        $request->validate([
+        $validationRules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+            'role' => [
+                'nullable',
+                'string',
+                Rule::in(RoleEnum::toArray()),
+            ],
+        ];
+
+        // Add school_id validation if role is Teacher
+        if ($request->input('role') === RoleEnum::TEACHER->value) {
+            $validationRules['school_id'] = 'required|exists:schools,id';
+        }
+
+        $validated = $request->validate($validationRules);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
         ]);
+
+        // Assign role if provided
+        if (!empty($validated['role'])) {
+            $user->assignRole($validated['role']);
+
+            // Handle teacher role with school request
+            if ($validated['role'] === RoleEnum::TEACHER->value && isset($validated['school_id'])) {
+                SchoolRequest::create([
+                    'user_id' => $user->id,
+                    'school_id' => $validated['school_id'],
+                    'status' => 'pending', // Default status
+                ]);
+            }
+        }
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('dashboard.index', absolute: false));
     }
 }

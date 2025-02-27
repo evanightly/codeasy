@@ -22,6 +22,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { classRoomServiceHook } from '@/Services/classRoomServiceHook';
 import { schoolServiceHook } from '@/Services/schoolServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { SchoolResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,7 +33,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 export default function Create() {
-    const { teachedSchools } = usePage().props.auth.user;
+    const { teachedSchools, roles } = usePage().props.auth.user;
     const { t } = useLaravelReactI18n();
     const createMutation = classRoomServiceHook.useCreate();
     const formSchema = z.object({
@@ -80,9 +81,24 @@ export default function Create() {
         const response = await schoolServiceHook.getAll({
             filters: {
                 ...filters,
-                column_filters: {
-                    id: teachedSchools,
-                },
+                column_filters: (() => {
+                    // Single role logic
+                    if (roles.includes(RoleEnum.TEACHER)) {
+                        if (teachedSchools.length === 0) {
+                            return {
+                                id: -1,
+                            };
+                        }
+                        return {
+                            id: teachedSchools,
+                            // , active: 1
+                        };
+                    }
+
+                    return {
+                        id: -1,
+                    };
+                })(),
             },
         });
         return response.data;

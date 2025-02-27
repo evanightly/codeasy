@@ -26,6 +26,11 @@ export default function Index() {
 
             // Single role logic
             if (roles.includes(RoleEnum.TEACHER)) {
+                if(teachedSchools.length === 0) {
+                    return {
+                        school_id: -1,
+                    };
+                }
                 return {
                     school_id: teachedSchools,
                     // , active: 1

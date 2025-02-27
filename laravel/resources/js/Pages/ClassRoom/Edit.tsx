@@ -22,10 +22,11 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { classRoomServiceHook } from '@/Services/classRoomServiceHook';
 import { schoolServiceHook } from '@/Services/schoolServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { ClassRoomResource, SchoolResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -38,6 +39,7 @@ interface Props {
 
 export default function Edit({ data: { data } }: Props) {
     const { t } = useLaravelReactI18n();
+    const { roles, teachedSchools } = usePage().props.auth.user;
     const updateMutation = classRoomServiceHook.useUpdate();
 
     const formSchema = z.object({
@@ -100,7 +102,24 @@ export default function Edit({ data: { data } }: Props) {
         const response = await schoolServiceHook.getAll({
             filters: {
                 ...filters,
-                page_size: 'all',
+                column_filters: (() => {
+                    // Single role logic
+                    if (roles.includes(RoleEnum.TEACHER)) {
+                        if (teachedSchools.length === 0) {
+                            return {
+                                id: -1,
+                            };
+                        }
+                        return {
+                            id: teachedSchools,
+                            // , active: 1
+                        };
+                    }
+
+                    return {
+                        id: -1,
+                    };
+                })(),
             },
         });
         return response.data;

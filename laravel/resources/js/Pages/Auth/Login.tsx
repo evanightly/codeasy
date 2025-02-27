@@ -1,32 +1,58 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import { Button } from '@/Components/UI/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/Components/UI/form';
 import { Input } from '@/Components/UI/input';
+import { Switch } from '@/Components/UI/switch';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { authServiceHook } from '@/Services/authServiceHook';
+import { ROUTES } from '@/Support/Constants/routes';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Head, Link, router } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FormEventHandler, useEffect, useRef, useState } from 'react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
 type Step = 'emailStep' | 'passwordStep' | 'authing';
 
 export default function Login({
     status,
-    canResetPassword,
+    canResetPassword = true,
 }: {
     status?: string;
-    canResetPassword: boolean;
+    canResetPassword?: boolean;
 }) {
+    const { t } = useLaravelReactI18n();
     const [step, setStep] = useState<Step>('emailStep');
     const [autoSubmitted, setAutoSubmitted] = useState(false);
-    const passwordInputRef = useRef<HTMLInputElement>(null);
-
     const [typedManually, setTypedManually] = useState(false);
+    const passwordInputRef = useRef<HTMLInputElement>(null);
+    const loginMutation = authServiceHook.useLogin();
 
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false,
+    // Define form schema with Zod
+    const formSchema = z.object({
+        email: z.string().min(1, t('validation.required', { attribute: 'email' })),
+        password: z.string().min(1, t('validation.required', { attribute: 'password' })),
+        remember: z.boolean().default(false),
+    });
+
+    // Setup form with react-hook-form
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+            remember: false,
+        },
     });
 
     const variants = {
@@ -35,48 +61,64 @@ export default function Login({
         exit: { opacity: 0, x: -50 },
     };
 
-    const handleNextEmail: FormEventHandler = (e) => {
-        e.preventDefault();
-        if (!data.email) {
-            alert('Silakan isi email/username!');
+    const handleNextEmail = () => {
+        const email = form.getValues('email');
+        if (!email) {
+            form.setError('email', {
+                type: 'manual',
+                message: t('validation.required', { attribute: 'email' }),
+            });
             return;
         }
         setStep('passwordStep');
     };
 
-    const signIn = () => {
+    const signIn = async () => {
         setStep('authing');
-        window.axios
-            .post(route('login'), data)
-            .then(() => {
-                router.visit(route('dashboard.index'));
-                setAutoSubmitted(false);
-                setTypedManually(false);
-            })
-            .catch(() => {
-                reset();
-                setStep('passwordStep');
-            })
-            .finally(reset);
+        const values = form.getValues();
+
+        try {
+            await loginMutation.mutateAsync({
+                data: values,
+            });
+
+            // Successful login
+            router.visit(route(`${ROUTES.DASHBOARD}.index`));
+            setAutoSubmitted(false);
+            setTypedManually(false);
+
+            toast.success(t('pages.auth.login.messages.success'));
+        } catch (error) {
+            // Handle login error
+            setStep('passwordStep');
+            form.reset({ email: values.email, password: '', remember: values.remember });
+
+            toast.error(t('pages.auth.login.messages.error'));
+
+            // // If there are specific field errors, set them
+            // if (error.response?.data?.errors) {
+            //     Object.entries(error.response.data.errors).forEach(([key, messages]) => {
+            //         form.setError(key as any, {
+            //             type: 'manual',
+            //             message: Array.isArray(messages) ? messages[0] : messages,
+            //         });
+            //     });
+            // }
+        }
     };
 
-    const handleSubmitPassword: FormEventHandler = (e) => {
-        e.preventDefault();
-        signIn();
-    };
-
-    // Auto sign in jika password di-autofill
+    // Auto sign in if password is autofilled
     useEffect(() => {
         if (step === 'passwordStep') {
-            // Reset state saat masuk ke password step
+            // Reset state when entering password step
             setTypedManually(false);
             setAutoSubmitted(false);
 
-            // Beri delay untuk menunggu autofill browser
+            // Delay to wait for browser autofill
             const autoFillTimer = setTimeout(() => {
                 const passwordInput = passwordInputRef.current;
                 if (passwordInput?.value && !typedManually && !autoSubmitted) {
-                    setData('password', passwordInput.value);
+                    form.setValue('password', passwordInput.value);
                     setAutoSubmitted(true);
                     signIn();
                 }
@@ -88,159 +130,188 @@ export default function Login({
 
     return (
         <GuestLayout>
-            <Head title='Log in' />
+            <Head title={t('pages.auth.login.title')} />
 
-            {status && <div className='mb-4 text-sm font-medium text-green-600'>{status}</div>}
-
-            <form
-                onSubmit={(e) => e.preventDefault()}
-                className='relative mx-auto w-full max-w-md rounded bg-white'
-            >
-                <AnimatePresence mode='wait'>
-                    {step === 'authing' ? (
-                        <motion.div
-                            variants={variants}
-                            transition={{ duration: 0.3 }}
-                            key='authing'
-                            initial='hidden'
-                            exit='exit'
-                            className='flex flex-col items-center justify-center py-8'
-                            animate='visible'
-                        >
-                            <p className='mb-4 text-lg font-semibold text-gray-700'>
-                                Authenticating...
-                            </p>
-                            <div className='h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent'></div>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            variants={variants}
-                            transition={{ duration: 0.3 }}
-                            key='fields'
-                            initial='hidden'
-                            exit='exit'
-                            animate='visible'
-                        >
-                            {/* Field email */}
-                            <div
-                                className={`transition-all duration-300 ${
-                                    step === 'emailStep'
-                                        ? 'h-auto opacity-100'
-                                        : 'pointer-events-none h-0 opacity-0'
-                                } `}
-                            >
-                                <div>
-                                    <InputLabel value='Email / Username' htmlFor='email' />
-                                    <TextInput
-                                        value={data.email}
-                                        type='text'
-                                        onChange={(e) => setData('email', e.target.value)}
-                                        name='email'
-                                        id='email'
-                                        className='mt-1 block w-full text-gray-700'
-                                        autoFocus
-                                        autoComplete='username'
-                                    />
-                                    <InputError message={errors.email} className='mt-2' />
-                                </div>
-                                <div className='mt-4 flex justify-end'>
-                                    <PrimaryButton onClick={handleNextEmail} disabled={processing}>
-                                        Next
-                                    </PrimaryButton>
-                                </div>
-                            </div>
-
-                            {/* Field password */}
-                            <div
-                                className={`transition-all duration-300 ${
-                                    step === 'passwordStep'
-                                        ? 'h-auto opacity-100'
-                                        : 'pointer-events-none h-0 opacity-0'
-                                } `}
-                            >
-                                <>
-                                    <div>
-                                        <InputLabel value='Password' htmlFor='password' />
-                                        <Input
-                                            value={data.password}
-                                            type='password'
-                                            ref={passwordInputRef}
-                                            // Add onKeyDown handler for Enter key
-                                            onKeyDown={(
-                                                e: React.KeyboardEvent<HTMLInputElement>,
-                                            ) => {
-                                                if (e.key === 'Enter' && !processing) {
-                                                    e.preventDefault();
-                                                    signIn();
-                                                }
-                                            }}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                setData('password', e.target.value);
-                                                // Check if input is from user interaction
-                                                const inputType = (e.nativeEvent as InputEvent)
-                                                    .inputType;
-                                                if (inputType && inputType !== 'insertFromPaste') {
-                                                    setTypedManually(true);
-                                                }
-                                            }}
-                                            name='password'
-                                            id='password'
-                                            className='mt-1 block w-full text-gray-700'
-                                            autoFocus
-                                            autoComplete='current-password'
-                                        />
-                                        <InputError message={errors.password} className='mt-2' />
-                                    </div>
-
-                                    {/* <div className="mt-4">
-                                        <label className="inline-flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                className="rounded border-gray-300 text-indigo-600"
-                                                checked={data.remember}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'remember',
-                                                        e.target.checked as any,
-                                                    )
-                                                }
-                                            />
-                                            <span className="ml-2 text-sm text-gray-600">
-                                                Remember me
-                                            </span>
-                                        </label>
-                                    </div> */}
-
-                                    <div className='mt-4 flex items-center justify-between'>
-                                        <div className='space-x-4 text-sm'>
-                                            {canResetPassword && (
-                                                <Link
-                                                    href={route('password.request')}
-                                                    className='text-gray-600 underline hover:text-gray-900'
-                                                >
-                                                    Forgot Password?
-                                                </Link>
-                                            )}
-                                            <Link
-                                                href={route('register')}
-                                                className='text-gray-600 underline hover:text-gray-900'
-                                            >
-                                                Sign Up
-                                            </Link>
-                                        </div>
-                                        <PrimaryButton
-                                            onClick={handleSubmitPassword}
-                                            disabled={processing}
-                                        >
-                                            Sign In
-                                        </PrimaryButton>
-                                    </div>
-                                </>
-                            </div>
-                        </motion.div>
+            <Card className='bg-background-2'>
+                <CardHeader>
+                    <CardTitle>{t('pages.auth.login.title')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {status && (
+                        <div className='mb-4 rounded-md bg-green-50 p-2 text-sm text-green-600'>
+                            {status}
+                        </div>
                     )}
-                </AnimatePresence>
-            </form>
+
+                    <Form {...form}>
+                        <form onSubmit={(e) => e.preventDefault()} className='space-y-4'>
+                            <AnimatePresence mode='wait'>
+                                {step === 'authing' ? (
+                                    <motion.div
+                                        variants={variants}
+                                        transition={{ duration: 0.3 }}
+                                        key='authing'
+                                        initial='hidden'
+                                        exit='exit'
+                                        className='flex flex-col items-center justify-center py-8'
+                                        animate='visible'
+                                    >
+                                        <p className='mb-4 text-lg font-semibold'>
+                                            {t('pages.auth.login.messages.authenticating')}
+                                        </p>
+                                        <div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        variants={variants}
+                                        transition={{ duration: 0.3 }}
+                                        key='fields'
+                                        initial='hidden'
+                                        exit='exit'
+                                        animate='visible'
+                                    >
+                                        {/* Email field */}
+                                        <div
+                                            className={`transition-all duration-300 ${
+                                                step === 'emailStep'
+                                                    ? 'h-auto opacity-100'
+                                                    : 'pointer-events-none h-0 opacity-0'
+                                            }`}
+                                        >
+                                            <FormField
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            {t(
+                                                                'pages.auth.login.fields.identifier',
+                                                            )}
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                {...field}
+                                                                autoFocus
+                                                                autoComplete='username'
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                                name='email'
+                                                control={form.control}
+                                            />
+                                            <div className='mt-4 flex justify-end items-center gap-4'>
+                                                <Link href={route(ROUTES.REGISTER)}>
+                                                    {t('pages.auth.login.buttons.dont_have_account')}
+                                                </Link>
+                                                <Button
+                                                    onClick={handleNextEmail}
+                                                    disabled={loginMutation.isPending}
+                                                >
+                                                    {t('pages.auth.login.buttons.next')}
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* Password field */}
+                                        <div
+                                            className={`transition-all duration-300 ${
+                                                step === 'passwordStep'
+                                                    ? 'h-auto opacity-100'
+                                                    : 'pointer-events-none h-0 opacity-0'
+                                            }`}
+                                        >
+                                            <FormField
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            {t('pages.auth.login.fields.password')}
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                {...field}
+                                                                type='password'
+                                                                ref={passwordInputRef}
+                                                                onKeyDown={(e) => {
+                                                                    if (
+                                                                        e.key === 'Enter' &&
+                                                                        !loginMutation.isPending
+                                                                    ) {
+                                                                        e.preventDefault();
+                                                                        signIn();
+                                                                    }
+                                                                }}
+                                                                onChange={(e) => {
+                                                                    field.onChange(e);
+                                                                    // Check if input is from user interaction
+                                                                    const inputType = (
+                                                                        e.nativeEvent as InputEvent
+                                                                    ).inputType;
+                                                                    if (
+                                                                        inputType &&
+                                                                        inputType !==
+                                                                            'insertFromPaste'
+                                                                    ) {
+                                                                        setTypedManually(true);
+                                                                    }
+                                                                }}
+                                                                autoFocus
+                                                                autoComplete='current-password'
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                                name='password'
+                                                control={form.control}
+                                            />
+
+                                            <FormField
+                                                render={({ field }) => (
+                                                    <FormItem className='mt-4 flex flex-row items-center gap-2'>
+                                                        <FormControl>
+                                                            <Switch
+                                                                onCheckedChange={field.onChange}
+                                                                checked={field.value}
+                                                            />
+                                                        </FormControl>
+                                                        <FormLabel className='text-sm font-normal'>
+                                                            {t('pages.auth.login.fields.remember')}
+                                                        </FormLabel>
+                                                    </FormItem>
+                                                )}
+                                                name='remember'
+                                                control={form.control}
+                                            />
+
+                                            <div className='mt-4 flex items-center justify-between'>
+                                                <div className='space-x-4 text-sm'>
+                                                    {canResetPassword && (
+                                                        <Link href={route(ROUTES.PASSWORD_REQUEST)}>
+                                                            {t(
+                                                                'pages.auth.login.buttons.forgot_password',
+                                                            )}
+                                                        </Link>
+                                                    )}
+                                                    <Link href={route(ROUTES.REGISTER)}>
+                                                        {t('pages.auth.login.buttons.sign_up')}
+                                                    </Link>
+                                                </div>
+                                                <Button
+                                                    onClick={signIn}
+                                                    loading={loginMutation.isPending}
+                                                    disabled={loginMutation.isPending}
+                                                >
+                                                    {t('pages.auth.login.buttons.sign_in')}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </form>
+                    </Form>
+                </CardContent>
+            </Card>
         </GuestLayout>
     );
 }

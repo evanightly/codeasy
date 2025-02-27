@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('school_id')->constrained()->cascadeOnDelete();
             $table->enum('status', SchoolRequestStatusEnum::toArray())->default(SchoolRequestStatusEnum::PENDING);
-            $table->text('message');
+            $table->text('message')->nullable();
             $table->timestamps();
         });
     }
