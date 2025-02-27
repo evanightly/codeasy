@@ -27,14 +27,7 @@ export function AssignStudentDialog({ school, isOpen, onClose, onAssign, loading
     const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
     const fetchUsers = async (filters: ServiceFilterOptions) => {
-        const response = await userServiceHook.getAll({
-            filters: {
-                ...filters,
-                column_filters: {
-                    exclude_school_id: school.id,
-                },
-            },
-        });
+        const response = await userServiceHook.getAll({ filters });
         return response.data;
     };
 

@@ -10,6 +10,7 @@ use App\Support\Interfaces\Repositories\SchoolRepositoryInterface;
 use App\Support\Interfaces\Services\SchoolServiceInterface;
 use App\Support\Interfaces\Services\UserServiceInterface;
 use App\Traits\Services\HandlesPageSizeAll;
+use Error;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SchoolService extends BaseCrudService implements SchoolServiceInterface {
@@ -34,6 +35,11 @@ class SchoolService extends BaseCrudService implements SchoolServiceInterface {
 
     public function assignSchoolAdmin(School $school, array $validatedRequest): void {
         $userId = $validatedRequest['user_id'];
+
+        // Check if user is already an admin of this school
+        if ($school->administrators()->where('user_id', $userId)->exists()) {
+            throw new \InvalidArgumentException(__('exceptions.services.school.admin.already_assigned'));
+        }
 
         // Remove any existing admin role for this school if exists
         $school->administrators()->detach($userId);
@@ -66,6 +72,16 @@ class SchoolService extends BaseCrudService implements SchoolServiceInterface {
     public function assignSchoolTeacher(School $school, array $validatedRequest): void {
         $userId = $validatedRequest['user_id'];
 
+        // Check if user is already a teacher of this school
+        if ($school->teachers()->where('user_id', $userId)->exists()) {
+            throw new \InvalidArgumentException(__('exceptions.services.school.teacher.already_assigned'));
+        }
+
+        // Check if user has any other roles in this school
+        if ($school->users()->where('user_id', $userId)->exists()) {
+            throw new \InvalidArgumentException(__('exceptions.services.school.teacher.different_role'));
+        }
+
         // Attach the teacher to school
         $school->users()->attach($userId, [
             'role' => RoleEnum::TEACHER->value,
@@ -93,6 +109,17 @@ class SchoolService extends BaseCrudService implements SchoolServiceInterface {
 
     public function assignStudent(School $school, array $validatedRequest): void {
         $userId = $validatedRequest['user_id'];
+
+        // Check if user is already a student of this school
+        if ($school->students()->where('user_id', $userId)->exists()) {
+            throw new Error(__('exceptions.services.school.student.already_assigned'));
+            // throw new \InvalidArgumentException(__('exceptions.services.school.student.already_assigned'));
+        }
+
+        // Check if user has any other roles in this school
+        if ($school->users()->where('user_id', $userId)->exists()) {
+            throw new \InvalidArgumentException(__('exceptions.services.school.student.different_role'));
+        }
 
         // Attach the student to school
         $school->users()->attach($userId, [

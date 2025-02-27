@@ -43,6 +43,22 @@ const permissions = {
     SCHOOL_REQUEST_READ: 'school-request-read',
     SCHOOL_REQUEST_UPDATE: 'school-request-update',
     SCHOOL_REQUEST_DELETE: 'school-request-delete',
+    CLASS_ROOM_CREATE: 'classroom-create',
+    CLASS_ROOM_READ: 'classroom-read',
+    CLASS_ROOM_UPDATE: 'classroom-update',
+    CLASS_ROOM_DELETE: 'classroom-delete',
+    CLASS_ROOM_STUDENT_CREATE: 'classroom-student-create',
+    CLASS_ROOM_STUDENT_READ: 'classroom-student-read',
+    CLASS_ROOM_STUDENT_UPDATE: 'classroom-student-update',
+    CLASS_ROOM_STUDENT_DELETE: 'classroom-student-delete',
+    COURSE_CREATE: 'course-create',
+    COURSE_READ: 'course-read',
+    COURSE_UPDATE: 'course-update',
+    COURSE_DELETE: 'course-delete',
+    MATERIAL_CREATE: 'material-create',
+    MATERIAL_READ: 'material-read',
+    MATERIAL_UPDATE: 'material-update',
+    MATERIAL_DELETE: 'material-delete',
 };
 
 export const PermissionEnum = permissions;

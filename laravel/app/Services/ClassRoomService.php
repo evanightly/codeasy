@@ -5,6 +5,7 @@ namespace App\Services;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Models\ClassRoom;
 use App\Models\School;
+use App\Models\User;
 use App\Support\Interfaces\Repositories\ClassRoomRepositoryInterface;
 use App\Support\Interfaces\Services\ClassRoomServiceInterface;
 use App\Support\Interfaces\Services\ClassRoomStudentServiceInterface;
@@ -21,9 +22,13 @@ class ClassRoomService extends BaseCrudService implements ClassRoomServiceInterf
     }
 
     public function getAllPaginated(array $search = [], int $pageSize = 15): LengthAwarePaginator {
+        /**
+         * @var User $user
+         */
+        $user = Auth::user();
         // Filter classrooms based on user's schools if not super admin
-        if (!Auth::user()->isSuperAdmin()) {
-            $schoolIds = Auth::user()->schools()->pluck('schools.id');
+        if (!$user->isSuperAdmin()) {
+            $schoolIds = $user->schools()->pluck('schools.id');
             $search['school_id'] = $schoolIds->toArray();
         }
 
@@ -33,11 +38,15 @@ class ClassRoomService extends BaseCrudService implements ClassRoomServiceInterf
     }
 
     public function create(array $data): ?Model {
+        /**
+         * @var User $user
+         */
+        $user = Auth::user();
         $school = School::findOrFail($data['school_id']);
 
         // Check if user is authorized to manage classrooms in this school
-        if (!Auth::user()->isTeacherAt($school) && !Auth::user()->isSchoolAdmin($school)) {
-            throw new \Exception('Unauthorized to create classrooms in this school');
+        if (!$user->isTeacherAt($school) && !$user->isSchoolAdmin($school)) {
+            throw new \Exception(__('exceptions.services.classroom.unauthorized', ['action' => 'create']));
         }
 
         $classroom = parent::create($data);
@@ -50,11 +59,15 @@ class ClassRoomService extends BaseCrudService implements ClassRoomServiceInterf
     }
 
     public function update($keyOrModel, array $data): ?Model {
+        /**
+         * @var User $user
+         */
+        $user = Auth::user();
         $classroom = $keyOrModel instanceof ClassRoom ? $keyOrModel : $this->findOrFail($keyOrModel);
 
         // Check if user is authorized to manage this classroom
-        if (!Auth::user()->isTeacherAt($classroom->school) && !Auth::user()->isSchoolAdmin($classroom->school)) {
-            throw new \Exception('Unauthorized to update this classroom');
+        if (!$user->isTeacherAt($classroom->school) && !$user->isSchoolAdmin($classroom->school)) {
+            throw new \Exception(__('exceptions.services.classroom.unauthorized', ['action' => 'update']));
         }
 
         if (isset($data['student_ids'])) {
@@ -65,23 +78,30 @@ class ClassRoomService extends BaseCrudService implements ClassRoomServiceInterf
     }
 
     public function delete($keyOrModel): bool {
+        /**
+         * @var User $user
+         */
+        $user = Auth::user();
         $classroom = $keyOrModel instanceof ClassRoom ? $keyOrModel : $this->findOrFail($keyOrModel);
 
         // Check if user is authorized to manage this classroom
-        if (!Auth::user()->isTeacherAt($classroom->school) && !Auth::user()->isSchoolAdmin($classroom->school)) {
-            throw new \Exception('Unauthorized to delete this classroom');
+        if (!$user->isTeacherAt($classroom->school) && !$user->isSchoolAdmin($classroom->school)) {
+            throw new \Exception(__('exceptions.services.classroom.unauthorized', ['action' => 'delete']));
         }
 
         return parent::delete($classroom);
     }
 
     public function assignStudent(ClassRoom $classroom, array $validatedRequest): void {
-        dump($validatedRequest);
+        // Check if student is already assigned
+        if ($classroom->students()->where('user_id', $validatedRequest['user_id'])->exists()) {
+            throw new \InvalidArgumentException(__('exceptions.services.classroom.student.already_assigned'));
+        }
+
         $classroom->students()->attach($validatedRequest['user_id']);
     }
 
     public function unassignStudent(ClassRoom $classroom, array $validatedRequest): void {
-        dump($validatedRequest);
         $classroom->students()->detach($validatedRequest['user_id']);
     }
 
