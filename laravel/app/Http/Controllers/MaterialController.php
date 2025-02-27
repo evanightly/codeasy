@@ -6,9 +6,9 @@ use App\Http\Requests\Material\StoreMaterialRequest;
 use App\Http\Requests\Material\UpdateMaterialRequest;
 use App\Http\Resources\MaterialResource;
 use App\Models\Material;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\MaterialServiceInterface;
 use Illuminate\Http\Request;
-use App\Support\Enums\PermissionEnum;
 use Illuminate\Routing\Controllers\Middleware;
 
 class MaterialController extends Controller {

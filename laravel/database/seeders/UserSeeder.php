@@ -39,7 +39,7 @@ class UserSeeder extends Seeder {
 
     public function createSchoolAdmins(School $school, ?int $count = null): Collection {
         $count = $count ?? self::TEST_DATA_COUNT['admins_per_school'];
-        $admins = new Collection();
+        $admins = new Collection;
 
         for ($i = 1; $i <= $count; $i++) {
             $admin = User::factory()->create([
@@ -63,7 +63,7 @@ class UserSeeder extends Seeder {
 
     public function createTeachers(School $school, ?int $count = null): Collection {
         $count = $count ?? self::TEST_DATA_COUNT['teachers_per_school'];
-        $teachers = new Collection();
+        $teachers = new Collection;
 
         for ($i = 1; $i <= $count; $i++) {
             $teacher = User::factory()->create([
@@ -87,7 +87,7 @@ class UserSeeder extends Seeder {
 
     public function createStudents(School $school, ?int $count = null): Collection {
         $count = $count ?? self::TEST_DATA_COUNT['students_per_school'];
-        $students = new Collection();
+        $students = new Collection;
 
         for ($i = 1; $i <= $count; $i++) {
             $student = User::factory()->create([

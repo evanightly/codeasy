@@ -6,9 +6,9 @@ use App\Http\Requests\ClassRoomStudent\StoreClassRoomStudentRequest;
 use App\Http\Requests\ClassRoomStudent\UpdateClassRoomStudentRequest;
 use App\Http\Resources\ClassRoomStudentResource;
 use App\Models\ClassRoomStudent;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\ClassRoomStudentServiceInterface;
 use Illuminate\Http\Request;
-use App\Support\Enums\PermissionEnum;
 use Illuminate\Routing\Controllers\Middleware;
 
 class ClassRoomStudentController extends Controller {

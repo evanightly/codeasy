@@ -25,7 +25,7 @@ class ClassRoomSeeder extends Seeder {
     }
 
     public function createClassRooms(School $school): Collection {
-        $classrooms = new Collection();
+        $classrooms = new Collection;
 
         for ($i = 1; $i <= self::TEST_DATA_COUNT['classes_per_school']; $i++) {
             $classroom = ClassRoom::create([

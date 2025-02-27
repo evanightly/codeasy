@@ -15,5 +15,4 @@ class Course extends Model {
     public function classroom() {
         return $this->belongsTo(ClassRoom::class);
     }
-
 }

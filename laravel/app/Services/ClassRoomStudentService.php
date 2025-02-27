@@ -18,7 +18,7 @@ class ClassRoomStudentService extends BaseCrudService implements ClassRoomStuden
         return parent::getAllPaginated($search, $pageSize);
     }
 
-    /** @var ClassRoomStudentRepository $repository */
+    /** @var ClassRoomStudentRepository */
     protected $repository;
 
     protected function getRepositoryClass(): string {

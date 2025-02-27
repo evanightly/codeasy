@@ -18,7 +18,7 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         return parent::getAllPaginated($search, $pageSize);
     }
 
-    /** @var CourseRepository $repository */
+    /** @var CourseRepository */
     protected $repository;
 
     protected function getRepositoryClass(): string {

@@ -18,7 +18,7 @@ class MaterialService extends BaseCrudService implements MaterialServiceInterfac
         return parent::getAllPaginated($search, $pageSize);
     }
 
-    /** @var MaterialRepository $repository */
+    /** @var MaterialRepository */
     protected $repository;
 
     protected function getRepositoryClass(): string {
