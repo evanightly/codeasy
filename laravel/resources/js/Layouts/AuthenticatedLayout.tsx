@@ -30,7 +30,7 @@ export default function AuthenticatedLayout({
                 {auth.user && <DashboardSidebar />}
                 <SidebarInset>
                     <DashboardNavbar breadcrumbs={breadcrumbs} />
-                    <main className={`flex flex-1 flex-col gap-4 ${paddingClass}`}>{children}</main>
+                    <main className={`text-foreground flex flex-1 flex-col gap-4 ${paddingClass}`}>{children}</main>
                 </SidebarInset>
             </SidebarProvider>
         </>
