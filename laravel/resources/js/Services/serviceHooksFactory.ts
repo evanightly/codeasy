@@ -11,6 +11,8 @@ import {
 import { Resource } from '@/Support/Interfaces/Resources';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+type ExtendedResource<T> = T & Record<string, any>;
+
 export function serviceHooksFactory<T extends Resource>({ baseKey, baseRoute }: ServiceHooks) {
     if (!baseKey) baseKey = baseRoute;
 
@@ -58,8 +60,8 @@ export function serviceHooksFactory<T extends Resource>({ baseKey, baseRoute }: 
         useCreate: ({ axiosRequestConfig, useMutationOptions }: UseCreateOptions<T> = {}) => {
             const queryClient = useQueryClient();
 
-            return useMutation<Partial<T>, Error, { data: Partial<T> }>({
-                mutationFn: async ({ data }: { data: Partial<T> }) => {
+            return useMutation<Partial<T>, Error, { data: Partial<ExtendedResource<T>> }>({
+                mutationFn: async ({ data }: { data: Partial<ExtendedResource<T>> }) => {
                     const url = route(`${baseRoute}.store`);
                     const response = await window.axios.post(url, data, axiosRequestConfig);
                     return response.data;
@@ -78,8 +80,18 @@ export function serviceHooksFactory<T extends Resource>({ baseKey, baseRoute }: 
         useUpdate: ({ axiosRequestConfig, useMutationOptions }: UseUpdateOptions<T> = {}) => {
             const queryClient = useQueryClient();
 
-            return useMutation<Partial<T>, Error, { id: number; data: Partial<T> }>({
-                mutationFn: async ({ id, data }: { id: number; data: Partial<T> }) => {
+            return useMutation<
+                Partial<T>,
+                Error,
+                { id: number; data: Partial<ExtendedResource<T>> }
+            >({
+                mutationFn: async ({
+                    id,
+                    data,
+                }: {
+                    id: number;
+                    data: Partial<ExtendedResource<T>>;
+                }) => {
                     const url = route(`${baseRoute}.update`, id);
                     const response = await window.axios.post(url, data, {
                         params: { _method: 'PUT' },
