@@ -10,9 +10,13 @@ class Course extends Model {
      *
      * @var array<string>
      */
-    protected $fillable = ['classroom_id', 'name', 'description', 'active'];
+    protected $fillable = ['class_room_id', 'teacher_id', 'name', 'description', 'active'];
 
     public function classroom() {
         return $this->belongsTo(ClassRoom::class);
+    }
+
+    public function teacher() {
+        return $this->belongsTo(User::class);
     }
 }
