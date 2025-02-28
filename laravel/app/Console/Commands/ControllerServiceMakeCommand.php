@@ -24,8 +24,8 @@ class ControllerServiceMakeCommand extends Command {
         $controllerPath = app_path("Http/Controllers/{$name}Controller.php");
         $controllerStubContents = file_get_contents(base_path('stubs/scaffold/backend/controller.stub'));
         $content = str_replace(
-            ['{{ modelName }}', '{{ modelNameCamel }}', '{{ modelNameUpper }}'],
-            [$name, Str::camel($name), Str::upper($name)],
+            ['{{ modelName }}', '{{ modelNameCamel }}', '{{ modelNameUpper }}', '{{ modelNameUpperSnake }}'],
+            [$name, Str::camel($name), Str::upper($name), Str::snake(Str::upper($name))],
             $controllerStubContents
         );
         $this->fileHelper->replaceFileWithContent($controllerPath, $content);
