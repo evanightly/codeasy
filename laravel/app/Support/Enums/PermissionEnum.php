@@ -86,4 +86,19 @@ enum PermissionEnum: string {
     case COURSE_READ = 'course-read';
     case COURSE_UPDATE = 'course-update';
     case COURSE_DELETE = 'course-delete';
+
+    case LEARNING_MATERIAL_CREATE = 'learning-material-create';
+    case LEARNING_MATERIAL_READ = 'learning-material-read';
+    case LEARNING_MATERIAL_UPDATE = 'learning-material-update';
+    case LEARNING_MATERIAL_DELETE = 'learning-material-delete';
+
+    case LEARNING_MATERIAL_QUESTION_CREATE = 'learning-material-question-create';
+    case LEARNING_MATERIAL_QUESTION_READ = 'learning-material-question-read';
+    case LEARNING_MATERIAL_QUESTION_UPDATE = 'learning-material-question-update';
+    case LEARNING_MATERIAL_QUESTION_DELETE = 'learning-material-question-delete';
+
+    case LEARNING_MATERIAL_QUESTION_TEST_CASE_CREATE = 'learning-material-question-test-case-create';
+    case LEARNING_MATERIAL_QUESTION_TEST_CASE_READ = 'learning-material-question-test-case-read';
+    case LEARNING_MATERIAL_QUESTION_TEST_CASE_UPDATE = 'learning-material-question-test-case-update';
+    case LEARNING_MATERIAL_QUESTION_TEST_CASE_DELETE = 'learning-material-question-test-case-delete';
 }

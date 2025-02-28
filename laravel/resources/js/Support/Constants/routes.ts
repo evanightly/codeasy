@@ -16,4 +16,5 @@ export const ROUTES = {
     COURSES: 'courses',
     LEARNING_MATERIALS: 'learning-materials',
     LEARNING_MATERIAL_QUESTIONS: 'learning-material-questions',
+	LEARNING_MATERIAL_QUESTION_TEST_CASES: 'learning-material-question-test-cases',
 };

@@ -1,4 +1,5 @@
-import { LearningMaterial } from '@/Support/Interfaces/Models';
-import { Resource } from '@/Support/Interfaces/Resources';
+import { CourseResource } from './CourseResource';
 
-export interface LearningMaterialResource extends Resource, LearningMaterial {}
+export interface LearningMaterialResource {
+    course?: CourseResource;
+}

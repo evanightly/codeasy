@@ -5,23 +5,22 @@ namespace App\Http\Resources;
 use App\Traits\Resources\JsonResource\HandlesResourceDataSelection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class LearningMaterialResource extends JsonResource {
+class LearningMaterialQuestionTestCaseResource extends JsonResource {
     use HandlesResourceDataSelection;
 
     public function toArray($request): array {
         $dataSource = [
             'id' => $this->id,
-            'course_id' => $this->course_id,
-            'title' => $this->title,
+            'learning_material_question_id' => $this->learning_material_question_id,
+            'input' => $this->input,
+            'expected_output' => $this->expected_output,
             'description' => $this->description,
-            'file' => $this->file,
-            'file_type' => $this->file_type,
-            'type' => $this->type,
             'order_number' => $this->order_number,
+            'hidden' => $this->hidden,
             'active' => $this->active,
+            'question' => LearningMaterialQuestionResource::make($this->whenLoaded('question')),
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
-            'course' => new CourseResource($this->whenLoaded('course')),
         ];
 
         return $this->filterData($request, $dataSource);

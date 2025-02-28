@@ -16,10 +16,10 @@ class LearningMaterialQuestionController extends Controller {
 
     public static function middleware(): array {
         return [
-            new Middleware('permission:' . PermissionEnum::LEARNINGMATERIALQUESTION_CREATE->value, only: ['create', 'store']),
-            new Middleware('permission:' . PermissionEnum::LEARNINGMATERIALQUESTION_UPDATE->value, only: ['edit', 'update']),
-            new Middleware('permission:' . PermissionEnum::LEARNINGMATERIALQUESTION_READ->value, only: ['index', 'show']),
-            new Middleware('permission:' . PermissionEnum::LEARNINGMATERIALQUESTION_DELETE->value, only: ['destroy']),
+            new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_QUESTION_CREATE->value, only: ['create', 'store']),
+            new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_QUESTION_UPDATE->value, only: ['edit', 'update']),
+            new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_QUESTION_READ->value, only: ['index', 'show']),
+            new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_QUESTION_DELETE->value, only: ['destroy']),
         ];
     }
 

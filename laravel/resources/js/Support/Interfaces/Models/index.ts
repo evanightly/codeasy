@@ -16,3 +16,5 @@ export * from './Course';
 
 export * from './LearningMaterial';
 export * from './LearningMaterialQuestion';
+
+export * from './LearningMaterialQuestionTestCase';
