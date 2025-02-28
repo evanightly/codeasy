@@ -199,9 +199,11 @@ export default function Login({
                                                 name='email'
                                                 control={form.control}
                                             />
-                                            <div className='mt-4 flex justify-end items-center gap-4'>
+                                            <div className='mt-4 flex items-center justify-end gap-4'>
                                                 <Link href={route(ROUTES.REGISTER)}>
-                                                    {t('pages.auth.login.buttons.dont_have_account')}
+                                                    {t(
+                                                        'pages.auth.login.buttons.dont_have_account',
+                                                    )}
                                                 </Link>
                                                 <Button
                                                     onClick={handleNextEmail}

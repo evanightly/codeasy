@@ -11,9 +11,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                 </Link>
             </div>
 
-            <div className='mt-6 w-full px-6 py-4 sm:max-w-md sm:rounded-lg'>
-                {children}
-            </div>
+            <div className='mt-6 w-full px-6 py-4 sm:max-w-md sm:rounded-lg'>{children}</div>
         </div>
     );
 }
