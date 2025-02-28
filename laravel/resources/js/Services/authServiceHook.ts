@@ -15,7 +15,7 @@ interface RegisterData {
 }
 
 interface LoginData {
-    email: string;
+    email: string; // Can contain either email or username
     password: string;
     remember?: boolean;
 }

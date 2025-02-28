@@ -40,7 +40,7 @@ export default function Login({
 
     // Define form schema with Zod
     const formSchema = z.object({
-        email: z.string().min(1, t('validation.required', { attribute: 'email' })),
+        email: z.string().min(1, t('validation.required', { attribute: 'email or username' })),
         password: z.string().min(1, t('validation.required', { attribute: 'password' })),
         remember: z.boolean().default(false),
     });
@@ -170,7 +170,7 @@ export default function Login({
                                         exit='exit'
                                         animate='visible'
                                     >
-                                        {/* Email field */}
+                                        {/* Email/Username field */}
                                         <div
                                             className={`transition-all duration-300 ${
                                                 step === 'emailStep'
@@ -182,15 +182,14 @@ export default function Login({
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>
-                                                            {t(
-                                                                'pages.auth.login.fields.identifier',
-                                                            )}
+                                                            {t('pages.auth.login.fields.identifier')}
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
                                                                 {...field}
+                                                                placeholder="Email or username"
                                                                 autoFocus
-                                                                autoComplete='username'
+                                                                autoComplete="username email"
                                                             />
                                                         </FormControl>
                                                         <FormMessage />
