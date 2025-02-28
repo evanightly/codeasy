@@ -94,7 +94,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('class-rooms', ClassRoomController::class);
     // Route::resource('class-room-students', ClassRoomStudentController::class);
     Route::resource('courses', CourseController::class);
-    Route::resource('materials', MaterialController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

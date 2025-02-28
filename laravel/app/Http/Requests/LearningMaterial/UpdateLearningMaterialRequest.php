@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Material;
+namespace App\Http\Requests\LearningMaterial;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateMaterialRequest extends FormRequest {
+class UpdateLearningMaterialRequest extends FormRequest {
     public function rules(): array {
         return [
             // Add your validation rules here

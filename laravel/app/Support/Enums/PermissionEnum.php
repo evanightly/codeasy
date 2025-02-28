@@ -86,10 +86,4 @@ enum PermissionEnum: string {
     case COURSE_READ = 'course-read';
     case COURSE_UPDATE = 'course-update';
     case COURSE_DELETE = 'course-delete';
-
-    // Material Management
-    case MATERIAL_CREATE = 'material-create';
-    case MATERIAL_READ = 'material-read';
-    case MATERIAL_UPDATE = 'material-update';
-    case MATERIAL_DELETE = 'material-delete';
 }

@@ -13,4 +13,6 @@ export * from './SchoolRequest';
 export * from './ClassRoom';
 export * from './ClassRoomStudent';
 export * from './Course';
-export * from './Material';
+
+export * from './LearningMaterial';
+export * from './LearningMaterialQuestion';

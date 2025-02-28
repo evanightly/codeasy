@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use App\Traits\Resources\JsonResource\HandlesResourceDataSelection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class MaterialResource extends JsonResource {
+class LearningMaterialResource extends JsonResource {
     use HandlesResourceDataSelection;
 
     public function toArray($request): array {

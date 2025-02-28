@@ -2,15 +2,15 @@
 
 namespace App\Repositories;
 
-use App\Models\Material;
-use App\Support\Interfaces\Repositories\MaterialRepositoryInterface;
+use App\Models\LearningMaterialQuestion;
+use App\Support\Interfaces\Repositories\LearningMaterialQuestionRepositoryInterface;
 use App\Traits\Repositories\HandlesFiltering;
 use App\Traits\Repositories\HandlesRelations;
 use App\Traits\Repositories\HandlesSorting;
 use App\Traits\Repositories\RelationQueryable;
 use Illuminate\Database\Eloquent\Builder;
 
-class MaterialRepository extends BaseRepository implements MaterialRepositoryInterface {
+class LearningMaterialQuestionRepository extends BaseRepository implements LearningMaterialQuestionRepositoryInterface {
     use HandlesFiltering, HandlesRelations, HandlesSorting, RelationQueryable;
 
     protected function applyFilters(array $searchParams = []): Builder {
@@ -28,6 +28,6 @@ class MaterialRepository extends BaseRepository implements MaterialRepositoryInt
     }
 
     protected function getModelClass(): string {
-        return Material::class;
+        return LearningMaterialQuestion::class;
     }
 }
