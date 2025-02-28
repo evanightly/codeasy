@@ -447,6 +447,94 @@ return [
             ],
         ],
     ],
+    'school_request' => [
+        'common' => [
+            'fields' => [
+                'school' => 'School',
+                'user' => 'User',
+                'message' => 'Message',
+                'status' => 'Status',
+                'created_at' => 'Created At',
+            ],
+            'placeholders' => [
+                'school' => 'Select a school',
+                'message' => 'Enter your request message',
+            ],
+            'validations' => [
+                'school_id' => [
+                    'required' => 'School is required',
+                ],
+                'user_id' => [
+                    'required' => 'User is required',
+                ],
+                'message' => [
+                    'required' => 'Message is required',
+                ],
+            ],
+            'messages' => [
+                'pending' => [
+                    'create' => 'Creating request...',
+                    'update' => 'Updating request...',
+                    'delete' => 'Deleting request...',
+                    'approve' => 'Approving request...',
+                    'reject' => 'Rejecting request...',
+                ],
+                'success' => [
+                    'create' => 'Request created successfully',
+                    'update' => 'Request updated successfully',
+                    'delete' => 'Request deleted successfully',
+                    'approve' => 'Request approved successfully',
+                    'reject' => 'Request rejected successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating request',
+                    'update' => 'Error updating request',
+                    'delete' => 'Error deleting request',
+                    'approve' => 'Error approving request',
+                    'reject' => 'Error rejecting request',
+                ],
+            ],
+            'status' => [
+                'pending' => 'Pending',
+                'approved' => 'Approved',
+                'rejected' => 'Rejected',
+            ],
+        ],
+        'index' => [
+            'title' => 'School Requests',
+            'buttons' => [
+                'create' => 'Create Request',
+            ],
+            'columns' => [
+                'school' => 'School',
+                'message' => 'Message',
+                'status' => 'Status',
+                'created_at' => 'Created At',
+                'actions' => 'Actions',
+            ],
+            'empty_state' => 'No school requests found',
+        ],
+        'create' => [
+            'title' => 'Create School Request',
+            'buttons' => [
+                'create' => 'Submit Request',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit School Request',
+            'buttons' => [
+                'update' => 'Update Request',
+            ],
+        ],
+        'show' => [
+            'title' => 'School Request Details',
+            'buttons' => [
+                'approve' => 'Approve',
+                'reject' => 'Reject',
+                'back' => 'Back to Requests',
+            ],
+        ],
+    ],
     'classroom' => [
         'common' => [
             'fields' => [

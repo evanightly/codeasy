@@ -1,3 +1,4 @@
+import GenericDataSelector from '@/Components/GenericDataSelector';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
@@ -8,62 +9,81 @@ import {
     FormLabel,
     FormMessage,
 } from '@/Components/UI/form';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/Components/UI/select';
 import { Textarea } from '@/Components/UI/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { schoolRequestServiceHook } from '@/Services/schoolRequestServiceHook';
 import { schoolServiceHook } from '@/Services/schoolServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+import { SchoolResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-const formSchema = z.object({
-    user_id: z.coerce.number().min(1, 'User is required'),
-    school_id: z.coerce.number().min(1, 'School is required'),
-    message: z.string().min(1, 'Message is required'),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
 export default function Create() {
-    const { user } = usePage().props.auth;
+    const { t } = useLaravelReactI18n();
+    const { id: userId, teachedSchools } = usePage().props.auth.user;
     const createMutation = schoolRequestServiceHook.useCreate();
-    const { data: schools } = schoolServiceHook.useGetAll();
+    const [schools, setSchools] = useState<SchoolResource[]>([]);
+
+    const formSchema = z.object({
+        user_id: z.coerce
+            .number()
+            .min(1, t('pages.school_request.common.validations.user_id.required')),
+        school_id: z.coerce
+            .number()
+            .min(1, t('pages.school_request.common.validations.school_id.required')),
+        message: z.string().min(1, t('pages.school_request.common.validations.message.required')),
+    });
+
+    type FormData = z.infer<typeof formSchema>;
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            user_id: user.id,
+            user_id: userId,
             school_id: undefined,
             message: '',
         },
     });
 
+    const fetchSchools = async (filters: ServiceFilterOptions) => {
+        const response = await schoolServiceHook.getAll({
+            filters: {
+                ...filters,
+            },
+        });
+        return response.data as SchoolResource[];
+    };
+
+    useEffect(() => {
+        // fetch then filter schools
+        fetchSchools({}).then((schools) => {
+            setSchools(schools.filter((school) => !teachedSchools.includes(school.id)));
+        });
+    }, [teachedSchools]);
+
     const handleSubmit = async (values: FormData) => {
         toast.promise(createMutation.mutateAsync({ data: values }), {
-            loading: 'Creating request...',
+            loading: t('pages.school_request.common.messages.pending.create'),
             success: () => {
                 router.visit(route(`${ROUTES.SCHOOL_REQUESTS}.index`));
-                return 'Request created successfully';
+                return t('pages.school_request.common.messages.success.create');
             },
-            error: 'An error occurred while creating request',
+            error: t('pages.school_request.common.messages.error.create'),
         });
     };
 
     return (
-        <AuthenticatedLayout title='Create School Request'>
+        <AuthenticatedLayout title={t('pages.school_request.create.title')}>
+            <Head title={t('pages.school_request.create.title')} />
             <Card>
                 <CardHeader>
-                    <CardTitle>Create School Request</CardTitle>
+                    <CardTitle>{t('pages.school_request.create.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -71,27 +91,23 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>School</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value?.toString()}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder='Select a school' />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {schools?.data?.map((school) => (
-                                                    <SelectItem
-                                                        value={school.id.toString()}
-                                                        key={school.id}
-                                                    >
-                                                        {school.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <FormLabel>
+                                            {t('pages.school_request.common.fields.school')}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <GenericDataSelector<SchoolResource>
+                                                setSelectedData={(school) => {
+                                                    field.onChange(school);
+                                                }}
+                                                selectedDataId={field.value}
+                                                renderItem={(school) => school?.name ?? ''}
+                                                placeholder={t(
+                                                    'pages.school_request.common.placeholders.school',
+                                                )}
+                                                nullable={false}
+                                                data={schools}
+                                            />
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -102,10 +118,14 @@ export default function Create() {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Message</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.school_request.common.fields.message')}
+                                        </FormLabel>
                                         <FormControl>
                                             <Textarea
-                                                placeholder='Enter request message'
+                                                placeholder={t(
+                                                    'pages.school_request.common.placeholders.message',
+                                                )}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -117,12 +137,11 @@ export default function Create() {
                             />
 
                             <Button
-                                variant='create'
                                 type='submit'
                                 loading={createMutation.isPending}
                                 disabled={createMutation.isPending}
                             >
-                                Create Request
+                                {t('pages.school_request.create.buttons.create')}
                             </Button>
                         </form>
                     </Form>
