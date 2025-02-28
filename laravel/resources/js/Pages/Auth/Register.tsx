@@ -137,7 +137,7 @@ export default function Register() {
     return (
         <GuestLayout>
             <Head title={t('pages.auth.register.title')} />
-            <Card className='bg-background-2'>
+            <Card>
                 <CardHeader>
                     <CardTitle>{t('pages.auth.register.title')}</CardTitle>
                 </CardHeader>

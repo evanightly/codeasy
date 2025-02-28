@@ -1,5 +1,6 @@
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
+import { Checkbox } from '@/Components/UI/checkbox';
 import {
     Form,
     FormControl,
@@ -9,7 +10,6 @@ import {
     FormMessage,
 } from '@/Components/UI/form';
 import { Input } from '@/Components/UI/input';
-import { Switch } from '@/Components/UI/switch';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { authServiceHook } from '@/Services/authServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
@@ -132,7 +132,7 @@ export default function Login({
         <GuestLayout>
             <Head title={t('pages.auth.login.title')} />
 
-            <Card className='bg-background-2'>
+            <Card>
                 <CardHeader>
                     <CardTitle>{t('pages.auth.login.title')}</CardTitle>
                 </CardHeader>
@@ -182,20 +182,39 @@ export default function Login({
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>
-                                                            {t('pages.auth.login.fields.identifier')}
+                                                            {t(
+                                                                'pages.auth.login.fields.identifier',
+                                                            )}
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
                                                                 {...field}
-                                                                placeholder="Email or username"
+                                                                placeholder='Email or username'
                                                                 autoFocus
-                                                                autoComplete="username email"
+                                                                autoComplete='username email'
                                                             />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
                                                 name='email'
+                                                control={form.control}
+                                            />
+                                            <FormField
+                                                render={({ field }) => (
+                                                    <FormItem className='mt-4 flex items-center gap-2'>
+                                                        <FormControl>
+                                                            <Checkbox
+                                                                onCheckedChange={field.onChange}
+                                                                checked={field.value}
+                                                            />
+                                                        </FormControl>
+                                                        <FormLabel className='!m-0 text-sm font-normal'>
+                                                            {t('pages.auth.login.fields.remember')}
+                                                        </FormLabel>
+                                                    </FormItem>
+                                                )}
+                                                name='remember'
                                                 control={form.control}
                                             />
                                             <div className='mt-4 flex items-center justify-end gap-4'>
@@ -263,24 +282,6 @@ export default function Login({
                                                     </FormItem>
                                                 )}
                                                 name='password'
-                                                control={form.control}
-                                            />
-
-                                            <FormField
-                                                render={({ field }) => (
-                                                    <FormItem className='mt-4 flex flex-row items-center gap-2'>
-                                                        <FormControl>
-                                                            <Switch
-                                                                onCheckedChange={field.onChange}
-                                                                checked={field.value}
-                                                            />
-                                                        </FormControl>
-                                                        <FormLabel className='text-sm font-normal'>
-                                                            {t('pages.auth.login.fields.remember')}
-                                                        </FormLabel>
-                                                    </FormItem>
-                                                )}
-                                                name='remember'
                                                 control={form.control}
                                             />
 
