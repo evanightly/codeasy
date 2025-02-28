@@ -63,7 +63,7 @@ class FrontendMakeCommand extends Command {
         $stub = $this->files->get(base_path('stubs/scaffold/frontend/service.hook.stub'));
         $content = str_replace(
             ['{{ modelName }}', '{{ modelCamel }}', '{{ modelUpperSnake }}'],
-            [$name, Str::camel($name), Str::upper($name)],
+            [$name, Str::camel($name), Str::upper(Str::snake($name))],
             $stub
         );
         $this->files->put($path, $content);
