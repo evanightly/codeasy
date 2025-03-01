@@ -13,7 +13,7 @@ class StoreLearningMaterialQuestionRequest extends FormRequest {
             'description' => ['nullable', 'string'],
             'file' => ['required', 'file'],
             'type' => ['required', 'string', 'in:' . implode(',', LearningMaterialType::toArray())],
-            'order_number' => ['required', 'integer'],
+            // 'order_number' => ['required', 'integer'],
             'clue' => ['nullable', 'string'],
             'active' => ['boolean'],
         ];

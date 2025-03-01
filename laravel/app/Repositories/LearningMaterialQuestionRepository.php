@@ -20,7 +20,7 @@ class LearningMaterialQuestionRepository extends BaseRepository implements Learn
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
-        $query = $this->applyColumnFilters($query, $searchParams, ['created_at', 'updated_at']);
+        $query = $this->applyColumnFilters($query, $searchParams, ['learning_material_id', 'created_at', 'updated_at']);
 
         $query = $this->applySorting($query, $searchParams);
 

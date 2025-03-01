@@ -12,9 +12,9 @@ class UpdateLearningMaterialRequest extends FormRequest {
             'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'file' => ['nullable', 'file'],
-            // 'file_type' => ['nullable', 'string', 'in:' . implode(',', FileTypeEnum::toArray())],
+            // 'file_extension' => ['nullable', 'string'],
             'type' => ['nullable', 'string', 'in:' . implode(',', LearningMaterialType::toArray())],
-            'order_number' => ['nullable', 'integer'],
+            // 'order_number' => ['nullable', 'integer'],
             'active' => ['boolean'],
         ];
     }

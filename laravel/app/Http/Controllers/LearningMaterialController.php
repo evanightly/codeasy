@@ -6,9 +6,9 @@ use App\Http\Requests\LearningMaterial\StoreLearningMaterialRequest;
 use App\Http\Requests\LearningMaterial\UpdateLearningMaterialRequest;
 use App\Http\Resources\LearningMaterialResource;
 use App\Models\LearningMaterial;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\LearningMaterialServiceInterface;
 use Illuminate\Http\Request;
-use App\Support\Enums\PermissionEnum;
 use Illuminate\Routing\Controllers\Middleware;
 
 class LearningMaterialController extends Controller {
@@ -40,12 +40,13 @@ class LearningMaterialController extends Controller {
 
     public function store(StoreLearningMaterialRequest $request) {
         if ($this->ajax()) {
+
             return $this->learningMaterialService->create($request->validated());
         }
     }
 
     public function show(LearningMaterial $learningMaterial) {
-        $data = LearningMaterialResource::make($learningMaterial);
+        $data = LearningMaterialResource::make($learningMaterial->load(['course']));
 
         if ($this->ajax()) {
             return $data;

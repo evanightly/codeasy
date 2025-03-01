@@ -1,6 +1,5 @@
 <?php
 
-use App\Support\Enums\FileTypeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,7 +17,7 @@ return new class extends Migration {
             // ->onDelete('cascade');
             $table->text('input')->nullable();
             $table->text('expected_output_file')->nullable();
-            $table->enum('expected_output_file_type', FileTypeEnum::toArray())->nullable();
+            $table->string('expected_output_file_extension')->nullable();
             $table->text('description')->nullable();
             $table->boolean('hidden')->default(true);
             $table->boolean('active')->default(true);

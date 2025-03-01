@@ -1,6 +1,5 @@
 <?php
 
-use App\Support\Enums\FileTypeEnum;
 use App\Support\Enums\LearningMaterialType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -19,7 +18,7 @@ return new class extends Migration {
             $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->string('file')->nullable();
-            $table->enum('file_type', FileTypeEnum::toArray())->nullable();
+            $table->string('file_extension')->nullable();
             $table->enum('type', LearningMaterialType::toArray());
             $table->integer('order_number');
             $table->text('clue')->nullable();

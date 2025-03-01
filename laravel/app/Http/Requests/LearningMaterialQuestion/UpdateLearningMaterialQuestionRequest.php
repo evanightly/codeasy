@@ -13,7 +13,7 @@ class UpdateLearningMaterialQuestionRequest extends FormRequest {
             'description' => ['nullable', 'string'],
             'file' => ['nullable', 'file'],
             'type' => ['nullable', 'string', 'in:' . implode(',', LearningMaterialType::toArray())],
-            'order_number' => ['nullable', 'integer'],
+            // 'order_number' => ['nullable', 'integer'],
             'clue' => ['nullable', 'string'],
             'active' => ['boolean'],
         ];

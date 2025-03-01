@@ -1,8 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { learningMaterialServiceHook } from '@/Services/learningMaterialServiceHook';
+import { ROUTES } from '@/Support/Constants/routes';
+import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { CourseResource } from '@/Support/Interfaces/Resources';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { useState } from 'react';
+import { LearningMaterials } from '../LearningMaterial/Partials/LearningMaterials';
 import { CourseDetails } from './Partials/CourseDetails';
 
 interface Props {
@@ -13,6 +19,18 @@ interface Props {
 
 export default function Show({ data: { data } }: Props) {
     const { t } = useLaravelReactI18n();
+
+    const [filters, setFilters] = useState<ServiceFilterOptions>({
+        page: 1,
+        perPage: 10,
+        sortBy: [['order_number', 'asc']],
+        learning_material_resource: 'id,title,description,type,order_number,active,file,file_extension',
+        column_filters: {
+            course_id: data.id,
+        },
+    });
+
+    const learningMaterialsResponse = learningMaterialServiceHook.useGetAll({ filters });
 
     if (!data) return null;
 
@@ -28,9 +46,22 @@ export default function Show({ data: { data } }: Props) {
                             <TabsTrigger value='details'>
                                 {t('pages.course.show.sections.information')}
                             </TabsTrigger>
+                            <TabsTrigger value='materials'>
+                                {t('pages.course.show.sections.learning_materials')}
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value='details'>
                             <CourseDetails course={data} />
+                        </TabsContent>
+                        <TabsContent value='materials'>
+                            <LearningMaterials
+                                setFilters={setFilters}
+                                response={learningMaterialsResponse}
+                                filters={filters}
+                                courseId={data.id}
+                                baseRoute={ROUTES.LEARNING_MATERIALS}
+                                baseKey={TANSTACK_QUERY_KEYS.LEARNING_MATERIALS}
+                            />
                         </TabsContent>
                     </Tabs>
                 </CardContent>

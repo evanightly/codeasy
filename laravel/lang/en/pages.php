@@ -778,6 +778,262 @@ return [
             'title' => 'Course Details',
             'sections' => [
                 'information' => 'Information',
+                'learning_materials' => 'Learning Materials',
+            ],
+        ],
+    ],
+    'learning_material' => [
+        'common' => [
+            'fields' => [
+                'title' => 'Title',
+                'description' => 'Description',
+                'type' => 'Type',
+                'order' => 'Order',
+                'file' => 'File',
+                'file_extension' => 'File Extension',
+                'status' => 'Status',
+                'active' => 'Active Status',
+                'course' => 'Course',
+            ],
+            'placeholders' => [
+                'title' => 'Enter title',
+                'description' => 'Enter description',
+                'type' => 'Select type',
+                'file_extension' => 'Enter file extension',
+            ],
+            'types' => [
+                'article' => 'Article',
+                'quiz' => 'Quiz',
+                'live_code' => 'Live Coding',
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+            'sections' => [
+                'details' => 'Material Details',
+                'timestamps' => 'Time Information',
+            ],
+            'validations' => [
+                'title' => [
+                    'required' => 'Title is required',
+                ],
+                'course_id' => [
+                    'required' => 'Course is required',
+                ],
+                'type' => [
+                    'required' => 'Material type is required',
+                ],
+                'order_number' => [
+                    'required' => 'Order number is required',
+                ],
+            ],
+            'messages' => [
+                'not_found' => 'Learning material not found',
+                'pending' => [
+                    'create' => 'Creating learning material...',
+                    'update' => 'Updating learning material...',
+                    'delete' => 'Deleting learning material...',
+                ],
+                'success' => [
+                    'create' => 'Learning material created successfully',
+                    'update' => 'Learning material updated successfully',
+                    'delete' => 'Learning material deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating learning material',
+                    'update' => 'Error updating learning material',
+                    'delete' => 'Error deleting learning material',
+                ],
+            ],
+            'no_course' => 'No Course Assigned',
+        ],
+        'index' => [
+            'title' => 'Learning Materials',
+            'buttons' => [
+                'create' => 'Add Material',
+            ],
+            'search_placeholder' => 'Search materials...',
+            'empty_state' => 'No learning materials found',
+        ],
+        'create' => [
+            'title' => 'Create Learning Material',
+            'buttons' => [
+                'create' => 'Create Material',
+            ],
+            'preview' => 'File Preview',
+            'no_preview_available' => 'Preview not available for this file type',
+        ],
+        'edit' => [
+            'title' => 'Edit Learning Material',
+            'buttons' => [
+                'update' => 'Update Material',
+            ],
+        ],
+        'show' => [
+            'title' => 'Learning Material Details',
+            'sections' => [
+                'information' => 'Information',
+                'details' => 'Material Details',
+                'questions' => 'Questions',
+            ],
+            'file_info' => 'File: :name (:extension)',
+        ],
+    ],
+    'learning_material_question' => [
+        'common' => [
+            'fields' => [
+                'title' => 'Question Title',
+                'description' => 'Question Content',
+                'type' => 'Question Type',
+                'order' => 'Order',
+                'clue' => 'Hint/Clue',
+                'file' => 'Starter Code File',
+                'file_extension' => 'File Extension',
+                'status' => 'Status',
+                'active' => 'Active Status',
+            ],
+            'placeholders' => [
+                'title' => 'Enter question title',
+                'description' => 'Enter question content',
+                'clue' => 'Enter hint or clue for students',
+            ],
+            'help' => [
+                'clue' => 'Provide a hint that students can view if they are stuck',
+                'starter_code' => 'Upload a file with starter code for students to begin with',
+            ],
+            'types' => [
+                'quiz' => 'Quiz Question',
+                'live_code' => 'Live Coding Exercise',
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+            'validations' => [
+                'title' => [
+                    'required' => 'Question title is required',
+                ],
+                'description' => [
+                    'required' => 'Question content is required',
+                ],
+                'material_id' => [
+                    'required' => 'Learning material is required',
+                ],
+                'order_number' => [
+                    'required' => 'Order number is required',
+                ],
+            ],
+            'messages' => [
+                'not_found' => 'Question not found',
+                'pending' => [
+                    'create' => 'Creating question...',
+                    'update' => 'Updating question...',
+                    'delete' => 'Deleting question...',
+                ],
+                'success' => [
+                    'create' => 'Question created successfully',
+                    'update' => 'Question updated successfully',
+                    'delete' => 'Question deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating question',
+                    'update' => 'Error updating question',
+                    'delete' => 'Error deleting question',
+                ],
+            ],
+            'actions' => [
+                'manage_test_cases' => 'Manage Test Cases',
+            ],
+        ],
+        'index' => [
+            'title' => 'Questions',
+            'buttons' => [
+                'create' => 'Add Question',
+            ],
+            'empty_state' => 'No questions found',
+        ],
+        'create' => [
+            'title' => 'Create Question',
+            'buttons' => [
+                'create' => 'Create Question',
+            ],
+            'preview' => 'File Preview',
+            'no_preview_available' => 'Preview not available for this file type',
+            'test_cases' => [
+                'note' => 'Test Cases for Live Coding',
+                'description' => 'For live coding questions, you can add test cases after creating the question.',
+                'add_later' => 'You will be able to add test cases from the question details page.',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit Question',
+            'buttons' => [
+                'update' => 'Update Question',
+            ],
+        ],
+        'show' => [
+            'title' => 'Question Details',
+            'sections' => [
+                'information' => 'Information',
+                'test_cases' => 'Test Cases',
+            ],
+        ],
+    ],
+    'learning_material_question_test_case' => [
+        'common' => [
+            'fields' => [
+                'description' => 'Test Description',
+                'input' => 'Input',
+                'expected_output' => 'Expected Output',
+                'output_type' => 'Output Type',
+                'hidden' => 'Hidden Test',
+                'active' => 'Active Status',
+            ],
+            'help' => [
+                'input' => 'Enter input values separated by new lines (if any)',
+                'hidden' => 'Hidden tests are only visible to teachers and used for grading',
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+            'messages' => [
+                'not_found' => 'Test case not found',
+                'pending' => [
+                    'create' => 'Creating test case...',
+                    'update' => 'Updating test case...',
+                    'delete' => 'Deleting test case...',
+                ],
+                'success' => [
+                    'create' => 'Test case created successfully',
+                    'update' => 'Test case updated successfully',
+                    'delete' => 'Test case deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating test case',
+                    'update' => 'Error updating test case',
+                    'delete' => 'Error deleting test case',
+                ],
+            ],
+        ],
+        'index' => [
+            'title' => 'Test Cases',
+            'buttons' => [
+                'create' => 'Add Test Case',
+            ],
+            'empty_state' => 'No test cases found',
+        ],
+        'create' => [
+            'title' => 'Create Test Case',
+            'buttons' => [
+                'create' => 'Create Test Case',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit Test Case',
+            'buttons' => [
+                'update' => 'Update Test Case',
             ],
         ],
     ],

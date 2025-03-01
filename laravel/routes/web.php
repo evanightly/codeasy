@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\ClassRoomController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\LearningMaterialController;
+use App\Http\Controllers\LearningMaterialQuestionController;
+use App\Http\Controllers\LearningMaterialQuestionTestCaseController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
@@ -94,7 +96,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('class-rooms', ClassRoomController::class);
     // Route::resource('class-room-students', ClassRoomStudentController::class);
     Route::resource('courses', CourseController::class);
-
+    Route::resource('learning-materials', LearningMaterialController::class);
+    Route::resource('learning-material-questions', LearningMaterialQuestionController::class);
+    Route::resource('learning-material-question-test-cases', LearningMaterialQuestionTestCaseController::class)
+        ->parameters([
+            'learning-material-question-test-cases' => 'testCase',
+        ]);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

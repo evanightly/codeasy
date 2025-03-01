@@ -44,8 +44,8 @@ class LearningMaterialQuestionTestCaseController extends Controller {
         }
     }
 
-    public function show(LearningMaterialQuestionTestCase $learningMaterialQuestionTestCase) {
-        $data = LearningMaterialQuestionTestCaseResource::make($learningMaterialQuestionTestCase);
+    public function show(LearningMaterialQuestionTestCase $testCase) {
+        $data = LearningMaterialQuestionTestCaseResource::make($testCase);
 
         if ($this->ajax()) {
             return $data;
@@ -54,21 +54,21 @@ class LearningMaterialQuestionTestCaseController extends Controller {
         return inertia('LearningMaterialQuestionTestCase/Show', compact('data'));
     }
 
-    public function edit(LearningMaterialQuestionTestCase $learningMaterialQuestionTestCase) {
-        $data = LearningMaterialQuestionTestCaseResource::make($learningMaterialQuestionTestCase);
+    public function edit(LearningMaterialQuestionTestCase $testCase) {
+        $data = LearningMaterialQuestionTestCaseResource::make($testCase);
 
         return inertia('LearningMaterialQuestionTestCase/Edit', compact('data'));
     }
 
-    public function update(UpdateLearningMaterialQuestionTestCaseRequest $request, LearningMaterialQuestionTestCase $learningMaterialQuestionTestCase) {
+    public function update(UpdateLearningMaterialQuestionTestCaseRequest $request, LearningMaterialQuestionTestCase $testCase) {
         if ($this->ajax()) {
-            return $this->learningMaterialQuestionTestCaseService->update($learningMaterialQuestionTestCase, $request->validated());
+            return $this->learningMaterialQuestionTestCaseService->update($testCase, $request->validated());
         }
     }
 
-    public function destroy(LearningMaterialQuestionTestCase $learningMaterialQuestionTestCase) {
+    public function destroy(LearningMaterialQuestionTestCase $testCase) {
         if ($this->ajax()) {
-            return $this->learningMaterialQuestionTestCaseService->delete($learningMaterialQuestionTestCase);
+            return $this->learningMaterialQuestionTestCaseService->delete($testCase);
         }
     }
 }

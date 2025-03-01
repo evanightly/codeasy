@@ -20,7 +20,7 @@ class LearningMaterialRepository extends BaseRepository implements LearningMater
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
-        $query = $this->applyColumnFilters($query, $searchParams, ['created_at', 'updated_at']);
+        $query = $this->applyColumnFilters($query, $searchParams, ['course_id', 'created_at', 'updated_at']);
 
         $query = $this->applySorting($query, $searchParams);
 
