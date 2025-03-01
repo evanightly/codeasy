@@ -47,7 +47,7 @@ class PermissionController extends Controller implements HasMiddleware {
     }
 
     public function show(Permission $permission) {
-        $data = PermissionResource::make($permission);
+        $data = PermissionResource::make($permission->load(['roles']));
 
         if ($this->ajax()) {
             return $data;

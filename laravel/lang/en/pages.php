@@ -174,6 +174,17 @@ return [
                 'update' => 'Update User',  // Added missing translation
             ],
         ],
+        'show' => [
+            'title' => 'User Details: :name',
+            'no_username' => 'No username set',
+            'no_roles' => 'No roles assigned to this user',
+            'sections' => [
+                'information' => 'Information',
+                'contact_information' => 'Contact Information',
+                'roles' => 'Roles',
+                'timestamps' => 'Time Information',
+            ],
+        ],
         'filters' => [
             'roles' => [
                 'title' => 'Roles',
@@ -249,6 +260,19 @@ return [
                 'update' => 'Update Permission',
             ],
         ],
+        'show' => [
+            'title' => 'Permission Details: :name',
+            'no_roles' => 'No roles assigned to this permission',
+            'fields' => [
+                'guard_name' => 'Guard Name',
+                'action' => 'Action',
+            ],
+            'sections' => [
+                'information' => 'Information',
+                'roles' => 'Associated Roles',
+                'timestamps' => 'Time Information',
+            ],
+        ],
     ],
     'role' => [
         'common' => [
@@ -309,6 +333,17 @@ return [
             'title' => 'Edit Role: :name',
             'buttons' => [
                 'update' => 'Update Role',
+            ],
+        ],
+        'show' => [
+            'title' => 'Role Details: :name',
+            'no_permissions' => 'No permissions assigned to this role',
+            'no_users' => 'No users assigned to this role',
+            'sections' => [
+                'information' => 'Information',
+                'permissions' => 'Permissions',
+                'users' => 'Users',
+                'timestamps' => 'Time Information',
             ],
         ],
     ],
