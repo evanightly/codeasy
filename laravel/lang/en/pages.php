@@ -19,6 +19,12 @@
  */
 
 return [
+    'common' => [
+        'columns' => [
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
+        ],
+    ],
     'login' => [
         'title' => 'Welcome Back!',
         'fields' => [
@@ -654,6 +660,89 @@ return [
                         'assign' => 'Assign Students',
                     ],
                 ],
+            ],
+        ],
+    ],
+    'course' => [
+        'common' => [
+            'fields' => [
+                'name' => 'Course Name',
+                'description' => 'Description',
+                'classroom' => 'Classroom',
+                'teacher' => 'Teacher',
+                'active' => 'Active Status',
+                'status' => 'Status',
+            ],
+            'placeholders' => [
+                'name' => 'Enter course name',
+                'description' => 'Enter course description',
+                'classroom' => 'Select a classroom',
+                'teacher' => 'Select a teacher',
+            ],
+            'validations' => [
+                'name' => [
+                    'required' => 'Course name is required',
+                ],
+                'class_room_id' => [
+                    'required' => 'Classroom is required',
+                ],
+                'teacher_id' => [
+                    'required' => 'Teacher is required',
+                ],
+            ],
+            'messages' => [
+                'not_found' => 'Course not found',
+                'pending' => [
+                    'create' => 'Creating course...',
+                    'update' => 'Updating course...',
+                    'delete' => 'Deleting course...',
+                ],
+                'success' => [
+                    'create' => 'Course created successfully',
+                    'update' => 'Course updated successfully',
+                    'delete' => 'Course deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating course',
+                    'update' => 'Error updating course',
+                    'delete' => 'Error deleting course',
+                ],
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+            'sections' => [
+                'details' => 'Course Details',
+                'information' => 'Information',
+                'timestamps' => 'Time Information',
+            ],
+            'not_assigned' => 'Not Assigned',
+        ],
+        'index' => [
+            'title' => 'Courses',
+            'buttons' => [
+                'create' => 'Create Course',
+            ],
+            'search_placeholder' => 'Search courses...',
+            'empty_state' => 'No courses found',
+        ],
+        'create' => [
+            'title' => 'Create Course',
+            'buttons' => [
+                'create' => 'Create Course',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit Course',
+            'buttons' => [
+                'update' => 'Update Course',
+            ],
+        ],
+        'show' => [
+            'title' => 'Course Details',
+            'sections' => [
+                'information' => 'Information',
             ],
         ],
     ],

@@ -75,7 +75,7 @@ class UserSeeder extends Seeder {
             $teacher->assignRole(RoleEnum::TEACHER);
             $this->assignPermissionsToRole(
                 Role::where('name', RoleEnum::TEACHER)->first(),
-                Permission::query()->whereIn('group', ['student', 'class', 'subject', 'exam'])->get()
+                Permission::query()->whereIn('group', ['school-request', 'student', 'class', 'subject', 'exam', 'course', 'learning-material', 'learning-material-question', 'learning-material-question-test-case'])->get()
             );
 
             $school->users()->attach($teacher->id, ['role' => RoleEnum::TEACHER]);

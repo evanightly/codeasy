@@ -45,7 +45,7 @@ class CourseController extends Controller {
     }
 
     public function show(Course $course) {
-        $data = CourseResource::make($course);
+        $data = CourseResource::make($course->load(['classroom', 'teacher']));
 
         if ($this->ajax()) {
             return $data;
