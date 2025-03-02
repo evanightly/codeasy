@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ClassRoomController;
+use App\Http\Controllers\Course\LearningMaterial\LearningMaterialQuestion\LearningMaterialQuestionTestCaseController as CourseLearningMaterialQuestionTestCaseController;
+use App\Http\Controllers\Course\LearningMaterial\LearningMaterialQuestionController as CourseLearningMaterialQuestionController;
+use App\Http\Controllers\Course\LearningMaterialController as CourseLearningMaterialController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\LearningMaterialController;
 use App\Http\Controllers\LearningMaterialQuestionController;
@@ -89,12 +92,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('schools', SchoolController::class)->except(['index']);
     Route::resource('school-requests', SchoolRequestController::class);
-    // CLASS_ROOMS: 'class-rooms',
-    // CLASS_ROOM_STUDENTS: 'class-room-students',
-    // COURSES: 'courses',
-    // MATERIALS: 'materials',
     Route::resource('class-rooms', ClassRoomController::class);
-    // Route::resource('class-room-students', ClassRoomStudentController::class);
     Route::resource('courses', CourseController::class);
     Route::resource('learning-materials', LearningMaterialController::class);
     Route::resource('learning-material-questions', LearningMaterialQuestionController::class);
@@ -102,9 +100,30 @@ Route::middleware('auth')->group(function () {
         ->parameters([
             'learning-material-question-test-cases' => 'testCase',
         ]);
+
+    // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Context-specific nested resources (viewing only)
+    Route::prefix('courses/{course}')->name('courses.')->group(function () {
+        // Learning Materials in context of a Course (view only)
+        Route::resource('learning-materials', CourseLearningMaterialController::class)
+            ->only(['index', 'show', 'create', 'edit']);
+
+        // Questions in context of a Course/LearningMaterial (view only)
+        Route::prefix('learning-materials/{learningMaterial}')->name('learning-materials.')->group(function () {
+            Route::resource('questions', CourseLearningMaterialQuestionController::class)
+                ->only(['index', 'show', 'create', 'edit']);
+
+            // Test Cases in context of a Course/LearningMaterial/Question (view only)
+            Route::prefix('questions/{question}')->name('questions.')->group(function () {
+                Route::resource('test-cases', CourseLearningMaterialQuestionTestCaseController::class)
+                    ->only(['index', 'show', 'create', 'edit']);
+            });
+        });
+    });
 });
 
 Route::resource('schools', SchoolController::class)->only(['index']);

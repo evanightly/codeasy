@@ -8,7 +8,7 @@ import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { CourseResource } from '@/Support/Interfaces/Resources';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useState } from 'react';
-import { LearningMaterials } from '../LearningMaterial/Partials/LearningMaterials';
+import { LearningMaterials } from './LearningMaterial/Partials/LearningMaterials';
 import { CourseDetails } from './Partials/CourseDetails';
 
 interface Props {
@@ -24,7 +24,8 @@ export default function Show({ data: { data } }: Props) {
         page: 1,
         perPage: 10,
         sortBy: [['order_number', 'asc']],
-        learning_material_resource: 'id,title,description,type,order_number,active,file,file_extension',
+        learning_material_resource:
+            'id,title,description,type,order_number,active,file,file_extension',
         column_filters: {
             course_id: data.id,
         },
@@ -59,8 +60,8 @@ export default function Show({ data: { data } }: Props) {
                                 response={learningMaterialsResponse}
                                 filters={filters}
                                 courseId={data.id}
-                                baseRoute={ROUTES.LEARNING_MATERIALS}
-                                baseKey={TANSTACK_QUERY_KEYS.LEARNING_MATERIALS}
+                                baseRoute={ROUTES.COURSE_LEARNING_MATERIALS}
+                                baseKey={TANSTACK_QUERY_KEYS.COURSE_LEARNING_MATERIALS}
                             />
                         </TabsContent>
                     </Tabs>
