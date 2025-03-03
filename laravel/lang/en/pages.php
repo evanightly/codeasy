@@ -23,6 +23,7 @@ return [
         'columns' => [
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'timestamps' => 'Time Information',
         ],
     ],
     'login' => [
@@ -1006,10 +1007,18 @@ return [
                 'output_type' => 'Output Type',
                 'hidden' => 'Hidden Test',
                 'active' => 'Active Status',
+                'status' => 'Status',
             ],
             'help' => [
-                'input' => 'Enter input values separated by new lines (if any)',
+                'description' => 'Describe what this test case is checking for',
+                'input' => 'Enter code or sample input for testing the question',
+                'expected_output' => 'Upload a PDF or image file showing the expected output for this test case',
                 'hidden' => 'Hidden tests are only visible to teachers and used for grading',
+            ],
+            'validations' => [
+                'description' => [
+                    'required' => 'Test description is required',
+                ],
             ],
             'status' => [
                 'active' => 'Active',
@@ -1051,6 +1060,15 @@ return [
             'title' => 'Edit Test Case',
             'buttons' => [
                 'update' => 'Update Test Case',
+            ],
+            'current_file' => 'Current File',
+        ],
+        'show' => [
+            'title' => 'Test Case Details',
+            'hidden' => 'Hidden',
+            'visible' => 'Visible',
+            'sections' => [
+                'details' => 'Test Case Details',
             ],
         ],
     ],

@@ -9,9 +9,8 @@ class StoreLearningMaterialQuestionTestCaseRequest extends FormRequest {
         return [
             'learning_material_question_id' => ['required', 'exists:learning_material_questions,id'],
             'input' => ['required', 'string'],
-            'expected_output' => ['required', 'string'],
+            'expected_output_file' => ['required', 'file', 'max:2048', 'mimes:pdf,jpg,jpeg,png'],
             'description' => ['nullable', 'string'],
-            'order_number' => ['required', 'integer'],
             'hidden' => ['boolean'],
             'active' => ['boolean'],
         ];

@@ -9,9 +9,8 @@ class UpdateLearningMaterialQuestionTestCaseRequest extends FormRequest {
         return [
             'learning_material_question_id' => ['nullable', 'exists:learning_material_questions,id'],
             'input' => ['nullable', 'string'],
-            'expected_output' => ['nullable', 'string'],
+            'expected_output_file' => ['nullable', 'file', 'max:2048', 'mimes:pdf,jpg,jpeg,png'],
             'description' => ['nullable', 'string'],
-            'order_number' => ['nullable', 'integer'],
             'hidden' => ['boolean'],
             'active' => ['boolean'],
         ];

@@ -1,6 +1,6 @@
 import { PDFViewer } from '@/Components/PDFViewer';
 import { Badge } from '@/Components/UI/badge';
-import { Button } from '@/Components/UI/button';
+import { Button, buttonVariants } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
     Table,
@@ -22,7 +22,7 @@ import {
     LearningMaterialQuestionTestCaseResource,
     LearningMaterialResource,
 } from '@/Support/Interfaces/Resources';
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
     CodeIcon,
@@ -67,7 +67,9 @@ export default function Show({
     const { t } = useLaravelReactI18n();
     const testCasesQuery = learningMaterialQuestionTestCaseServiceHook.useGetAll({
         filters: {
-            learning_material_question_id: questionData.id,
+            column_filters: {
+                learning_material_question_id: questionData.id,
+            },
         },
     });
     const deleteTestCaseMutation = learningMaterialQuestionTestCaseServiceHook.useDelete();
@@ -101,21 +103,17 @@ export default function Show({
                             )}
                         </div>
                     </div>
-                    <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() =>
-                            router.visit(
-                                route(
-                                    `${ROUTES.LEARNING_MATERIAL_QUESTIONS}.edit`,
-                                    questionData.id,
-                                ),
-                            )
-                        }
+                    <Link
+                        href={route(`${ROUTES.COURSE_LEARNING_MATERIAL_QUESTIONS}.edit`, [
+                            courseData.id,
+                            learningMaterialData.id,
+                            questionData.id,
+                        ])}
+                        className={buttonVariants({ variant: 'outline', size: 'sm' })}
                     >
                         <EditIcon className='mr-1 h-4 w-4' />
                         {t('action.edit')}
-                    </Button>
+                    </Link>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue='information'>
@@ -231,22 +229,24 @@ export default function Show({
                             <TabsContent value='test_cases' className='mt-4'>
                                 <div className='space-y-4'>
                                     <div className='flex justify-end'>
-                                        <Button
-                                            size='sm'
-                                            onClick={() =>
-                                                router.visit(
-                                                    route(
-                                                        `${ROUTES.LEARNING_MATERIAL_QUESTIONS}.test-cases.create`,
-                                                        questionData.id,
-                                                    ),
-                                                )
-                                            }
-                                        >
-                                            <PlusIcon className='mr-1 h-4 w-4' />
-                                            {t(
-                                                'pages.learning_material_question_test_case.index.buttons.create',
+                                        <Link
+                                            href={route(
+                                                `${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.create`,
+                                                [
+                                                    courseData.id,
+                                                    learningMaterialData.id,
+                                                    questionData.id,
+                                                ],
                                             )}
-                                        </Button>
+                                            className={buttonVariants({ size: 'sm' })}
+                                        >
+                                            <>
+                                                <PlusIcon className='mr-1 h-4 w-4' />
+                                                {t(
+                                                    'pages.learning_material_question_test_case.index.buttons.create',
+                                                )}
+                                            </>
+                                        </Link>
                                     </div>
 
                                     {testCasesQuery.data?.data?.length ? (
@@ -321,23 +321,23 @@ export default function Show({
                                                                 )}
                                                             </TableCell>
                                                             <TableCell className='text-right'>
-                                                                <Button
-                                                                    variant='ghost'
-                                                                    size='icon'
-                                                                    onClick={() =>
-                                                                        router.visit(
-                                                                            route(
-                                                                                `${ROUTES.LEARNING_MATERIAL_QUESTIONS}.test-cases.edit`,
-                                                                                [
-                                                                                    questionData.id,
-                                                                                    testCase.id,
-                                                                                ],
-                                                                            ),
-                                                                        )
-                                                                    }
+                                                                <Link
+                                                                    href={route(
+                                                                        `${ROUTES.COURSE_LEARNING_MATERIAL_QUESTIONS}.test-cases.edit`,
+                                                                        [
+                                                                            questionData.id,
+                                                                            learningMaterialData.id,
+                                                                            questionData.id,
+                                                                            testCase.id,
+                                                                        ],
+                                                                    )}
+                                                                    className={buttonVariants({
+                                                                        variant: 'ghost',
+                                                                        size: 'icon',
+                                                                    })}
                                                                 >
                                                                     <EditIcon className='h-4 w-4' />
-                                                                </Button>
+                                                                </Link>
                                                                 <Button
                                                                     variant='ghost'
                                                                     size='icon'

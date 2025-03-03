@@ -1,6 +1,6 @@
 import { FilePondUploader } from '@/Components/FilePondUploader';
 import { PDFViewer } from '@/Components/PDFViewer';
-import { Button } from '@/Components/UI/button';
+import { Button, buttonVariants } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
     Form,
@@ -23,7 +23,7 @@ import {
     LearningMaterialResource,
 } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -421,22 +421,23 @@ export default function Edit({
                                     </p>
 
                                     <div className='mt-4'>
-                                        <Button
-                                            variant='outline'
-                                            type='button'
-                                            onClick={() =>
-                                                router.visit(
-                                                    route(
-                                                        `${ROUTES.LEARNING_MATERIAL_QUESTIONS}.test-cases.index`,
-                                                        questionData.id,
-                                                    ),
-                                                )
-                                            }
+                                        <Link
+                                            href={route(
+                                                `${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.index`,
+                                                [
+                                                    courseData.id,
+                                                    learningMaterialData.id,
+                                                    questionData.id,
+                                                ],
+                                            )}
+                                            className={buttonVariants({
+                                                variant: 'outline',
+                                            })}
                                         >
                                             {t(
                                                 'pages.learning_material_question.edit.test_cases.manage_button',
                                             )}
-                                        </Button>
+                                        </Link>
                                     </div>
                                 </div>
                             )}

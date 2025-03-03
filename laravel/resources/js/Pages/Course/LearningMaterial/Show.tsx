@@ -76,7 +76,7 @@ export default function Show({
                                     filters={filters}
                                     courseId={course.id}
                                     baseRoute={`${ROUTES.COURSE_LEARNING_MATERIAL_QUESTIONS}`}
-                                    baseKey={TANSTACK_QUERY_KEYS.LEARNING_MATERIAL_QUESTIONS}
+                                    baseKey={TANSTACK_QUERY_KEYS.COURSE_LEARNING_MATERIAL_QUESTIONS}
                                 />
                             </TabsContent>
                         )}

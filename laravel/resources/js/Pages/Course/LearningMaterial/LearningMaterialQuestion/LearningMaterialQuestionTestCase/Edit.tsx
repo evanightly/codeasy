@@ -19,11 +19,13 @@ import { ROUTES } from '@/Support/Constants/routes';
 import {
     CourseResource,
     LearningMaterialQuestionResource,
+    LearningMaterialQuestionTestCaseResource,
     LearningMaterialResource,
 } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -38,15 +40,19 @@ interface Props {
     question: {
         data: LearningMaterialQuestionResource;
     };
+    testCase: {
+        data: LearningMaterialQuestionTestCaseResource;
+    };
 }
 
-export default function Create({
-    question: { data: question },
+export default function Edit({
     course: { data: course },
     learningMaterial: { data: learningMaterial },
+    question: { data: question },
+    testCase: { data: testCase },
 }: Props) {
     const { t } = useLaravelReactI18n();
-    const createMutation = learningMaterialQuestionTestCaseServiceHook.useCreate();
+    const updateMutation = learningMaterialQuestionTestCaseServiceHook.useUpdate();
 
     const formSchema = z.object({
         learning_material_question_id: z.number(),
@@ -59,7 +65,7 @@ export default function Create({
                     { defaultValue: 'Description is required' },
                 ),
             ),
-        input: z.string(),
+        input: z.string().optional(),
         expected_output_file: z.any().optional(),
         hidden: z.boolean().default(false),
         active: z.boolean().default(true),
@@ -68,77 +74,85 @@ export default function Create({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            learning_material_question_id: question.id,
-            description: '',
-            input: '',
+            learning_material_question_id: testCase.learning_material_question_id,
+            description: testCase.description || '',
+            input: testCase.input || '',
             expected_output_file: undefined,
-            hidden: false,
-            active: true,
+            hidden: testCase.hidden,
+            active: testCase.active,
         },
     });
 
+    useEffect(() => {
+        if (testCase) {
+            form.reset({
+                learning_material_question_id: testCase.learning_material_question_id,
+                description: testCase.description || '',
+                input: testCase.input || '',
+                expected_output_file: undefined, // File can't be pre-filled
+                hidden: testCase.hidden,
+                active: testCase.active,
+            });
+        }
+    }, [testCase, form]);
+
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         const formData = new FormData();
+
+        // Add fields to form data
         formData.append(
             'learning_material_question_id',
-            values.learning_material_question_id.toString(),
+            String(values.learning_material_question_id),
         );
-
-        // Add other fields to form data
         formData.append('description', values.description);
-        formData.append('input', values.input);
+        if (values.input) formData.append('input', values.input);
         formData.append('hidden', values.hidden ? '1' : '0');
         formData.append('active', values.active ? '1' : '0');
 
-        // Handle file upload
+        // Handle file upload - only append if a new file is selected
         if (values.expected_output_file instanceof File) {
             formData.append('expected_output_file', values.expected_output_file);
         }
 
-        // debug form data
-        for (const [key, value] of formData.entries()) {
-            console.log(key, value);
-        }
-
         toast.promise(
-            createMutation.mutateAsync({
+            updateMutation.mutateAsync({
+                id: testCase.id,
                 data: formData,
             }),
             {
                 loading: t(
-                    'pages.learning_material_question_test_case.common.messages.pending.create',
-                    { defaultValue: 'Creating test case...' },
+                    'pages.learning_material_question_test_case.common.messages.pending.update',
+                    { defaultValue: 'Updating test case...' },
                 ),
                 success: () => {
                     router.visit(
-                        route(`${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.index`, {
-                            course: course.id,
-                            learningMaterial: learningMaterial.id,
-                            question: question.id,
-                        }),
+                        route(`${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.index`, [
+                            course.id,
+                            learningMaterial.id,
+                            question.id,
+                        ]),
                     );
                     return t(
-                        'pages.learning_material_question_test_case.common.messages.success.create',
-                        { defaultValue: 'Test case created successfully' },
+                        'pages.learning_material_question_test_case.common.messages.success.update',
+                        { defaultValue: 'Test case updated successfully' },
                     );
                 },
-                error: (err) => {
-                    console.error(err);
-                    return t(
-                        'pages.learning_material_question_test_case.common.messages.error.create',
-                        { defaultValue: 'Failed to create test case' },
-                    );
-                },
+                error: t(
+                    'pages.learning_material_question_test_case.common.messages.error.update',
+                    { defaultValue: 'Error updating test case' },
+                ),
             },
         );
     };
 
+    if (!testCase) return null;
+
     return (
-        <AuthenticatedLayout title={t('pages.learning_material_question_test_case.create.title')}>
+        <AuthenticatedLayout title={t('pages.learning_material_question_test_case.edit.title')}>
             <Card>
                 <CardHeader>
                     <CardTitle>
-                        {t('pages.learning_material_question_test_case.create.title')}
+                        {t('pages.learning_material_question_test_case.edit.title')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -235,6 +249,27 @@ export default function Create({
                                                 },
                                             )}
                                         </FormDescription>
+                                        {testCase.expected_output_file && (
+                                            <div className='mt-2'>
+                                                <p className='text-sm text-muted-foreground'>
+                                                    {t(
+                                                        'pages.learning_material_question_test_case.edit.current_file',
+                                                        {
+                                                            defaultValue: 'Current file:',
+                                                        },
+                                                    )}
+                                                    :
+                                                </p>
+                                                <a
+                                                    target='_blank'
+                                                    rel='noreferrer'
+                                                    href={testCase.expected_output_file_url}
+                                                    className='text-sm text-primary hover:underline'
+                                                >
+                                                    {testCase.expected_output_file}
+                                                </a>
+                                            </div>
+                                        )}
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -293,11 +328,11 @@ export default function Create({
 
                             <Button
                                 type='submit'
-                                loading={createMutation.isPending}
-                                disabled={createMutation.isPending}
+                                loading={updateMutation.isPending}
+                                disabled={updateMutation.isPending}
                             >
                                 {t(
-                                    'pages.learning_material_question_test_case.create.buttons.create',
+                                    'pages.learning_material_question_test_case.edit.buttons.update',
                                 )}
                             </Button>
                         </form>
