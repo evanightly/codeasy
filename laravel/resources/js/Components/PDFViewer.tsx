@@ -219,6 +219,7 @@ export const PDFViewer = ({
                 {showScrollTop && (
                     <div className='sticky bottom-24 z-40 float-right mr-6 transition-all duration-300 ease-in-out'>
                         <Button
+                            type='button'
                             title={t('action.back_to_top')}
                             size='icon'
                             onClick={scrollToTop}
