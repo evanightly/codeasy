@@ -22,4 +22,8 @@ return [
     'clear' => 'Clear',
     'select' => 'Select',
     'loading' => 'Loading...',
+    'view_file' => 'View File',
+    'prev' => 'Prev',
+    'next' => 'Next',
+    'back_to_top' => 'Back to Top',
 ];

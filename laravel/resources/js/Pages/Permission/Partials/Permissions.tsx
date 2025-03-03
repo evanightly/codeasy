@@ -85,7 +85,7 @@ const Permissions = ({ response, filters, setFilters, baseKey, baseRoute }: Perm
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
-                            <DropdownMenuItem disabled={isPredefined} asChild>
+                            <DropdownMenuItem asChild>
                                 <Link href={route(`${ROUTES.PERMISSIONS}.show`, permission.id)}>
                                     {t('action.show')}
                                 </Link>

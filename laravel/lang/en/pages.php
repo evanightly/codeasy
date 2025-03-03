@@ -19,6 +19,12 @@
  */
 
 return [
+    'common' => [
+        'columns' => [
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
+        ],
+    ],
     'login' => [
         'title' => 'Welcome Back!',
         'fields' => [
@@ -168,6 +174,17 @@ return [
                 'update' => 'Update User',  // Added missing translation
             ],
         ],
+        'show' => [
+            'title' => 'User Details: :name',
+            'no_username' => 'No username set',
+            'no_roles' => 'No roles assigned to this user',
+            'sections' => [
+                'information' => 'Information',
+                'contact_information' => 'Contact Information',
+                'roles' => 'Roles',
+                'timestamps' => 'Time Information',
+            ],
+        ],
         'filters' => [
             'roles' => [
                 'title' => 'Roles',
@@ -243,6 +260,19 @@ return [
                 'update' => 'Update Permission',
             ],
         ],
+        'show' => [
+            'title' => 'Permission Details: :name',
+            'no_roles' => 'No roles assigned to this permission',
+            'fields' => [
+                'guard_name' => 'Guard Name',
+                'action' => 'Action',
+            ],
+            'sections' => [
+                'information' => 'Information',
+                'roles' => 'Associated Roles',
+                'timestamps' => 'Time Information',
+            ],
+        ],
     ],
     'role' => [
         'common' => [
@@ -303,6 +333,17 @@ return [
             'title' => 'Edit Role: :name',
             'buttons' => [
                 'update' => 'Update Role',
+            ],
+        ],
+        'show' => [
+            'title' => 'Role Details: :name',
+            'no_permissions' => 'No permissions assigned to this role',
+            'no_users' => 'No users assigned to this role',
+            'sections' => [
+                'information' => 'Information',
+                'permissions' => 'Permissions',
+                'users' => 'Users',
+                'timestamps' => 'Time Information',
             ],
         ],
     ],
@@ -654,6 +695,362 @@ return [
                         'assign' => 'Assign Students',
                     ],
                 ],
+            ],
+        ],
+    ],
+    'course' => [
+        'common' => [
+            'fields' => [
+                'name' => 'Course Name',
+                'description' => 'Description',
+                'classroom' => 'Classroom',
+                'teacher' => 'Teacher',
+                'active' => 'Active Status',
+                'status' => 'Status',
+            ],
+            'placeholders' => [
+                'name' => 'Enter course name',
+                'description' => 'Enter course description',
+                'classroom' => 'Select a classroom',
+                'teacher' => 'Select a teacher',
+            ],
+            'validations' => [
+                'name' => [
+                    'required' => 'Course name is required',
+                ],
+                'class_room_id' => [
+                    'required' => 'Classroom is required',
+                ],
+                'teacher_id' => [
+                    'required' => 'Teacher is required',
+                ],
+            ],
+            'messages' => [
+                'not_found' => 'Course not found',
+                'pending' => [
+                    'create' => 'Creating course...',
+                    'update' => 'Updating course...',
+                    'delete' => 'Deleting course...',
+                ],
+                'success' => [
+                    'create' => 'Course created successfully',
+                    'update' => 'Course updated successfully',
+                    'delete' => 'Course deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating course',
+                    'update' => 'Error updating course',
+                    'delete' => 'Error deleting course',
+                ],
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+            'sections' => [
+                'details' => 'Course Details',
+                'information' => 'Information',
+                'timestamps' => 'Time Information',
+            ],
+            'not_assigned' => 'Not Assigned',
+        ],
+        'index' => [
+            'title' => 'Courses',
+            'buttons' => [
+                'create' => 'Create Course',
+            ],
+            'search_placeholder' => 'Search courses...',
+            'empty_state' => 'No courses found',
+        ],
+        'create' => [
+            'title' => 'Create Course',
+            'buttons' => [
+                'create' => 'Create Course',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit Course',
+            'buttons' => [
+                'update' => 'Update Course',
+            ],
+        ],
+        'show' => [
+            'title' => 'Course Details',
+            'sections' => [
+                'information' => 'Information',
+                'learning_materials' => 'Learning Materials',
+            ],
+        ],
+    ],
+    'learning_material' => [
+        'common' => [
+            'fields' => [
+                'title' => 'Title',
+                'description' => 'Description',
+                'type' => 'Type',
+                'order' => 'Order',
+                'file' => 'File',
+                'file_extension' => 'File Extension',
+                'status' => 'Status',
+                'active' => 'Active Status',
+                'course' => 'Course',
+            ],
+            'placeholders' => [
+                'title' => 'Enter title',
+                'description' => 'Enter description',
+                'type' => 'Select type',
+                'file_extension' => 'Enter file extension',
+            ],
+            'types' => [
+                'article' => 'Article',
+                'quiz' => 'Quiz',
+                'live_code' => 'Live Coding',
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+            'sections' => [
+                'details' => 'Material Details',
+                'timestamps' => 'Time Information',
+            ],
+            'validations' => [
+                'title' => [
+                    'required' => 'Title is required',
+                ],
+                'course_id' => [
+                    'required' => 'Course is required',
+                ],
+                'type' => [
+                    'required' => 'Material type is required',
+                ],
+                'order_number' => [
+                    'required' => 'Order number is required',
+                ],
+            ],
+            'messages' => [
+                'not_found' => 'Learning material not found',
+                'pending' => [
+                    'create' => 'Creating learning material...',
+                    'update' => 'Updating learning material...',
+                    'delete' => 'Deleting learning material...',
+                ],
+                'success' => [
+                    'create' => 'Learning material created successfully',
+                    'update' => 'Learning material updated successfully',
+                    'delete' => 'Learning material deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating learning material',
+                    'update' => 'Error updating learning material',
+                    'delete' => 'Error deleting learning material',
+                ],
+            ],
+            'no_course' => 'No Course Assigned',
+        ],
+        'index' => [
+            'title' => 'Learning Materials',
+            'buttons' => [
+                'create' => 'Add Material',
+            ],
+            'search_placeholder' => 'Search materials...',
+            'empty_state' => 'No learning materials found',
+        ],
+        'create' => [
+            'title' => 'Create Learning Material',
+            'buttons' => [
+                'create' => 'Create Material',
+            ],
+            'preview' => 'File Preview',
+            'no_preview_available' => 'Preview not available for this file type',
+        ],
+        'edit' => [
+            'title' => 'Edit Learning Material',
+            'buttons' => [
+                'update' => 'Update Material',
+            ],
+            'current_file' => 'Current File',
+            'new_file_preview' => 'New File Preview',
+            'current_file_preview' => 'Current File Preview',
+            'preview' => 'File Preview',
+            'no_preview_available' => 'Preview not available for this file type',
+        ],
+        'show' => [
+            'title' => 'Learning Material Details',
+            'sections' => [
+                'information' => 'Information',
+                'details' => 'Material Details',
+                'questions' => 'Questions',
+            ],
+            'file_info' => 'File: :name (:extension)',
+        ],
+    ],
+    'learning_material_question' => [
+        'common' => [
+            'fields' => [
+                'title' => 'Question Title',
+                'description' => 'Question Description',
+                'type' => 'Question Type',
+                'order' => 'Order',
+                'clue' => 'Hint/Clue',
+                'file' => 'Question File',
+                'file_extension' => 'File Extension',
+                'status' => 'Status',
+                'active' => 'Active Status',
+            ],
+            'placeholders' => [
+                'title' => 'Enter question title',
+                'description' => 'Enter question description or instructions',
+                'clue' => 'Enter hint or clue for students',
+            ],
+            'help' => [
+                'clue' => 'Provide a hint that students can view if they are stuck',
+                'question_file' => 'Upload a PDF or image file containing the question details or visual elements',
+                'starter_code' => null, // Remove this line or comment it out
+            ],
+            'types' => [
+                'quiz' => 'Quiz Question',
+                'live_code' => 'Live Coding Exercise',
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+            'validations' => [
+                'title' => [
+                    'required' => 'Question title is required',
+                ],
+                'description' => [
+                    'required' => 'Question content is required',
+                ],
+                'material_id' => [
+                    'required' => 'Learning material is required',
+                ],
+                'order_number' => [
+                    'required' => 'Order number is required',
+                ],
+            ],
+            'messages' => [
+                'not_found' => 'Question not found',
+                'pending' => [
+                    'create' => 'Creating question...',
+                    'update' => 'Updating question...',
+                    'delete' => 'Deleting question...',
+                ],
+                'success' => [
+                    'create' => 'Question created successfully',
+                    'update' => 'Question updated successfully',
+                    'delete' => 'Question deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating question',
+                    'update' => 'Error updating question',
+                    'delete' => 'Error deleting question',
+                ],
+            ],
+            'actions' => [
+                'manage_test_cases' => 'Manage Test Cases',
+            ],
+        ],
+        'index' => [
+            'title' => 'Questions',
+            'buttons' => [
+                'create' => 'Add Question',
+            ],
+            'empty_state' => 'No questions found',
+        ],
+        'create' => [
+            'title' => 'Create Question',
+            'buttons' => [
+                'create' => 'Create Question',
+            ],
+            'preview' => 'File Preview',
+            'no_preview_available' => 'Preview not available for this file type',
+            'test_cases' => [
+                'note' => 'Test Cases for Live Coding',
+                'description' => 'For live coding questions, you can add test cases after creating the question.',
+                'add_later' => 'You will be able to add test cases from the question details page.',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit Question',
+            'buttons' => [
+                'update' => 'Update Question',
+            ],
+            'current_file' => 'Current Question File',
+            'new_file_preview' => 'New File Preview',
+            'current_file_preview' => 'Current File Preview',
+            'preview' => 'File Preview',
+            'no_preview_available' => 'No preview available for this file type',
+            'test_cases' => [
+                'title' => 'Test Cases',
+                'description' => 'You can manage test cases for this live coding question',
+                'manage_button' => 'Manage Test Cases',
+            ],
+        ],
+        'show' => [
+            'title' => 'Question Details',
+            'question_file' => 'Question File',
+            'sections' => [
+                'information' => 'Information',
+                'test_cases' => 'Test Cases',
+            ],
+        ],
+    ],
+    'learning_material_question_test_case' => [
+        'common' => [
+            'fields' => [
+                'description' => 'Test Description',
+                'input' => 'Input',
+                'expected_output' => 'Expected Output',
+                'output_type' => 'Output Type',
+                'hidden' => 'Hidden Test',
+                'active' => 'Active Status',
+            ],
+            'help' => [
+                'input' => 'Enter input values separated by new lines (if any)',
+                'hidden' => 'Hidden tests are only visible to teachers and used for grading',
+            ],
+            'status' => [
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+            ],
+            'messages' => [
+                'not_found' => 'Test case not found',
+                'pending' => [
+                    'create' => 'Creating test case...',
+                    'update' => 'Updating test case...',
+                    'delete' => 'Deleting test case...',
+                ],
+                'success' => [
+                    'create' => 'Test case created successfully',
+                    'update' => 'Test case updated successfully',
+                    'delete' => 'Test case deleted successfully',
+                ],
+                'error' => [
+                    'create' => 'Error creating test case',
+                    'update' => 'Error updating test case',
+                    'delete' => 'Error deleting test case',
+                ],
+            ],
+        ],
+        'index' => [
+            'title' => 'Test Cases',
+            'buttons' => [
+                'create' => 'Add Test Case',
+            ],
+            'empty_state' => 'No test cases found',
+        ],
+        'create' => [
+            'title' => 'Create Test Case',
+            'buttons' => [
+                'create' => 'Create Test Case',
+            ],
+        ],
+        'edit' => [
+            'title' => 'Edit Test Case',
+            'buttons' => [
+                'update' => 'Update Test Case',
             ],
         ],
     ],

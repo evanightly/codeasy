@@ -55,10 +55,18 @@ const permissions = {
     COURSE_READ: 'course-read',
     COURSE_UPDATE: 'course-update',
     COURSE_DELETE: 'course-delete',
-    MATERIAL_CREATE: 'material-create',
-    MATERIAL_READ: 'material-read',
-    MATERIAL_UPDATE: 'material-update',
-    MATERIAL_DELETE: 'material-delete',
+    LEARNING_MATERIAL_CREATE: 'learning-material-create',
+    LEARNING_MATERIAL_READ: 'learning-material-read',
+    LEARNING_MATERIAL_UPDATE: 'learning-material-update',
+    LEARNING_MATERIAL_DELETE: 'learning-material-delete',
+    LEARNING_MATERIAL_QUESTION_CREATE: 'learning-material-question-create',
+    LEARNING_MATERIAL_QUESTION_READ: 'learning-material-question-read',
+    LEARNING_MATERIAL_QUESTION_UPDATE: 'learning-material-question-update',
+    LEARNING_MATERIAL_QUESTION_DELETE: 'learning-material-question-delete',
+    LEARNING_MATERIAL_QUESTION_TEST_CASE_CREATE: 'learning-material-question-test-case-create',
+    LEARNING_MATERIAL_QUESTION_TEST_CASE_READ: 'learning-material-question-test-case-read',
+    LEARNING_MATERIAL_QUESTION_TEST_CASE_UPDATE: 'learning-material-question-test-case-update',
+    LEARNING_MATERIAL_QUESTION_TEST_CASE_DELETE: 'learning-material-question-test-case-delete',
 };
 
 export const PermissionEnum = permissions;

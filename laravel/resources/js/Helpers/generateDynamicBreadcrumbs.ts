@@ -3,13 +3,17 @@ import { GenericBreadcrumbItem } from '@/Support/Interfaces/Others';
 import { usePage } from '@inertiajs/react';
 
 function generateDynamicBreadcrumbs(): GenericBreadcrumbItem[] {
-    const { url } = usePage(); // Get the current URL path from Inertia.js
+    const { url } = usePage();
 
-    // Extract only the path part from the generated route (without the domain)
+    // Parse the URL to handle query parameters
+    const urlObj = new URL(window.location.origin + url);
+    const pathWithoutQuery = urlObj.pathname;
+
+    // Extract only the path part from the dashboard route
     const dashboardPath = new URL(route(`${ROUTES.DASHBOARD}.index`)).pathname;
 
-    // If the current URL is the Dashboard (Home), return only the "Home" breadcrumb
-    if (url === dashboardPath) {
+    // Handle dashboard route
+    if (pathWithoutQuery === dashboardPath) {
         return [
             {
                 name: 'Home',
@@ -19,20 +23,26 @@ function generateDynamicBreadcrumbs(): GenericBreadcrumbItem[] {
         ];
     }
 
-    const paths = url.split('/').filter(Boolean); // Split the URL into parts and remove empty elements
+    const paths = pathWithoutQuery.split('/').filter(Boolean);
 
     const breadcrumbs: GenericBreadcrumbItem[] = paths.map((path, index) => {
         const isActive = index === paths.length - 1;
+
         // Format the name by replacing hyphens with spaces and capitalizing each word
         const name = path
             .split('-')
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
+
+        // Construct the link maintaining the same path structure
         const link = `/${paths.slice(0, index + 1).join('/')}`;
+
+        // Add query parameters only to the active (last) breadcrumb if they exist
+        const finalLink = isActive ? `${link}${urlObj.search}` : link;
 
         return {
             name,
-            link,
+            link: finalLink,
             active: isActive,
         };
     });

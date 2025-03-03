@@ -1,8 +1,8 @@
 const roles = {
-    SUPER_ADMIN: 'Super Admin',
-    SCHOOL_ADMIN: 'School Admin',
-    TEACHER: 'Teacher',
-    STUDENT: 'Student',
+    SUPER_ADMIN: 'super_admin',
+    SCHOOL_ADMIN: 'school_admin',
+    TEACHER: 'teacher',
+    STUDENT: 'student',
 };
 
 export const RoleEnum = roles;
