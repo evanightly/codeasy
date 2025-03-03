@@ -10,6 +10,8 @@ import '../css/app.css';
 import './bootstrap';
 import { ConfirmationDialogProvider } from './Contexts/ConfirmationDialogContext';
 import { addRippleEffect } from './Helpers';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

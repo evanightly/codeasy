@@ -121,6 +121,7 @@ export default function Create({ course: { data: courseData } }: Props) {
             setPreviewUrl(url);
             setFileType(file.type);
         } else {
+            setPreviewUrl(null);
             setFileType(null);
         }
     };
@@ -287,7 +288,7 @@ export default function Create({ course: { data: courseData } }: Props) {
                                                         />
                                                     </div>
                                                 ) : (
-                                                    <div className='rounded bg-gray-50 p-4 text-center text-gray-500'>
+                                                    <div className='rounded p-4 text-center'>
                                                         {t(
                                                             'pages.learning_material.create.no_preview_available',
                                                         )}

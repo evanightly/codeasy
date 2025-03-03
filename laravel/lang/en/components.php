@@ -75,5 +75,6 @@ return [
         'error_loading' => 'Error loading PDF document',
         'no_preview' => 'PDF preview not available',
         'open_in_new_tab' => 'Open in new tab',
+        'page' => 'Page',
     ],
 ];

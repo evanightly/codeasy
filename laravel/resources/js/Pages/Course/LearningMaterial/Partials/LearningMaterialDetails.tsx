@@ -7,11 +7,11 @@ import { CourseResource, LearningMaterialResource } from '@/Support/Interfaces/R
 import { Link } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
+    Album,
     BookIcon,
     CalendarIcon,
     FileIcon,
     FileTextIcon,
-    GraduationCapIcon,
     ListOrderedIcon,
 } from 'lucide-react';
 
@@ -22,7 +22,6 @@ interface LearningMaterialDetailsProps {
 
 export const LearningMaterialDetails = ({ material, course }: LearningMaterialDetailsProps) => {
     const { t } = useLaravelReactI18n();
-console.log(course);
 
     const renderContent = () => {
         if (material.file && material.file_extension) {
@@ -91,11 +90,11 @@ console.log(course);
                 <div className='flex items-center gap-2'>
                     <Link
                         href={route(`${ROUTES.COURSES}.show`, course?.id)}
-                        className={material.course ? 'text-blue-600 hover:underline' : ''}
+                        className={course ? 'text-blue-600 hover:underline' : ''}
                     >
                         <Button variant='outline' size='sm'>
-                            <GraduationCapIcon className='mr-2 h-4 w-4' />
-                            {material.course?.name || t('pages.learning_material.common.no_course')}
+                            <Album />
+                            {course?.name || t('pages.learning_material.common.no_course')}
                         </Button>
                     </Link>
                 </div>
