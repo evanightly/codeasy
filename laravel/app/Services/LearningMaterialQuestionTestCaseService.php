@@ -18,7 +18,7 @@ class LearningMaterialQuestionTestCaseService extends BaseCrudService implements
         return parent::getAllPaginated($search, $pageSize);
     }
 
-    /** @var LearningMaterialQuestionTestCaseRepository $repository */
+    /** @var LearningMaterialQuestionTestCaseRepository */
     protected $repository;
 
     protected function getRepositoryClass(): string {

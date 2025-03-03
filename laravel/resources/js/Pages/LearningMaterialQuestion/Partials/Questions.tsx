@@ -86,7 +86,7 @@ export const Questions = ({
             cell: ({ row }) => {
                 const question = row.original;
 
-                if(!question.type) return null;
+                if (!question.type) return null;
 
                 return (
                     <div className='flex items-center'>
@@ -97,7 +97,7 @@ export const Questions = ({
                             )}
                         </span>
                     </div>
-                )
+                );
             },
         }),
         columnHelper.accessor('order_number', {
@@ -151,7 +151,10 @@ export const Questions = ({
                             {question.type === LearningMaterialTypeEnum.LIVE_CODE && (
                                 <DropdownMenuItem asChild>
                                     <Link
-                                        href={route(`${ROUTES.LEARNING_MATERIAL_QUESTION_TEST_CASES}.index`, question.id)}
+                                        href={route(
+                                            `${ROUTES.LEARNING_MATERIAL_QUESTION_TEST_CASES}.index`,
+                                            question.id,
+                                        )}
                                     >
                                         {t(
                                             'pages.learning_material_question.common.actions.manage_test_cases',

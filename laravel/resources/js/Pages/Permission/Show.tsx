@@ -14,7 +14,7 @@ interface Props {
 
 export default function Show({ data: { data: permission } }: Props) {
     const { t } = useLaravelReactI18n();
-console.log(permission);
+    console.log(permission);
 
     if (!permission) return null;
 

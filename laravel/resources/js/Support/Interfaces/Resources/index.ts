@@ -14,7 +14,7 @@ export * from './ClassRoomResource';
 export * from './ClassRoomStudentResource';
 export * from './CourseResource';
 
-export * from './LearningMaterialResource';
 export * from './LearningMaterialQuestionResource';
+export * from './LearningMaterialResource';
 
 export * from './LearningMaterialQuestionTestCaseResource';

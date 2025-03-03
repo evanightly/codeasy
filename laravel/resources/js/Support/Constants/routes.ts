@@ -16,7 +16,7 @@ export const ROUTES = {
     COURSES: 'courses',
     LEARNING_MATERIALS: 'learning-materials',
     LEARNING_MATERIAL_QUESTIONS: 'learning-material-questions',
-	LEARNING_MATERIAL_QUESTION_TEST_CASES: 'learning-material-question-test-cases',
+    LEARNING_MATERIAL_QUESTION_TEST_CASES: 'learning-material-question-test-cases',
     COURSE_LEARNING_MATERIALS: 'courses.learning-materials',
     COURSE_LEARNING_MATERIAL_QUESTIONS: 'courses.learning-materials.questions',
     COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES: 'courses.learning-materials.questions.test-cases',
