@@ -14,11 +14,10 @@ import { LearningMaterialTypeEnum } from '@/Support/Enums/learningMaterialTypeEn
 import { PaginateMeta, PaginateResponse, ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { LearningMaterialResource } from '@/Support/Interfaces/Resources';
 import { Link } from '@inertiajs/react';
-import { QuestionMarkIcon } from '@radix-ui/react-icons';
 import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { MoreHorizontal } from 'lucide-react';
+import { Code, MoreHorizontal } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 
@@ -59,7 +58,7 @@ export const LearningMaterials = ({
     const renderTypeIcon = (type: string) => {
         switch (type) {
             case LearningMaterialTypeEnum.LIVE_CODE:
-                return <QuestionMarkIcon className='mr-2 h-4 w-4' />;
+                return <Code className='mr-2 h-4 w-4' />;
             default:
                 return null;
         }

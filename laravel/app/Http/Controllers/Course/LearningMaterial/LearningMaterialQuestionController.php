@@ -36,14 +36,14 @@ class LearningMaterialQuestionController extends Controller {
             return [
                 'course' => new CourseResource($course),
                 'learningMaterial' => new LearningMaterialResource($learningMaterial),
-                'questions' => LearningMaterialQuestionResource::collection($questions),
+                'learningMaterialQuestions' => LearningMaterialQuestionResource::collection($questions),
             ];
         }
 
         return Inertia::render('Course/LearningMaterial/LearningMaterialQuestion/Index', [
             'course' => new CourseResource($course),
             'learningMaterial' => new LearningMaterialResource($learningMaterial),
-            'questions' => LearningMaterialQuestionResource::collection($questions),
+            'learningMaterialQuestions' => LearningMaterialQuestionResource::collection($questions),
         ]);
     }
 
@@ -77,14 +77,14 @@ class LearningMaterialQuestionController extends Controller {
             return [
                 'course' => new CourseResource($course),
                 'learningMaterial' => new LearningMaterialResource($learningMaterial),
-                'question' => new LearningMaterialQuestionResource($question),
+                'learningMaterialQuestion' => new LearningMaterialQuestionResource($question),
             ];
         }
 
         return Inertia::render('Course/LearningMaterial/LearningMaterialQuestion/Show', [
             'course' => new CourseResource($course),
             'learningMaterial' => new LearningMaterialResource($learningMaterial),
-            'question' => new LearningMaterialQuestionResource($question),
+            'learningMaterialQuestion' => new LearningMaterialQuestionResource($question),
         ]);
     }
 
@@ -100,7 +100,7 @@ class LearningMaterialQuestionController extends Controller {
         return Inertia::render('Course/LearningMaterial/LearningMaterialQuestion/Edit', [
             'course' => new CourseResource($course),
             'learningMaterial' => new LearningMaterialResource($learningMaterial),
-            'question' => new LearningMaterialQuestionResource($question),
+            'learningMaterialQuestion' => new LearningMaterialQuestionResource($question),
         ]);
     }
 }
