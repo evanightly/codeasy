@@ -1,5 +1,11 @@
 import { FilePondUploader } from '@/Components/FilePondUploader';
 import { PDFViewer } from '@/Components/PDFViewer';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from '@/Components/UI/accordion';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
@@ -34,78 +40,57 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface Props {
-    course: CourseResource;
-    learningMaterial: LearningMaterialResource;
+    course: { data: CourseResource };
+    learningMaterial: { data: LearningMaterialResource };
 }
 
-export default function Edit({ course, learningMaterial }: Props) {
+export default function Edit({
+    course: { data: courseData },
+    learningMaterial: { data: learningMaterialData },
+}: Props) {
     const { t } = useLaravelReactI18n();
     const updateMutation = learningMaterialServiceHook.useUpdate();
 
     const formSchema = z.object({
-        course_id: z.string().min(1),
+        course_id: z
+            .string()
+            .min(1, t('pages.learning_material.common.validations.course_id.required')),
         title: z.string().min(1, t('pages.learning_material.common.validations.title.required')),
         description: z.string().optional(),
-        type: z.nativeEnum(LearningMaterialTypeEnum),
+        type: z.nativeEnum(LearningMaterialTypeEnum, {
+            errorMap: () => ({
+                message: t('pages.learning_material.common.validations.type.required'),
+            }),
+        }),
         active: z.boolean().default(true),
         file: z.any().optional(),
+        _method: z.string().default('PUT'),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            course_id: course.id.toString(),
-            title: learningMaterial.title || '',
-            description: learningMaterial.description || '',
-            type:
-                (learningMaterial.type as LearningMaterialTypeEnum) ||
-                LearningMaterialTypeEnum.LIVE_CODE,
-            active: learningMaterial.active || true,
+            course_id: courseData.id.toString(),
+            title: learningMaterialData.title,
+            description: learningMaterialData.description || '',
+            type: learningMaterialData.type as LearningMaterialTypeEnum,
+            active: learningMaterialData.active,
             file: undefined,
+            _method: 'PUT',
         },
     });
 
-    const [previewUrl, setPreviewUrl] = useState<string | null>(learningMaterial.file_url || null);
-    const [fileType, setFileType] = useState<string | null>(
-        learningMaterial.file_extension ? `application/${learningMaterial.file_extension}` : null,
+    const [previewUrl, setPreviewUrl] = useState<string | null>(
+        learningMaterialData.file_url || null,
     );
-
-    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-        const formData = new FormData();
-
-        Object.entries(values).forEach(([key, value]) => {
-            if (key === 'file' && value instanceof File) {
-                formData.append(key, value);
-            } else if (value !== undefined && value !== null && key !== 'file') {
-                formData.append(key, String(value));
-            }
-        });
-
-        formData.set('active', values.active ? '1' : '0');
-
-        toast.promise(
-            updateMutation.mutateAsync({
-                id: learningMaterial.id,
-                data: formData,
-            }),
-            {
-                loading: t('pages.learning_material.common.messages.pending.update'),
-                success: () => {
-                    router.visit(
-                        route(`${ROUTES.COURSE_LEARNING_MATERIALS}.show`, [
-                            course.id,
-                            learningMaterial.id,
-                        ]),
-                    );
-                    return t('pages.learning_material.common.messages.success.update');
-                },
-                error: t('pages.learning_material.common.messages.error.update'),
-            },
-        );
-    };
+    const [fileType, setFileType] = useState<string | null>(
+        learningMaterialData.file_url?.endsWith('.pdf') ? 'application/pdf' : null,
+    );
+    const [newFileUploaded, setNewFileUploaded] = useState(false);
 
     const handleFileChange = (file: File | null) => {
-        if (previewUrl && previewUrl !== learningMaterial.file_url) {
+        // If there's already a preview URL and it's not the original file
+        if (previewUrl && newFileUploaded) {
             URL.revokeObjectURL(previewUrl);
         }
 
@@ -115,36 +100,72 @@ export default function Edit({ course, learningMaterial }: Props) {
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);
             setFileType(file.type);
+            setNewFileUploaded(true);
+        } else if (!newFileUploaded && learningMaterialData.file_url) {
+            // Reset to original file if exists
+            setPreviewUrl(learningMaterialData.file_url);
+            setFileType(learningMaterialData.file_url?.endsWith('.pdf') ? 'application/pdf' : null);
         } else {
-            setPreviewUrl(learningMaterial?.file_url || null);
-            setFileType(
-                learningMaterial.file_extension
-                    ? `application/${learningMaterial.file_extension}`
-                    : null,
-            );
+            setPreviewUrl(null);
+            setFileType(null);
         }
     };
 
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        const formData = new FormData();
+        formData.append('course_id', courseData.id.toString());
+        formData.append('_method', 'PUT');
+
+        Object.entries(values).forEach(([key, value]) => {
+            if (key === 'file' && value instanceof File) {
+                formData.append(key, value);
+            } else if (
+                value !== undefined &&
+                value !== null &&
+                key !== 'file' &&
+                key !== '_method'
+            ) {
+                formData.append(key, String(value));
+            }
+        });
+
+        formData.set('active', values.active ? '1' : '0');
+
+        toast.promise(
+            updateMutation.mutateAsync({
+                id: learningMaterialData.id,
+                data: formData,
+            }),
+            {
+                loading: t('pages.learning_material.common.messages.pending.update'),
+                success: () => {
+                    router.visit(route(`${ROUTES.COURSES}.show`, courseData.id));
+                    return t('pages.learning_material.common.messages.success.update');
+                },
+                error: t('pages.learning_material.common.messages.error.update'),
+            },
+        );
+    };
+
+    // Clean up object URL on unmount
     useEffect(() => {
         return () => {
-            if (previewUrl && previewUrl !== learningMaterial.file_url) {
+            if (previewUrl && newFileUploaded) {
                 URL.revokeObjectURL(previewUrl);
             }
         };
-    }, [previewUrl, learningMaterial.file_url]);
+    }, [previewUrl, newFileUploaded]);
 
     return (
         <AuthenticatedLayout
-            title={`${t('pages.learning_material.edit.title')} - ${learningMaterial.title}`}
+            title={`${courseData.name} - ${t('pages.learning_material.edit.title')}`}
         >
-            <Head
-                title={`${t('pages.learning_material.edit.title')} - ${learningMaterial.title}`}
-            />
+            <Head title={`${courseData.name} - ${t('pages.learning_material.edit.title')}`} />
 
             <Card>
                 <CardHeader>
                     <CardTitle>
-                        {t('pages.learning_material.edit.title')}: {learningMaterial.title}
+                        {t('pages.learning_material.edit.title')} - {courseData.name}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -189,6 +210,7 @@ export default function Edit({ course, learningMaterial }: Props) {
                                             {t('pages.learning_material.common.fields.type')}
                                         </FormLabel>
                                         <Select
+                                            value={field.value}
                                             onValueChange={field.onChange}
                                             defaultValue={field.value}
                                         >
@@ -243,47 +265,78 @@ export default function Edit({ course, learningMaterial }: Props) {
                                 render={({ field: { onChange, value, ...rest } }) => (
                                     <FormItem>
                                         <FormLabel>
-                                            {t('pages.learning_material.common.fields.file')} (
-                                            {t('pages.learning_material.edit.file_help')})
+                                            {t('pages.learning_material.common.fields.file')}
                                         </FormLabel>
                                         <FormControl>
                                             <FilePondUploader
                                                 value={value}
                                                 onChange={handleFileChange}
                                                 maxFileSize='10MB'
+                                                labelIdle={t(
+                                                    'components.filepond.labels.label_idle',
+                                                )}
                                                 acceptedFileTypes={['application/pdf']}
                                             />
                                         </FormControl>
                                         <FormMessage />
+                                        {learningMaterialData.file_url && !newFileUploaded && (
+                                            <p className='text-sm text-muted-foreground'>
+                                                {t('pages.learning_material.edit.current_file')}:{' '}
+                                                {learningMaterialData.file}
+                                            </p>
+                                        )}
                                     </FormItem>
                                 )}
                                 name='file'
                                 control={form.control}
                             />
 
+                            {/* Preview Section */}
                             {previewUrl && (
-                                <div className='rounded-md border p-3'>
-                                    <h3 className='mb-2 font-medium'>
-                                        {t('pages.learning_material.edit.current_file')}
-                                    </h3>
-                                    {fileType === 'application/pdf' ? (
-                                        <PDFViewer
-                                            fileUrl={previewUrl}
-                                            filename={`${learningMaterial.title}.pdf`}
-                                        />
-                                    ) : (
-                                        <div className='flex justify-center p-4 text-center'>
-                                            <a
-                                                target='_blank'
-                                                rel='noopener noreferrer'
-                                                href={previewUrl}
-                                                className='text-blue-600 hover:underline'
-                                            >
-                                                {t('pages.learning_material.edit.view_file')}
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
+                                <Accordion type='single' defaultValue='file_preview' collapsible>
+                                    <AccordionItem value='file_preview'>
+                                        <AccordionTrigger>
+                                            {newFileUploaded
+                                                ? t('pages.learning_material.edit.new_file_preview')
+                                                : t(
+                                                      'pages.learning_material.edit.current_file_preview',
+                                                  )}
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <div className='rounded-md border p-3'>
+                                                {fileType === 'application/pdf' ? (
+                                                    <PDFViewer
+                                                        fileUrl={previewUrl}
+                                                        filename={
+                                                            newFileUploaded
+                                                                ? form.getValues('file')?.name
+                                                                : learningMaterialData.file ||
+                                                                  t(
+                                                                      'components.pdf_viewer.document',
+                                                                  )
+                                                        }
+                                                    />
+                                                ) : fileType?.startsWith('image/') ? (
+                                                    <div className='mt-2 flex justify-center'>
+                                                        <img
+                                                            src={previewUrl}
+                                                            className='max-h-96 rounded object-contain'
+                                                            alt={t(
+                                                                'pages.learning_material.edit.preview',
+                                                            )}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className='rounded p-4 text-center'>
+                                                        {t(
+                                                            'pages.learning_material.edit.no_preview_available',
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
                             )}
 
                             <div className='flex justify-between'>
@@ -291,12 +344,7 @@ export default function Edit({ course, learningMaterial }: Props) {
                                     variant='outline'
                                     type='button'
                                     onClick={() =>
-                                        router.visit(
-                                            route(`${ROUTES.COURSE_LEARNING_MATERIALS}.show`, [
-                                                course.id,
-                                                learningMaterial.id,
-                                            ]),
-                                        )
+                                        router.visit(route(`${ROUTES.COURSES}.show`, courseData.id))
                                     }
                                 >
                                     {t('action.cancel')}

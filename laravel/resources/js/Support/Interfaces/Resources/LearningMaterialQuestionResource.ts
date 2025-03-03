@@ -3,4 +3,5 @@ import { LearningMaterialResource, Resource } from '@/Support/Interfaces/Resourc
 
 export interface LearningMaterialQuestionResource extends Resource, LearningMaterialQuestion {
     learning_material?: LearningMaterialResource;
+    file_url?: string;
 }

@@ -869,6 +869,11 @@ return [
             'buttons' => [
                 'update' => 'Update Material',
             ],
+            'current_file' => 'Current File',
+            'new_file_preview' => 'New File Preview',
+            'current_file_preview' => 'Current File Preview',
+            'preview' => 'File Preview',
+            'no_preview_available' => 'Preview not available for this file type',
         ],
         'show' => [
             'title' => 'Learning Material Details',
@@ -970,6 +975,16 @@ return [
             'title' => 'Edit Question',
             'buttons' => [
                 'update' => 'Update Question',
+            ],
+            'current_file' => 'Current Starter Code File',
+            'new_file_preview' => 'new_file_preview',
+            'current_file_preview' => 'current_file_preview',
+            'preview' => 'preview',
+            'no_preview_available' => 'no_preview_available',
+            'test_cases' => [
+                'title' => 'Test Cases',
+                'description' => 'Description',
+                'manage_button' => 'Manage Test Cases',
             ],
         ],
         'show' => [
