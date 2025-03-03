@@ -4,7 +4,7 @@ namespace App\Support\Enums;
 
 use App\Traits\Enums\Arrayable;
 
-enum LearningMaterialType: string {
+enum LearningMaterialTypeEnum: string {
     use Arrayable;
 
     case LIVE_CODE = 'live_code';

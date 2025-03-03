@@ -889,23 +889,24 @@ return [
         'common' => [
             'fields' => [
                 'title' => 'Question Title',
-                'description' => 'Question Content',
+                'description' => 'Question Description',
                 'type' => 'Question Type',
                 'order' => 'Order',
                 'clue' => 'Hint/Clue',
-                'file' => 'Starter Code File',
+                'file' => 'Question File',
                 'file_extension' => 'File Extension',
                 'status' => 'Status',
                 'active' => 'Active Status',
             ],
             'placeholders' => [
                 'title' => 'Enter question title',
-                'description' => 'Enter question content',
+                'description' => 'Enter question description or instructions',
                 'clue' => 'Enter hint or clue for students',
             ],
             'help' => [
                 'clue' => 'Provide a hint that students can view if they are stuck',
-                'starter_code' => 'Upload a file with starter code for students to begin with',
+                'question_file' => 'Upload a PDF or image file containing the question details or visual elements',
+                'starter_code' => null, // Remove this line or comment it out
             ],
             'types' => [
                 'quiz' => 'Quiz Question',
@@ -976,7 +977,7 @@ return [
             'buttons' => [
                 'update' => 'Update Question',
             ],
-            'current_file' => 'Current Starter Code File',
+            'current_file' => 'Current Question File',
             'new_file_preview' => 'New File Preview',
             'current_file_preview' => 'Current File Preview',
             'preview' => 'File Preview',
@@ -989,6 +990,7 @@ return [
         ],
         'show' => [
             'title' => 'Question Details',
+            'question_file' => 'Question File',
             'sections' => [
                 'information' => 'Information',
                 'test_cases' => 'Test Cases',

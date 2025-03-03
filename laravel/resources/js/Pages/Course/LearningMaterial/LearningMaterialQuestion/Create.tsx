@@ -241,22 +241,21 @@ export default function Create({
                                                         value={value}
                                                         onChange={handleFileChange}
                                                         maxFileSize='10MB'
+                                                        labelIdle={t(
+                                                            'components.filepond.labels.label_idle',
+                                                        )}
                                                         acceptedFileTypes={[
                                                             'application/pdf',
-                                                            // 'text/plain',
-                                                            // '.py',
-                                                            // '.js',
-                                                            // '.java',
-                                                            // '.cpp',
-                                                            // '.html',
-                                                            // '.css',
+                                                            'image/jpeg',
+                                                            'image/png',
+                                                            'image/gif',
                                                         ]}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
                                                 <p className='text-sm text-muted-foreground'>
                                                     {t(
-                                                        'pages.learning_material_question.common.help.starter_code',
+                                                        'pages.learning_material_question.common.help.question_file',
                                                     )}
                                                 </p>
                                             </FormItem>

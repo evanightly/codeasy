@@ -2,31 +2,42 @@
 
 namespace App\Models;
 
-use App\Support\Enums\LearningMaterialType;
+use App\Support\Enums\LearningMaterialTypeEnum;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LearningMaterialQuestion extends Model {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<string>
-     */
-    protected $fillable = ['learning_material_id', 'title', 'description', 'file', 'type', 'order_number', 'clue', 'active'];
+    use HasFactory;
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
+    protected $fillable = [
+        'learning_material_id',
+        'title',
+        'description',
+        'file',
+        'file_extension',
+        'type',
+        'order_number',
+        'clue',
+        'active',
+    ];
     protected $casts = [
-        'type' => LearningMaterialType::class,
         'active' => 'boolean',
+        'type' => LearningMaterialTypeEnum::class,
     ];
 
     /**
-     * Get the learning material that owns the question.
+     * Get the learning material that owns the question
      */
-    public function learningMaterial() {
+    public function learningMaterial(): BelongsTo {
         return $this->belongsTo(LearningMaterial::class);
+    }
+
+    /**
+     * Get the test cases for this question
+     */
+    public function testCases(): HasMany {
+        return $this->hasMany(LearningMaterialQuestionTestCase::class);
     }
 }

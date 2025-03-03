@@ -92,14 +92,14 @@ export default function Show({
                 <CardHeader className='flex flex-row items-center justify-between'>
                     <div>
                         <CardTitle>{questionData.title}</CardTitle>
-                        <p className='text-sm text-muted-foreground'>
+                        <div className='text-sm text-muted-foreground'>
                             {isLiveCode && (
                                 <Badge variant='outline'>
                                     <CodeIcon className='mr-1 h-4 w-4' />
                                     {t('pages.learning_material_question.common.types.live_code')}
                                 </Badge>
                             )}
-                        </p>
+                        </div>
                     </div>
                     <Button
                         variant='outline'
@@ -152,7 +152,7 @@ export default function Show({
                                                 'pages.learning_material_question.common.fields.clue',
                                             )}
                                         </h3>
-                                        <div className='mt-1 bg-background-2 rounded-md p-4 text-sm'>
+                                        <div className='mt-1 rounded-md bg-background-2 p-4 text-sm'>
                                             {questionData.clue}
                                         </div>
                                     </div>
@@ -175,16 +175,18 @@ export default function Show({
                                                         t('components.pdf_viewer.document')
                                                     }
                                                 />
-                                            ) : fileType === 'text/plain' ||
-                                              /\.(txt|py|js|java|cpp|c|html|css)$/.test(
-                                                  questionData.file || '',
+                                            ) : fileType?.startsWith('image/') ||
+                                              questionData.file_url?.match(
+                                                  /\.(jpg|jpeg|png|gif|webp)$/i,
                                               ) ? (
-                                                <div className='overflow-auto rounded border bg-gray-50 p-4'>
-                                                    <pre className='whitespace-pre-wrap text-sm text-gray-800'>
-                                                        <TextFilePreview
-                                                            fileUrl={questionData.file_url}
-                                                        />
-                                                    </pre>
+                                                <div className='mt-2 flex justify-center p-4'>
+                                                    <img
+                                                        src={questionData.file_url}
+                                                        className='max-w-full rounded object-contain'
+                                                        alt={t(
+                                                            'pages.learning_material_question.show.question_file',
+                                                        )}
+                                                    />
                                                 </div>
                                             ) : (
                                                 <div className='p-4 text-center text-muted-foreground'>

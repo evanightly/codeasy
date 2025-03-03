@@ -1,6 +1,6 @@
 <?php
 
-use App\Support\Enums\LearningMaterialType;
+use App\Support\Enums\LearningMaterialTypeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->string('file')->nullable();
             $table->string('file_extension')->nullable();
-            $table->enum('type', LearningMaterialType::toArray());
+            $table->enum('type', LearningMaterialTypeEnum::toArray());
             $table->integer('order_number');
             $table->boolean('active')->default(true);
             $table->timestamps();

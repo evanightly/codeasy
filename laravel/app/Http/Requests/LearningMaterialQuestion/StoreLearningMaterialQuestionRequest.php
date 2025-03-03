@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\LearningMaterialQuestion;
 
-use App\Support\Enums\LearningMaterialType;
+use App\Support\Enums\LearningMaterialTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreLearningMaterialQuestionRequest extends FormRequest {
@@ -12,7 +12,7 @@ class StoreLearningMaterialQuestionRequest extends FormRequest {
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'file' => ['required', 'file'],
-            'type' => ['required', 'string', 'in:' . implode(',', LearningMaterialType::toArray())],
+            'type' => ['required', 'string', 'in:' . implode(',', LearningMaterialTypeEnum::toArray())],
             // 'order_number' => ['required', 'integer'],
             'clue' => ['nullable', 'string'],
             'active' => ['boolean'],

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Support\Enums\LearningMaterialType;
+use App\Support\Enums\LearningMaterialTypeEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,7 +18,7 @@ class LearningMaterial extends Model {
         'active',
     ];
     protected $casts = [
-        'type' => LearningMaterialType::class,
+        'type' => LearningMaterialTypeEnum::class,
         'active' => 'boolean',
     ];
 

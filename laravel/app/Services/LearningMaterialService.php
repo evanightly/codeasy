@@ -78,6 +78,17 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
         return parent::update($keyOrModel, $data);
     }
 
+    public function delete($keyOrModel): bool {
+        // Get existing record to delete old file if exists
+        $existingRecord = $this->repository->find($keyOrModel);
+        if ($existingRecord && $existingRecord->file) {
+            $this->deleteFile($this->baseDirectory . '/' .
+                $existingRecord->file . '.' . $existingRecord->file_extension);
+        }
+
+        return parent::delete($keyOrModel);
+    }
+
     public function getAllPaginated(array $search = [], int $pageSize = 15): LengthAwarePaginator {
         $this->handlePageSizeAll();
 

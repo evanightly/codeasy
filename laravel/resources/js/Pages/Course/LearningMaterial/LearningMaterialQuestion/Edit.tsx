@@ -273,13 +273,10 @@ export default function Edit({
                                                         )}
                                                         acceptedFileTypes={[
                                                             'application/pdf',
-                                                            // 'text/plain',
-                                                            // '.py',
-                                                            // '.js',
-                                                            // '.java',
-                                                            // '.cpp',
-                                                            // '.html',
-                                                            // '.css',
+                                                            'image/jpeg',
+                                                            'image/png',
+                                                            'image/gif',
+                                                            'image/webp',
                                                         ]}
                                                     />
                                                 </FormControl>
@@ -294,7 +291,7 @@ export default function Edit({
                                                 )}
                                                 <p className='text-sm text-muted-foreground'>
                                                     {t(
-                                                        'pages.learning_material_question.common.help.starter_code',
+                                                        'pages.learning_material_question.common.help.question_file',
                                                     )}
                                                 </p>
                                             </FormItem>
@@ -326,7 +323,8 @@ export default function Edit({
                                                               t('components.pdf_viewer.document')
                                                     }
                                                 />
-                                            ) : fileType?.startsWith('image/') ? (
+                                            ) : fileType?.startsWith('image/') ||
+                                              previewUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                                                 <div className='mt-2 flex justify-center'>
                                                     <img
                                                         src={previewUrl}
