@@ -2,14 +2,14 @@ import { PDFViewer } from '@/Components/PDFViewer';
 import { Badge } from '@/Components/UI/badge';
 import { Button, buttonVariants } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
+import { DataTable } from '@/Components/UI/data-table';
+import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/Components/UI/table';
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/Components/UI/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import { useConfirmation } from '@/Contexts/ConfirmationDialogContext';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -23,34 +23,19 @@ import {
     LearningMaterialResource,
 } from '@/Support/Interfaces/Resources';
 import { Link, router } from '@inertiajs/react';
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
     CodeIcon,
     EditIcon,
+    EyeIcon,
+    EyeOffIcon,
     FileTextIcon,
     ListChecksIcon,
+    MoreHorizontal,
     PlusIcon,
-    TrashIcon,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-function TextFilePreview({ fileUrl }: { fileUrl: string }) {
-    const [content, setContent] = useState<string>('Loading...');
-
-    useEffect(() => {
-        fetch(fileUrl)
-            .then((response) => response.text())
-            .then((text) => {
-                setContent(text);
-            })
-            .catch((error) => {
-                console.error('Error loading text file:', error);
-                setContent('Error loading file content');
-            });
-    }, [fileUrl]);
-
-    return <>{content}</>;
-}
+import { useEffect, useMemo, useState } from 'react';
 
 interface Props {
     course: { data: CourseResource };
@@ -87,6 +72,173 @@ export default function Show({
             testCasesQuery.refetch();
         });
     };
+
+    // Create column definitions for the DataTable
+    const columnHelper = createColumnHelper<LearningMaterialQuestionTestCaseResource>();
+
+    const columns = useMemo(
+        () =>
+            [
+                columnHelper.accessor('id', {
+                    header: ({ column }) => <DataTableColumnHeader title='ID' column={column} />,
+                    cell: ({ row }) => <div>{row.original.id}</div>,
+                }),
+                columnHelper.accessor('description', {
+                    header: ({ column }) => (
+                        <DataTableColumnHeader
+                            title={t(
+                                'pages.learning_material_question_test_case.common.fields.description',
+                            )}
+                            column={column}
+                        />
+                    ),
+                    cell: ({ row }) => (
+                        <div className='max-w-[300px] truncate'>
+                            {row.original.description || '-'}
+                        </div>
+                    ),
+                }),
+                columnHelper.accessor('input', {
+                    header: ({ column }) => (
+                        <DataTableColumnHeader
+                            title={t(
+                                'pages.learning_material_question_test_case.common.fields.input',
+                            )}
+                            column={column}
+                        />
+                    ),
+                    cell: ({ row }) => (
+                        <div className='max-w-[150px] truncate'>
+                            {row.original.input ? (
+                                <pre className='overflow-hidden text-ellipsis whitespace-nowrap text-xs'>
+                                    {row.original.input}
+                                </pre>
+                            ) : (
+                                '-'
+                            )}
+                        </div>
+                    ),
+                }),
+                columnHelper.accessor('hidden', {
+                    header: ({ column }) => (
+                        <DataTableColumnHeader
+                            title={t(
+                                'pages.learning_material_question_test_case.common.fields.hidden',
+                            )}
+                            column={column}
+                        />
+                    ),
+                    cell: ({ row }) => (
+                        <div className='flex items-center'>
+                            {row.original.hidden ? (
+                                <div className='flex items-center'>
+                                    <EyeOffIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+                                    <span>
+                                        {t(
+                                            'pages.learning_material_question_test_case.show.hidden',
+                                        )}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className='flex items-center'>
+                                    <EyeIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+                                    <span>
+                                        {t(
+                                            'pages.learning_material_question_test_case.show.visible',
+                                        )}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    ),
+                }),
+                columnHelper.accessor('active', {
+                    header: ({ column }) => (
+                        <DataTableColumnHeader
+                            title={t(
+                                'pages.learning_material_question_test_case.common.fields.active',
+                            )}
+                            column={column}
+                        />
+                    ),
+                    cell: ({ row }) => (
+                        <Badge variant={row.original.active ? 'success' : 'destructive'}>
+                            {row.original.active
+                                ? t(
+                                      'pages.learning_material_question_test_case.common.status.active',
+                                  )
+                                : t(
+                                      'pages.learning_material_question_test_case.common.status.inactive',
+                                  )}
+                        </Badge>
+                    ),
+                }),
+                columnHelper.display({
+                    id: 'actions',
+                    header: () => <div className='text-right'>Actions</div>,
+                    cell: ({ row }) => {
+                        const testCase = row.original;
+                        return (
+                            <div className='text-right'>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant='ghost' className='h-8 w-8 p-0'>
+                                            <span className='sr-only'>
+                                                {t('components.dropdown_menu.sr_open_menu')}
+                                            </span>
+                                            <MoreHorizontal className='h-4 w-4' />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align='end'>
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                href={route(
+                                                    `${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.show`,
+                                                    [
+                                                        courseData.id,
+                                                        learningMaterialData.id,
+                                                        questionData.id,
+                                                        testCase.id,
+                                                    ],
+                                                )}
+                                            >
+                                                {t('action.show')}
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                href={route(
+                                                    `${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.edit`,
+                                                    [
+                                                        courseData.id,
+                                                        learningMaterialData.id,
+                                                        questionData.id,
+                                                        testCase.id,
+                                                    ],
+                                                )}
+                                            >
+                                                {t('action.edit')}
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => handleDeleteTestCase(testCase.id)}
+                                        >
+                                            {t('action.delete')}
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        );
+                    },
+                }),
+            ] as Array<
+                ColumnDef<
+                    LearningMaterialQuestionTestCaseResource,
+                    LearningMaterialQuestionTestCaseResource
+                >
+            >,
+        [],
+    );
 
     return (
         <AuthenticatedLayout title={t('pages.learning_material_question.show.title')}>
@@ -250,114 +402,11 @@ export default function Show({
                                     </div>
 
                                     {testCasesQuery.data?.data?.length ? (
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>ID</TableHead>
-                                                    <TableHead>
-                                                        {t(
-                                                            'pages.learning_material_question_test_case.common.fields.description',
-                                                        )}
-                                                    </TableHead>
-                                                    <TableHead>
-                                                        {t(
-                                                            'pages.learning_material_question_test_case.common.fields.input',
-                                                        )}
-                                                    </TableHead>
-                                                    <TableHead>
-                                                        {t(
-                                                            'pages.learning_material_question_test_case.common.fields.hidden',
-                                                        )}
-                                                    </TableHead>
-                                                    <TableHead>
-                                                        {t(
-                                                            'pages.learning_material_question_test_case.common.fields.active',
-                                                        )}
-                                                    </TableHead>
-                                                    <TableHead className='text-right'>
-                                                        Actions
-                                                    </TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {testCasesQuery.data.data.map(
-                                                    (
-                                                        testCase: LearningMaterialQuestionTestCaseResource,
-                                                    ) => (
-                                                        <TableRow key={testCase.id}>
-                                                            <TableCell>{testCase.id}</TableCell>
-                                                            <TableCell>
-                                                                {testCase.description || '-'}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {testCase.input ? (
-                                                                    <pre className='max-w-64 overflow-hidden text-ellipsis whitespace-nowrap text-xs'>
-                                                                        {testCase.input}
-                                                                    </pre>
-                                                                ) : (
-                                                                    '-'
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {testCase.hidden ? (
-                                                                    <Badge variant='secondary'>
-                                                                        Yes
-                                                                    </Badge>
-                                                                ) : (
-                                                                    <Badge variant='outline'>
-                                                                        No
-                                                                    </Badge>
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {testCase.active ? (
-                                                                    <Badge variant='success'>
-                                                                        Active
-                                                                    </Badge>
-                                                                ) : (
-                                                                    <Badge variant='destructive'>
-                                                                        Inactive
-                                                                    </Badge>
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell className='text-right'>
-                                                                <Link
-                                                                    href={route(
-                                                                        `${ROUTES.COURSE_LEARNING_MATERIAL_QUESTIONS}.test-cases.edit`,
-                                                                        [
-                                                                            questionData.id,
-                                                                            learningMaterialData.id,
-                                                                            questionData.id,
-                                                                            testCase.id,
-                                                                        ],
-                                                                    )}
-                                                                    className={buttonVariants({
-                                                                        variant: 'ghost',
-                                                                        size: 'icon',
-                                                                    })}
-                                                                >
-                                                                    <EditIcon className='h-4 w-4' />
-                                                                </Link>
-                                                                <Button
-                                                                    variant='ghost'
-                                                                    size='icon'
-                                                                    onClick={() =>
-                                                                        handleDeleteTestCase(
-                                                                            testCase.id,
-                                                                        )
-                                                                    }
-                                                                    disabled={
-                                                                        deleteTestCaseMutation.isPending
-                                                                    }
-                                                                >
-                                                                    <TrashIcon className='h-4 w-4 text-red-500' />
-                                                                </Button>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ),
-                                                )}
-                                            </TableBody>
-                                        </Table>
+                                        <DataTable
+                                            showPagination={false}
+                                            data={testCasesQuery.data.data}
+                                            columns={columns}
+                                        />
                                     ) : (
                                         <div className='rounded-md border border-dashed p-8 text-center text-muted-foreground'>
                                             {t(
