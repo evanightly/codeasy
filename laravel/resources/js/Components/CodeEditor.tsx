@@ -151,7 +151,12 @@ export default function CodeEditor({
                             </PopoverContent>
                         </Popover>
 
-                        <Button variant='outline' size='icon' onClick={toggleDarkMode}>
+                        <Button
+                            variant='outline'
+                            type='button'
+                            size='icon'
+                            onClick={toggleDarkMode}
+                        >
                             {isDarkMode ? <Sun /> : <Moon />}
                         </Button>
                     </div>
