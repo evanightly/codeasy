@@ -16,6 +16,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { learningMaterialQuestionTestCaseServiceHook } from '@/Services/learningMaterialQuestionTestCaseServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { LearningMaterialTypeEnum } from '@/Support/Enums/learningMaterialTypeEnum';
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import {
     CourseResource,
     LearningMaterialQuestionResource,
@@ -35,7 +36,7 @@ import {
     MoreHorizontal,
     PlusIcon,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface Props {
     course: { data: CourseResource };
@@ -50,13 +51,16 @@ export default function Show({
 }: Props) {
     const confirmAction = useConfirmation();
     const { t } = useLaravelReactI18n();
-    const testCasesQuery = learningMaterialQuestionTestCaseServiceHook.useGetAll({
+
+    const [filters, setFilters] = useState<ServiceFilterOptions>({
         filters: {
             column_filters: {
                 learning_material_question_id: questionData.id,
             },
         },
     });
+
+    const testCasesQuery = learningMaterialQuestionTestCaseServiceHook.useGetAll({ filters });
     const deleteTestCaseMutation = learningMaterialQuestionTestCaseServiceHook.useDelete();
 
     const isLiveCode = learningMaterialData.type === LearningMaterialTypeEnum.LIVE_CODE;
@@ -401,19 +405,19 @@ export default function Show({
                                         </Link>
                                     </div>
 
-                                    {testCasesQuery.data?.data?.length ? (
-                                        <DataTable
-                                            showPagination={false}
-                                            data={testCasesQuery.data.data}
-                                            columns={columns}
-                                        />
-                                    ) : (
-                                        <div className='rounded-md border border-dashed p-8 text-center text-muted-foreground'>
-                                            {t(
-                                                'pages.learning_material_question_test_case.index.empty_state',
-                                            )}
-                                        </div>
-                                    )}
+                                    <DataTable
+                                        setFilters={setFilters}
+                                        meta={testCasesQuery?.data?.meta}
+                                        filters={filters}
+                                        data={testCasesQuery?.data?.data ?? []}
+                                        columns={columns}
+                                        baseRoute={
+                                            ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES
+                                        }
+                                        baseKey={
+                                            ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES
+                                        }
+                                    />
                                 </div>
                             </TabsContent>
                         )}
