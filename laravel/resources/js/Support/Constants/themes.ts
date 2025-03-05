@@ -294,7 +294,7 @@ export const THEMES: Theme[] = [
             warning: '61 100% 50%',
             'warning-foreground': '0 0% 3.9%',
             success: '120 100% 50%',
-            'success-foreground': '0 0% 3.9%',
+            'success-foreground': '0 0% 100%',
             info: '207 100% 50%',
             'info-foreground': '0 0% 98%',
             muted: '0 0% 96.1%',
@@ -350,7 +350,7 @@ export const THEMES: Theme[] = [
             warning: '61 100% 50%',
             'warning-foreground': '0 0% 3.9%',
             success: '120 100% 50%',
-            'success-foreground': '0 0% 3.9%',
+            'success-foreground': '0 0% 100%',
             info: '207 100% 50%',
             'info-foreground': '0 0% 98%',
             muted: '0 0% 14.9%',
@@ -1263,8 +1263,7 @@ export const THEMES: Theme[] = [
             'color-5': '35 100% 60%',
         },
         is_active: false,
-    }
-
+    },
 ];
 
 export type { Theme, ThemeColors, ThemeType };
