@@ -534,6 +534,7 @@ return [
                     'delete' => 'Error deleting request',
                     'approve' => 'Error approving request',
                     'reject' => 'Error rejecting request',
+                    'already_requested' => 'You have already submitted a request for this school that is pending or approved',
                 ],
             ],
             'status' => [
