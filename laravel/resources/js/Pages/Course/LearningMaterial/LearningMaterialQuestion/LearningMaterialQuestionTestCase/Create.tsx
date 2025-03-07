@@ -11,11 +11,22 @@ import {
     FormLabel,
     FormMessage,
 } from '@/Components/UI/form';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/Components/UI/select';
 import { Switch } from '@/Components/UI/switch';
 import { Textarea } from '@/Components/UI/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { learningMaterialQuestionTestCaseServiceHook } from '@/Services/learningMaterialQuestionTestCaseServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import {
+    ProgrammingLanguageEnum,
+    programmingLanguageLabels,
+} from '@/Support/Enums/programmingLanguageEnum';
 import {
     CourseResource,
     LearningMaterialQuestionResource,
@@ -61,6 +72,7 @@ export default function Create({
             ),
         input: z.string(),
         expected_output_file: z.any().optional(),
+        language: z.nativeEnum(ProgrammingLanguageEnum).default(ProgrammingLanguageEnum.PYTHON),
         hidden: z.boolean().default(false),
         active: z.boolean().default(true),
     });
@@ -72,10 +84,13 @@ export default function Create({
             description: '',
             input: '',
             expected_output_file: undefined,
+            language: ProgrammingLanguageEnum.PYTHON,
             hidden: false,
             active: true,
         },
     });
+
+    const selectedLanguage = form.watch('language');
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         const formData = new FormData();
@@ -84,20 +99,15 @@ export default function Create({
             values.learning_material_question_id.toString(),
         );
 
-        // Add other fields to form data
         formData.append('description', values.description);
         formData.append('input', values.input);
+        formData.append('language', values.language);
         formData.append('hidden', values.hidden ? '1' : '0');
         formData.append('active', values.active ? '1' : '0');
 
         // Handle file upload
         if (values.expected_output_file instanceof File) {
             formData.append('expected_output_file', values.expected_output_file);
-        }
-
-        // debug form data
-        for (const [key, value] of formData.entries()) {
-            console.log(key, value);
         }
 
         toast.promise(
@@ -176,6 +186,57 @@ export default function Create({
                                     <FormItem>
                                         <FormLabel>
                                             {t(
+                                                'pages.learning_material_question_test_case.common.fields.language',
+                                            )}
+                                        </FormLabel>
+                                        <Select
+                                            value={field.value}
+                                            onValueChange={(value) => {
+                                                field.onChange(value as ProgrammingLanguageEnum);
+                                            }}
+                                            defaultValue={field.value}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue
+                                                        placeholder={t(
+                                                            'pages.learning_material_question_test_case.common.placeholders.language',
+                                                            { defaultValue: 'Select a language' },
+                                                        )}
+                                                    />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {Object.values(ProgrammingLanguageEnum).map(
+                                                    (lang) => (
+                                                        <SelectItem value={lang} key={lang}>
+                                                            {programmingLanguageLabels[lang]}
+                                                        </SelectItem>
+                                                    ),
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormDescription>
+                                            {t(
+                                                'pages.learning_material_question_test_case.common.help.language',
+                                                {
+                                                    defaultValue:
+                                                        'Select the programming language for this test case',
+                                                },
+                                            )}
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                                name='language'
+                                control={form.control}
+                            />
+
+                            <FormField
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            {t(
                                                 'pages.learning_material_question_test_case.common.fields.input',
                                             )}
                                         </FormLabel>
@@ -183,7 +244,7 @@ export default function Create({
                                             <CodeEditor
                                                 value={field.value || ''}
                                                 onChange={field.onChange}
-                                                language='python'
+                                                language={selectedLanguage}
                                                 height='200px'
                                             />
                                         </FormControl>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Enums\ProgrammingLanguageEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +21,7 @@ class LearningMaterialQuestionTestCase extends Model {
         'expected_output_file',
         'expected_output_file_extension',
         'description',
+        'language', // Programming language defined in the CodeEditor.tsx
         'hidden',
         'active',
     ];
@@ -30,6 +32,7 @@ class LearningMaterialQuestionTestCase extends Model {
      * @var array<string, string>
      */
     protected $casts = [
+        'language' => ProgrammingLanguageEnum::class,
         'hidden' => 'boolean',
         'active' => 'boolean',
     ];

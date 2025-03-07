@@ -11,11 +11,22 @@ import {
     FormLabel,
     FormMessage,
 } from '@/Components/UI/form';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/Components/UI/select';
 import { Switch } from '@/Components/UI/switch';
 import { Textarea } from '@/Components/UI/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { learningMaterialQuestionTestCaseServiceHook } from '@/Services/learningMaterialQuestionTestCaseServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import {
+    ProgrammingLanguageEnum,
+    programmingLanguageLabels,
+} from '@/Support/Enums/programmingLanguageEnum';
 import {
     CourseResource,
     LearningMaterialQuestionResource,
@@ -69,6 +80,7 @@ export default function Edit({
         expected_output_file: z.any().optional(),
         hidden: z.boolean().default(false),
         active: z.boolean().default(true),
+        language: z.nativeEnum(ProgrammingLanguageEnum).default(ProgrammingLanguageEnum.PYTHON),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -80,6 +92,8 @@ export default function Edit({
             expected_output_file: undefined,
             hidden: testCase.hidden,
             active: testCase.active,
+            language:
+                (testCase.language as ProgrammingLanguageEnum) || ProgrammingLanguageEnum.PYTHON,
         },
     });
 
@@ -89,9 +103,12 @@ export default function Edit({
                 learning_material_question_id: testCase.learning_material_question_id,
                 description: testCase.description || '',
                 input: testCase.input || '',
-                expected_output_file: undefined, // File can't be pre-filled
+                expected_output_file: undefined,
                 hidden: testCase.hidden,
                 active: testCase.active,
+                language:
+                    (testCase.language as ProgrammingLanguageEnum) ||
+                    ProgrammingLanguageEnum.PYTHON,
             });
         }
     }, [testCase, form]);
@@ -99,17 +116,16 @@ export default function Edit({
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         const formData = new FormData();
 
-        // Add fields to form data
         formData.append(
             'learning_material_question_id',
             String(values.learning_material_question_id),
         );
         formData.append('description', values.description);
         if (values.input) formData.append('input', values.input);
+        formData.append('language', values.language);
         formData.append('hidden', values.hidden ? '1' : '0');
         formData.append('active', values.active ? '1' : '0');
 
-        // Handle file upload - only append if a new file is selected
         if (values.expected_output_file instanceof File) {
             formData.append('expected_output_file', values.expected_output_file);
         }
@@ -146,6 +162,8 @@ export default function Edit({
     };
 
     if (!testCase) return null;
+
+    const selectedLanguage = form.watch('language');
 
     return (
         <AuthenticatedLayout title={t('pages.learning_material_question_test_case.edit.title')}>
@@ -190,6 +208,57 @@ export default function Edit({
                                     <FormItem>
                                         <FormLabel>
                                             {t(
+                                                'pages.learning_material_question_test_case.common.fields.language',
+                                            )}
+                                        </FormLabel>
+                                        <Select
+                                            value={field.value}
+                                            onValueChange={(value) => {
+                                                field.onChange(value as ProgrammingLanguageEnum);
+                                            }}
+                                            defaultValue={field.value}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue
+                                                        placeholder={t(
+                                                            'pages.learning_material_question_test_case.common.placeholders.language',
+                                                            { defaultValue: 'Select a language' },
+                                                        )}
+                                                    />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {Object.values(ProgrammingLanguageEnum).map(
+                                                    (lang) => (
+                                                        <SelectItem value={lang} key={lang}>
+                                                            {programmingLanguageLabels[lang]}
+                                                        </SelectItem>
+                                                    ),
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormDescription>
+                                            {t(
+                                                'pages.learning_material_question_test_case.common.help.language',
+                                                {
+                                                    defaultValue:
+                                                        'Select the programming language for this test case',
+                                                },
+                                            )}
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                                name='language'
+                                control={form.control}
+                            />
+
+                            <FormField
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            {t(
                                                 'pages.learning_material_question_test_case.common.fields.input',
                                             )}
                                         </FormLabel>
@@ -197,7 +266,7 @@ export default function Edit({
                                             <CodeEditor
                                                 value={field.value || ''}
                                                 onChange={field.onChange}
-                                                language='python'
+                                                language={selectedLanguage}
                                                 height='200px'
                                             />
                                         </FormControl>

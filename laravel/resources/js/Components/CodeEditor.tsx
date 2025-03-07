@@ -10,11 +10,16 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/UI/popover';
 import { useDarkMode } from '@/Contexts/ThemeContext';
 import { ny } from '@/Lib/Utils';
+import { ProgrammingLanguageEnum } from '@/Support/Enums/programmingLanguageEnum';
+import { cpp } from '@codemirror/lang-cpp';
+import { java } from '@codemirror/lang-java';
+import { javascript } from '@codemirror/lang-javascript';
+import { php } from '@codemirror/lang-php';
 import { python } from '@codemirror/lang-python';
 import * as codemirrorThemes from '@uiw/codemirror-themes-all';
 import CodeMirror from '@uiw/react-codemirror';
 import { Check, ChevronsUpDown, Moon, Sun } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const THEMES = [
     'dark',
@@ -63,7 +68,7 @@ interface CodeEditorProps {
     onChange: (value: string) => void;
     height?: string;
     showThemePicker?: boolean;
-    language?: 'python' | 'javascript';
+    language?: ProgrammingLanguageEnum;
     label?: string;
 }
 
@@ -72,7 +77,7 @@ export default function CodeEditor({
     onChange,
     height = '300px',
     showThemePicker = true,
-    language = 'python',
+    language = ProgrammingLanguageEnum.PYTHON,
     label,
 }: CodeEditorProps) {
     const [themeComboboxOpen, setThemeComboboxOpen] = useState(false);
@@ -95,12 +100,28 @@ export default function CodeEditor({
 
     const getLanguageExtension = () => {
         switch (language) {
-            case 'python':
+            case ProgrammingLanguageEnum.PYTHON:
                 return python();
+            case ProgrammingLanguageEnum.JAVASCRIPT:
+                return javascript();
+            case ProgrammingLanguageEnum.JAVA:
+                return java();
+            case ProgrammingLanguageEnum.CPP:
+                return cpp();
+            case ProgrammingLanguageEnum.PHP:
+                return php();
+            // For other languages, fallback to python or appropriate extension
+            // You'll need to import the appropriate languages from @codemirror
             default:
                 return python();
         }
     };
+
+    // Force re-render of CodeMirror when language changes
+    const [key, setKey] = useState(0);
+    useEffect(() => {
+        setKey((prev) => prev + 1);
+    }, [language]);
 
     return (
         <div className='flex flex-col gap-3'>
@@ -166,6 +187,7 @@ export default function CodeEditor({
                     value={value}
                     theme={theme}
                     onChange={handleCodeChange}
+                    key={key} // Important: This forces re-render when language changes
                     height={height}
                     extensions={[getLanguageExtension()]}
                     className='w-full rounded-md border'

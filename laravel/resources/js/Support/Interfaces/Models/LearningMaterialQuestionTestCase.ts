@@ -6,6 +6,7 @@ export interface LearningMaterialQuestionTestCase extends Model {
     expected_output_file?: string;
     expected_output_file_extension?: string;
     description?: string;
+    language?: string;
     order_number?: number;
     hidden?: boolean;
     active?: boolean;

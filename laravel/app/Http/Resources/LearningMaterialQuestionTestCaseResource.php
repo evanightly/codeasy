@@ -17,6 +17,7 @@ class LearningMaterialQuestionTestCaseResource extends JsonResource {
             'expected_output_file_extension' => $this->expected_output_file_extension,
             'expected_output_file_url' => $this->expected_output_file_url,
             'description' => $this->description,
+            'language' => $this->language,
             'hidden' => $this->hidden,
             'active' => $this->active,
             'question' => LearningMaterialQuestionResource::make($this->whenLoaded('question')),
