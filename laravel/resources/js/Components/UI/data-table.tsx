@@ -54,6 +54,7 @@ interface DataTableProps<TData, TValue, R extends Resource = Resource> {
         filters: ServiceFilterOptions<R>,
         setFilters: (filters: ServiceFilterOptions<R>) => void,
     ) => React.ReactNode;
+    emptyStateMessage?: string;
 }
 
 const tableVariants = cva('w-full text-sm min-h-[400px]', {
@@ -87,6 +88,7 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
     setFilters,
     filterComponents,
     tableOptions,
+    emptyStateMessage = 'No data available',
 }: DataTableProps<TData, TValue, R> &
     VariantProps<typeof tableVariants> &
     HTMLAttributes<HTMLTableSectionElement> & {
@@ -193,30 +195,43 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
                             ))}
                         </TableHeader>
                         <TableBody className='relative h-full'>
-                            {virtualizer.getVirtualItems().map((virtualRow, index) => {
-                                const row = rows[virtualRow.index];
-                                return (
-                                    <TableRow
-                                        style={{
-                                            height: `${virtualRow.size}px`,
-                                            transform: `translateY(${
-                                                virtualRow.start - index * virtualRow.size
-                                            }px)`,
-                                        }}
-                                        key={row.id}
-                                        data-state={row.getIsSelected() && 'selected'}
+                            {data.length === 0 ? (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={columns.length}
+                                        className='h-24 text-center'
                                     >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext(),
-                                                )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                );
-                            })}
+                                        <div className='text-muted-foreground'>
+                                            {emptyStateMessage}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                virtualizer.getVirtualItems().map((virtualRow, index) => {
+                                    const row = rows[virtualRow.index];
+                                    return (
+                                        <TableRow
+                                            style={{
+                                                height: `${virtualRow.size}px`,
+                                                transform: `translateY(${
+                                                    virtualRow.start - index * virtualRow.size
+                                                }px)`,
+                                            }}
+                                            key={row.id}
+                                            data-state={row.getIsSelected() && 'selected'}
+                                        >
+                                            {row.getVisibleCells().map((cell) => (
+                                                <TableCell key={cell.id}>
+                                                    {flexRender(
+                                                        cell.column.columnDef.cell,
+                                                        cell.getContext(),
+                                                    )}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    );
+                                })
+                            )}
                         </TableBody>
                     </Table>
                 </div>

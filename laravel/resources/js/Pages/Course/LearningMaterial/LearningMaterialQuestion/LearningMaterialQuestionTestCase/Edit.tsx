@@ -31,6 +31,7 @@ import {
 import {
     CourseResource,
     LearningMaterialQuestionResource,
+    LearningMaterialQuestionTestCaseResource,
     LearningMaterialResource,
 } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -69,15 +70,19 @@ interface Props {
     question: {
         data: LearningMaterialQuestionResource;
     };
+    testCase: {
+        data: LearningMaterialQuestionTestCaseResource;
+    };
 }
 
-export default function Create({
-    question: { data: question },
+export default function Edit({
     course: { data: course },
     learningMaterial: { data: learningMaterial },
+    question: { data: question },
+    testCase: { data: testCase },
 }: Props) {
     const { t } = useLaravelReactI18n();
-    const createMutation = learningMaterialQuestionTestCaseServiceHook.useCreate();
+    const updateMutation = learningMaterialQuestionTestCaseServiceHook.useUpdate();
 
     const formSchema = z.object({
         learning_material_question_id: z.number(),
@@ -90,33 +95,58 @@ export default function Create({
                     { defaultValue: 'Description is required' },
                 ),
             ),
-        input: z.string(),
+        input: z.string().optional(),
         expected_output_file: z.any().optional(),
-        language: z.nativeEnum(ProgrammingLanguageEnum).default(ProgrammingLanguageEnum.PYTHON),
         hidden: z.boolean().default(false),
         active: z.boolean().default(true),
+        language: z.nativeEnum(ProgrammingLanguageEnum).default(ProgrammingLanguageEnum.PYTHON),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            learning_material_question_id: question.id,
-            description: '',
-            input: '',
+            learning_material_question_id: testCase.learning_material_question_id,
+            description: testCase.description || '',
+            input: testCase.input || '',
             expected_output_file: undefined,
-            language: ProgrammingLanguageEnum.PYTHON,
-            hidden: false,
-            active: true,
+            hidden: testCase.hidden,
+            active: testCase.active,
+            language:
+                (testCase.language as ProgrammingLanguageEnum) || ProgrammingLanguageEnum.PYTHON,
         },
     });
 
-    const selectedLanguage = form.watch('language');
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [fileType, setFileType] = useState<string | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(
+        testCase.expected_output_file_url || null,
+    );
+    const [fileType, setFileType] = useState<string | null>(
+        testCase.expected_output_file_url?.endsWith('.pdf')
+            ? 'application/pdf'
+            : testCase.expected_output_file_url?.match(/\.(txt|py|js|java|cpp|c|html|css)$/)
+              ? 'text/plain'
+              : null,
+    );
+    const [newFileUploaded, setNewFileUploaded] = useState(false);
+
+    useEffect(() => {
+        if (testCase) {
+            form.reset({
+                learning_material_question_id: testCase.learning_material_question_id,
+                description: testCase.description || '',
+                input: testCase.input || '',
+                expected_output_file: undefined,
+                hidden: testCase.hidden,
+                active: testCase.active,
+                language:
+                    (testCase.language as ProgrammingLanguageEnum) ||
+                    ProgrammingLanguageEnum.PYTHON,
+            });
+        }
+    }, [testCase, form]);
 
     const handleFileChange = (file: File | null) => {
-        // Clear existing preview URL if exists
-        if (previewUrl) {
+        // Clear existing preview URL if it's a new upload
+        if (previewUrl && newFileUploaded) {
             URL.revokeObjectURL(previewUrl);
         }
 
@@ -126,78 +156,90 @@ export default function Create({
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);
             setFileType(file.type);
+            setNewFileUploaded(true);
+        } else if (!newFileUploaded && testCase.expected_output_file_url) {
+            // Reset to original file if exists
+            setPreviewUrl(testCase.expected_output_file_url);
+            setFileType(
+                testCase.expected_output_file_url?.endsWith('.pdf')
+                    ? 'application/pdf'
+                    : testCase.expected_output_file_url?.match(/\.(txt|py|js|java|cpp|c|html|css)$/)
+                      ? 'text/plain'
+                      : null,
+            );
         } else {
             setPreviewUrl(null);
             setFileType(null);
         }
     };
 
-    // Clean up object URLs on unmount
+    // Clean up object URL on unmount
     useEffect(() => {
         return () => {
-            if (previewUrl) {
+            if (previewUrl && newFileUploaded) {
                 URL.revokeObjectURL(previewUrl);
             }
         };
-    }, [previewUrl]);
+    }, [previewUrl, newFileUploaded]);
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         const formData = new FormData();
+
         formData.append(
             'learning_material_question_id',
-            values.learning_material_question_id.toString(),
+            String(values.learning_material_question_id),
         );
-
         formData.append('description', values.description);
-        formData.append('input', values.input);
+        if (values.input) formData.append('input', values.input);
         formData.append('language', values.language);
         formData.append('hidden', values.hidden ? '1' : '0');
         formData.append('active', values.active ? '1' : '0');
 
-        // Handle file upload
         if (values.expected_output_file instanceof File) {
             formData.append('expected_output_file', values.expected_output_file);
         }
 
         toast.promise(
-            createMutation.mutateAsync({
+            updateMutation.mutateAsync({
+                id: testCase.id,
                 data: formData,
             }),
             {
                 loading: t(
-                    'pages.learning_material_question_test_case.common.messages.pending.create',
-                    { defaultValue: 'Creating test case...' },
+                    'pages.learning_material_question_test_case.common.messages.pending.update',
+                    { defaultValue: 'Updating test case...' },
                 ),
                 success: () => {
                     router.visit(
-                        route(`${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.index`, {
-                            course: course.id,
-                            learningMaterial: learningMaterial.id,
-                            question: question.id,
-                        }),
+                        route(`${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.index`, [
+                            course.id,
+                            learningMaterial.id,
+                            question.id,
+                        ]),
                     );
                     return t(
-                        'pages.learning_material_question_test_case.common.messages.success.create',
-                        { defaultValue: 'Test case created successfully' },
+                        'pages.learning_material_question_test_case.common.messages.success.update',
+                        { defaultValue: 'Test case updated successfully' },
                     );
                 },
-                error: (err) => {
-                    console.error(err);
-                    return t(
-                        'pages.learning_material_question_test_case.common.messages.error.create',
-                        { defaultValue: 'Failed to create test case' },
-                    );
-                },
+                error: t(
+                    'pages.learning_material_question_test_case.common.messages.error.update',
+                    { defaultValue: 'Error updating test case' },
+                ),
             },
         );
     };
 
+    if (!testCase) return null;
+
+    const selectedLanguage = form.watch('language');
+
     return (
-        <AuthenticatedLayout title={t('pages.learning_material_question_test_case.create.title')}>
+        <AuthenticatedLayout title={t('pages.learning_material_question_test_case.edit.title')}>
             <Card>
                 <CardHeader>
                     <CardTitle>
-                        {t('pages.learning_material_question_test_case.create.title')}
+                        {t('pages.learning_material_question_test_case.edit.title')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -351,24 +393,39 @@ export default function Create({
                                         {previewUrl && (
                                             <div className='mt-4 rounded-md border p-3'>
                                                 <h3 className='mb-2 text-base font-medium'>
-                                                    {t(
-                                                        'pages.learning_material_question_test_case.create.file_preview',
-                                                        { defaultValue: 'File Preview' },
-                                                    )}
+                                                    {newFileUploaded
+                                                        ? t(
+                                                              'pages.learning_material_question_test_case.edit.new_file_preview',
+                                                              { defaultValue: 'New File Preview' },
+                                                          )
+                                                        : t(
+                                                              'pages.learning_material_question_test_case.edit.current_file_preview',
+                                                              {
+                                                                  defaultValue:
+                                                                      'Current File Preview',
+                                                              },
+                                                          )}
                                                 </h3>
                                                 {fileType === 'application/pdf' ? (
                                                     <PDFViewer
                                                         fileUrl={previewUrl}
                                                         filename={
-                                                            form.getValues('expected_output_file')
-                                                                ?.name ||
-                                                            t('components.pdf_viewer.document')
+                                                            newFileUploaded
+                                                                ? form.getValues(
+                                                                      'expected_output_file',
+                                                                  )?.name
+                                                                : testCase.expected_output_file ||
+                                                                  t(
+                                                                      'components.pdf_viewer.document',
+                                                                  )
                                                         }
                                                     />
                                                 ) : fileType === 'text/plain' ||
                                                   /\.(txt|py|js|java|cpp|c|html|css)$/.test(
-                                                      form.getValues('expected_output_file')
-                                                          ?.name || '',
+                                                      (newFileUploaded
+                                                          ? form.getValues('expected_output_file')
+                                                                ?.name
+                                                          : testCase.expected_output_file) || '',
                                                   ) ? (
                                                     <div className='mt-2 overflow-auto rounded border bg-gray-50 p-4'>
                                                         <pre className='whitespace-pre-wrap text-sm text-gray-800'>
@@ -384,7 +441,7 @@ export default function Create({
                                                             src={previewUrl}
                                                             className='max-h-96 rounded object-contain'
                                                             alt={t(
-                                                                'pages.learning_material_question_test_case.create.preview',
+                                                                'pages.learning_material_question_test_case.edit.preview',
                                                                 { defaultValue: 'File Preview' },
                                                             )}
                                                         />
@@ -392,7 +449,7 @@ export default function Create({
                                                 ) : (
                                                     <div className='rounded bg-gray-50 p-4 text-center text-gray-500'>
                                                         {t(
-                                                            'pages.learning_material_question_test_case.create.no_preview_available',
+                                                            'pages.learning_material_question_test_case.edit.no_preview_available',
                                                             {
                                                                 defaultValue:
                                                                     'No preview available for this file type',
@@ -403,6 +460,19 @@ export default function Create({
                                             </div>
                                         )}
 
+                                        {testCase.expected_output_file &&
+                                            !newFileUploaded &&
+                                            !previewUrl && (
+                                                <div className='mt-2'>
+                                                    <p className='text-sm text-muted-foreground'>
+                                                        {t(
+                                                            'pages.learning_material_question_test_case.edit.current_file',
+                                                            { defaultValue: 'Current file:' },
+                                                        )}{' '}
+                                                        {testCase.expected_output_file}
+                                                    </p>
+                                                </div>
+                                            )}
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -422,10 +492,6 @@ export default function Create({
                                             <FormDescription>
                                                 {t(
                                                     'pages.learning_material_question_test_case.common.help.hidden',
-                                                    {
-                                                        defaultValue:
-                                                            'Hidden test cases are not visible to students but are still used for evaluation.',
-                                                    },
                                                 )}
                                             </FormDescription>
                                         </div>
@@ -481,12 +547,12 @@ export default function Create({
 
                                 <Button
                                     type='submit'
-                                    loading={createMutation.isPending}
-                                    disabled={createMutation.isPending}
+                                    loading={updateMutation.isPending}
+                                    disabled={updateMutation.isPending}
                                 >
                                     {t(
-                                        'pages.learning_material_question_test_case.create.buttons.create',
-                                        { defaultValue: 'Create Test Case' },
+                                        'pages.learning_material_question_test_case.edit.buttons.update',
+                                        { defaultValue: 'Update Test Case' },
                                     )}
                                 </Button>
                             </div>

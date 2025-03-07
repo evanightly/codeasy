@@ -24,6 +24,10 @@ class DatabaseSeeder extends Seeder {
             UserSeeder::class,
             SchoolSeeder::class,
             ClassRoomSeeder::class,
+            CourseSeeder::class,
+            LearningMaterialSeeder::class,
+            LearningMaterialQuestionSeeder::class,
+            LearningMaterialQuestionTestCaseSeeder::class,
         ]);
     }
 }

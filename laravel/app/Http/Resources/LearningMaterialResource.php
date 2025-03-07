@@ -11,7 +11,7 @@ class LearningMaterialResource extends JsonResource {
     public function toArray($request): array {
         $fileUrl = null;
         if ($this->file && $this->file_extension) {
-            $fileUrl = asset('storage/learning-materials/' . $this->file . '.' . $this->file_extension);
+            $fileUrl = asset('storage/learning-materials/' . $this->file);
         }
 
         $dataSource = [

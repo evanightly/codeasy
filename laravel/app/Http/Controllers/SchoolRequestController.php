@@ -56,6 +56,7 @@ class SchoolRequestController extends Controller {
     }
 
     public function edit(SchoolRequest $schoolRequest) {
+        abort(403);
         $data = SchoolRequestResource::make($schoolRequest->load('user', 'school'));
 
         return inertia('SchoolRequest/Edit', compact('data'));

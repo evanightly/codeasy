@@ -6,7 +6,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/Components/UI/accordion';
-import { Button } from '@/Components/UI/button';
+import { Button, buttonVariants } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
     Form,
@@ -32,7 +32,7 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { LearningMaterialTypeEnum } from '@/Support/Enums/learningMaterialTypeEnum';
 import { CourseResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -301,20 +301,14 @@ export default function Create({ course: { data: courseData } }: Props) {
                             )}
 
                             <div className='flex justify-between'>
-                                <Button
-                                    variant='outline'
-                                    type='button'
-                                    onClick={() =>
-                                        router.visit(
-                                            route(
-                                                `${ROUTES.COURSE_LEARNING_MATERIALS}.index`,
-                                                courseData.id,
-                                            ),
-                                        )
-                                    }
+                                <Link
+                                    href={route(`${ROUTES.COURSES}.show`, courseData.id)}
+                                    className={buttonVariants({
+                                        variant: 'outline',
+                                    })}
                                 >
                                     {t('action.cancel')}
-                                </Button>
+                                </Link>
 
                                 <Button
                                     type='submit'

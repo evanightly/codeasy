@@ -152,7 +152,7 @@ const SchoolRequests = ({
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align='end'>
-                                <DropdownMenuItem asChild>
+                                <DropdownMenuItem disabled asChild>
                                     <Link
                                         href={route(`${ROUTES.SCHOOL_REQUESTS}.edit`, request.id)}
                                     >

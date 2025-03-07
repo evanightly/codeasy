@@ -23,6 +23,7 @@ return [
         'columns' => [
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'timestamps' => 'Time Information',
         ],
     ],
     'login' => [
@@ -533,6 +534,7 @@ return [
                     'delete' => 'Error deleting request',
                     'approve' => 'Error approving request',
                     'reject' => 'Error rejecting request',
+                    'already_requested' => 'You have already submitted a request for this school that is pending or approved',
                 ],
             ],
             'status' => [
@@ -1006,10 +1008,20 @@ return [
                 'output_type' => 'Output Type',
                 'hidden' => 'Hidden Test',
                 'active' => 'Active Status',
+                'status' => 'Status',
+                'language' => 'Programming Language',
             ],
             'help' => [
-                'input' => 'Enter input values separated by new lines (if any)',
+                'description' => 'Describe what this test case is checking for',
+                'input' => 'Enter code or sample input for testing the question',
+                'expected_output' => 'Upload a PDF or image file showing the expected output for this test case',
                 'hidden' => 'Hidden tests are only visible to teachers and used for grading',
+                'language' => 'Select the programming language for this test case',
+            ],
+            'validations' => [
+                'description' => [
+                    'required' => 'Test description is required',
+                ],
             ],
             'status' => [
                 'active' => 'Active',
@@ -1033,6 +1045,9 @@ return [
                     'delete' => 'Error deleting test case',
                 ],
             ],
+            'placeholders' => [
+                'language' => 'Select a language',
+            ],
         ],
         'index' => [
             'title' => 'Test Cases',
@@ -1046,11 +1061,28 @@ return [
             'buttons' => [
                 'create' => 'Create Test Case',
             ],
+            'file_preview' => 'File Preview',
+            'preview' => 'File Preview',
+            'no_preview_available' => 'No preview available for this file type',
         ],
         'edit' => [
             'title' => 'Edit Test Case',
             'buttons' => [
                 'update' => 'Update Test Case',
+            ],
+            'current_file' => 'Current File',
+            'new_file_preview' => 'New File Preview',
+            'current_file_preview' => 'Current File Preview',
+            'preview' => 'File Preview',
+            'no_preview_available' => 'No preview available for this file type',
+        ],
+        'show' => [
+            'title' => 'Test Case Details',
+            'hidden' => 'Hidden',
+            'visible' => 'Visible',
+            'expected_output_file' => 'Expected Output File',
+            'sections' => [
+                'details' => 'Test Case Details',
             ],
         ],
     ],

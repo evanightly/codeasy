@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->text('expected_output_file')->nullable();
             $table->string('expected_output_file_extension')->nullable();
             $table->text('description')->nullable();
+            $table->string('language')->default('python'); // Programming language defined in the CodeEditor.tsx, probably added as enum in the future
             $table->boolean('hidden')->default(true);
             $table->boolean('active')->default(true);
             $table->timestamps();

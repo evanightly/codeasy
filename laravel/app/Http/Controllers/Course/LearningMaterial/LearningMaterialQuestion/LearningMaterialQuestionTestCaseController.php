@@ -74,7 +74,7 @@ class LearningMaterialQuestionTestCaseController extends Controller {
         // Verify relationships
         if ($learningMaterial->course_id != $course->id ||
             $question->learning_material_id != $learningMaterial->id ||
-            $testCase->question_id != $question->id) {
+            $testCase->learning_material_question_id != $question->id) {
             abort(404);
         }
 
@@ -99,10 +99,10 @@ class LearningMaterialQuestionTestCaseController extends Controller {
      * Edit form for a test case
      */
     public function edit(Course $course, LearningMaterial $learningMaterial, LearningMaterialQuestion $question, LearningMaterialQuestionTestCase $testCase) {
-        // Verify relationships
+        // // Verify relationships
         if ($learningMaterial->course_id != $course->id ||
             $question->learning_material_id != $learningMaterial->id ||
-            $testCase->question_id != $question->id) {
+            $testCase->learning_material_question_id != $question->id) {
             abort(404);
         }
 

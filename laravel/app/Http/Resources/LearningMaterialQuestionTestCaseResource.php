@@ -9,13 +9,20 @@ class LearningMaterialQuestionTestCaseResource extends JsonResource {
     use HandlesResourceDataSelection;
 
     public function toArray($request): array {
+        $fileUrl = null;
+        if ($this->expected_output_file && $this->expected_output_file_extension) {
+            $fileUrl = asset('storage/learning-material-question-test-cases/' . $this->expected_output_file);
+        }
+
         $dataSource = [
             'id' => $this->id,
             'learning_material_question_id' => $this->learning_material_question_id,
             'input' => $this->input,
-            'expected_output' => $this->expected_output,
+            'expected_output_file' => $this->expected_output_file,
+            'expected_output_file_extension' => $this->expected_output_file_extension,
+            'expected_output_file_url' => $fileUrl,
             'description' => $this->description,
-            'order_number' => $this->order_number,
+            'language' => $this->language,
             'hidden' => $this->hidden,
             'active' => $this->active,
             'question' => LearningMaterialQuestionResource::make($this->whenLoaded('question')),

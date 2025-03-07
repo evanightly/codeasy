@@ -11,6 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class LearningMaterialQuestion extends Model {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'learning_material_id',
         'title',
@@ -22,20 +27,26 @@ class LearningMaterialQuestion extends Model {
         'clue',
         'active',
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'active' => 'boolean',
         'type' => LearningMaterialTypeEnum::class,
     ];
 
     /**
-     * Get the learning material that owns the question
+     * Get the learning material that owns the question.
      */
     public function learningMaterial(): BelongsTo {
         return $this->belongsTo(LearningMaterial::class);
     }
 
     /**
-     * Get the test cases for this question
+     * Get the test cases for the question.
      */
     public function testCases(): HasMany {
         return $this->hasMany(LearningMaterialQuestionTestCase::class);

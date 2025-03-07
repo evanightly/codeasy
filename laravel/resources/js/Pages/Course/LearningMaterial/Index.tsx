@@ -46,7 +46,7 @@ export default function Index({ course }: Props) {
                         filters={filters}
                         courseId={course.id}
                         baseRoute={`${ROUTES.COURSE_LEARNING_MATERIALS}`}
-                        baseKey={TANSTACK_QUERY_KEYS.LEARNING_MATERIALS}
+                        baseKey={TANSTACK_QUERY_KEYS.COURSE_LEARNING_MATERIALS}
                     />
                 </CardContent>
             </Card>

@@ -16,7 +16,7 @@ class LearningMaterialQuestionRepository extends BaseRepository implements Learn
     protected function applyFilters(array $searchParams = []): Builder {
         $query = $this->getQuery();
 
-        $query = $this->applySearchFilters($query, $searchParams, ['name', 'group']);
+        $query = $this->applySearchFilters($query, $searchParams, ['title', 'description']);
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
