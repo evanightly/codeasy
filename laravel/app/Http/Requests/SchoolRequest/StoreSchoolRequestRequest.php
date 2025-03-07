@@ -18,4 +18,3 @@ class StoreSchoolRequestRequest extends FormRequest {
         ];
     }
 }
-

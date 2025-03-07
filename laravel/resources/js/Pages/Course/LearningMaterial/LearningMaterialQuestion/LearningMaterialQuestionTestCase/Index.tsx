@@ -45,7 +45,7 @@ export default function Index({
     const testCasesResponse = learningMaterialQuestionTestCaseServiceHook.useGetAll({ filters });
 
     if (!question) return null;
-   
+
     return (
         <AuthenticatedLayout title={t('pages.learning_material_question_test_case.index.title')}>
             <Card>
