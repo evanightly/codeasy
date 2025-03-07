@@ -6,9 +6,9 @@ use App\Http\Requests\LearningMaterialQuestionTestCase\StoreLearningMaterialQues
 use App\Http\Requests\LearningMaterialQuestionTestCase\UpdateLearningMaterialQuestionTestCaseRequest;
 use App\Http\Resources\LearningMaterialQuestionTestCaseResource;
 use App\Models\LearningMaterialQuestionTestCase;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\LearningMaterialQuestionTestCaseServiceInterface;
 use Illuminate\Http\Request;
-use App\Support\Enums\PermissionEnum;
 use Illuminate\Routing\Controllers\Middleware;
 
 class LearningMaterialQuestionTestCaseController extends Controller {

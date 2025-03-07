@@ -6,12 +6,12 @@ import { LaravelReactI18nProvider } from 'laravel-react-i18n';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { MouseEvent } from 'react';
 import { createRoot } from 'react-dom/client';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 import '../css/app.css';
 import './bootstrap';
 import { ConfirmationDialogProvider } from './Contexts/ConfirmationDialogContext';
 import { addRippleEffect } from './Helpers';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
