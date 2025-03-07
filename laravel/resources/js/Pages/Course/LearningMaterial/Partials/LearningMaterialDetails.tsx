@@ -53,7 +53,7 @@ export const LearningMaterialDetails = ({ material, course }: LearningMaterialDe
                             <a
                                 target='_blank'
                                 rel='noreferrer'
-                                href={`/storage/learning-materials/${material.type === 'live_code' ? 'code' : 'other'}/${material.file}.${material.file_extension}`}
+                                href={material.file_url}
                                 className='text-primary hover:underline'
                             >
                                 {t('action.view_file')}

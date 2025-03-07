@@ -27,21 +27,16 @@ class LearningMaterialQuestionService extends BaseCrudService implements Learnin
             $data['order_number'] = $this->calculateNextOrderNumber($data['learning_material_id'] ?? null);
         }
 
-        // Handle file upload directly to the base directory
+        // Handle file upload with extension included in filename
         if (isset($data['file'])) {
-            // Get original extension
             $extension = $data['file']->getClientOriginalExtension();
+            $filePath = $this->storeFile($data['file'], $this->baseDirectory);
 
-            // Use the trait method for uploading
-            $filePath = $this->uploadFile(
-                $data['file'],
-                $this->baseDirectory
-            );
-
-            // Get just the filename without extension for storage
-            $pathParts = pathinfo($filePath);
-            $data['file'] = $pathParts['filename']; // Just filename without extension
-            $data['file_extension'] = $extension;
+            if ($filePath) {
+                $pathInfo = pathinfo($filePath);
+                $data['file'] = $pathInfo['basename']; // Store filename with extension
+                $data['file_extension'] = $extension; // Keep for compatibility
+            }
         }
 
         return parent::create($data);
@@ -53,23 +48,17 @@ class LearningMaterialQuestionService extends BaseCrudService implements Learnin
             // Get existing record to delete old file if exists
             $existingRecord = $this->repository->find($keyOrModel);
             if ($existingRecord && $existingRecord->file) {
-                $this->deleteFile($this->baseDirectory . '/' .
-                    $existingRecord->file . '.' . $existingRecord->file_extension);
+                $this->deleteFile($this->baseDirectory . '/' . $existingRecord->file);
             }
 
-            // Get original extension
             $extension = $data['file']->getClientOriginalExtension();
+            $filePath = $this->storeFile($data['file'], $this->baseDirectory);
 
-            // Use the trait method for uploading
-            $filePath = $this->uploadFile(
-                $data['file'],
-                $this->baseDirectory
-            );
-
-            // Get just the filename without extension for storage
-            $pathParts = pathinfo($filePath);
-            $data['file'] = $pathParts['filename']; // Just filename without extension
-            $data['file_extension'] = $extension;
+            if ($filePath) {
+                $pathInfo = pathinfo($filePath);
+                $data['file'] = $pathInfo['basename']; // Store filename with extension
+                $data['file_extension'] = $extension; // Keep for compatibility
+            }
         }
 
         return parent::update($keyOrModel, $data);

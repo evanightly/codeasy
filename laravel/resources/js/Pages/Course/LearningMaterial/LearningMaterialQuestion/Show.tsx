@@ -322,7 +322,6 @@ export default function Show({
                                         <div className='mt-2 rounded-md border'>
                                             {fileType === 'application/pdf' ? (
                                                 <PDFViewer
-                                                    withPagination={true}
                                                     fileUrl={questionData.file_url}
                                                     filename={
                                                         questionData.file ||

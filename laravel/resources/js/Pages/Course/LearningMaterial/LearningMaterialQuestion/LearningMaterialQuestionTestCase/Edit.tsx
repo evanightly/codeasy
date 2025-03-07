@@ -1,5 +1,6 @@
 import CodeEditor from '@/Components/CodeEditor';
 import { FilePondUploader } from '@/Components/FilePondUploader';
+import { PDFViewer } from '@/Components/PDFViewer';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
@@ -36,10 +37,28 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+
+function TextFilePreview({ fileUrl }: { fileUrl: string }) {
+    const [content, setContent] = useState<string>('Loading...');
+
+    useEffect(() => {
+        fetch(fileUrl)
+            .then((response) => response.text())
+            .then((text) => {
+                setContent(text);
+            })
+            .catch((error) => {
+                console.error('Error loading text file:', error);
+                setContent('Error loading file content');
+            });
+    }, [fileUrl]);
+
+    return <>{content}</>;
+}
 
 interface Props {
     course: {
@@ -97,6 +116,18 @@ export default function Edit({
         },
     });
 
+    const [previewUrl, setPreviewUrl] = useState<string | null>(
+        testCase.expected_output_file_url || null,
+    );
+    const [fileType, setFileType] = useState<string | null>(
+        testCase.expected_output_file_url?.endsWith('.pdf')
+            ? 'application/pdf'
+            : testCase.expected_output_file_url?.match(/\.(txt|py|js|java|cpp|c|html|css)$/)
+              ? 'text/plain'
+              : null,
+    );
+    const [newFileUploaded, setNewFileUploaded] = useState(false);
+
     useEffect(() => {
         if (testCase) {
             form.reset({
@@ -112,6 +143,44 @@ export default function Edit({
             });
         }
     }, [testCase, form]);
+
+    const handleFileChange = (file: File | null) => {
+        // Clear existing preview URL if it's a new upload
+        if (previewUrl && newFileUploaded) {
+            URL.revokeObjectURL(previewUrl);
+        }
+
+        form.setValue('expected_output_file', file);
+
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+            setFileType(file.type);
+            setNewFileUploaded(true);
+        } else if (!newFileUploaded && testCase.expected_output_file_url) {
+            // Reset to original file if exists
+            setPreviewUrl(testCase.expected_output_file_url);
+            setFileType(
+                testCase.expected_output_file_url?.endsWith('.pdf')
+                    ? 'application/pdf'
+                    : testCase.expected_output_file_url?.match(/\.(txt|py|js|java|cpp|c|html|css)$/)
+                      ? 'text/plain'
+                      : null,
+            );
+        } else {
+            setPreviewUrl(null);
+            setFileType(null);
+        }
+    };
+
+    // Clean up object URL on unmount
+    useEffect(() => {
+        return () => {
+            if (previewUrl && newFileUploaded) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl, newFileUploaded]);
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         const formData = new FormData();
@@ -297,7 +366,7 @@ export default function Edit({
                                         <FormControl>
                                             <FilePondUploader
                                                 value={value as any}
-                                                onChange={(file) => onChange(file)}
+                                                onChange={handleFileChange}
                                                 maxFileSize='5MB'
                                                 acceptedFileTypes={[
                                                     'application/pdf',
@@ -306,6 +375,7 @@ export default function Edit({
                                                     '.jpg',
                                                     '.jpeg',
                                                     '.png',
+                                                    '.txt',
                                                 ]}
                                             />
                                         </FormControl>
@@ -314,31 +384,95 @@ export default function Edit({
                                                 'pages.learning_material_question_test_case.common.help.expected_output',
                                                 {
                                                     defaultValue:
-                                                        'Upload a PDF or image file showing the expected output for this test case.',
+                                                        'Upload a PDF, image, or text file showing the expected output for this test case.',
                                                 },
                                             )}
                                         </FormDescription>
-                                        {testCase.expected_output_file && (
-                                            <div className='mt-2'>
-                                                <p className='text-sm text-muted-foreground'>
-                                                    {t(
-                                                        'pages.learning_material_question_test_case.edit.current_file',
-                                                        {
-                                                            defaultValue: 'Current file:',
-                                                        },
-                                                    )}
-                                                    :
-                                                </p>
-                                                <a
-                                                    target='_blank'
-                                                    rel='noreferrer'
-                                                    href={testCase.expected_output_file_url}
-                                                    className='text-sm text-primary hover:underline'
-                                                >
-                                                    {testCase.expected_output_file}
-                                                </a>
+
+                                        {/* Preview Section */}
+                                        {previewUrl && (
+                                            <div className='mt-4 rounded-md border p-3'>
+                                                <h3 className='mb-2 text-base font-medium'>
+                                                    {newFileUploaded
+                                                        ? t(
+                                                              'pages.learning_material_question_test_case.edit.new_file_preview',
+                                                              { defaultValue: 'New File Preview' },
+                                                          )
+                                                        : t(
+                                                              'pages.learning_material_question_test_case.edit.current_file_preview',
+                                                              {
+                                                                  defaultValue:
+                                                                      'Current File Preview',
+                                                              },
+                                                          )}
+                                                </h3>
+                                                {fileType === 'application/pdf' ? (
+                                                    <PDFViewer
+                                                        fileUrl={previewUrl}
+                                                        filename={
+                                                            newFileUploaded
+                                                                ? form.getValues(
+                                                                      'expected_output_file',
+                                                                  )?.name
+                                                                : testCase.expected_output_file ||
+                                                                  t(
+                                                                      'components.pdf_viewer.document',
+                                                                  )
+                                                        }
+                                                    />
+                                                ) : fileType === 'text/plain' ||
+                                                  /\.(txt|py|js|java|cpp|c|html|css)$/.test(
+                                                      (newFileUploaded
+                                                          ? form.getValues('expected_output_file')
+                                                                ?.name
+                                                          : testCase.expected_output_file) || '',
+                                                  ) ? (
+                                                    <div className='mt-2 overflow-auto rounded border bg-gray-50 p-4'>
+                                                        <pre className='whitespace-pre-wrap text-sm text-gray-800'>
+                                                            <TextFilePreview fileUrl={previewUrl} />
+                                                        </pre>
+                                                    </div>
+                                                ) : fileType?.startsWith('image/') ||
+                                                  previewUrl?.match(
+                                                      /\.(jpg|jpeg|png|gif|webp)$/i,
+                                                  ) ? (
+                                                    <div className='mt-2 flex justify-center'>
+                                                        <img
+                                                            src={previewUrl}
+                                                            className='max-h-96 rounded object-contain'
+                                                            alt={t(
+                                                                'pages.learning_material_question_test_case.edit.preview',
+                                                                { defaultValue: 'File Preview' },
+                                                            )}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className='rounded bg-gray-50 p-4 text-center text-gray-500'>
+                                                        {t(
+                                                            'pages.learning_material_question_test_case.edit.no_preview_available',
+                                                            {
+                                                                defaultValue:
+                                                                    'No preview available for this file type',
+                                                            },
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
+
+                                        {testCase.expected_output_file &&
+                                            !newFileUploaded &&
+                                            !previewUrl && (
+                                                <div className='mt-2'>
+                                                    <p className='text-sm text-muted-foreground'>
+                                                        {t(
+                                                            'pages.learning_material_question_test_case.edit.current_file',
+                                                            { defaultValue: 'Current file:' },
+                                                        )}{' '}
+                                                        {testCase.expected_output_file}
+                                                    </p>
+                                                </div>
+                                            )}
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -395,15 +529,33 @@ export default function Edit({
                                 control={form.control}
                             />
 
-                            <Button
-                                type='submit'
-                                loading={updateMutation.isPending}
-                                disabled={updateMutation.isPending}
-                            >
-                                {t(
-                                    'pages.learning_material_question_test_case.edit.buttons.update',
-                                )}
-                            </Button>
+                            <div className='flex justify-between'>
+                                <Button
+                                    variant='outline'
+                                    type='button'
+                                    onClick={() =>
+                                        router.visit(
+                                            route(
+                                                `${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.index`,
+                                                [course.id, learningMaterial.id, question.id],
+                                            ),
+                                        )
+                                    }
+                                >
+                                    {t('action.cancel')}
+                                </Button>
+
+                                <Button
+                                    type='submit'
+                                    loading={updateMutation.isPending}
+                                    disabled={updateMutation.isPending}
+                                >
+                                    {t(
+                                        'pages.learning_material_question_test_case.edit.buttons.update',
+                                        { defaultValue: 'Update Test Case' },
+                                    )}
+                                </Button>
+                            </div>
                         </form>
                     </Form>
                 </CardContent>

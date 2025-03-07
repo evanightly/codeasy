@@ -1061,6 +1061,9 @@ return [
             'buttons' => [
                 'create' => 'Create Test Case',
             ],
+            'file_preview' => 'File Preview',
+            'preview' => 'File Preview',
+            'no_preview_available' => 'No preview available for this file type',
         ],
         'edit' => [
             'title' => 'Edit Test Case',
@@ -1068,11 +1071,16 @@ return [
                 'update' => 'Update Test Case',
             ],
             'current_file' => 'Current File',
+            'new_file_preview' => 'New File Preview',
+            'current_file_preview' => 'Current File Preview',
+            'preview' => 'File Preview',
+            'no_preview_available' => 'No preview available for this file type',
         ],
         'show' => [
             'title' => 'Test Case Details',
             'hidden' => 'Hidden',
             'visible' => 'Visible',
+            'expected_output_file' => 'Expected Output File',
             'sections' => [
                 'details' => 'Test Case Details',
             ],

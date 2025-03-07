@@ -1,3 +1,4 @@
+import { PDFViewer } from '@/Components/PDFViewer';
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
@@ -12,6 +13,25 @@ import {
 import { Link } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { CalendarIcon, EyeIcon, EyeOffIcon, FileTextIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+function TextFilePreview({ fileUrl }: { fileUrl: string }) {
+    const [content, setContent] = useState<string>('Loading...');
+
+    useEffect(() => {
+        fetch(fileUrl)
+            .then((response) => response.text())
+            .then((text) => {
+                setContent(text);
+            })
+            .catch((error) => {
+                console.error('Error loading text file:', error);
+                setContent('Error loading file content');
+            });
+    }, [fileUrl]);
+
+    return <>{content}</>;
+}
 
 interface Props {
     testCase: {
@@ -38,6 +58,12 @@ export default function Show({
 
     if (!testCase) return null;
 
+    const fileType = testCase.expected_output_file_url?.endsWith('.pdf')
+        ? 'application/pdf'
+        : testCase.expected_output_file_url?.match(/\.(txt|py|js|java|cpp|c|html|css)$/)
+          ? 'text/plain'
+          : null;
+
     return (
         <AuthenticatedLayout title={t('pages.learning_material_question_test_case.show.title')}>
             <Card>
@@ -57,7 +83,7 @@ export default function Show({
                         <Link
                             href={route(
                                 `${ROUTES.COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES}.index`,
-                                [course.id, learningMaterial.id, question.id, testCase.id],
+                                [course.id, learningMaterial.id, question.id],
                             )}
                         >
                             <Button variant='outline'>{t('action.back')}</Button>
@@ -146,22 +172,61 @@ export default function Show({
                                 <div className='mt-4'>
                                     <div className='flex items-start gap-2'>
                                         <FileTextIcon className='mt-1 h-5 w-5 text-muted-foreground' />
-                                        <div>
+                                        <div className='w-full'>
                                             <span className='block font-semibold'>
                                                 {t(
                                                     'pages.learning_material_question_test_case.common.fields.expected_output',
                                                 )}
                                                 :
                                             </span>
-                                            <div className='mt-1'>
-                                                <a
-                                                    target='_blank'
-                                                    rel='noreferrer'
-                                                    href={testCase.expected_output_file_url}
-                                                    className='text-primary hover:underline'
-                                                >
-                                                    {t('action.view_file')}
-                                                </a>
+
+                                            <div className='mt-2 rounded-md border'>
+                                                {fileType === 'application/pdf' ? (
+                                                    <PDFViewer
+                                                        fileUrl={
+                                                            testCase?.expected_output_file_url || ''
+                                                        }
+                                                        filename={
+                                                            testCase.expected_output_file ||
+                                                            t('components.pdf_viewer.document')
+                                                        }
+                                                    />
+                                                ) : fileType === 'text/plain' ? (
+                                                    <div className='mt-2 overflow-auto rounded border bg-gray-50 p-4'>
+                                                        <pre className='whitespace-pre-wrap text-sm text-gray-800'>
+                                                            <TextFilePreview
+                                                                fileUrl={
+                                                                    testCase?.expected_output_file_url ||
+                                                                    ''
+                                                                }
+                                                            />
+                                                        </pre>
+                                                    </div>
+                                                ) : testCase.expected_output_file_url?.match(
+                                                      /\.(jpg|jpeg|png|gif|webp)$/i,
+                                                  ) ? (
+                                                    <div className='mt-2 flex justify-center p-4'>
+                                                        <img
+                                                            src={testCase.expected_output_file_url}
+                                                            className='max-w-full rounded object-contain'
+                                                            alt={t(
+                                                                'pages.learning_material_question_test_case.show.expected_output_file',
+                                                            )}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className='p-4 text-center text-muted-foreground'>
+                                                        <a
+                                                            target='_blank'
+                                                            rel='noopener noreferrer'
+                                                            href={testCase.expected_output_file_url}
+                                                            className='inline-flex items-center text-blue-600 hover:underline'
+                                                        >
+                                                            {t('action.view_file')}:{' '}
+                                                            {testCase.expected_output_file}
+                                                        </a>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

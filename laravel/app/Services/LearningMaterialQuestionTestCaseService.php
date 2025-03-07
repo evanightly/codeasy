@@ -15,31 +15,26 @@ class LearningMaterialQuestionTestCaseService extends BaseCrudService implements
     use HandlesFileUpload, HandlesPageSizeAll;
 
     /**
-     * The base directory for learning material files
+     * The base directory for test case output files
      *
      * @var string
      */
     protected $baseDirectory = 'learning-material-question-test-cases';
 
     /**
-     * Create a new learning material with auto-ordering
+     * Create a new test case
      */
     public function create(array $data): ?Model {
-        // Handle file upload - store directly in base directory
+        // Handle file upload with extension included in filename
         if (isset($data['expected_output_file'])) {
-            // Get original extension
             $extension = $data['expected_output_file']->getClientOriginalExtension();
+            $filePath = $this->storeFile($data['expected_output_file'], $this->baseDirectory);
 
-            // Use the trait method for uploading
-            $filePath = $this->uploadFile(
-                $data['expected_output_file'],
-                $this->baseDirectory
-            );
-
-            // Get just the filename without extension for storage
-            $pathParts = pathinfo($filePath);
-            $data['expected_output_file'] = $pathParts['filename']; // Just filename without extension
-            $data['expected_output_file_extension'] = $extension;
+            if ($filePath) {
+                $pathInfo = pathinfo($filePath);
+                $data['expected_output_file'] = $pathInfo['basename']; // Store filename with extension
+                $data['expected_output_file_extension'] = $extension; // Keep for compatibility
+            }
         }
 
         return parent::create($data);
@@ -50,24 +45,18 @@ class LearningMaterialQuestionTestCaseService extends BaseCrudService implements
         if (isset($data['expected_output_file'])) {
             // Get existing record to delete old file if exists
             $existingRecord = $this->repository->find($keyOrModel);
-            if ($existingRecord && $existingRecord->expectedOutputFile) {
-                $this->deleteFile($this->baseDirectory . '/' .
-                    $existingRecord->expectedOutputFile . '.' . $existingRecord->expected_output_file_extension);
+            if ($existingRecord && $existingRecord->expected_output_file) {
+                $this->deleteFile($this->baseDirectory . '/' . $existingRecord->expected_output_file);
             }
 
-            // Get original extension
             $extension = $data['expected_output_file']->getClientOriginalExtension();
+            $filePath = $this->storeFile($data['expected_output_file'], $this->baseDirectory);
 
-            // Use the trait method for uploading
-            $filePath = $this->uploadFile(
-                $data['expected_output_file'],
-                $this->baseDirectory
-            );
-
-            // Get just the filename without extension for storage
-            $pathParts = pathinfo($filePath);
-            $data['expected_output_file'] = $pathParts['filename']; // Just filename without extension
-            $data['expected_output_file_extension'] = $extension;
+            if ($filePath) {
+                $pathInfo = pathinfo($filePath);
+                $data['expected_output_file'] = $pathInfo['basename']; // Store filename with extension
+                $data['expected_output_file_extension'] = $extension; // Keep for compatibility
+            }
         }
 
         return parent::update($keyOrModel, $data);
@@ -76,9 +65,8 @@ class LearningMaterialQuestionTestCaseService extends BaseCrudService implements
     public function delete($keyOrModel): bool {
         // Get existing record to delete old file if exists
         $existingRecord = $this->repository->find($keyOrModel);
-        if ($existingRecord && $existingRecord->expectedOutputFile) {
-            $this->deleteFile($this->baseDirectory . '/' .
-                $existingRecord->expectedOutputFile . '.' . $existingRecord->expected_output_file_extension);
+        if ($existingRecord && $existingRecord->expected_output_file) {
+            $this->deleteFile($this->baseDirectory . '/' . $existingRecord->expected_output_file);
         }
 
         return parent::delete($keyOrModel);

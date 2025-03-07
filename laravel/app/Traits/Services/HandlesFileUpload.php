@@ -8,34 +8,20 @@ use Illuminate\Support\Str;
 
 trait HandlesFileUpload {
     /**
-     * Handle file upload to a specific folder
+     * Store a file in the specified directory
      *
      * @param  UploadedFile  $file  The file to upload
-     * @param  string  $baseDirectory  Base directory where files will be stored
-     * @param  string|null  $subfolder  Optional subfolder within the base directory
+     * @param  string  $directory  Directory where file will be stored
      * @param  bool  $preserveFileName  Whether to preserve the original filename
-     * @return string|null The path to the stored file
+     * @return string|null Path to the stored file
      */
-    protected function uploadFile(
-        UploadedFile $file,
-        string $baseDirectory,
-        ?string $subfolder = null,
-        bool $preserveFileName = false
-    ): ?string {
+    protected function storeFile(UploadedFile $file, string $directory, bool $preserveFileName = false): ?string {
         if (!$file) {
             return null;
         }
 
-        // Determine the full path
-        $path = $baseDirectory;
-        if ($subfolder) {
-            $path = $path . '/' . trim($subfolder, '/');
-        }
-
         // Create directory if it doesn't exist
-        if (!Storage::exists('public/' . $path)) {
-            Storage::makeDirectory('public/' . $path, 0755, true);
-        }
+        Storage::makeDirectory('public/' . $directory, 0755, true);
 
         // Generate filename
         if ($preserveFileName) {
@@ -43,36 +29,29 @@ trait HandlesFileUpload {
             $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
             $filename .= '_' . uniqid() . '.' . $file->getClientOriginalExtension();
         } else {
-            // Generate a completely unique filename
+            // Generate a completely unique filename with extension
             $filename = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
         }
 
         // Store the file
-        $file->storeAs('public/' . $path, $filename);
+        $file->storeAs('public/' . $directory, $filename);
 
         // Return the relative path for database storage
-        return $path . '/' . $filename;
+        return $directory . '/' . $filename;
     }
 
     /**
      * Delete a file from storage
+     *
+     * @param  string|null  $filePath  Path to the file to delete
+     * @param  string  $disk  Storage disk to use
+     * @return bool Whether the file was deleted
      */
-    protected function deleteFile(string $filePath): bool {
+    protected function deleteFile(?string $filePath, string $disk = 'public'): bool {
         if (empty($filePath)) {
             return false;
         }
 
-        return Storage::delete('public/' . $filePath);
-    }
-
-    /**
-     * Get the publicly accessible URL for a file
-     */
-    protected function getFileUrl(string $filePath): ?string {
-        if (empty($filePath)) {
-            return null;
-        }
-
-        return Storage::url('public/' . $filePath);
+        return Storage::disk($disk)->delete($filePath);
     }
 }

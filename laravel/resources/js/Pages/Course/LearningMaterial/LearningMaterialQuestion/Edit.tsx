@@ -314,7 +314,6 @@ export default function Edit({
                                             </h3>
                                             {fileType === 'application/pdf' ? (
                                                 <PDFViewer
-                                                    withPagination={true}
                                                     fileUrl={previewUrl}
                                                     filename={
                                                         newFileUploaded

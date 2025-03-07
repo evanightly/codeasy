@@ -30,21 +30,16 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
             $data['order_number'] = $this->calculateNextOrderNumber($data['course_id'] ?? null);
         }
 
-        // Handle file upload - store directly in base directory
+        // Handle file upload - store filename with extension
         if (isset($data['file'])) {
-            // Get original extension
             $extension = $data['file']->getClientOriginalExtension();
+            $filePath = $this->storeFile($data['file'], $this->baseDirectory);
 
-            // Use the trait method for uploading
-            $filePath = $this->uploadFile(
-                $data['file'],
-                $this->baseDirectory
-            );
-
-            // Get just the filename without extension for storage
-            $pathParts = pathinfo($filePath);
-            $data['file'] = $pathParts['filename']; // Just filename without extension
-            $data['file_extension'] = $extension;
+            if ($filePath) {
+                $pathInfo = pathinfo($filePath);
+                $data['file'] = $pathInfo['basename']; // Store filename with extension
+                $data['file_extension'] = $extension; // Keep extension field for compatibility
+            }
         }
 
         return parent::create($data);
@@ -56,23 +51,17 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
             // Get existing record to delete old file if exists
             $existingRecord = $this->repository->find($keyOrModel);
             if ($existingRecord && $existingRecord->file) {
-                $this->deleteFile($this->baseDirectory . '/' .
-                    $existingRecord->file . '.' . $existingRecord->file_extension);
+                $this->deleteFile($this->baseDirectory . '/' . $existingRecord->file);
             }
 
-            // Get original extension
             $extension = $data['file']->getClientOriginalExtension();
+            $filePath = $this->storeFile($data['file'], $this->baseDirectory);
 
-            // Use the trait method for uploading
-            $filePath = $this->uploadFile(
-                $data['file'],
-                $this->baseDirectory
-            );
-
-            // Get just the filename without extension for storage
-            $pathParts = pathinfo($filePath);
-            $data['file'] = $pathParts['filename']; // Just filename without extension
-            $data['file_extension'] = $extension;
+            if ($filePath) {
+                $pathInfo = pathinfo($filePath);
+                $data['file'] = $pathInfo['basename']; // Store filename with extension
+                $data['file_extension'] = $extension; // Keep extension field for compatibility
+            }
         }
 
         return parent::update($keyOrModel, $data);
@@ -82,8 +71,7 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
         // Get existing record to delete old file if exists
         $existingRecord = $this->repository->find($keyOrModel);
         if ($existingRecord && $existingRecord->file) {
-            $this->deleteFile($this->baseDirectory . '/' .
-                $existingRecord->file . '.' . $existingRecord->file_extension);
+            $this->deleteFile($this->baseDirectory . '/' . $existingRecord->file);
         }
 
         return parent::delete($keyOrModel);
