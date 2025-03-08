@@ -2,16 +2,51 @@ import { AnimatedGridPattern } from '@/Components/UI/animated-grid-pattern';
 import { Badge } from '@/Components/UI/badge';
 import { buttonVariants } from '@/Components/UI/button';
 import { Card, CardContent } from '@/Components/UI/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/Components/UI/dropdown-menu';
 import { FloatingCodeHighlight } from '@/Components/UI/floating-code-highlight'; // New
 import { Meteors } from '@/Components/UI/meteors';
 import Particles from '@/Components/UI/particles';
 import { Separator } from '@/Components/UI/separator';
 import { SparkleHover } from '@/Components/UI/sparkle-hover'; // New
 import WordRotate from '@/Components/UI/word-rotate';
+import { useTheme } from '@/Contexts/ThemeContext';
+import { DashboardNavbarDarkModeToggler } from '@/Layouts/Components/Components/Components/DashboardDarkModeToggler';
 import { PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { Check, SwatchBook } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react'; // Added useRef, useState, useEffect
+
+const SetTheme = () => {
+    const { isDarkMode, currentTheme, availableThemes, toggleDarkMode, setTheme } = useTheme();
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger className={buttonVariants({ size: 'icon', variant: 'outline' })}>
+                <SwatchBook />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+                {availableThemes.map((theme) => (
+                    <DropdownMenuItem
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setTheme(theme);
+                        }}
+                        key={theme.name}
+                    >
+                        {theme.name}
+                        {currentTheme?.name === theme.name && <Check className='ml-2 h-4 w-4' />}
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
 
 export default function Welcome({
     laravelVersion,
@@ -174,6 +209,7 @@ print(cognitive_levels.value_counts())`;
                                 </Link>
                             </>
                         )}
+                        <SetTheme />
                     </nav>
 
                     {/* Mobile Menu Button */}
@@ -272,12 +308,17 @@ print(cognitive_levels.value_counts())`;
                         style={{ y: prefersReducedMotion ? 0 : heroTextY }}
                         className='mb-10 text-center'
                     >
-                        <Badge
-                            variant='outline'
-                            className='mb-4 border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary'
-                        >
-                            Powered by Machine Learning
-                        </Badge>
+                        <div className='mb-4 flex items-center justify-center gap-4'>
+                            <Badge
+                                variant='outline'
+                                className='border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary'
+                            >
+                                Powered by Machine Learning
+                            </Badge>
+                            <div className='flex text-left'>
+                                <DashboardNavbarDarkModeToggler />
+                            </div>
+                        </div>
                         <motion.h1
                             transition={{ duration: 0.7 }}
                             initial={{ opacity: 0, y: 20 }}
