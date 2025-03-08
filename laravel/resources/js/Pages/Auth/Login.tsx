@@ -73,6 +73,15 @@ export default function Login({
         setStep('passwordStep');
     };
 
+    // Auto focus password input when step changes to passwordStep
+    useEffect(() => {
+        if (step === 'passwordStep' && passwordInputRef.current) {
+            setTimeout(() => {
+                passwordInputRef.current?.focus();
+            }, 100); // Short delay to ensure DOM has updated
+        }
+    }, [step]);
+
     const signIn = async () => {
         setStep('authing');
         const values = form.getValues();
@@ -190,6 +199,12 @@ export default function Login({
                                                             <Input
                                                                 {...field}
                                                                 placeholder='Email or username'
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        handleNextEmail();
+                                                                    }
+                                                                }}
                                                                 autoFocus
                                                                 autoComplete='username email'
                                                             />
