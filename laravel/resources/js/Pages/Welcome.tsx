@@ -198,18 +198,20 @@ print(cognitive_levels.value_counts())`;
                                 >
                                     Login
                                 </Link>
-                                <Link
-                                    href={route('register')}
-                                    className={buttonVariants({
-                                        className:
-                                            'border-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
-                                    })}
-                                >
-                                    Get Started
-                                </Link>
+                                <div className='flex gap-2'>
+                                    <Link
+                                        href={route('register')}
+                                        className={buttonVariants({
+                                            className:
+                                                'border-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
+                                        })}
+                                    >
+                                        Get Started
+                                    </Link>
+                                    <SetTheme />
+                                </div>
                             </>
                         )}
-                        <SetTheme />
                     </nav>
 
                     {/* Mobile Menu Button */}
@@ -966,7 +968,7 @@ print(cognitive_levels.value_counts())`;
                     {/* Modified steps with continuous vertical line */}
                     <div className='relative'>
                         {/* Continuous vertical line */}
-                        <div className='absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-muted md:left-1/2'></div>
+                        <div className='absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-primary/50 md:left-1/2'></div>
 
                         <div className='space-y-24'>
                             {[
