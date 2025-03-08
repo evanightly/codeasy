@@ -10,7 +10,6 @@ use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\CourseServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
 
 class CourseController extends Controller implements HasMiddleware {
     public function __construct(protected CourseServiceInterface $courseService) {}
@@ -23,10 +22,10 @@ class CourseController extends Controller implements HasMiddleware {
         ];
 
         return [
-            new Middleware('permission:' . PermissionEnum::COURSE_CREATE->value, only: ['create', 'store']),
-            new Middleware('permission:' . PermissionEnum::COURSE_UPDATE->value, only: ['edit', 'update']),
+            self::createPermissionMiddleware([PermissionEnum::COURSE_CREATE->value], ['create', 'store']),
+            self::createPermissionMiddleware([PermissionEnum::COURSE_UPDATE->value], ['edit', 'update']),
             self::createPermissionMiddleware($courseReadPermissions, ['index', 'show']),
-            new Middleware('permission:' . PermissionEnum::COURSE_DELETE->value, only: ['destroy']),
+            self::createPermissionMiddleware([PermissionEnum::COURSE_DELETE->value], ['destroy']),
         ];
     }
 

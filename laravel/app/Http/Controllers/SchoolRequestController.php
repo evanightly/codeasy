@@ -11,23 +11,21 @@ use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\SchoolRequestServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
 
 class SchoolRequestController extends Controller implements HasMiddleware {
     public function __construct(protected SchoolRequestServiceInterface $schoolRequestService) {}
 
     public static function middleware(): array {
-
         $schoolRequestReadPermissions = [
             PermissionEnum::SCHOOL_REQUEST_READ->value,
-            // PermissionEnum::SCHOOL_ADMIN->value,
+            // PermissionEnum::SCHOOL_ADMIN->value, // Commented out as it doesn't exist in the enum
         ];
 
         return [
-            new Middleware('permission:' . PermissionEnum::SCHOOL_REQUEST_CREATE->value, only: ['create', 'store']),
-            new Middleware('permission:' . PermissionEnum::SCHOOL_REQUEST_UPDATE->value, only: ['edit', 'update']),
+            self::createPermissionMiddleware([PermissionEnum::SCHOOL_REQUEST_CREATE->value], ['create', 'store']),
+            self::createPermissionMiddleware([PermissionEnum::SCHOOL_REQUEST_UPDATE->value], ['edit', 'update']),
             self::createPermissionMiddleware($schoolRequestReadPermissions, ['index', 'show']),
-            new Middleware('permission:' . PermissionEnum::SCHOOL_REQUEST_DELETE->value, only: ['destroy']),
+            self::createPermissionMiddleware([PermissionEnum::SCHOOL_REQUEST_DELETE->value], ['destroy']),
         ];
     }
 

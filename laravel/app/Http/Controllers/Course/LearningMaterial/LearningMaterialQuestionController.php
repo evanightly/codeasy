@@ -10,13 +10,25 @@ use App\Models\Course;
 use App\Models\LearningMaterial;
 use App\Models\LearningMaterialQuestion;
 use App\Services\LearningMaterialQuestionService;
+use App\Support\Enums\PermissionEnum;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
 
-class LearningMaterialQuestionController extends Controller {
+class LearningMaterialQuestionController extends Controller implements HasMiddleware {
     protected $questionService;
 
     public function __construct(LearningMaterialQuestionService $questionService) {
         $this->questionService = $questionService;
+    }
+
+    public static function middleware(): array {
+        return [
+            self::createPermissionMiddleware([
+                PermissionEnum::COURSE_READ->value,
+                PermissionEnum::LEARNING_MATERIAL_READ->value,
+                PermissionEnum::LEARNING_MATERIAL_QUESTION_READ->value,
+            ], ['index', 'show', 'create', 'edit']),
+        ];
     }
 
     /**

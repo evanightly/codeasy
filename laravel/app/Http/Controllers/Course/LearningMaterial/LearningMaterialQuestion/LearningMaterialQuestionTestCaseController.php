@@ -12,13 +12,26 @@ use App\Models\LearningMaterial;
 use App\Models\LearningMaterialQuestion;
 use App\Models\LearningMaterialQuestionTestCase;
 use App\Services\LearningMaterialQuestionTestCaseService;
+use App\Support\Enums\PermissionEnum;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
 
-class LearningMaterialQuestionTestCaseController extends Controller {
+class LearningMaterialQuestionTestCaseController extends Controller implements HasMiddleware {
     protected $testCaseService;
 
     public function __construct(LearningMaterialQuestionTestCaseService $testCaseService) {
         $this->testCaseService = $testCaseService;
+    }
+
+    public static function middleware(): array {
+        return [
+            self::createPermissionMiddleware([
+                PermissionEnum::COURSE_READ->value,
+                PermissionEnum::LEARNING_MATERIAL_READ->value,
+                PermissionEnum::LEARNING_MATERIAL_QUESTION_READ->value,
+                PermissionEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_READ->value,
+            ], ['index', 'show', 'create', 'edit']),
+        ];
     }
 
     /**

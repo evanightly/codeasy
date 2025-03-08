@@ -10,17 +10,16 @@ use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\ClassRoomStudentServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
 
 class ClassRoomStudentController extends Controller implements HasMiddleware {
     public function __construct(protected ClassRoomStudentServiceInterface $classRoomStudentService) {}
 
     public static function middleware(): array {
         return [
-            new Middleware('permission:' . PermissionEnum::CLASS_ROOM_STUDENT_CREATE->value, only: ['create', 'store']),
-            new Middleware('permission:' . PermissionEnum::CLASS_ROOM_STUDENT_UPDATE->value, only: ['edit', 'update']),
+            self::createPermissionMiddleware([PermissionEnum::CLASS_ROOM_STUDENT_CREATE->value], ['create', 'store']),
+            self::createPermissionMiddleware([PermissionEnum::CLASS_ROOM_STUDENT_UPDATE->value], ['edit', 'update']),
             self::createPermissionMiddleware([PermissionEnum::CLASS_ROOM_STUDENT_READ->value], ['index', 'show']),
-            new Middleware('permission:' . PermissionEnum::CLASS_ROOM_STUDENT_DELETE->value, only: ['destroy']),
+            self::createPermissionMiddleware([PermissionEnum::CLASS_ROOM_STUDENT_DELETE->value], ['destroy']),
         ];
     }
 

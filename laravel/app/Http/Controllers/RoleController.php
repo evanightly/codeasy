@@ -10,7 +10,6 @@ use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\RoleServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
 
 class RoleController extends Controller implements HasMiddleware {
     public function __construct(protected RoleServiceInterface $roleService) {}
@@ -23,10 +22,10 @@ class RoleController extends Controller implements HasMiddleware {
         ];
 
         return [
-            new Middleware('permission:' . PermissionEnum::ROLE_CREATE->value, only: ['create', 'store']),
-            new Middleware('permission:' . PermissionEnum::ROLE_UPDATE->value, only: ['edit', 'update']),
+            self::createPermissionMiddleware([PermissionEnum::ROLE_CREATE->value], ['create', 'store']),
+            self::createPermissionMiddleware([PermissionEnum::ROLE_UPDATE->value], ['edit', 'update']),
             self::createPermissionMiddleware($roleReadPermissions, ['index', 'show']),
-            new Middleware('permission:' . PermissionEnum::ROLE_DELETE->value, only: ['destroy']),
+            self::createPermissionMiddleware([PermissionEnum::ROLE_DELETE->value], ['destroy']),
         ];
     }
 

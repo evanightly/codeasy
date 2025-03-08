@@ -8,13 +8,24 @@ use App\Http\Resources\LearningMaterialResource;
 use App\Models\Course;
 use App\Models\LearningMaterial;
 use App\Services\LearningMaterialService;
+use App\Support\Enums\PermissionEnum;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
 
-class LearningMaterialController extends Controller {
+class LearningMaterialController extends Controller implements HasMiddleware {
     protected $learningMaterialService;
 
     public function __construct(LearningMaterialService $learningMaterialService) {
         $this->learningMaterialService = $learningMaterialService;
+    }
+
+    public static function middleware(): array {
+        return [
+            self::createPermissionMiddleware([
+                PermissionEnum::COURSE_READ->value,
+                PermissionEnum::LEARNING_MATERIAL_READ->value,
+            ], ['index', 'show', 'create', 'edit']),
+        ];
     }
 
     /**

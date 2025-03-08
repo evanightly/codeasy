@@ -11,7 +11,6 @@ use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\UserServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
 
 class UserController extends Controller implements HasMiddleware {
     public function __construct(protected UserServiceInterface $userService) {}
@@ -28,10 +27,10 @@ class UserController extends Controller implements HasMiddleware {
         ];
 
         return [
-            new Middleware('permission:' . PermissionEnum::USER_CREATE->value, only: ['create', 'store']),
-            new Middleware('permission:' . PermissionEnum::USER_UPDATE->value, only: ['edit', 'update']),
+            self::createPermissionMiddleware([PermissionEnum::USER_CREATE->value], ['create', 'store']),
+            self::createPermissionMiddleware([PermissionEnum::USER_UPDATE->value], ['edit', 'update']),
             self::createPermissionMiddleware($userReadPermissions, ['index', 'show']),
-            new Middleware('permission:' . PermissionEnum::USER_DELETE->value, only: ['destroy']),
+            self::createPermissionMiddleware([PermissionEnum::USER_DELETE->value], ['destroy']),
         ];
     }
 
