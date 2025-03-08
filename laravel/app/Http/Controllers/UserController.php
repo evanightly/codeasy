@@ -10,16 +10,25 @@ use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\UserServiceInterface;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
-class UserController extends Controller {
+class UserController extends Controller implements HasMiddleware {
     public function __construct(protected UserServiceInterface $userService) {}
 
     public static function middleware(): array {
+        // Define permissions that should grant access to user listing
+        $userReadPermissions = [
+            PermissionEnum::USER_READ->value,
+            PermissionEnum::CLASS_ROOM_STUDENT_CREATE->value,
+            PermissionEnum::CLASS_ROOM_STUDENT_READ->value,
+            PermissionEnum::CLASS_ROOM_STUDENT_UPDATE->value,
+        ];
+
         return [
             new Middleware('permission:' . PermissionEnum::USER_CREATE->value, only: ['create', 'store']),
             new Middleware('permission:' . PermissionEnum::USER_UPDATE->value, only: ['edit', 'update']),
-            new Middleware('permission:' . PermissionEnum::USER_READ->value, only: ['index', 'show']),
+            self::createPermissionMiddleware($userReadPermissions, ['index', 'show']), // Using default 'permission' type
             new Middleware('permission:' . PermissionEnum::USER_DELETE->value, only: ['destroy']),
         ];
     }
