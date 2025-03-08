@@ -92,7 +92,7 @@ return [
                 'password' => 'Password',
                 'password_confirmation' => 'Confirm Password',
                 'roles' => 'Roles',
-                'avatar' => 'Avatar',
+                'profile_image' => 'Profile Image',
             ],
             'placeholders' => [
                 'name' => 'Enter Name',
@@ -1084,6 +1084,94 @@ return [
             'sections' => [
                 'details' => 'Test Case Details',
             ],
+        ],
+    ],
+    'profile' => [
+        'edit' => [
+            'title' => 'Profile Settings',
+            'tabs' => [
+                'profile' => 'Profile',
+                'password' => 'Password',
+                'danger' => 'Danger Zone',
+            ],
+        ],
+        'sections' => [
+            'information' => 'Profile Information',
+            'password' => 'Update Password',
+            'delete_account' => 'Delete Account',
+        ],
+        'descriptions' => [
+            'information' => 'Update your account\'s profile information and email address.',
+            'password' => 'Ensure your account is using a long, random password to stay secure.',
+            'delete_account' => 'Once your account is deleted, all of its resources and data will be permanently deleted.',
+        ],
+        'fields' => [
+            'name' => 'Name',
+            'username' => 'Username',
+            'email' => 'Email',
+            'current_password' => 'Current Password',
+            'new_password' => 'New Password',
+            'confirm_password' => 'Confirm Password',
+            'password' => 'Password',
+        ],
+        'validations' => [
+            'name' => [
+                'required' => 'Name is required',
+            ],
+            'username' => [
+                'required' => 'Username is required',
+            ],
+            'email' => [
+                'required' => 'Email is required',
+                'invalid' => 'Please enter a valid email address',
+            ],
+            'current_password' => [
+                'required' => 'Current password is required',
+            ],
+            'password' => [
+                'min' => 'Password must be at least 8 characters',
+                'required' => 'Password is required',
+                'required_for_deletion' => 'Password is required to confirm account deletion',
+            ],
+            'password_confirmation' => [
+                'required' => 'Please confirm your password',
+                'match' => 'The password confirmation does not match',
+            ],
+        ],
+        'buttons' => [
+            'save' => 'Save',
+            'delete_account' => 'Delete Account',
+            'cancel' => 'Cancel',
+            'confirm_delete' => 'Delete Account',
+        ],
+        'messages' => [
+            'success' => [
+                'update' => 'Profile updated successfully',
+                'password' => 'Password updated successfully',
+                'delete' => 'Account deleted successfully',
+            ],
+            'error' => [
+                'update' => 'There was an error updating your profile',
+                'password' => 'There was an error updating your password',
+                'delete' => 'There was an error deleting your account',
+            ],
+        ],
+        'verification' => [
+            'title' => 'Email Verification',
+            'message' => 'Your email address is unverified.',
+            'resend_link' => 'Click here to resend the verification email',
+            'sent' => 'A new verification link has been sent to your email address.',
+        ],
+        'upload' => [
+            'label' => 'Drag & drop your profile picture or <span class="filepond--label-action">Browse</span>',
+            'hint' => 'Recommended: Square image, max 1MB (.jpg, .png)',
+        ],
+        'warnings' => [
+            'delete_account' => 'This action cannot be undone. This will permanently delete your account and all associated data.',
+        ],
+        'delete_dialog' => [
+            'title' => 'Are you sure?',
+            'description' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
         ],
     ],
 ];

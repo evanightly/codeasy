@@ -1,7 +1,7 @@
 import { RoleEnum } from '@/Support/Enums/roleEnum';
-import { User } from '@/Support/Interfaces/Models';
+import { UserResource } from '@/Support/Interfaces/Resources';
 
-interface AuthenticatedUser extends User {
+interface AuthenticatedUser extends UserResource {
     roles: RoleEnum[];
     initials: string;
     image: string;

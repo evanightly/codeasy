@@ -3,4 +3,5 @@ import { Resource, RoleResource } from '@/Support/Interfaces/Resources';
 
 export interface UserResource extends Resource, User {
     roles?: RoleResource[];
+    profile_image_url?: string;
 }

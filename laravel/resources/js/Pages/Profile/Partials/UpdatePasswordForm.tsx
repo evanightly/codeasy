@@ -1,113 +1,141 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import { Transition } from '@headlessui/react';
-import { useForm } from '@inertiajs/react';
-import { FormEventHandler, useRef } from 'react';
+import { Button } from '@/Components/UI/button';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/Components/UI/form';
+import { Input } from '@/Components/UI/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
-export default function UpdatePasswordForm({ className = '' }: { className?: string }) {
-    const passwordInput = useRef<HTMLInputElement>(null);
-    const currentPasswordInput = useRef<HTMLInputElement>(null);
+export default function UpdatePasswordForm() {
+    const { t } = useLaravelReactI18n();
+    const [loading, setLoading] = useState(false);
 
-    const { data, setData, errors, put, reset, processing, recentlySuccessful } = useForm({
-        current_password: '',
-        password: '',
-        password_confirmation: '',
+    const formSchema = z
+        .object({
+            current_password: z
+                .string()
+                .min(1, t('pages.profile.validations.current_password.required')),
+            password: z.string().min(8, t('pages.profile.validations.password.min')),
+            password_confirmation: z
+                .string()
+                .min(1, t('pages.profile.validations.password_confirmation.required')),
+        })
+        .refine((data) => data.password === data.password_confirmation, {
+            message: t('pages.profile.validations.password_confirmation.match'),
+            path: ['password_confirmation'],
+        });
+
+    type FormData = z.infer<typeof formSchema>;
+
+    const form = useForm<FormData>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            current_password: '',
+            password: '',
+            password_confirmation: '',
+        },
     });
 
-    const updatePassword: FormEventHandler = (e) => {
-        e.preventDefault();
+    const onSubmit = async (values: FormData) => {
+        setLoading(true);
 
-        put(route('password.update'), {
-            preserveScroll: true,
-            onSuccess: () => reset(),
-            onError: (errors) => {
-                if (errors.password) {
-                    reset('password', 'password_confirmation');
-                    passwordInput.current?.focus();
-                }
+        try {
+            await axios.put(route('password.update'), values);
+            toast.success(t('pages.profile.messages.success.password'));
 
-                if (errors.current_password) {
-                    reset('current_password');
-                    currentPasswordInput.current?.focus();
-                }
-            },
-        });
+            // Reset form
+            form.reset();
+        } catch (error: any) {
+            console.error(error);
+
+            if (error.response?.data?.errors) {
+                // Set form errors
+                Object.entries(error.response.data.errors).forEach(
+                    ([key, errorMessages]: [string, any]) => {
+                        form.setError(key as any, {
+                            type: 'manual',
+                            message: errorMessages[0],
+                        });
+                    },
+                );
+            } else {
+                toast.error(t('pages.profile.messages.error.password'));
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <section className={className}>
-            <header>
-                <h2 className='text-lg font-medium text-gray-900'>Update Password</h2>
-
-                <p className='mt-1 text-sm text-gray-600'>
-                    Ensure your account is using a long, random password to stay secure.
+        <div className='space-y-6'>
+            <div>
+                <h2 className='text-lg font-medium '>
+                    {t('pages.profile.sections.password')}
+                </h2>
+                <p className='mt-1 text-sm '>
+                    {t('pages.profile.descriptions.password')}
                 </p>
-            </header>
+            </div>
 
-            <form onSubmit={updatePassword} className='mt-6 space-y-6'>
-                <div>
-                    <InputLabel value='Current Password' htmlFor='current_password' />
-
-                    <TextInput
-                        value={data.current_password}
-                        type='password'
-                        ref={currentPasswordInput}
-                        onChange={(e) => setData('current_password', e.target.value)}
-                        id='current_password'
-                        className='mt-1 block w-full'
-                        autoComplete='current-password'
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+                    <FormField
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('pages.profile.fields.current_password')}</FormLabel>
+                                <FormControl>
+                                    <Input type='password' {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        name='current_password'
+                        control={form.control}
                     />
 
-                    <InputError message={errors.current_password} className='mt-2' />
-                </div>
-
-                <div>
-                    <InputLabel value='New Password' htmlFor='password' />
-
-                    <TextInput
-                        value={data.password}
-                        type='password'
-                        ref={passwordInput}
-                        onChange={(e) => setData('password', e.target.value)}
-                        id='password'
-                        className='mt-1 block w-full'
-                        autoComplete='new-password'
+                    <FormField
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('pages.profile.fields.new_password')}</FormLabel>
+                                <FormControl>
+                                    <Input type='password' {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        name='password'
+                        control={form.control}
                     />
 
-                    <InputError message={errors.password} className='mt-2' />
-                </div>
-
-                <div>
-                    <InputLabel value='Confirm Password' htmlFor='password_confirmation' />
-
-                    <TextInput
-                        value={data.password_confirmation}
-                        type='password'
-                        onChange={(e) => setData('password_confirmation', e.target.value)}
-                        id='password_confirmation'
-                        className='mt-1 block w-full'
-                        autoComplete='new-password'
+                    <FormField
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('pages.profile.fields.confirm_password')}</FormLabel>
+                                <FormControl>
+                                    <Input type='password' {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        name='password_confirmation'
+                        control={form.control}
                     />
 
-                    <InputError message={errors.password_confirmation} className='mt-2' />
-                </div>
-
-                <div className='flex items-center gap-4'>
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
-
-                    <Transition
-                        show={recentlySuccessful}
-                        leaveTo='opacity-0'
-                        leave='transition ease-in-out'
-                        enterFrom='opacity-0'
-                        enter='transition ease-in-out'
-                    >
-                        <p className='text-sm text-gray-600'>Saved.</p>
-                    </Transition>
-                </div>
-            </form>
-        </section>
+                    <Button type='submit' loading={loading} disabled={loading}>
+                        {t('pages.profile.buttons.save')}
+                    </Button>
+                </form>
+            </Form>
+        </div>
     );
 }

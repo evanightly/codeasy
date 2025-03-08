@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\ClassRoomController;
 use App\Http\Controllers\Course\LearningMaterial\LearningMaterialQuestion\LearningMaterialQuestionTestCaseController as CourseLearningMaterialQuestionTestCaseController;
 use App\Http\Controllers\Course\LearningMaterial\LearningMaterialQuestionController as CourseLearningMaterialQuestionController;
@@ -26,7 +27,7 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('welcome');
 
 Route::get('/test-fastapi', function () {
     // Contoh data payload, seharusnya diisi dengan kode siswa dan testcase yang sesuai
@@ -103,7 +104,8 @@ Route::middleware('auth')->group(function () {
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/password', [PasswordController::class, 'update'])->name('password.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Context-specific nested resources (viewing only)

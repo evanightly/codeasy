@@ -52,8 +52,8 @@ export default function Show({ data: { data: user } }: Props) {
                             <div className='space-y-6'>
                                 <div className='flex flex-col items-center gap-4 sm:flex-row'>
                                     <Avatar className='h-24 w-24'>
-                                        {user.image_url ? (
-                                            <AvatarImage src={user.image_url} alt={user.name} />
+                                        {user.profile_image ? (
+                                            <AvatarImage src={user.profile_image_url} alt={user.name} />
                                         ) : (
                                             <AvatarFallback>
                                                 {getInitials(user?.name ?? '')}

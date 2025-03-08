@@ -1,3 +1,5 @@
+import { FilePondUploader } from '@/Components/FilePondUploader';
+import { Avatar, AvatarFallback, AvatarImage } from '@/Components/UI/avatar';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { Checkbox } from '@/Components/UI/checkbox';
@@ -18,6 +20,7 @@ import { UserResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -30,6 +33,15 @@ export default function Edit({ data: { data: user } }: Props) {
     const { t } = useLaravelReactI18n();
     const updateMutation = userServiceHook.useUpdate();
     const { data: roles, isLoading } = roleServiceHook.useGetAll();
+    const [profileImage, setProfileImage] = useState<File | null>(null);
+
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map((part) => part[0])
+            .join('')
+            .toUpperCase();
+    };
 
     const formSchema = z
         .object({
@@ -86,14 +98,39 @@ export default function Edit({ data: { data: user } }: Props) {
             data.password_confirmation = values.password_confirmation;
         }
 
-        toast.promise(updateMutation.mutateAsync({ id: user.id, data }), {
-            loading: t('pages.user.common.messages.pending.update'),
-            success: () => {
-                router.visit(route(`${ROUTES.USERS}.index`));
-                return t('pages.user.common.messages.success.update');
-            },
-            error: t('pages.user.common.messages.error.update'),
-        });
+        // Create FormData if there's a profile image
+        if (profileImage) {
+            const formData = new FormData();
+            Object.keys(data).forEach((key) => {
+                if (Array.isArray(data[key])) {
+                    data[key].forEach((value: any) => {
+                        formData.append(`${key}[]`, value);
+                    });
+                } else {
+                    formData.append(key, data[key]);
+                }
+            });
+            formData.append('profile_image', profileImage);
+
+            toast.promise(updateMutation.mutateAsync({ id: user.id, data: formData }), {
+                loading: t('pages.user.common.messages.pending.update'),
+                success: () => {
+                    router.visit(route(`${ROUTES.USERS}.index`));
+                    return t('pages.user.common.messages.success.update');
+                },
+                error: t('pages.user.common.messages.error.update'),
+            });
+        } else {
+            // Regular data update
+            toast.promise(updateMutation.mutateAsync({ id: user.id, data }), {
+                loading: t('pages.user.common.messages.pending.update'),
+                success: () => {
+                    router.visit(route(`${ROUTES.USERS}.index`));
+                    return t('pages.user.common.messages.success.update');
+                },
+                error: t('pages.user.common.messages.error.update'),
+            });
+        }
     };
 
     return (
@@ -103,6 +140,32 @@ export default function Edit({ data: { data: user } }: Props) {
                     <CardTitle>{t('pages.user.edit.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
+                    <div className='mb-6 flex flex-col items-center gap-4 md:flex-row'>
+                        <div className='space-y-4'>
+                            <Avatar className='h-24 w-24'>
+                                {user.profile_image ? (
+                                    <AvatarImage src={user.profile_image_url} alt={user.name} />
+                                ) : (
+                                    <AvatarFallback>{getInitials(user?.name ?? '')}</AvatarFallback>
+                                )}
+                            </Avatar>
+                        </div>
+
+                        <div className='w-full max-w-sm'>
+                            <FilePondUploader
+                                value={profileImage}
+                                onChange={setProfileImage}
+                                maxFileSize='1MB'
+                                labelIdle={t('pages.user.common.fields.profile_image')}
+                                className='mb-1'
+                                acceptedFileTypes={['image/png', 'image/jpeg', 'image/jpg']}
+                            />
+                            <p className='mt-1 text-xs text-gray-500'>
+                                {t('pages.profile.upload.hint')}
+                            </p>
+                        </div>
+                    </div>
+
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
                             <FormField

@@ -1,6 +1,10 @@
+import { Card } from '@/Components/UI/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { UserResource } from '@/Support/Interfaces/Resources';
 import { PageProps } from '@/types';
 import { Head } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
@@ -8,34 +12,47 @@ import UpdateProfileInformationForm from './Partials/UpdateProfileInformationFor
 export default function Edit({
     mustVerifyEmail,
     status,
-}: PageProps<{ mustVerifyEmail: boolean; status?: string }>) {
+    user,
+}: PageProps<{ mustVerifyEmail: boolean; status?: string; user: UserResource }>) {
+    const { t } = useLaravelReactI18n();
+
     return (
-        <AuthenticatedLayout
-        // header={
-        //     <h2 className="text-xl font-semibold leading-tight text-gray-800">
-        //         Profile
-        //     </h2>
-        // }
-        >
-            <Head title='Profile' />
+        <AuthenticatedLayout title={t('pages.profile.edit.title')}>
+            <Head title={t('pages.profile.edit.title')} />
 
             <div className='py-12'>
                 <div className='mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8'>
-                    <div className='bg-white p-4 shadow sm:rounded-lg sm:p-8'>
-                        <UpdateProfileInformationForm
-                            status={status}
-                            mustVerifyEmail={mustVerifyEmail}
-                            className='max-w-xl'
-                        />
-                    </div>
+                    <Card>
+                        <Tabs defaultValue='profile' className='w-full'>
+                            <TabsList className='grid w-full grid-cols-3'>
+                                <TabsTrigger value='profile'>
+                                    {t('pages.profile.edit.tabs.profile')}
+                                </TabsTrigger>
+                                <TabsTrigger value='password'>
+                                    {t('pages.profile.edit.tabs.password')}
+                                </TabsTrigger>
+                                <TabsTrigger value='danger'>
+                                    {t('pages.profile.edit.tabs.danger')}
+                                </TabsTrigger>
+                            </TabsList>
 
-                    <div className='bg-white p-4 shadow sm:rounded-lg sm:p-8'>
-                        <UpdatePasswordForm className='max-w-xl' />
-                    </div>
+                            <TabsContent value='profile' className='p-4'>
+                                <UpdateProfileInformationForm
+                                    user={user}
+                                    status={status}
+                                    mustVerifyEmail={mustVerifyEmail}
+                                />
+                            </TabsContent>
 
-                    <div className='bg-white p-4 shadow sm:rounded-lg sm:p-8'>
-                        <DeleteUserForm className='max-w-xl' />
-                    </div>
+                            <TabsContent value='password' className='p-4'>
+                                <UpdatePasswordForm />
+                            </TabsContent>
+
+                            <TabsContent value='danger' className='p-4'>
+                                <DeleteUserForm />
+                            </TabsContent>
+                        </Tabs>
+                    </Card>
                 </div>
             </div>
         </AuthenticatedLayout>

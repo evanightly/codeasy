@@ -1,112 +1,233 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import { Transition } from '@headlessui/react';
-import { Link, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FilePondUploader } from '@/Components/FilePondUploader';
+import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
+import { Avatar, AvatarFallback, AvatarImage } from '@/Components/UI/avatar';
+import { Button } from '@/Components/UI/button';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/Components/UI/form';
+import { Input } from '@/Components/UI/input';
+import { UserResource } from '@/Support/Interfaces/Resources';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, usePage } from '@inertiajs/react';
+import axios from 'axios';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
-export default function UpdateProfileInformation({
-    mustVerifyEmail,
-    status,
-    className = '',
-}: {
+interface UpdateProfileInformationFormProps {
+    user: UserResource;
     mustVerifyEmail: boolean;
     status?: string;
-    className?: string;
-}) {
-    const user = usePage().props.auth.user;
+}
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
-        name: user.name,
-        email: user.email,
+export default function UpdateProfileInformationForm({
+    mustVerifyEmail,
+    status,
+}: UpdateProfileInformationFormProps) {
+    const {
+        auth: { user },
+    } = usePage().props;
+    const { t } = useLaravelReactI18n();
+    const [loading, setLoading] = useState(false);
+    const [profileImage, setProfileImage] = useState<File | null>(null);
+
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map((part) => part[0])
+            .join('')
+            .toUpperCase();
+    };
+
+    const formSchema = z.object({
+        name: z.string().min(1, t('pages.profile.validations.name.required')),
+        username: z.string().min(1, t('pages.profile.validations.username.required')),
+        email: z
+            .string()
+            .email(t('pages.profile.validations.email.invalid'))
+            .min(1, t('pages.profile.validations.email.required')),
     });
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
+    type FormData = z.infer<typeof formSchema>;
 
-        patch(route('profile.update'));
+    const form = useForm<FormData>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: user.name || '',
+            username: user.username || '',
+            email: user.email || '',
+        },
+    });
+
+    const onSubmit = async (values: FormData) => {
+        setLoading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('name', values.name);
+            formData.append('username', values.username);
+            formData.append('email', values.email);
+            formData.append('_method', 'PUT');
+
+            // Add image if exists
+            if (profileImage) {
+                formData.append('profile_image', profileImage);
+            }
+
+            await axios.post(route('profile.update'), formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            toast.success(t('pages.profile.messages.success.update'));
+
+            if (values.email !== user.email) {
+                // Redirect to verification notice if email changed
+                window.location.href = route('verification.notice');
+            } else {
+                // Reload page to show updated info
+                window.location.reload();
+            }
+        } catch (error: any) {
+            console.error(error);
+
+            if (error.response?.data?.errors) {
+                // Set form errors
+                Object.entries(error.response.data.errors).forEach(
+                    ([key, errorMessages]: [string, any]) => {
+                        form.setError(key as any, {
+                            type: 'manual',
+                            message: errorMessages[0],
+                        });
+                    },
+                );
+            } else {
+                toast.error(t('pages.profile.messages.error.update'));
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <section className={className}>
-            <header>
-                <h2 className='text-lg font-medium text-gray-900'>Profile Information</h2>
+        <div className='space-y-6'>
+            <div>
+                <h2 className='text-lg font-medium'>{t('pages.profile.sections.information')}</h2>
+                <p className='mt-1 text-sm'>{t('pages.profile.descriptions.information')}</p>
+            </div>
 
-                <p className='mt-1 text-sm text-gray-600'>
-                    Update your account's profile information and email address.
-                </p>
-            </header>
-
-            <form onSubmit={submit} className='mt-6 space-y-6'>
-                <div>
-                    <InputLabel value='Name' htmlFor='name' />
-
-                    <TextInput
-                        value={data.name}
-                        required
-                        onChange={(e) => setData('name', e.target.value)}
-                        isFocused
-                        id='name'
-                        className='mt-1 block w-full'
-                        autoComplete='name'
-                    />
-
-                    <InputError message={errors.name} className='mt-2' />
-                </div>
-
-                <div>
-                    <InputLabel value='Email' htmlFor='email' />
-
-                    <TextInput
-                        value={data.email}
-                        type='email'
-                        required
-                        onChange={(e) => setData('email', e.target.value)}
-                        id='email'
-                        className='mt-1 block w-full'
-                        autoComplete='username'
-                    />
-
-                    <InputError message={errors.email} className='mt-2' />
-                </div>
-
-                {mustVerifyEmail && user.email_verified_at === null && (
-                    <div>
-                        <p className='mt-2 text-sm text-gray-800'>
-                            Your email address is unverified.
-                            <Link
-                                method='post'
-                                href={route('verification.send')}
-                                className='rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-                                as='button'
-                            >
-                                Click here to re-send the verification email.
-                            </Link>
-                        </p>
-
-                        {status === 'verification-link-sent' && (
-                            <div className='mt-2 text-sm font-medium text-green-600'>
-                                A new verification link has been sent to your email address.
-                            </div>
+            <div className='flex flex-col items-center gap-4 md:flex-row'>
+                <div className='space-y-4'>
+                    <Avatar className='h-28 w-28'>
+                        {user.profile_image ? (
+                            <AvatarImage
+                                src={user.profile_image_url}
+                                className='object-cover'
+                                alt={user.name}
+                            />
+                        ) : (
+                            <AvatarFallback className='text-lg'>
+                                {getInitials(user?.name ?? '')}
+                            </AvatarFallback>
                         )}
-                    </div>
-                )}
-
-                <div className='flex items-center gap-4'>
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
-
-                    <Transition
-                        show={recentlySuccessful}
-                        leaveTo='opacity-0'
-                        leave='transition ease-in-out'
-                        enterFrom='opacity-0'
-                        enter='transition ease-in-out'
-                    >
-                        <p className='text-sm text-gray-600'>Saved.</p>
-                    </Transition>
+                    </Avatar>
                 </div>
-            </form>
-        </section>
+
+                <div className='w-full max-w-sm'>
+                    <FilePondUploader
+                        value={profileImage}
+                        onChange={setProfileImage}
+                        maxFileSize='1MB'
+                        labelIdle={t('pages.profile.upload.label')}
+                        className='mb-1'
+                        acceptedFileTypes={['image/png', 'image/jpeg', 'image/jpg']}
+                    />
+                    <p className='mt-1 text-xs text-gray-500'>{t('pages.profile.upload.hint')}</p>
+                </div>
+            </div>
+
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+                    <FormField
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('pages.profile.fields.name')}</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        name='name'
+                        control={form.control}
+                    />
+
+                    <FormField
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('pages.profile.fields.username')}</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        name='username'
+                        control={form.control}
+                    />
+
+                    <FormField
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('pages.profile.fields.email')}</FormLabel>
+                                <FormControl>
+                                    <Input type='email' {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        name='email'
+                        control={form.control}
+                    />
+
+                    {mustVerifyEmail && user.email_verified_at === null && (
+                        <Alert variant='warning'>
+                            <AlertTitle>{t('pages.profile.verification.title')}</AlertTitle>
+                            <AlertDescription className='flex flex-col gap-2'>
+                                {t('pages.profile.verification.message')}
+                                <Link
+                                    method='post'
+                                    href={route('verification.send')}
+                                    className='font-medium text-primary hover:underline'
+                                    as='button'
+                                >
+                                    {t('pages.profile.verification.resend_link')}
+                                </Link>
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                    {status === 'verification-link-sent' && (
+                        <Alert>
+                            <AlertDescription>
+                                {t('pages.profile.verification.sent')}
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                    <Button type='submit' loading={loading} disabled={loading}>
+                        {t('pages.profile.buttons.save')}
+                    </Button>
+                </form>
+            </Form>
+        </div>
     );
 }

@@ -1,103 +1,152 @@
-import DangerButton from '@/Components/DangerButton';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
-import TextInput from '@/Components/TextInput';
-import { useForm } from '@inertiajs/react';
-import { FormEventHandler, useRef, useState } from 'react';
+import { Alert, AlertDescription } from '@/Components/UI/alert';
+import { Button } from '@/Components/UI/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/Components/UI/dialog';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/Components/UI/form';
+import { Input } from '@/Components/UI/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { router } from '@inertiajs/react';
+import axios from 'axios';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
-export default function DeleteUserForm({ className = '' }: { className?: string }) {
-    const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
-    const passwordInput = useRef<HTMLInputElement>(null);
+export default function DeleteUserForm() {
+    const { t } = useLaravelReactI18n();
+    const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
 
-    const {
-        data,
-        setData,
-        delete: destroy,
-        processing,
-        reset,
-        errors,
-        clearErrors,
-    } = useForm({
-        password: '',
+    const formSchema = z.object({
+        password: z.string().min(1, t('pages.profile.validations.password.required_for_deletion')),
     });
 
-    const confirmUserDeletion = () => {
-        setConfirmingUserDeletion(true);
-    };
+    type FormData = z.infer<typeof formSchema>;
 
-    const deleteUser: FormEventHandler = (e) => {
-        e.preventDefault();
+    const form = useForm<FormData>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            password: '',
+        },
+    });
 
-        destroy(route('profile.destroy'), {
-            preserveScroll: true,
-            onSuccess: () => closeModal(),
-            onError: () => passwordInput.current?.focus(),
-            onFinish: () => reset(),
-        });
-    };
+    const onSubmit = async (values: FormData) => {
+        setLoading(true);
 
-    const closeModal = () => {
-        setConfirmingUserDeletion(false);
+        try {
+            await axios.delete(route('profile.destroy'), {
+                data: values,
+            });
 
-        clearErrors();
-        reset();
+            toast.success(t('pages.profile.messages.success.delete'));
+
+            // Redirect to home page
+            router.visit(route('welcome'));
+        } catch (error: any) {
+            console.error(error);
+
+            if (error.response?.data?.errors) {
+                // Set form errors
+                Object.entries(error.response.data.errors).forEach(
+                    ([key, errorMessages]: [string, any]) => {
+                        form.setError(key as any, {
+                            type: 'manual',
+                            message: errorMessages[0],
+                        });
+                    },
+                );
+            } else {
+                toast.error(t('pages.profile.messages.error.delete'));
+            }
+
+            setLoading(false);
+        }
     };
 
     return (
-        <section className={`space-y-6 ${className}`}>
-            <header>
-                <h2 className='text-lg font-medium text-gray-900'>Delete Account</h2>
+        <div className='space-y-6'>
+            <div>
+                <h2 className='text-lg font-medium'>
+                    {t('pages.profile.sections.delete_account')}
+                </h2>
+                <p className='mt-1 text-sm'>{t('pages.profile.descriptions.delete_account')}</p>
+            </div>
 
-                <p className='mt-1 text-sm text-gray-600'>
-                    Once your account is deleted, all of its resources and data will be permanently
-                    deleted. Before deleting your account, please download any data or information
-                    that you wish to retain.
-                </p>
-            </header>
+            <Alert variant='destructive'>
+                <AlertDescription>{t('pages.profile.warnings.delete_account')}</AlertDescription>
+            </Alert>
 
-            <DangerButton onClick={confirmUserDeletion}>Delete Account</DangerButton>
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                    <Button variant='destructive'>
+                        {t('pages.profile.buttons.delete_account')}
+                    </Button>
+                </DialogTrigger>
 
-            <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                <form onSubmit={deleteUser} className='p-6'>
-                    <h2 className='text-lg font-medium text-gray-900'>
-                        Are you sure you want to delete your account?
-                    </h2>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('pages.profile.delete_dialog.title')}</DialogTitle>
+                        <DialogDescription>
+                            {t('pages.profile.delete_dialog.description')}
+                        </DialogDescription>
+                    </DialogHeader>
 
-                    <p className='mt-1 text-sm text-gray-600'>
-                        Once your account is deleted, all of its resources and data will be
-                        permanently deleted. Please enter your password to confirm you would like to
-                        permanently delete your account.
-                    </p>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+                            <FormField
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>{t('pages.profile.fields.password')}</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type='password'
+                                                {...field}
+                                                autoComplete='current-password'
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                                name='password'
+                                control={form.control}
+                            />
 
-                    <div className='mt-6'>
-                        <InputLabel value='Password' htmlFor='password' className='sr-only' />
-
-                        <TextInput
-                            value={data.password}
-                            type='password'
-                            ref={passwordInput}
-                            placeholder='Password'
-                            onChange={(e) => setData('password', e.target.value)}
-                            name='password'
-                            isFocused
-                            id='password'
-                            className='mt-1 block w-3/4'
-                        />
-
-                        <InputError message={errors.password} className='mt-2' />
-                    </div>
-
-                    <div className='mt-6 flex justify-end'>
-                        <SecondaryButton onClick={closeModal}>Cancel</SecondaryButton>
-
-                        <DangerButton disabled={processing} className='ms-3'>
-                            Delete Account
-                        </DangerButton>
-                    </div>
-                </form>
-            </Modal>
-        </section>
+                            <DialogFooter>
+                                <Button
+                                    variant='outline'
+                                    type='button'
+                                    onClick={() => setOpen(false)}
+                                >
+                                    {t('pages.profile.buttons.cancel')}
+                                </Button>
+                                <Button
+                                    variant='destructive'
+                                    type='submit'
+                                    loading={loading}
+                                    disabled={loading}
+                                >
+                                    {t('pages.profile.buttons.confirm_delete')}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
+        </div>
     );
 }

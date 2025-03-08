@@ -9,4 +9,6 @@ export interface User extends Model {
     remember_token?: string | null;
     image_url?: string | null;
     image_path?: string | null;
+    profile_image?: string | null;
+    profile_image_path?: string | null;
 }

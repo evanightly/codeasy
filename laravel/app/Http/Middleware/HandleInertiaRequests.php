@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -44,9 +45,8 @@ class HandleInertiaRequests extends Middleware {
             ],
             'auth' => [
                 'user' => array_merge(
-                    optional($user)->toArray() ?? [],
+                    $request->user() ? UserResource::make($request->user())->toArray($request) : [],
                     [
-                        'image' => optional($user)->image ?? null,
                         'roles' => optional($user)->roles?->pluck('name')->toArray() ?? [],
                         'permissions' => optional($user)->getAllPermissions()?->pluck('name')->toArray() ?? [],
                         'administeredSchools' => optional($user)?->administeredSchools()?->pluck('schools.id')->toArray() ?? [],

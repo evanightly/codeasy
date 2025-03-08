@@ -19,7 +19,7 @@ class LearningMaterialQuestionService extends BaseCrudService implements Learnin
      *
      * @var string
      */
-    protected $baseDirectory = 'learning_material_questions';
+    protected $baseDirectory = 'learning-material-questions';
 
     public function create(array $data): ?Model {
         // Auto-calculate order_number if not provided or empty

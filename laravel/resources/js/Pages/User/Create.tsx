@@ -1,3 +1,4 @@
+import { FilePondUploader } from '@/Components/FilePondUploader';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { Checkbox } from '@/Components/UI/checkbox';
@@ -17,6 +18,7 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -25,6 +27,7 @@ export default function Create() {
     const { t } = useLaravelReactI18n();
     const createMutation = userServiceHook.useCreate();
     const { data: roles, isLoading } = roleServiceHook.useGetAll();
+    const [profileImage, setProfileImage] = useState<File | null>(null);
 
     const formSchema = z
         .object({
@@ -58,25 +61,53 @@ export default function Create() {
     });
 
     const handleSubmit = async (values: FormData) => {
-        const data = {
-            ...values,
-            password: values.password,
-            password_confirmation: values.password_confirmation,
-        };
+        if (profileImage) {
+            const formData = new FormData();
+            Object.keys(values).forEach((key) => {
+                if (key === 'role_ids' && Array.isArray(values.role_ids)) {
+                    values.role_ids.forEach((roleId) => {
+                        formData.append('role_ids[]', roleId.toString());
+                    });
+                } else {
+                    formData.append(key, values[key as keyof FormData] as string);
+                }
+            });
+            formData.append('profile_image', profileImage);
 
-        toast.promise(
-            createMutation.mutateAsync({
-                data,
-            }),
-            {
-                loading: t('pages.user.common.messages.pending.create'),
-                success: () => {
-                    router.visit(route(`${ROUTES.USERS}.index`));
-                    return t('pages.user.common.messages.success.create');
+            toast.promise(
+                createMutation.mutateAsync({
+                    data: formData,
+                }),
+                {
+                    loading: t('pages.user.common.messages.pending.create'),
+                    success: () => {
+                        router.visit(route(`${ROUTES.USERS}.index`));
+                        return t('pages.user.common.messages.success.create');
+                    },
+                    error: t('pages.user.common.messages.error.create'),
                 },
-                error: t('pages.user.common.messages.error.create'),
-            },
-        );
+            );
+        } else {
+            const data = {
+                ...values,
+                password: values.password,
+                password_confirmation: values.password_confirmation,
+            };
+
+            toast.promise(
+                createMutation.mutateAsync({
+                    data,
+                }),
+                {
+                    loading: t('pages.user.common.messages.pending.create'),
+                    success: () => {
+                        router.visit(route(`${ROUTES.USERS}.index`));
+                        return t('pages.user.common.messages.success.create');
+                    },
+                    error: t('pages.user.common.messages.error.create'),
+                },
+            );
+        }
     };
 
     return (
@@ -86,6 +117,20 @@ export default function Create() {
                     <CardTitle>{t('pages.user.create.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
+                    <div className='mb-6 w-full max-w-sm'>
+                        <FilePondUploader
+                            value={profileImage}
+                            onChange={setProfileImage}
+                            maxFileSize='1MB'
+                            labelIdle={t('pages.user.common.fields.profile_image')}
+                            className='mb-1'
+                            acceptedFileTypes={['image/png', 'image/jpeg', 'image/jpg']}
+                        />
+                        <p className='mt-1 text-xs text-gray-500'>
+                            {t('pages.profile.upload.hint')}
+                        </p>
+                    </div>
+
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
                             <FormField
