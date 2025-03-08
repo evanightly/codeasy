@@ -1,46 +1,45 @@
 'use client';
 
 import { ny } from '@/Lib/Utils';
-import type { HTMLMotionProps } from 'framer-motion';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 interface WordRotateProps {
     words: string[];
-    duration?: number;
-    framerProps?: HTMLMotionProps<'h1'>;
     className?: string;
+    interval?: number;
 }
 
-export default function WordRotate({
-    words,
-    duration = 2500,
-    framerProps = {
-        initial: { opacity: 0, y: -50 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: 50 },
-        transition: { duration: 0.25, ease: 'easeOut' },
-    },
-    className,
-}: WordRotateProps) {
-    const [index, setIndex] = useState(0);
+const WordRotate = ({ words, className, interval = 3000 }: WordRotateProps) => {
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setIndex((prevIndex) => (prevIndex + 1) % words.length);
-        }, duration);
+        if (words.length <= 1) return;
 
-        // Clean up interval on unmount
-        return () => clearInterval(interval);
-    }, [words, duration]);
+        const timer = setInterval(() => {
+            setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
+        }, interval);
+
+        return () => clearInterval(timer);
+    }, [words, interval]);
 
     return (
-        <div className='overflow-hidden py-2'>
+        <span className={ny('relative inline-block', className)}>
             <AnimatePresence mode='wait'>
-                <motion.h1 key={words[index]} className={ny(className)} {...framerProps}>
-                    {words[index]}
-                </motion.h1>
+                <motion.span
+                    transition={{ duration: 0.5 }}
+                    key={currentIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className='inline-block'
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    {words[currentIndex]}
+                </motion.span>
             </AnimatePresence>
-        </div>
+            {/* Remove the underline from here - it will be managed by the parent */}
+        </span>
     );
-}
+};
+
+export default WordRotate;
