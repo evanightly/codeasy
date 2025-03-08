@@ -9,16 +9,23 @@ use App\Models\LearningMaterial;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\LearningMaterialServiceInterface;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
-class LearningMaterialController extends Controller {
+class LearningMaterialController extends Controller implements HasMiddleware {
     public function __construct(protected LearningMaterialServiceInterface $learningMaterialService) {}
 
     public static function middleware(): array {
+        $learningMaterialReadPermissions = [
+            PermissionEnum::LEARNING_MATERIAL_READ->value,
+            PermissionEnum::LEARNING_MATERIAL_QUESTION_CREATE->value,
+            PermissionEnum::LEARNING_MATERIAL_QUESTION_READ->value,
+        ];
+
         return [
             new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_CREATE->value, only: ['create', 'store']),
             new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_UPDATE->value, only: ['edit', 'update']),
-            new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_READ->value, only: ['index', 'show']),
+            self::createPermissionMiddleware($learningMaterialReadPermissions, ['index', 'show']),
             new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_DELETE->value, only: ['destroy']),
         ];
     }

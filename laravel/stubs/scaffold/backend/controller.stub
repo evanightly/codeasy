@@ -8,10 +8,11 @@ use App\Http\Resources\{{ modelName }}Resource;
 use App\Models\{{ modelName }};
 use App\Support\Interfaces\Services\{{ modelName }}ServiceInterface;
 use Illuminate\Http\Request;
-use App\Support\Enums\PermissionEnum;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use App\Support\Enums\PermissionEnum;
 
-class {{ modelName }}Controller extends Controller {
+class {{ modelName }}Controller extends Controller implements HasMiddleware {
     public function __construct(protected {{ modelName }}ServiceInterface ${{ modelNameCamel }}Service) {}
 
     public static function middleware(): array {

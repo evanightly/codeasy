@@ -23,12 +23,14 @@ class UserController extends Controller implements HasMiddleware {
             PermissionEnum::CLASS_ROOM_STUDENT_CREATE->value,
             PermissionEnum::CLASS_ROOM_STUDENT_READ->value,
             PermissionEnum::CLASS_ROOM_STUDENT_UPDATE->value,
+            PermissionEnum::SCHOOL_REQUEST_CREATE->value,
+            PermissionEnum::SCHOOL_REQUEST_READ->value,
         ];
 
         return [
             new Middleware('permission:' . PermissionEnum::USER_CREATE->value, only: ['create', 'store']),
             new Middleware('permission:' . PermissionEnum::USER_UPDATE->value, only: ['edit', 'update']),
-            self::createPermissionMiddleware($userReadPermissions, ['index', 'show']), // Using default 'permission' type
+            self::createPermissionMiddleware($userReadPermissions, ['index', 'show']),
             new Middleware('permission:' . PermissionEnum::USER_DELETE->value, only: ['destroy']),
         ];
     }

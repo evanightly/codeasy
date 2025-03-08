@@ -9,16 +9,17 @@ use App\Models\LearningMaterialQuestionTestCase;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\LearningMaterialQuestionTestCaseServiceInterface;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
-class LearningMaterialQuestionTestCaseController extends Controller {
+class LearningMaterialQuestionTestCaseController extends Controller implements HasMiddleware {
     public function __construct(protected LearningMaterialQuestionTestCaseServiceInterface $learningMaterialQuestionTestCaseService) {}
 
     public static function middleware(): array {
         return [
             new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_CREATE->value, only: ['create', 'store']),
             new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_UPDATE->value, only: ['edit', 'update']),
-            new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_READ->value, only: ['index', 'show']),
+            self::createPermissionMiddleware([PermissionEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_READ->value], ['index', 'show']),
             new Middleware('permission:' . PermissionEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_DELETE->value, only: ['destroy']),
         ];
     }

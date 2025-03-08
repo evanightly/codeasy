@@ -10,16 +10,23 @@ use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\SchoolRequestServiceInterface;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
-class SchoolRequestController extends Controller {
+class SchoolRequestController extends Controller implements HasMiddleware {
     public function __construct(protected SchoolRequestServiceInterface $schoolRequestService) {}
 
     public static function middleware(): array {
+
+        $schoolRequestReadPermissions = [
+            PermissionEnum::SCHOOL_REQUEST_READ->value,
+            // PermissionEnum::SCHOOL_ADMIN->value,
+        ];
+
         return [
             new Middleware('permission:' . PermissionEnum::SCHOOL_REQUEST_CREATE->value, only: ['create', 'store']),
             new Middleware('permission:' . PermissionEnum::SCHOOL_REQUEST_UPDATE->value, only: ['edit', 'update']),
-            new Middleware('permission:' . PermissionEnum::SCHOOL_REQUEST_READ->value, only: ['index', 'show']),
+            self::createPermissionMiddleware($schoolRequestReadPermissions, ['index', 'show']),
             new Middleware('permission:' . PermissionEnum::SCHOOL_REQUEST_DELETE->value, only: ['destroy']),
         ];
     }

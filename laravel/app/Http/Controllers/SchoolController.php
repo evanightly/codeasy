@@ -10,16 +10,25 @@ use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\SchoolServiceInterface;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
-class SchoolController extends Controller {
+class SchoolController extends Controller implements HasMiddleware {
     public function __construct(protected SchoolServiceInterface $schoolService) {}
 
     public static function middleware(): array {
+        // Define permissions that should grant access to school listing
+        $schoolReadPermissions = [
+            PermissionEnum::SCHOOL_READ->value,
+            PermissionEnum::SCHOOL_REQUEST_CREATE->value,
+            PermissionEnum::SCHOOL_REQUEST_READ->value,
+            PermissionEnum::CLASS_ROOM_CREATE->value,
+        ];
+
         return [
             new Middleware('permission:' . PermissionEnum::SCHOOL_CREATE->value, only: ['create', 'store']),
             new Middleware('permission:' . PermissionEnum::SCHOOL_UPDATE->value, only: ['edit', 'update']),
-            new Middleware('permission:' . PermissionEnum::SCHOOL_READ->value, only: ['index', 'show']),
+            self::createPermissionMiddleware($schoolReadPermissions, ['index', 'show']),
             new Middleware('permission:' . PermissionEnum::SCHOOL_DELETE->value, only: ['destroy']),
         ];
     }
