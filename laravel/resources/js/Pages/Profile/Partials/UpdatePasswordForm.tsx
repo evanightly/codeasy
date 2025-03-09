@@ -79,12 +79,8 @@ export default function UpdatePasswordForm() {
     return (
         <div className='space-y-6'>
             <div>
-                <h2 className='text-lg font-medium '>
-                    {t('pages.profile.sections.password')}
-                </h2>
-                <p className='mt-1 text-sm '>
-                    {t('pages.profile.descriptions.password')}
-                </p>
+                <h2 className='text-lg font-medium'>{t('pages.profile.sections.password')}</h2>
+                <p className='mt-1 text-sm'>{t('pages.profile.descriptions.password')}</p>
             </div>
 
             <Form {...form}>
