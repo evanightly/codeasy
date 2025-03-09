@@ -6,20 +6,20 @@ use App\Http\Requests\ExecutionResult\StoreExecutionResultRequest;
 use App\Http\Requests\ExecutionResult\UpdateExecutionResultRequest;
 use App\Http\Resources\ExecutionResultResource;
 use App\Models\ExecutionResult;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\ExecutionResultServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use App\Support\Enums\PermissionEnum;
 
 class ExecutionResultController extends Controller implements HasMiddleware {
     public function __construct(protected ExecutionResultServiceInterface $executionResultService) {}
 
     public static function middleware(): array {
         return [
-            self::createPermissionMiddleware([PermissionEnum::e_x_e_c_u_t_i_o_n_r_e_s_u_l_t_CREATE->value], ['create', 'store']),
-            self::createPermissionMiddleware([PermissionEnum::e_x_e_c_u_t_i_o_n_r_e_s_u_l_t_UPDATE->value], ['edit', 'update']),
-            self::createPermissionMiddleware([PermissionEnum::e_x_e_c_u_t_i_o_n_r_e_s_u_l_t_READ->value], ['index', 'show']),
-            self::createPermissionMiddleware([PermissionEnum::e_x_e_c_u_t_i_o_n_r_e_s_u_l_t_DELETE->value], ['destroy']),
+            self::createPermissionMiddleware([PermissionEnum::EXECUTION_RESULT_CREATE->value], ['create', 'store']),
+            self::createPermissionMiddleware([PermissionEnum::EXECUTION_RESULT_UPDATE->value], ['edit', 'update']),
+            self::createPermissionMiddleware([PermissionEnum::EXECUTION_RESULT_READ->value], ['index', 'show']),
+            self::createPermissionMiddleware([PermissionEnum::EXECUTION_RESULT_DELETE->value], ['destroy']),
         ];
     }
 

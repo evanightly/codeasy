@@ -16,10 +16,10 @@ class StudentScoreController extends Controller implements HasMiddleware {
 
     public static function middleware(): array {
         return [
-            self::createPermissionMiddleware([PermissionEnum::s_t_u_d_e_n_t_s_c_o_r_e_CREATE->value], ['create', 'store']),
-            self::createPermissionMiddleware([PermissionEnum::s_t_u_d_e_n_t_s_c_o_r_e_UPDATE->value], ['edit', 'update']),
-            self::createPermissionMiddleware([PermissionEnum::s_t_u_d_e_n_t_s_c_o_r_e_READ->value], ['index', 'show']),
-            self::createPermissionMiddleware([PermissionEnum::s_t_u_d_e_n_t_s_c_o_r_e_DELETE->value], ['destroy']),
+            self::createPermissionMiddleware([PermissionEnum::STUDENT_SCORE_CREATE->value], ['create', 'store']),
+            self::createPermissionMiddleware([PermissionEnum::STUDENT_SCORE_UPDATE->value], ['edit', 'update']),
+            self::createPermissionMiddleware([PermissionEnum::STUDENT_SCORE_READ->value], ['index', 'show']),
+            self::createPermissionMiddleware([PermissionEnum::STUDENT_SCORE_DELETE->value], ['destroy']),
         ];
     }
 
