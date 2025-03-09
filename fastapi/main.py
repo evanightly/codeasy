@@ -32,10 +32,16 @@ class JupyterKernelManager:
                 content = msg['content']
 
                 if msg_type == 'stream':
-                    outputs.append({
-                        "type": "text",
-                        "content": content['text'].strip()
-                    })
+                    # Split stream outputs by newlines to separate print statements
+                    text_content = content['text'].strip()
+                    if text_content:
+                        lines = text_content.split('\n')
+                        for line in lines:
+                            if line.strip():  # Only add non-empty lines
+                                outputs.append({
+                                    "type": "text",
+                                    "content": line.strip()
+                                })
                 
                 elif msg_type == 'display_data' or msg_type == 'execute_result':
                     if 'image/png' in content.get('data', {}):
