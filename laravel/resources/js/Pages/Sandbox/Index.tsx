@@ -1,83 +1,19 @@
+import CodeEditor from '@/Components/CodeEditor';
 import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
 import { Button } from '@/Components/UI/button';
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/Components/UI/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/Components/UI/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/UI/tooltip';
-import { useDarkMode } from '@/Contexts/ThemeContext';
-import { ny } from '@/Lib/Utils';
-import { python } from '@codemirror/lang-python';
+import { ProgrammingLanguageEnum } from '@/Support/Enums/programmingLanguageEnum';
 import { Head } from '@inertiajs/react';
-import * as codemirrorThemes from '@uiw/codemirror-themes-all';
-import CodeMirror from '@uiw/react-codemirror';
-import {
-    AlertCircle,
-    Check,
-    ChevronsUpDown,
-    Ellipsis,
-    Loader2,
-    Moon,
-    Redo2,
-    Sun,
-} from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { AlertCircle, Ellipsis, Loader2, Redo2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const THEMES = [
-    'dark',
-    'light',
-    'abcdef',
-    'abyss',
-    'androidstudio',
-    'atomone',
-    'aura',
-    'bbedit',
-    'bespin',
-    'darcula',
-    'dracula',
-    'duotoneDark',
-    'duotoneLight',
-    'eclipse',
-    'githubDark',
-    'githubLight',
-    'gruvboxDark',
-    'gruvboxLight',
-    'kimbie',
-    'material',
-    'materialDark',
-    'materialLight',
-    'monokai',
-    'monokaiDimmed',
-    'noctisLilac',
-    'nord',
-    'okaidia',
-    'quietlight',
-    'red',
-    'solarizedDark',
-    'solarizedLight',
-    'sublime',
-    'tokyoNight',
-    'tokyoNightDay',
-    'tokyoNightStorm',
-    'tomorrowNightBlue',
-    'vscodeDark',
-    'xcodeDark',
-    'xcodeLight',
-] as const;
+// Remove THEMES constant as it's now handled by CodeEditor component
 
 export default function Index() {
     const [isCompiling, setIsCompiling] = useState(false);
     const [code, setCode] = useState("print('Test')");
     const [output, setOutput] = useState([]);
-    const [themeComboboxOpen, setThemeComboboxOpen] = useState(false);
-    const [theme, setTheme] = useState((codemirrorThemes as Record<string, any>)['monokai']);
-    const [selectedThemeName, setSelectedThemeName] = useState('monokai');
-    const { isDarkMode, toggleDarkMode } = useDarkMode();
+    // Remove theme-related states as they're handled by CodeEditor
 
     const handleSubmit = async (e?: any) => {
         // Make e optional since we'll call this without an event from keyboard
@@ -112,15 +48,11 @@ export default function Index() {
         };
     }, [code]); // Add code as dependency to ensure we have latest code state
 
-    const onChange = useCallback((val: any, viewUpdate: any) => {
+    const handleCodeChange = (val: string) => {
         setCode(val);
-    }, []);
-
-    const handleThemeChange = (themeName: string) => {
-        setSelectedThemeName(themeName);
-        setTheme((codemirrorThemes as Record<string, any>)[themeName]);
-        setThemeComboboxOpen(false);
     };
+
+    // Remove handleThemeChange as it's now handled by CodeEditor
 
     return (
         <>
@@ -138,57 +70,7 @@ export default function Index() {
                 </div>
                 <div className='flex flex-col gap-5 px-5 lg:flex-row'>
                     <div className='flex flex-1 flex-col gap-5'>
-                        <div className='flex gap-5'>
-                            <Popover open={themeComboboxOpen} onOpenChange={setThemeComboboxOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant='outline'
-                                        role='combobox'
-                                        // aria-expanded={open}
-                                        className='w-[200px] justify-between'
-                                    >
-                                        {selectedThemeName}
-                                        <ChevronsUpDown className='opacity-50' />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className='w-[200px] p-0'>
-                                    <Command>
-                                        <CommandInput
-                                            placeholder='Search theme...'
-                                            className='border-none focus:ring-0'
-                                        />
-                                        <CommandList>
-                                            <CommandEmpty>No theme found.</CommandEmpty>
-                                            <CommandGroup>
-                                                {THEMES.map((themeName) => (
-                                                    <CommandItem
-                                                        value={themeName}
-                                                        onSelect={handleThemeChange}
-                                                        key={themeName}
-                                                    >
-                                                        {themeName}
-                                                        <Check
-                                                            className={ny(
-                                                                'ml-auto',
-                                                                selectedThemeName === themeName
-                                                                    ? 'opacity-100'
-                                                                    : 'opacity-0',
-                                                            )}
-                                                        />
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-
-                            <Button variant='outline' size='icon' onClick={toggleDarkMode}>
-                                {isDarkMode ? <Sun /> : <Moon />}
-                            </Button>
-                        </div>
-
-                        <div className='flex'>
+                        <div className='flex w-full flex-1 border'>
                             <div className='flex flex-col gap-5 border bg-background-2 p-5'>
                                 <Button size='icon'>
                                     <PythonIcon />
@@ -207,13 +89,14 @@ export default function Index() {
                                 </TooltipProvider>
                             </div>
 
-                            <CodeMirror
+                            <CodeEditor
                                 value={code}
-                                theme={theme}
-                                onChange={onChange}
+                                showThemePicker={true}
+                                onChange={handleCodeChange}
+                                language={ProgrammingLanguageEnum.PYTHON}
                                 height='500px'
-                                extensions={[python()]}
-                                className='w-full'
+                                headerClassName='ml-4 mt-3'
+                                className='flex-1'
                             />
                         </div>
 

@@ -16,6 +16,7 @@ import { java } from '@codemirror/lang-java';
 import { javascript } from '@codemirror/lang-javascript';
 import { php } from '@codemirror/lang-php';
 import { python } from '@codemirror/lang-python';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import * as codemirrorThemes from '@uiw/codemirror-themes-all';
 import CodeMirror from '@uiw/react-codemirror';
 import { Check, ChevronsUpDown, Moon, Sun } from 'lucide-react';
@@ -70,6 +71,8 @@ interface CodeEditorProps {
     showThemePicker?: boolean;
     language?: ProgrammingLanguageEnum;
     label?: string;
+    className?: string;
+    headerClassName?: string;
 }
 
 export default function CodeEditor({
@@ -79,10 +82,17 @@ export default function CodeEditor({
     showThemePicker = true,
     language = ProgrammingLanguageEnum.PYTHON,
     label,
+    className,
+    headerClassName,
 }: CodeEditorProps) {
     const [themeComboboxOpen, setThemeComboboxOpen] = useState(false);
-    const [theme, setTheme] = useState((codemirrorThemes as Record<string, any>)['monokai']);
-    const [selectedThemeName, setSelectedThemeName] = useState('monokai');
+    const [selectedThemeName, setSelectedThemeName] = useLocalStorage(
+        'code-editor-theme',
+        'monokai',
+    );
+    const [theme, setTheme] = useState(
+        () => (codemirrorThemes as Record<string, any>)[selectedThemeName],
+    );
     const { isDarkMode, toggleDarkMode } = useDarkMode();
 
     const handleCodeChange = useCallback(
@@ -97,6 +107,11 @@ export default function CodeEditor({
         setTheme((codemirrorThemes as Record<string, any>)[themeName]);
         setThemeComboboxOpen(false);
     };
+
+    // Update theme when selectedThemeName changes (from localStorage)
+    useEffect(() => {
+        setTheme((codemirrorThemes as Record<string, any>)[selectedThemeName]);
+    }, [selectedThemeName]);
 
     const getLanguageExtension = () => {
         switch (language) {
@@ -124,11 +139,11 @@ export default function CodeEditor({
     }, [language]);
 
     return (
-        <div className='flex flex-col gap-3'>
+        <div className={ny('flex flex-col gap-3', className)}>
             {label && <label className='text-sm font-medium'>{label}</label>}
             <div className='flex flex-col gap-3'>
                 {showThemePicker && (
-                    <div className='flex gap-3'>
+                    <div className={ny('flex gap-3', headerClassName)}>
                         <Popover open={themeComboboxOpen} onOpenChange={setThemeComboboxOpen}>
                             <PopoverTrigger asChild>
                                 <Button
