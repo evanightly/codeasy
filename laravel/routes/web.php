@@ -6,6 +6,7 @@ use App\Http\Controllers\Course\LearningMaterial\LearningMaterialQuestion\Learni
 use App\Http\Controllers\Course\LearningMaterial\LearningMaterialQuestionController as CourseLearningMaterialQuestionController;
 use App\Http\Controllers\Course\LearningMaterialController as CourseLearningMaterialController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ExecutionResultController;
 use App\Http\Controllers\LearningMaterialController;
 use App\Http\Controllers\LearningMaterialQuestionController;
 use App\Http\Controllers\LearningMaterialQuestionTestCaseController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SchoolRequestController;
+use App\Http\Controllers\StudentScoreController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Http;
@@ -88,6 +90,7 @@ Route::post('/sandbox', function (\Illuminate\Http\Request $request) {
 
 Route::middleware('auth')->group(function () {
     Route::inertia('dashboard', 'Dashboard/Index')->name('dashboard.index');
+
     Route::resource('permissions', PermissionController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
@@ -101,6 +104,8 @@ Route::middleware('auth')->group(function () {
         ->parameters([
             'learning-material-question-test-cases' => 'testCase',
         ]);
+    Route::resource('execution-results', ExecutionResultController::class);
+    Route::resource('student-scores', StudentScoreController::class);
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

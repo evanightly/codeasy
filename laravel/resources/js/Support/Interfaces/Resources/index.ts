@@ -18,3 +18,6 @@ export * from './LearningMaterialQuestionResource';
 export * from './LearningMaterialResource';
 
 export * from './LearningMaterialQuestionTestCaseResource';
+
+export * from './StudentScoreResource';
+export * from './ExecutionResultResource';
