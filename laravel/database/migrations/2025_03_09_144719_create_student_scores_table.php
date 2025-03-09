@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('learning_material_question_id')->constrained()->onDelete('cascade');
+            $table->integer('coding_time')->default(0);
             $table->integer('score')->default(0);
             $table->boolean('completion_status')->default(false);
             $table->boolean('trial_status')->default(false);

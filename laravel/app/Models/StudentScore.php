@@ -10,7 +10,7 @@ class StudentScore extends Model {
      *
      * @var array<string>
      */
-    protected $fillable = ['user_id', 'learning_material_question_id', 'score', 'completion_status', 'trial_status'];
+    protected $fillable = ['user_id', 'learning_material_question_id', 'coding_time', 'score', 'completion_status', 'trial_status'];
 
     /**
      * The attributes that should be cast.

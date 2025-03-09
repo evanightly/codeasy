@@ -9,6 +9,7 @@ class UpdateStudentScoreRequest extends FormRequest {
         return [
             'user_id' => 'nullable|exists:users,id',
             'learning_material_question_id' => 'nullable|exists:learning_material_questions,id',
+            'coding_time' => 'nullable|integer',
             'score' => 'nullable|integer',
             'completion_status' => 'nullable|boolean',
             'trial_status' => 'nullable|boolean',

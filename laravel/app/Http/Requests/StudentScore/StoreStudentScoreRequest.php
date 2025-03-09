@@ -9,6 +9,7 @@ class StoreStudentScoreRequest extends FormRequest {
         return [
             'user_id' => 'required|exists:users,id',
             'learning_material_question_id' => 'required|exists:learning_material_questions,id',
+            'coding_time' => 'required|integer',
             'score' => 'required|integer',
             'completion_status' => 'required|boolean',
             'trial_status' => 'required|boolean',
