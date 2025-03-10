@@ -113,7 +113,6 @@ export default function Workspace({
 
         setIsCompiling(true);
         try {
-
             // TODO: implement using service hooks
             const response = await axios.post(route('student.questions.execute'), {
                 student_score_id: tracking.score_id,
@@ -169,6 +168,16 @@ export default function Workspace({
         } catch (error) {
             console.error('Failed to sync time:', error);
             return false;
+        }
+    };
+
+    const getTestResultBadgeVariant = (success: number, total: number) => {
+        if (success === 0) {
+            return 'destructive'; // red
+        } else if (success < total) {
+            return 'warning'; // partial
+        } else {
+            return 'success'; // all passed
         }
     };
 
@@ -538,12 +547,10 @@ export default function Workspace({
                                                                             )}
                                                                         </h4>
                                                                         <Badge
-                                                                            variant={
-                                                                                out.success ===
-                                                                                out.total_tests
-                                                                                    ? 'success'
-                                                                                    : 'destructive'
-                                                                            }
+                                                                            variant={getTestResultBadgeVariant(
+                                                                                out.success,
+                                                                                out.total_tests,
+                                                                            )}
                                                                         >
                                                                             {out.success}/
                                                                             {out.total_tests}

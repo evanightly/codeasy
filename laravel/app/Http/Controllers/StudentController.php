@@ -267,16 +267,25 @@ class StudentController extends Controller {
                 $results = $response->json();
 
                 // Check if all test cases passed
-                $allPassed = false;
+                // $allPassed = false;
+                // foreach ($results as $result) {
+                //     if (isset($result['type']) && $result['type'] === 'test_stats') {
+                //         $allPassed = $result['success'] === $result['total_tests'];
+                //         break;
+                //     }
+                // }
+
+                // Check if at least one test case passed
+                $somePassed = false;
                 foreach ($results as $result) {
                     if (isset($result['type']) && $result['type'] === 'test_stats') {
-                        $allPassed = $result['success'] === $result['total_tests'];
+                        $somePassed = $result['success'] > 0;
                         break;
                     }
                 }
 
                 // Only update the student score if not already completed
-                if ($allPassed && !$studentScore->completion_status) {
+                if ($somePassed && !$studentScore->completion_status) {
                     $this->studentScoreService->update($studentScore->id, [
                         'completion_status' => true,
                         'score' => 100,
@@ -296,7 +305,7 @@ class StudentController extends Controller {
 
                 return response()->json([
                     'output' => $processedResults,
-                    'success' => $allPassed,
+                    'success' => $somePassed,
                 ]);
             }
 
