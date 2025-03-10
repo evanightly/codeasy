@@ -1,6 +1,6 @@
 import { AnimatedGridPattern } from '@/Components/UI/animated-grid-pattern';
 import { Badge } from '@/Components/UI/badge';
-import { buttonVariants } from '@/Components/UI/button';
+import { Button, buttonVariants } from '@/Components/UI/button';
 import { Card, CardContent } from '@/Components/UI/card';
 import {
     DropdownMenu,
@@ -19,11 +19,11 @@ import { DashboardNavbarDarkModeToggler } from '@/Layouts/Components/Components/
 import { PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { Check, SwatchBook } from 'lucide-react';
+import { Check, Menu, SwatchBook, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react'; // Added useRef, useState, useEffect
 
 const SetTheme = () => {
-    const { isDarkMode, currentTheme, availableThemes, toggleDarkMode, setTheme } = useTheme();
+    const { currentTheme, availableThemes, setTheme } = useTheme();
 
     return (
         <DropdownMenu>
@@ -52,6 +52,8 @@ export default function Welcome({
     laravelVersion,
     phpVersion,
 }: PageProps<{ laravelVersion: string; phpVersion: string }>) {
+    const { isDarkMode } = useTheme();
+
     // For better accessibility and performance
     const prefersReducedMotion = useReducedMotion();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -215,29 +217,17 @@ print(cognitive_levels.value_counts())`;
                     </nav>
 
                     {/* Mobile Menu Button */}
-                    <button
+                    <Button
+                        variant='outline'
+                        size='icon'
                         onClick={toggleMenu}
                         className='inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary md:hidden'
                         aria-label='Toggle Navigation'
                         aria-expanded={isMenuOpen}
                         aria-controls='mobile-menu'
                     >
-                        <svg
-                            viewBox='0 0 24 24'
-                            className={`h-6 w-6 fill-current transition-transform ${isMenuOpen ? 'rotate-90' : ''}`}
-                        >
-                            {isMenuOpen ? (
-                                <path
-                                    strokeWidth='2'
-                                    strokeLinecap='round'
-                                    stroke='currentColor'
-                                    d='M6 18L18 6M6 6l12 12'
-                                />
-                            ) : (
-                                <path d='M4 5h16M4 12h16M4 19h16' />
-                            )}
-                        </svg>
-                    </button>
+                        {isMenuOpen ? <X /> : <Menu />}
+                    </Button>
                 </div>
 
                 {/* Mobile Menu */}
@@ -296,7 +286,7 @@ print(cognitive_levels.value_counts())`;
                 className='relative overflow-hidden bg-gradient-to-b from-background via-background to-background/90 pb-24 pt-16 md:pt-24'
             >
                 <div className='absolute inset-0 z-0'>
-                    {!prefersReducedMotion && (
+                    {!prefersReducedMotion && isDarkMode && (
                         <>
                             <Meteors number={20} />
                             <Particles size={2} quantity={100} className='absolute inset-0 z-0' />
