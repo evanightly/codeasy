@@ -9,7 +9,7 @@ use Illuminate\Database\Seeder;
 
 class CourseSeeder extends Seeder {
     private const TEST_DATA_COUNT = [
-        'courses_per_classroom' => 2,
+        'courses_per_classroom' => 3,
     ];
 
     public function run(): void {
@@ -48,32 +48,43 @@ class CourseSeeder extends Seeder {
             return $courses;
         }
 
-        $courseSubjects = [
-            'Introduction to Programming',
-            'Data Structures',
-            'Algorithms',
-            'Web Development',
-            'Database Systems',
-            'Software Engineering',
-            'Mobile App Development',
-            'Computer Networks',
-            'Operating Systems',
-            'Artificial Intelligence',
+        $dataScienceCourses = [
+            [
+                'name' => 'Introduction to Python for Data Science',
+                'description' => 'Learn the fundamentals of Python programming for data science, including basic syntax, data types, and importing essential libraries like NumPy and Pandas.',
+            ],
+            [
+                'name' => 'Data Analysis with Python',
+                'description' => 'Master data manipulation, cleaning, and analysis using Pandas and NumPy. Learn how to handle missing data, perform statistical operations, and prepare datasets for visualization.',
+            ],
+            [
+                'name' => 'Data Visualization with Python',
+                'description' => 'Create compelling data visualizations using Matplotlib, Seaborn, and Plotly. Learn to design charts, graphs, and interactive plots to effectively communicate insights from data.',
+            ],
+            [
+                'name' => 'Machine Learning Foundations with Python',
+                'description' => 'Introduction to machine learning concepts and implementation using scikit-learn. Learn regression, classification, clustering techniques, and model evaluation.',
+            ],
+            [
+                'name' => 'Advanced Python for Data Science',
+                'description' => 'Explore advanced techniques in Python for data science including time series analysis, natural language processing, and building complex visualization dashboards.',
+            ],
         ];
 
-        for ($i = 1; $i <= self::TEST_DATA_COUNT['courses_per_classroom']; $i++) {
+        // Create a subset of courses for each classroom
+        $coursesToCreate = min(count($dataScienceCourses), self::TEST_DATA_COUNT['courses_per_classroom']);
+        $selectedCourses = array_slice($dataScienceCourses, 0, $coursesToCreate);
+
+        foreach ($selectedCourses as $index => $courseData) {
             // Select a random teacher for this course
             $teacher = $teachers->random();
-
-            // Select a random course subject
-            $courseName = $courseSubjects[array_rand($courseSubjects)];
 
             $course = Course::create([
                 'class_room_id' => $classroom->id,
                 'teacher_id' => $teacher->id,
-                'name' => "$courseName - Class {$classroom->name}",
-                'description' => "This course covers the fundamentals of $courseName for students in {$classroom->name}.",
-                'active' => rand(0, 10) > 2, // 80% chance of being active
+                'name' => $courseData['name'],
+                'description' => $courseData['description'],
+                'active' => true, // All courses are active
             ]);
 
             $courses->push($course);

@@ -15,6 +15,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SchoolRequestController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentScoreController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
@@ -35,10 +36,9 @@ Route::get('/test-fastapi', function () {
     // Contoh data payload, seharusnya diisi dengan kode siswa dan testcase yang sesuai
     $payload = [
         'type' => 'sandbox',
-        'code' => "print('nama saya Arin')\nimport matplotlib.pyplot as plt\nplt.plot([25,231,32])\nplt.title('Visualisasi Siswa')\nplt.show()\nprint('okokokok')",
+        'code' => "def add_numbers(a, b):\n    return a + b\n\nprint('Result:', add_numbers(2, 3))",
         'testcases' => [
-            'self.assertEqual(2+2, 4)',
-            "self.assertTrue('Arin' in 'nama saya Arin')",
+            'self.assertEqual(add_numbers(2, 3), 5)',
         ],
     ];
 
@@ -130,6 +130,16 @@ Route::middleware('auth')->group(function () {
                     ->only(['index', 'show', 'create', 'edit']);
             });
         });
+    });
+
+    // TODO: refactor nested controllers to use Route::resource() instead
+    Route::prefix('student')->name('student.')->group(function () {
+        Route::get('/courses', [StudentController::class, 'courses'])->name('courses.index');
+        Route::get('/courses/{course}', [StudentController::class, 'showCourse'])->name('courses.show');
+        Route::get('/courses/{course}/materials/{material}', [StudentController::class, 'showMaterial'])->name('materials.show');
+        Route::get('/courses/{course}/materials/{material}/questions/{question}', [StudentController::class, 'showQuestion'])->name('questions.show');
+        Route::post('/questions/execute', [StudentController::class, 'executeCode'])->name('questions.execute');
+        Route::post('/questions/update-time', [StudentController::class, 'updateCodingTime'])->name('questions.update-time');
     });
 });
 

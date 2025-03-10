@@ -1174,4 +1174,82 @@ return [
             'description' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
         ],
     ],
+    'student_courses' => [
+        'common' => [
+            'fields' => [
+                'name' => 'Name',
+                'classroom' => 'Classroom',
+                'description' => 'Description',
+            ],
+        ],
+        'index' => [
+            'title' => 'My Courses',
+        ],
+        'show' => [
+            'title' => 'Course Details',
+        ],
+        'actions' => [
+            'back_to_list' => 'Back to List',
+            'back_to_home' => 'Back to Home',
+            'back_to_dashboard' => 'Back to Dashboard',
+            'back_to_courses' => 'Back to Courses',
+            'back_to_course' => 'Back to Course',
+            'back_to_material' => 'Back to Material',
+        ],
+    ],
+
+    'student_materials' => [
+        'common' => [
+            'fields' => [
+                'title' => 'Title',
+                'type' => 'Type',
+                'description' => 'Description',
+            ],
+        ],
+        'index' => [
+            'title' => 'Learning Materials',
+        ],
+        'show' => [
+            'title' => 'Material Details',
+            'progress' => 'Your Progress',
+            'questions' => 'Questions',
+            'completed' => ':count of :total questions completed',
+            'completed_label' => 'Completed',
+            'in_progress' => 'In Progress',
+            'score' => 'Score',
+            'continue' => 'Continue',
+            'start' => 'Start',
+        ],
+    ],
+
+    'student_questions' => [
+        'workspace' => [
+            'question' => 'Question',
+            'time' => 'Time',
+            'time_spent' => 'Time Spent',
+            'view_image' => 'Question Image',
+            'clue' => 'Hint',
+            'test_cases' => 'Test Cases',
+            'code' => 'Code',
+            'output' => 'Output',
+            'run' => 'Run Code',
+            'running' => 'Running',
+            'next' => 'Next Question',
+            'previous' => 'Previous Question',
+            'run_first' => 'You must run your code at least once to proceed',
+            'completed' => 'Completed',
+            'no_output_yet' => 'No output yet. Run your code to see results.',
+            'error' => 'Error',
+            'test_results' => 'Test Results',
+            'passed' => ' passed',
+            'success' => [
+                'title' => 'Congratulations!',
+                'description' => 'All tests passed successfully.',
+            ],
+            'error' => [
+                'title' => 'Error Running Code',
+                'description' => 'There was a problem executing your code. Please check for errors.',
+            ],
+        ],
+    ],
 ];

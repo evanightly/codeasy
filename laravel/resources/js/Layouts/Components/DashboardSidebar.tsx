@@ -24,6 +24,7 @@ import {
 import { ROUTES } from '@/Support/Constants/routes';
 import { PermissionEnum } from '@/Support/Enums/permissionEnum';
 import { MenuItem } from '@/Support/Interfaces/Others';
+import { usePage } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { DashboardSidebarHeader } from './Components/DashboardSidebarHeader';
 import { DashboardSidebarUser } from './Components/DashboardSidebarUser';
@@ -33,6 +34,8 @@ interface AppSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const DashboardSidebar = ({ ...props }: AppSidebarProps) => {
     const { t, currentLocale } = useLaravelReactI18n();
+    const { url } = usePage();
+
     const data = {
         teams: [
             {
@@ -131,8 +134,25 @@ const DashboardSidebar = ({ ...props }: AppSidebarProps) => {
                     },
                 ],
             },
+            {
+                type: 'group',
+                title: t('pages.student_courses.index.title'),
+                items: [
+                    {
+                        type: 'menu',
+                        title: t('pages.student_courses.index.title'),
+                        url: route('student.courses.index'),
+                        icon: School,
+                        isActive:
+                            url.startsWith('/student/courses') ||
+                            url.startsWith('/student/materials') ||
+                            url.startsWith('/student/questions'),
+                    },
+                ],
+                permission: null, // No special permission needed, shown to all students
+            },
         ],
-        [currentLocale],
+        [currentLocale, url],
     );
 
     return (

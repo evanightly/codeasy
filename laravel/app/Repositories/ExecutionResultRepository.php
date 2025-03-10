@@ -27,6 +27,24 @@ class ExecutionResultRepository extends BaseRepository implements ExecutionResul
         return $query;
     }
 
+    /**
+     * Find the latest execution result for a student score
+     *
+     * @return \App\Models\ExecutionResult|null
+     */
+    public function findLatestByStudentScore(int $studentScoreId) {
+        return ExecutionResult::where('student_score_id', $studentScoreId)
+            ->latest()
+            ->first();
+    }
+
+    /**
+     * Count the compilation attempts for a student score
+     */
+    public function countCompilationAttempts(int $studentScoreId): int {
+        return ExecutionResult::where('student_score_id', $studentScoreId)->count();
+    }
+
     protected function getModelClass(): string {
         return ExecutionResult::class;
     }

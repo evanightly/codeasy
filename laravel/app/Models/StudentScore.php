@@ -35,4 +35,11 @@ class StudentScore extends Model {
     public function question() {
         return $this->belongsTo(LearningMaterialQuestion::class, 'learning_material_question_id');
     }
+
+    /**
+     * Get the execution results for this student score.
+     */
+    public function executionResults() {
+        return $this->hasMany(ExecutionResult::class);
+    }
 }

@@ -27,6 +27,32 @@ class StudentScoreRepository extends BaseRepository implements StudentScoreRepos
         return $query;
     }
 
+    /**
+     * Find a student score by user and question IDs
+     *
+     * @return \App\Models\StudentScore|null
+     */
+    public function findByUserAndQuestion(int $userId, int $questionId) {
+        return StudentScore::where('user_id', $userId)
+            ->where('learning_material_question_id', $questionId)
+            ->first();
+    }
+
+    /**
+     * Get all completed questions for a user in a learning material
+     *
+     * @return array
+     */
+    public function getCompletedQuestionsByMaterial(int $userId, int $learningMaterialId) {
+        return StudentScore::where('user_id', $userId)
+            ->whereHas('question', function ($query) use ($learningMaterialId) {
+                $query->where('learning_material_id', $learningMaterialId);
+            })
+            ->where('completion_status', true)
+            ->pluck('learning_material_question_id')
+            ->toArray();
+    }
+
     protected function getModelClass(): string {
         return StudentScore::class;
     }

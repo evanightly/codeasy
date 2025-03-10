@@ -1,4 +1,5 @@
 export * from './DashboardMenuItem';
+export * from './FastApiOutput';
 export * from './GenericBreadcrumbItem';
 export * from './PaginateMeta';
 export * from './PaginateMetaLink';

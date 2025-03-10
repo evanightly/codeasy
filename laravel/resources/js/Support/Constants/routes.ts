@@ -20,6 +20,9 @@ export const ROUTES = {
     COURSE_LEARNING_MATERIALS: 'courses.learning-materials',
     COURSE_LEARNING_MATERIAL_QUESTIONS: 'courses.learning-materials.questions',
     COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES: 'courses.learning-materials.questions.test-cases',
-	STUDENT_SCORES: 'student-scores',
-	EXECUTION_RESULTS: 'execution-results',
-};
+    STUDENT_SCORES: 'student-scores',
+    EXECUTION_RESULTS: 'execution-results',
+    STUDENT_COURSES: 'student.courses',
+    STUDENT_MATERIALS: 'student.materials',
+    STUDENT_QUESTIONS: 'student.questions',
+} as const;
