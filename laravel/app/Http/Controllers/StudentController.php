@@ -12,28 +12,25 @@ use App\Support\Interfaces\Services\CourseServiceInterface;
 use App\Support\Interfaces\Services\ExecutionResultServiceInterface;
 use App\Support\Interfaces\Services\LearningMaterialServiceInterface;
 use App\Support\Interfaces\Services\StudentScoreServiceInterface;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
+use Inertia\Response;
 
 // TODO: refactor this controller to use services
 class StudentController extends Controller {
-    /**
-     * StudentController constructor.
-     */
     public function __construct(
-        protected StudentScoreServiceInterface $studentScoreService,
-        protected ExecutionResultServiceInterface $executionResultService,
+        protected CourseServiceInterface $courseService,
         protected LearningMaterialServiceInterface $learningMaterialService,
-        protected CourseServiceInterface $courseService
+        protected StudentScoreServiceInterface $studentScoreService,
+        protected ExecutionResultServiceInterface $executionResultService
     ) {}
 
     /**
      * Show the student's courses.
-     *
-     * @return \Inertia\Response
      */
-    public function courses() {
+    public function courses(): Response {
         $user = Auth::user();
 
         $courses = $this->courseService->with(['classroom'])->find([
@@ -61,10 +58,8 @@ class StudentController extends Controller {
 
     /**
      * Show course details with learning materials.
-     *
-     * @return \Inertia\Response
      */
-    public function showCourse(Course $course) {
+    public function showCourse(Course $course): Response {
         // Check if the user belongs to this course's classroom
         $user = Auth::user();
 
@@ -92,10 +87,8 @@ class StudentController extends Controller {
 
     /**
      * Show learning material details with questions.
-     *
-     * @return \Inertia\Response
      */
-    public function showMaterial(Course $course, LearningMaterial $material) {
+    public function showMaterial(Course $course, LearningMaterial $material): Response {
         // Check if the user belongs to this course's classroom
         $user = Auth::user();
 
@@ -126,10 +119,8 @@ class StudentController extends Controller {
 
     /**
      * Show question workspace for attempting a question.
-     *
-     * @return \Inertia\Response
      */
-    public function showQuestion(Course $course, LearningMaterial $material, LearningMaterialQuestion $question) {
+    public function showQuestion(Course $course, LearningMaterial $material, LearningMaterialQuestion $question): Response {
         // Check if the user belongs to this course's classroom
         $user = Auth::user();
 
@@ -173,7 +164,7 @@ class StudentController extends Controller {
                 ];
             });
 
-        // Get or create a student score entry
+        // Get or create a student score entry with compile_count initialized to 0
         $studentScore = StudentScore::firstOrCreate(
             [
                 'user_id' => $user->id,
@@ -184,6 +175,7 @@ class StudentController extends Controller {
                 'score' => 0,
                 'completion_status' => false,
                 'trial_status' => true,
+                'compile_count' => 0,  // Initialize compile_count to 0
             ]
         );
 
@@ -225,10 +217,8 @@ class StudentController extends Controller {
 
     /**
      * Execute code and return results.
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function executeCode(ExecuteCodeRequest $request) {
+    public function executeCode(ExecuteCodeRequest $request): JsonResponse {
         $user = Auth::user();
         $studentScoreId = $request->student_score_id;
         $code = $request->code;
@@ -246,11 +236,17 @@ class StudentController extends Controller {
         $question = $studentScore->question;
         $testCases = $question->testCases()->where('active', true)->get();
 
+        // If question is already completed, just execute the code without updating tracking data
+        if (!$studentScore->completion_status) {
+            // Increment compile count only if not completed
+            $studentScore->compile_count = (int) ($studentScore->compile_count ?? 0) + 1;
+            $studentScore->save();
+        }
+
         // Record the execution attempt
         $executionResult = $this->executionResultService->create([
             'student_score_id' => $studentScoreId,
             'code' => $code,
-            'compile_count' => $studentScore->executionResults()->count() + 1,
             'compile_status' => true, // We'll assume success initially
         ]);
 
@@ -279,8 +275,8 @@ class StudentController extends Controller {
                     }
                 }
 
-                // If all tests passed, update the student score
-                if ($allPassed) {
+                // Only update the student score if not already completed
+                if ($allPassed && !$studentScore->completion_status) {
                     $this->studentScoreService->update($studentScore->id, [
                         'completion_status' => true,
                         'score' => 100,
@@ -325,10 +321,8 @@ class StudentController extends Controller {
 
     /**
      * Update coding time for a question attempt.
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function updateCodingTime(UpdateTimeRequest $request) {
+    public function updateCodingTime(UpdateTimeRequest $request): JsonResponse {
         $user = Auth::user();
         $studentScoreId = $request->student_score_id;
         $seconds = $request->seconds;
@@ -342,10 +336,13 @@ class StudentController extends Controller {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Update the coding time
-        $this->studentScoreService->update($studentScoreId, [
-            'coding_time' => $seconds,
-        ]);
+        // Only update the coding time if the question is not already completed
+        if (!$studentScore->completion_status) {
+            // Update the coding time
+            $this->studentScoreService->update($studentScoreId, [
+                'coding_time' => $seconds,
+            ]);
+        }
 
         return response()->json(['success' => true]);
     }

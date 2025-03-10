@@ -13,7 +13,6 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('student_score_id')->constrained()->onDelete('cascade');
             $table->text('code');
-            $table->integer('compile_count')->default(0);
             $table->boolean('compile_status')->default(false);
             $table->string('output_image')->nullable();
             $table->timestamps();

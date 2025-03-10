@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->integer('score')->default(0); // Score out of 100
             $table->boolean('completion_status')->default(false); // Whether the question is completed
             $table->boolean('trial_status')->default(false); // Whether the student has attempted the question
+            $table->integer('compile_count')->default(0); // Number of times the student has compiled the code
             $table->timestamps();
 
             // Unique constraint to ensure one score per user per question

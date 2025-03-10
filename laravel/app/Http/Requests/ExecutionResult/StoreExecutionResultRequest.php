@@ -9,7 +9,6 @@ class StoreExecutionResultRequest extends FormRequest {
         return [
             'student_score_id' => ['required', 'exists:student_scores,id'],
             'code' => ['required', 'string'],
-            'compile_count' => ['nullable', 'integer', 'min:1'],
             'compile_status' => ['nullable', 'boolean'],
             'output_image' => ['nullable', 'string'],
         ];

@@ -10,7 +10,15 @@ class StudentScore extends Model {
      *
      * @var array<string>
      */
-    protected $fillable = ['user_id', 'learning_material_question_id', 'coding_time', 'score', 'completion_status', 'trial_status'];
+    protected $fillable = [
+        'user_id',
+        'learning_material_question_id',
+        'coding_time',
+        'score',
+        'completion_status',
+        'trial_status',
+        'compile_count', // Added compile_count here
+    ];
 
     /**
      * The attributes that should be cast.
@@ -20,6 +28,7 @@ class StudentScore extends Model {
     protected $casts = [
         'completion_status' => 'boolean',
         'trial_status' => 'boolean',
+        'compile_count' => 'integer',
     ];
 
     /**

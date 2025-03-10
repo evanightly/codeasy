@@ -10,7 +10,12 @@ class ExecutionResult extends Model {
      *
      * @var array<string>
      */
-    protected $fillable = ['student_score_id', 'code', 'compile_count', 'compile_status', 'output_image'];
+    protected $fillable = [
+        'student_score_id',
+        'code',
+        'compile_status',
+        'output_image',
+    ];
 
     /**
      * The attributes that should be cast.

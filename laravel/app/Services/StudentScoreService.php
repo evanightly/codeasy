@@ -147,4 +147,32 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
             'questions' => $progress,
         ];
     }
+
+    /**
+     * Override update method to prevent updating completed scores
+     * TODO: review later for array_diff_key usage
+     */
+    public function update($keyOrModel, array $data): ?Model {
+        $studentScore = $this->repository->find($keyOrModel);
+
+        // If the score is already completed, don't update tracking metrics
+        if ($studentScore && $studentScore->completion_status) {
+            // Still allow updates for non-tracking fields if needed
+            // But filter out tracking metrics
+            $data = array_diff_key($data, array_flip([
+                'coding_time',
+                'score',
+                'completion_status',
+                'trial_status',
+                'compile_count',
+            ]));
+
+            // If there's nothing left to update, return the current model
+            if (empty($data)) {
+                return $studentScore;
+            }
+        }
+
+        return parent::update($keyOrModel, $data);
+    }
 }
