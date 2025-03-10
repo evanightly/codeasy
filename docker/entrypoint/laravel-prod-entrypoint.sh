@@ -8,6 +8,7 @@ echo "=== Running NPM and Composer ==="
 composer install --no-dev --optimize-autoloader
 npm install
 npm run build
+composer dump-autoload
 
 echo "=== Running Artisan optimize commands ==="
 php artisan optimize:clear || true
