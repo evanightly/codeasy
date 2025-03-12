@@ -4,13 +4,18 @@ namespace Database\Seeders;
 
 use App\Models\ClassRoom;
 use App\Models\Course;
+use App\Services\Course\CourseImportService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class CourseSeeder extends Seeder {
     private const TEST_DATA_COUNT = [
         'courses_per_classroom' => 3,
     ];
+
+    // Path to look for Excel import file
+    private const EXCEL_IMPORT_PATH = 'imports/courses_import.xlsx';
 
     public function run(): void {
         if (app()->isProduction()) {
@@ -19,11 +24,41 @@ class CourseSeeder extends Seeder {
             return;
         }
 
+        // Check if we have an Excel file to import
+        $excelPath = $this->getExcelImportPath();
+
+        if ($excelPath && file_exists($excelPath)) {
+            $this->info('Found Excel import file. Importing courses from Excel...');
+            $this->importFromExcel($excelPath);
+
+            return;
+        }
+
+        // Fall back to default seeding if no Excel file is found
+        $this->info('No Excel import file found. Using default seeding data...');
         $this->seedDevelopmentData();
     }
 
     private function seedProductionData(): void {
         // Production data would go here if needed
+    }
+
+    private function importFromExcel($filePath): void {
+        $importer = app(CourseImportService::class);
+        $result = $importer->import($filePath);
+
+        if ($result['success']) {
+            $this->info('Excel import completed successfully:');
+            $this->info("- {$result['stats']['courses']} courses");
+            $this->info("- {$result['stats']['materials']} learning materials");
+            $this->info("- {$result['stats']['questions']} questions");
+            $this->info("- {$result['stats']['testCases']} test cases");
+        } else {
+            $this->error('Excel import failed: ' . $result['message']);
+            foreach ($result['errors'] as $error) {
+                $this->warn("- {$error}");
+            }
+        }
     }
 
     private function seedDevelopmentData(): void {
@@ -32,6 +67,24 @@ class CourseSeeder extends Seeder {
         foreach ($classrooms as $classroom) {
             $this->createCoursesForClassroom($classroom);
         }
+    }
+
+    /**
+     * Get the path to the Excel import file
+     */
+    private function getExcelImportPath(): ?string {
+        // Check storage/app directory first
+        if (Storage::exists(self::EXCEL_IMPORT_PATH)) {
+            return Storage::path(self::EXCEL_IMPORT_PATH);
+        }
+
+        // Check public directory as fallback
+        $publicPath = public_path('imports/courses_import.xlsx');
+        if (file_exists($publicPath)) {
+            return $publicPath;
+        }
+
+        return null;
     }
 
     /**
@@ -91,5 +144,26 @@ class CourseSeeder extends Seeder {
         }
 
         return $courses;
+    }
+
+    /**
+     * Output info message during seeding
+     */
+    private function info($message): void {
+        $this->command->info($message);
+    }
+
+    /**
+     * Output error message during seeding
+     */
+    private function error($message): void {
+        $this->command->error($message);
+    }
+
+    /**
+     * Output warning message during seeding
+     */
+    private function warn($message): void {
+        $this->command->warn($message);
     }
 }

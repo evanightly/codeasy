@@ -21,6 +21,7 @@ import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { MoreHorizontal } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
+import Import from './Partials/Import';
 
 interface CoursesProps {
     response?: UseQueryResult<PaginateResponse<CourseResource>, Error>;
@@ -137,12 +138,15 @@ const Courses = ({ response, filters, setFilters, baseKey, baseRoute }: CoursesP
                 }
 
                 return (
-                    <Link
-                        href={route(`${ROUTES.COURSES}.create`)}
-                        className={buttonVariants({ variant: 'create' })}
-                    >
-                        {t('pages.course.index.buttons.create')}
-                    </Link>
+                    <>
+                        <Link
+                            href={route(`${ROUTES.COURSES}.create`)}
+                            className={buttonVariants({ variant: 'create' })}
+                        >
+                            {t('pages.course.index.buttons.create')}
+                        </Link>
+                        <Import />
+                    </>
                 );
             }}
             data={response?.data?.data ?? []}

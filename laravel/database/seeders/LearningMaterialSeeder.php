@@ -20,6 +20,13 @@ class LearningMaterialSeeder extends Seeder {
             return;
         }
 
+        // Skip seeding if courses were imported from Excel
+        if ($this->wasExcelImportUsed()) {
+            $this->info('Skipping learning material seeding as courses were imported from Excel.');
+
+            return;
+        }
+
         $this->seedDevelopmentData();
     }
 
@@ -108,5 +115,23 @@ class LearningMaterialSeeder extends Seeder {
         }
 
         return $materials;
+    }
+
+    /**
+     * Check if the courses were imported from Excel
+     */
+    private function wasExcelImportUsed(): bool {
+        // Check for a marker file or environment variable that could be set by CourseSeeder
+        $excelPath = storage_path('app/imports/courses_import.xlsx');
+        $publicPath = public_path('imports/courses_import.xlsx');
+
+        return file_exists($excelPath) || file_exists($publicPath);
+    }
+
+    /**
+     * Output info message during seeding
+     */
+    private function info($message): void {
+        $this->command->info($message);
     }
 }
