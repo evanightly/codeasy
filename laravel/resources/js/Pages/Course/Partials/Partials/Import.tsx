@@ -42,23 +42,34 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
 
     // Inertia form for file upload progress
     const inertiaForm = useInertiaForm({
-        excel_file: null as File | null,
+        import_file: null as File | null,
     });
 
     // Define Zod schema for validation
     const formSchema = z.object({
-        excel_file: z
+        import_file: z
             .instanceof(File, { message: t('validation.required', { attribute: 'file' }) })
             .refine(
                 (file) =>
                     [
                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         'application/vnd.ms-excel',
-                    ].includes(file.type),
-                { message: t('validation.mimes', { attribute: 'file', values: '.xlsx, .xls' }) },
+                        'application/zip',
+                        'application/x-zip-compressed',
+                        'multipart/x-zip',
+                    ].includes(file.type) ||
+                    file.name.endsWith('.xlsx') ||
+                    file.name.endsWith('.xls') ||
+                    file.name.endsWith('.zip'),
+                {
+                    message: t('validation.mimes', {
+                        attribute: 'file',
+                        values: '.xlsx, .xls, .zip',
+                    }),
+                },
             )
-            .refine((file) => file.size <= 10 * 1024 * 1024, {
-                message: t('validation.max.file', { attribute: 'file', max: '10MB' }),
+            .refine((file) => file.size <= 50 * 1024 * 1024, {
+                message: t('validation.max.file', { attribute: 'file', max: '50MB' }),
             }),
     });
 
@@ -66,15 +77,15 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            excel_file: undefined,
+            import_file: undefined,
         },
     });
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            form.setValue('excel_file', file, { shouldValidate: true });
-            inertiaForm.setData('excel_file', file);
+            form.setValue('import_file', file, { shouldValidate: true });
+            inertiaForm.setData('import_file', file);
         }
     };
 
@@ -121,7 +132,7 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
         const formData = new FormData();
-        formData.append('excel_file', values.excel_file);
+        formData.append('import_file', values.import_file);
 
         toast.promise(courseImportMutation.mutateAsync(formData), {
             loading: t('pages.course.import.importing', {
@@ -136,7 +147,7 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                     if (response.data?.errors) {
                         Object.entries(response.data.errors).forEach(([key, messages]) => {
                             const message = Array.isArray(messages) ? messages[0] : messages;
-                            form.setError('excel_file' as any, { message: message as string });
+                            form.setError('import_file' as any, { message: message as string });
                         });
                     }
 
@@ -153,7 +164,7 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                 if (err.response?.data?.errors) {
                     Object.entries(err.response.data.errors).forEach(([key, messages]) => {
                         const message = Array.isArray(messages) ? messages[0] : messages;
-                        form.setError('excel_file' as any, { message: message as string });
+                        form.setError('import_file' as any, { message: message as string });
                     });
                 }
 
@@ -179,9 +190,32 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             const file = e.dataTransfer.files[0];
-            form.setValue('excel_file', file, { shouldValidate: true });
-            inertiaForm.setData('excel_file', file);
+            form.setValue('import_file', file, { shouldValidate: true });
+            inertiaForm.setData('import_file', file);
         }
+    };
+
+    // Get file type label for display
+    const getFileTypeLabel = (file?: File) => {
+        if (!file) return '';
+
+        if (
+            file.name.endsWith('.zip') ||
+            file.type === 'application/zip' ||
+            file.type === 'application/x-zip-compressed' ||
+            file.type === 'multipart/x-zip'
+        ) {
+            return 'ZIP';
+        } else if (
+            file.name.endsWith('.xlsx') ||
+            file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ) {
+            return 'Excel (XLSX)';
+        } else if (file.name.endsWith('.xls') || file.type === 'application/vnd.ms-excel') {
+            return 'Excel (XLS)';
+        }
+
+        return file.type;
     };
 
     return (
@@ -198,7 +232,8 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                     </DialogTitle>
                     <DialogDescription>
                         {t('pages.course.import.description', {
-                            defaultValue: 'Import courses from an Excel file',
+                            defaultValue:
+                                'Import courses from an Excel file or ZIP archive containing Excel and related files',
                         })}
                     </DialogDescription>
                 </DialogHeader>
@@ -247,7 +282,7 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                         <div className='mb-6 flex items-center justify-between'>
                             <h3 className='text-lg font-semibold'>
                                 {t('pages.course.import.upload_title', {
-                                    defaultValue: 'Upload Course Excel File',
+                                    defaultValue: 'Upload Course Import File',
                                 })}
                             </h3>
                             <Button
@@ -282,7 +317,7 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                                                     <p className='mb-2 text-center text-sm text-gray-700'>
                                                         {t('pages.course.import.drag_drop', {
                                                             defaultValue:
-                                                                'Drag and drop your Excel file here, or click to browse',
+                                                                'Drag and drop your Excel file or ZIP archive here, or click to browse',
                                                         })}
                                                     </p>
                                                     <p className='text-xs text-gray-500'>
@@ -290,15 +325,16 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                                                             'pages.course.import.supported_formats',
                                                             {
                                                                 defaultValue:
-                                                                    'Supports .xlsx and .xls files up to 10MB',
+                                                                    'Supports .xlsx, .xls and .zip files up to 50MB',
                                                             },
                                                         )}
                                                     </p>
                                                     <Input
                                                         type='file'
+                                                        // ref={fileInputRef}
                                                         onChange={handleFileChange}
                                                         className='hidden'
-                                                        accept='.xlsx,.xls'
+                                                        accept='.xlsx,.xls,.zip'
                                                         {...field}
                                                     />
                                                 </div>
@@ -306,18 +342,21 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                    name='excel_file'
+                                    name='import_file'
                                     control={form.control}
                                 />
 
-                                {form.watch('excel_file') && (
+                                {form.watch('import_file') && (
                                     <div className='mb-4 flex items-center rounded-md bg-background p-3'>
                                         <FileIcon className='mr-2 h-5 w-5' />
                                         <span className='flex-1 truncate text-sm font-medium'>
-                                            {form.watch('excel_file').name}
+                                            {form.watch('import_file').name}
                                         </span>
-                                        <span className='text-xs text-gray-500'>
-                                            {(form.watch('excel_file').size / 1024 / 1024).toFixed(
+                                        <span className='ml-2 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800'>
+                                            {getFileTypeLabel(form.watch('import_file'))}
+                                        </span>
+                                        <span className='ml-2 text-xs text-gray-500'>
+                                            {(form.watch('import_file').size / 1024 / 1024).toFixed(
                                                 2,
                                             )}{' '}
                                             MB
@@ -346,7 +385,7 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                                         type='submit'
                                         loading={courseImportMutation.isPending}
                                         disabled={
-                                            !form.watch('excel_file') ||
+                                            !form.watch('import_file') ||
                                             courseImportMutation.isPending
                                         }
                                     >
@@ -383,26 +422,27 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                                     })}
                                 </li>
                                 <li>
-                                    {t('pages.course.import.instructions.questions', {
+                                    {t('pages.course.import.instructions.zip_use', {
                                         defaultValue:
-                                            'Questions must reference materials by title and include the course name',
+                                            'For file attachments, use a ZIP file containing both Excel and referenced files',
                                     })}
                                 </li>
                                 <li>
-                                    {t('pages.course.import.instructions.test_cases', {
+                                    {t('pages.course.import.instructions.file_references', {
                                         defaultValue:
-                                            'Test cases must reference questions by title and include the material title and course name',
-                                    })}
-                                </li>
-                                <li>
-                                    {t('pages.course.import.instructions.order', {
-                                        defaultValue:
-                                            'Fill out sheets in order: Courses → Materials → Questions → TestCases',
+                                            'In Excel, add file paths relative to the ZIP root (e.g., "materials/lecture1.pdf")',
                                     })}
                                 </li>
                                 <li>
                                     {t('pages.course.import.instructions.backup', {
-                                        defaultValue: 'Keep a backup of your Excel file',
+                                        defaultValue:
+                                            'Keep a backup of your Excel file and attachments',
+                                    })}
+                                </li>
+                                <li>
+                                    {t('pages.course.import.instructions.file_handling', {
+                                        defaultValue:
+                                            'Referenced files are stored with unique names - you only need to specify the path within the ZIP',
                                     })}
                                 </li>
                             </ul>

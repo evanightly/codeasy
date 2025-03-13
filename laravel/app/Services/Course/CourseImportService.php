@@ -13,9 +13,12 @@ use App\Support\Enums\ProgrammingLanguageEnum;
 use App\Support\Interfaces\Services\Course\CourseImportServiceInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use ZipArchive;
 
 class CourseImportService implements CourseImportServiceInterface {
     protected $spreadsheet;
@@ -32,9 +35,27 @@ class CourseImportService implements CourseImportServiceInterface {
     protected $createdMaterials = [];
     protected $createdQuestions = [];
 
+    // Extract directory for ZIP files
+    protected $extractDir;
+    protected $isZipImport = false;
+    protected $uploadedFiles = [];
+
     public function import(string $filePath) {
         try {
-            $this->spreadsheet = IOFactory::load($filePath);
+            // Determine if this is a ZIP file
+            $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
+            $this->isZipImport = strtolower($fileExtension) === 'zip';
+
+            if ($this->isZipImport) {
+                $excelPath = $this->extractZipFile($filePath);
+                if (!$excelPath) {
+                    throw new \Exception('No Excel file found in the ZIP archive');
+                }
+            } else {
+                $excelPath = $filePath;
+            }
+
+            $this->spreadsheet = IOFactory::load($excelPath);
 
             DB::beginTransaction();
 
@@ -42,6 +63,7 @@ class CourseImportService implements CourseImportServiceInterface {
 
             // If there are errors, throw a validation exception before committing
             if (count($this->errors) > 0) {
+                $this->cleanupTempFiles();
                 DB::rollBack();
                 throw ValidationException::withMessages([
                     'excel_file' => 'Import has errors',
@@ -50,6 +72,9 @@ class CourseImportService implements CourseImportServiceInterface {
             }
 
             DB::commit();
+
+            // Clean up temporary extraction directory if this was a ZIP import
+            $this->cleanupTempFiles();
 
             return [
                 'success' => true,
@@ -61,6 +86,7 @@ class CourseImportService implements CourseImportServiceInterface {
             // Let validation exceptions pass through
             throw $e;
         } catch (\Exception $e) {
+            $this->cleanupTempFiles();
             DB::rollBack();
             Log::error('Course import failed: ' . $e->getMessage(), ['exception' => $e]);
 
@@ -70,6 +96,127 @@ class CourseImportService implements CourseImportServiceInterface {
                 'errors' => $this->errors,
             ];
         }
+    }
+
+    /**
+     * Extract a ZIP file and find the Excel file within
+     *
+     * @param  string  $zipPath  Path to the ZIP file
+     * @return string|null Path to the extracted Excel file, or null if not found
+     */
+    protected function extractZipFile(string $zipPath): ?string {
+        $zip = new ZipArchive;
+        $result = $zip->open($zipPath);
+
+        if ($result !== true) {
+            throw new \Exception("Failed to open ZIP file: error code $result");
+        }
+
+        // Create a unique temporary directory for extraction
+        $this->extractDir = storage_path('app/temp/imports/' . Str::uuid());
+
+        if (!file_exists($this->extractDir)) {
+            mkdir($this->extractDir, 0755, true);
+        }
+
+        // Extract all files
+        $zip->extractTo($this->extractDir);
+        $zip->close();
+
+        // Find Excel files in the extracted content
+        $excelFiles = array_merge(
+            glob($this->extractDir . '/*.xlsx'),
+            glob($this->extractDir . '/*.xls')
+        );
+
+        if (empty($excelFiles)) {
+            throw new \Exception('No Excel file found in the ZIP archive');
+        }
+
+        // Return the first Excel file found
+        return $excelFiles[0];
+    }
+
+    /**
+     * Clean up temporary files after import
+     */
+    protected function cleanupTempFiles() {
+        if ($this->isZipImport && $this->extractDir && file_exists($this->extractDir)) {
+            $this->rrmdir($this->extractDir);
+        }
+    }
+
+    /**
+     * Recursively remove a directory
+     */
+    protected function rrmdir($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != '.' && $object != '..') {
+                    if (is_dir($dir . DIRECTORY_SEPARATOR . $object)) {
+                        $this->rrmdir($dir . DIRECTORY_SEPARATOR . $object);
+                    } else {
+                        unlink($dir . DIRECTORY_SEPARATOR . $object);
+                    }
+                }
+            }
+            rmdir($dir);
+        }
+    }
+
+    /**
+     * Resolve and copy a file from the ZIP extract directory to storage
+     *
+     * @param  string  $relativePath  Relative path from the Excel file
+     * @param  string  $targetDirectory  Directory to store the file in
+     * @return array File info [filename, extension]
+     */
+    protected function resolveFile(string $relativePath, string $targetDirectory): array {
+        if (empty($relativePath)) {
+            return [null, null];
+        }
+
+        // Skip if not a ZIP import
+        if (!$this->isZipImport) {
+            // For non-ZIP imports, just return the filename as-is
+            return [basename($relativePath), pathinfo($relativePath, PATHINFO_EXTENSION)];
+        }
+
+        // Normalize path
+        $relativePath = str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $relativePath);
+
+        // Full path in the extracted directory
+        $fullPath = $this->extractDir . DIRECTORY_SEPARATOR . $relativePath;
+
+        // Check if file exists
+        if (!file_exists($fullPath)) {
+            $this->errors[] = "File not found in ZIP: {$relativePath}";
+
+            return [null, null];
+        }
+
+        // Get file extension
+        $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+
+        // Generate unique filename
+        $filename = Str::uuid() . '.' . $extension;
+
+        // Directory to store the file
+        $storageDirectory = "public/{$targetDirectory}";
+
+        // Copy file to storage
+        $storagePath = Storage::putFileAs(
+            $storageDirectory,
+            $fullPath,
+            $filename
+        );
+
+        // Track uploaded file
+        $this->uploadedFiles[] = $storagePath;
+
+        // Return just the filename and extension (not the path)
+        return [$filename, $extension];
     }
 
     protected function processCourseSheet() {
@@ -190,6 +337,19 @@ class CourseImportService implements CourseImportServiceInterface {
                     continue;
                 }
 
+                // Handle file references for materials if present in the ZIP
+                if ($this->isZipImport && !empty($materialData['file'])) {
+                    [$filePath, $fileExtension] = $this->resolveFile(
+                        $materialData['file'],
+                        'learning_materials'
+                    );
+
+                    if ($filePath) {
+                        $materialData['file'] = $filePath;
+                        $materialData['file_extension'] = $fileExtension ?? $materialData['file_extension'] ?? null;
+                    }
+                }
+
                 // Create material
                 $material = LearningMaterial::create([
                     'course_id' => $course->id,
@@ -265,6 +425,19 @@ class CourseImportService implements CourseImportServiceInterface {
                     $this->errors[] = "Questions Row {$index}: " . implode(', ', $validator->errors()->all());
 
                     continue;
+                }
+
+                // Handle file references for questions if present in the ZIP
+                if ($this->isZipImport && !empty($questionData['file'])) {
+                    [$filePath, $fileExtension] = $this->resolveFile(
+                        $questionData['file'],
+                        'learning_material_questions'
+                    );
+
+                    if ($filePath) {
+                        $questionData['file'] = $filePath;
+                        $questionData['file_extension'] = $fileExtension ?? $questionData['file_extension'] ?? null;
+                    }
                 }
 
                 // Create question
@@ -343,6 +516,20 @@ class CourseImportService implements CourseImportServiceInterface {
                     $this->errors[] = "TestCases Row {$index}: " . implode(', ', $validator->errors()->all());
 
                     continue;
+                }
+
+                // Handle file references for test cases if present in the ZIP
+                if ($this->isZipImport && !empty($testCaseData['expected_output_file'])) {
+                    [$filePath, $fileExtension] = $this->resolveFile(
+                        $testCaseData['expected_output_file'],
+                        'learning_material_question_test_cases'
+                    );
+
+                    if ($filePath) {
+                        $testCaseData['expected_output_file'] = $filePath;
+                        $testCaseData['expected_output_file_extension'] = $fileExtension ??
+                            $testCaseData['expected_output_file_extension'] ?? null;
+                    }
                 }
 
                 // Create test case

@@ -39,15 +39,15 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
 
     public function import(Request $request) {
         try {
-            $file = $request->file('excel_file');
+            $file = $request->file('import_file');
             $path = $file->store('temp');
             $fullPath = Storage::path($path);
 
             try {
                 $result = $this->courseImport->import($fullPath);
 
-                // Create a marker file to indicate that Excel import was used
-                $this->createExcelImportMarker();
+                // Create a marker file to indicate that import was used
+                $this->createImportMarker();
 
                 // Clean up the temporary file
                 Storage::delete($path);
@@ -68,21 +68,21 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
             // Return a proper error response
             return response()->json([
                 'message' => 'Import failed: ' . $e->getMessage(),
-                'errors' => ['excel_file' => 'Error processing file: ' . $e->getMessage()],
+                'errors' => ['import_file' => 'Error processing file: ' . $e->getMessage()],
             ], 422);
         }
     }
 
     /**
-     * Create a marker file to indicate that Excel import was used
+     * Create a marker file to indicate that import was used
      */
-    private function createExcelImportMarker() {
+    private function createImportMarker() {
         if (!Storage::exists('imports')) {
             Storage::makeDirectory('imports');
         }
 
-        // Copy the uploaded file to the imports directory as a marker
-        Storage::put('imports/courses_import.xlsx', 'Excel import was used on ' . now()->toDateTimeString());
+        // Create a marker file
+        Storage::put('imports/courses_import.xlsx', 'Import was used on ' . now()->toDateTimeString());
     }
 
     public function downloadTemplate() {
@@ -200,6 +200,20 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         $sheet->setCellValue('A11', '- Materials must reference a course by name');
         $sheet->setCellValue('A12', '- Questions must reference a material by title and include the course name');
         $sheet->setCellValue('A13', '- Test cases must reference a question by title and include the material title and course name');
+
+        // Add ZIP file instructions
+        $sheet->setCellValue('A15', 'ZIP File Instructions:');
+        $sheet->setCellValue('A16', '- You can include all files in a ZIP archive along with this Excel file');
+        $sheet->setCellValue('A17', '- In the Excel file, use relative paths to reference files within the ZIP');
+        $sheet->setCellValue('A18', '- Example: "materials/lecture1.pdf" would reference a file in a "materials" folder in the ZIP');
+        $sheet->setCellValue('A19', '- Files for learning materials should be referenced in the "file" column');
+        $sheet->setCellValue('A20', '- Files for questions should be referenced in the "file" column');
+        $sheet->setCellValue('A21', '- Files for test cases should be referenced in the "expected_output_file" column');
+
+        // Format headers
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A15')->getFont()->setBold(true);
+        $sheet->getStyle('A8')->getFont()->setBold(true);
 
         return $spreadsheet;
     }

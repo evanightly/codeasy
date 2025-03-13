@@ -12,7 +12,7 @@ class StoreCourseRequest extends FormRequest {
         switch ($intent) {
             case IntentEnum::COURSE_STORE_IMPORT->value:
                 return [
-                    'excel_file' => 'required|file|mimes:xlsx,xls|max:10240',
+                    'import_file' => 'required|file|mimes:xlsx,xls,zip|max:51200', // Increased max size to 50MB to accommodate ZIP files
                 ];
         }
 
