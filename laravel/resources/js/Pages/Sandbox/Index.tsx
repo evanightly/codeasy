@@ -120,25 +120,36 @@ export default function Index() {
 
                         <div className='flex flex-col gap-5 px-0 py-5'>
                             {output.map((out: any, i) => {
-                                return (
-                                    <div key={i} className='rounded bg-background-2 px-3 py-2'>
-                                        {out.type === 'image' ? (
-                                            <img
-                                                src={out.content}
-                                                key={i}
-                                                className='mx-auto w-[30rem] rounded bg-background-2'
-                                                alt='output'
-                                            />
-                                        ) : (
-                                            <div
-                                                key={i}
-                                                className='rounded bg-background-2 px-3 py-2'
-                                            >
-                                                {out.content}
+                                if (out.type === 'image') {
+                                    return (
+                                        <img
+                                            src={out.content}
+                                            key={i}
+                                            className='mx-auto w-[30rem] rounded bg-background-2'
+                                            alt='output'
+                                        />
+                                    );
+                                } else if (out.type === 'error') {
+                                    return (
+                                        <div
+                                            key={i}
+                                            className='rounded bg-destructive/10 px-3 py-2'
+                                        >
+                                            <div className='font-medium text-destructive'>
+                                                {out.error_type}: {out.error_msg}
                                             </div>
-                                        )}
-                                    </div>
-                                );
+                                            <pre className='mt-2 whitespace-pre-wrap text-sm'>
+                                                {out.content}
+                                            </pre>
+                                        </div>
+                                    );
+                                } else {
+                                    return (
+                                        <div key={i} className='rounded bg-background-2 px-3 py-2'>
+                                            {out.content}
+                                        </div>
+                                    );
+                                }
                             })}
                         </div>
                     </div>

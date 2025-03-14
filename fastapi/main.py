@@ -6,6 +6,7 @@ import os
 import uuid
 import base64
 import json
+import re  # Add import for regex
 
 app = FastAPI()
 
@@ -13,6 +14,28 @@ class CodeInput(BaseModel):
     code: str
     testcases: Optional[List[str]] = None
     type: Optional[str] = None  # Add type field
+
+# Function to strip ANSI color codes
+def strip_ansi_codes(text):
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+# Function to format error traceback
+def format_error_message(traceback_text):
+    # Strip ANSI color codes
+    clean_text = strip_ansi_codes(traceback_text)
+    
+    # Split into lines for better formatting
+    lines = clean_text.split('\n')
+    
+    # Format the traceback to be more readable
+    formatted_lines = []
+    for line in lines:
+        line = line.rstrip()
+        if line:
+            formatted_lines.append(line)
+    
+    return '\n'.join(formatted_lines)
 
 class JupyterKernelManager:
     def __init__(self):
@@ -74,9 +97,13 @@ class JupyterKernelManager:
                         })
 
                 elif msg_type == 'error':
+                    # Format the error message properly
+                    error_content = format_error_message('\n'.join(content['traceback']))
                     outputs.append({
                         "type": "error",
-                        "content": '\n'.join(content['traceback'])
+                        "content": error_content,
+                        "error_type": content.get('ename', 'Error'),
+                        "error_msg": content.get('evalue', '')
                     })
 
                 if msg_type == 'status' and content['execution_state'] == 'idle':
@@ -85,7 +112,9 @@ class JupyterKernelManager:
         except Exception as e:
             outputs.append({
                 "type": "error",
-                "content": str(e)
+                "content": str(e),
+                "error_type": type(e).__name__,
+                "error_msg": str(e)
             })
 
         return outputs
