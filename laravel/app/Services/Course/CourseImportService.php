@@ -341,7 +341,7 @@ class CourseImportService implements CourseImportServiceInterface {
                 if ($this->isZipImport && !empty($materialData['file'])) {
                     [$filePath, $fileExtension] = $this->resolveFile(
                         $materialData['file'],
-                        'learning_materials'
+                        'learning-materials'  // Changed from learning_materials to learning-materials
                     );
 
                     if ($filePath) {
@@ -431,7 +431,7 @@ class CourseImportService implements CourseImportServiceInterface {
                 if ($this->isZipImport && !empty($questionData['file'])) {
                     [$filePath, $fileExtension] = $this->resolveFile(
                         $questionData['file'],
-                        'learning_material_questions'
+                        'learning-material-questions'  // Changed from learning_material_questions to learning-material-questions
                     );
 
                     if ($filePath) {
@@ -522,7 +522,7 @@ class CourseImportService implements CourseImportServiceInterface {
                 if ($this->isZipImport && !empty($testCaseData['expected_output_file'])) {
                     [$filePath, $fileExtension] = $this->resolveFile(
                         $testCaseData['expected_output_file'],
-                        'learning_material_question_test_cases'
+                        'learning-material-question-test-cases'  // Changed from learning_material_question_test_cases to learning-material-question-test-cases
                     );
 
                     if ($filePath) {

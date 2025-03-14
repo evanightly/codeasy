@@ -1,3 +1,4 @@
+import { FilePondUploader } from '@/Components/FilePondUploader';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent } from '@/Components/UI/card';
 import {
@@ -9,13 +10,11 @@ import {
     DialogTrigger,
 } from '@/Components/UI/dialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/Components/UI/form';
-import { Input } from '@/Components/UI/input';
 import { courseServiceHook } from '@/Services/courseServiceHook';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as useInertiaForm } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { FileIcon, UploadIcon } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { FileIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -34,8 +33,6 @@ interface ImportProps {
 
 export default function Import({ errors, stats, message, status }: ImportProps) {
     const { t } = useLaravelReactI18n();
-    const [isDragging, setIsDragging] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const courseImportMutation = courseServiceHook.importCourses();
     const courseDownloadImportTemplateMutation = courseServiceHook.downloadImportTemplate();
@@ -62,14 +59,15 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                     file.name.endsWith('.xls') ||
                     file.name.endsWith('.zip'),
                 {
-                    message: t('validation.mimes', {
-                        attribute: 'file',
-                        values: '.xlsx, .xls, .zip',
+                    message: t('pages.course.import.validation.file_type', {
+                        defaultValue: 'Only .xlsx, .xls and .zip files are accepted',
                     }),
                 },
             )
             .refine((file) => file.size <= 50 * 1024 * 1024, {
-                message: t('validation.max.file', { attribute: 'file', max: '50MB' }),
+                message: t('pages.course.import.validation.file_size', {
+                    defaultValue: 'File size must not exceed 50MB',
+                }),
             }),
     });
 
@@ -80,14 +78,6 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
             import_file: undefined,
         },
     });
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            form.setValue('import_file', file, { shouldValidate: true });
-            inertiaForm.setData('import_file', file);
-        }
-    };
 
     const handleDownload = () => {
         toast.promise(courseDownloadImportTemplateMutation.mutateAsync({}), {
@@ -139,8 +129,6 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                 defaultValue: 'Importing courses...',
             }),
             success: (response) => {
-                console.log('success', response);
-
                 // Check if we got an error status in the response
                 if (response.data?.status === 'error') {
                     // Handle API errors with success HTTP status but error in payload
@@ -159,7 +147,6 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                 });
             },
             error: (err) => {
-                console.log('error', err);
                 // Display validation errors
                 if (err.response?.data?.errors) {
                     Object.entries(err.response.data.errors).forEach(([key, messages]) => {
@@ -173,49 +160,6 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                 });
             },
         });
-    };
-
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = () => {
-        setIsDragging(false);
-    };
-
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(false);
-
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            const file = e.dataTransfer.files[0];
-            form.setValue('import_file', file, { shouldValidate: true });
-            inertiaForm.setData('import_file', file);
-        }
-    };
-
-    // Get file type label for display
-    const getFileTypeLabel = (file?: File) => {
-        if (!file) return '';
-
-        if (
-            file.name.endsWith('.zip') ||
-            file.type === 'application/zip' ||
-            file.type === 'application/x-zip-compressed' ||
-            file.type === 'multipart/x-zip'
-        ) {
-            return 'ZIP';
-        } else if (
-            file.name.endsWith('.xlsx') ||
-            file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        ) {
-            return 'Excel (XLSX)';
-        } else if (file.name.endsWith('.xls') || file.type === 'application/vnd.ms-excel') {
-            return 'Excel (XLS)';
-        }
-
-        return file.type;
     };
 
     return (
@@ -299,45 +243,31 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
                                 <FormField
-                                    render={({ field: { onChange, value, ...field } }) => (
+                                    render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <div
-                                                    onDrop={handleDrop}
-                                                    onDragOver={handleDragOver}
-                                                    onDragLeave={handleDragLeave}
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    className={`mb-4 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed ${
-                                                        isDragging
-                                                            ? 'border-primary bg-primary/5'
-                                                            : 'border-gray-300'
-                                                    } p-6 transition-colors duration-200`}
-                                                >
-                                                    <UploadIcon className='mb-2 h-8 w-8 text-gray-500' />
-                                                    <p className='mb-2 text-center text-sm text-gray-700'>
-                                                        {t('pages.course.import.drag_drop', {
-                                                            defaultValue:
-                                                                'Drag and drop your Excel file or ZIP archive here, or click to browse',
-                                                        })}
-                                                    </p>
-                                                    <p className='text-xs text-gray-500'>
-                                                        {t(
-                                                            'pages.course.import.supported_formats',
-                                                            {
-                                                                defaultValue:
-                                                                    'Supports .xlsx, .xls and .zip files up to 50MB',
-                                                            },
-                                                        )}
-                                                    </p>
-                                                    <Input
-                                                        type='file'
-                                                        // ref={fileInputRef}
-                                                        onChange={handleFileChange}
-                                                        className='hidden'
-                                                        accept='.xlsx,.xls,.zip'
-                                                        {...field}
-                                                    />
-                                                </div>
+                                                <FilePondUploader
+                                                    value={field.value}
+                                                    onChange={(file) => {
+                                                        field.onChange(file);
+                                                        inertiaForm.setData('import_file', file);
+                                                    }}
+                                                    maxFileSize='50MB'
+                                                    labelIdle={t('pages.course.import.drag_drop', {
+                                                        defaultValue:
+                                                            'Drag and drop your Excel file or ZIP archive here, or click to browse',
+                                                    })}
+                                                    acceptedFileTypes={[
+                                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                                        'application/vnd.ms-excel',
+                                                        'application/zip',
+                                                        'application/x-zip-compressed',
+                                                        'multipart/x-zip',
+                                                        '.xlsx',
+                                                        '.xls',
+                                                        '.zip',
+                                                    ]}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -345,40 +275,6 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                                     name='import_file'
                                     control={form.control}
                                 />
-
-                                {form.watch('import_file') && (
-                                    <div className='mb-4 flex items-center rounded-md bg-background p-3'>
-                                        <FileIcon className='mr-2 h-5 w-5' />
-                                        <span className='flex-1 truncate text-sm font-medium'>
-                                            {form.watch('import_file').name}
-                                        </span>
-                                        <span className='ml-2 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800'>
-                                            {getFileTypeLabel(form.watch('import_file'))}
-                                        </span>
-                                        <span className='ml-2 text-xs text-gray-500'>
-                                            {(form.watch('import_file').size / 1024 / 1024).toFixed(
-                                                2,
-                                            )}{' '}
-                                            MB
-                                        </span>
-                                    </div>
-                                )}
-
-                                {inertiaForm.progress && (
-                                    <div className='mb-4'>
-                                        <div className='h-2 w-full overflow-hidden rounded-full bg-gray-200'>
-                                            <div
-                                                style={{
-                                                    width: `${inertiaForm.progress.percentage}%`,
-                                                }}
-                                                className='h-full bg-blue-600 transition-all duration-300'
-                                            />
-                                        </div>
-                                        <p className='mt-1 text-right text-xs text-gray-500'>
-                                            {inertiaForm.progress.percentage}%
-                                        </p>
-                                    </div>
-                                )}
 
                                 <div className='mt-4 flex justify-end'>
                                     <Button
@@ -434,15 +330,15 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
                                     })}
                                 </li>
                                 <li>
-                                    {t('pages.course.import.instructions.backup', {
-                                        defaultValue:
-                                            'Keep a backup of your Excel file and attachments',
-                                    })}
-                                </li>
-                                <li>
                                     {t('pages.course.import.instructions.file_handling', {
                                         defaultValue:
                                             'Referenced files are stored with unique names - you only need to specify the path within the ZIP',
+                                    })}
+                                </li>
+                                <li>
+                                    {t('pages.course.import.instructions.backup', {
+                                        defaultValue:
+                                            'Keep a backup of your Excel file and attachments',
                                     })}
                                 </li>
                             </ul>

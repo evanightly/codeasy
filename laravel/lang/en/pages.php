@@ -803,6 +803,7 @@ return [
                 'backup' => 'Keep a backup of your Excel file and attachments',
                 'zip_use' => 'For file attachments, use a ZIP file containing both Excel and referenced files',
                 'file_references' => 'In Excel, add file paths relative to the ZIP root (e.g., "materials/lecture1.pdf")',
+                'file_handling' => 'All files will be stored and accessible to students without needing to specify paths',
             ],
             'buttons' => [
                 'import' => 'Import Courses',
