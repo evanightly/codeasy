@@ -6,21 +6,21 @@ import os
 import uuid
 import base64
 import json
-import re  # Add import for regex
+import re
 
 app = FastAPI()
 
 class CodeInput(BaseModel):
     code: str
     testcases: Optional[List[str]] = None
-    type: Optional[str] = None  # Add type field
+    type: Optional[str] = None
 
 # Function to strip ANSI color codes
 def strip_ansi_codes(text):
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     return ansi_escape.sub('', text)
 
-# Function to format error traceback
+# Function to format error message
 def format_error_message(traceback_text):
     # Strip ANSI color codes
     clean_text = strip_ansi_codes(traceback_text)
@@ -37,6 +37,12 @@ def format_error_message(traceback_text):
     
     return '\n'.join(formatted_lines)
 
+# Function to detect input() usage in code
+def contains_input_function(code):
+    # Check for input() call patterns using regex
+    input_pattern = re.compile(r'(?<![a-zA-Z0-9_])input\s*\(')
+    return bool(input_pattern.search(code))
+
 class JupyterKernelManager:
     def __init__(self):
         self.km = KernelManager(kernel_name='python3')
@@ -46,6 +52,17 @@ class JupyterKernelManager:
 
     def execute_code(self, code: str, is_sandbox: bool = False):
         outputs = []
+        
+        # Check for input() usage and reject if found
+        if contains_input_function(code):
+            outputs.append({
+                "type": "error",
+                "error_type": "InputFunctionNotSupported",
+                "error_msg": "The input() function is not supported in the sandbox environment",
+                "content": "The Python sandbox doesn't support interactive input. Please modify your code to use hardcoded values instead of input() calls.\n\nExample:\n# Instead of: name = input('Enter your name: ')\n# Use: name = 'John'  # hardcoded value"
+            })
+            return outputs
+        
         msg_id = self.kc.execute(code)
         
         try:
@@ -97,14 +114,23 @@ class JupyterKernelManager:
                         })
 
                 elif msg_type == 'error':
-                    # Format the error message properly
-                    error_content = format_error_message('\n'.join(content['traceback']))
-                    outputs.append({
-                        "type": "error",
-                        "content": error_content,
-                        "error_type": content.get('ename', 'Error'),
-                        "error_msg": content.get('evalue', '')
-                    })
+                    # Check for EOFError specifically to provide a better message
+                    if "EOFError" in content.get('ename', '') and "reading a line" in content.get('evalue', ''):
+                        outputs.append({
+                            "type": "error",
+                            "content": "The input() function is not supported in this environment. Please modify your code to use hardcoded values instead.",
+                            "error_type": "InputFunctionNotSupported",
+                            "error_msg": "Interactive input is not supported"
+                        })
+                    else:
+                        # Format the error message properly
+                        error_content = format_error_message('\n'.join(content['traceback']))
+                        outputs.append({
+                            "type": "error",
+                            "content": error_content,
+                            "error_type": content.get('ename', 'Error'),
+                            "error_msg": content.get('evalue', '')
+                        })
 
                 if msg_type == 'status' and content['execution_state'] == 'idle':
                     break
