@@ -484,6 +484,7 @@ export default function Index() {
                                         onChange={handleCodeChange}
                                         language={ProgrammingLanguageEnum.PYTHON}
                                         height='500px'
+                                        headerClassName='ml-3 mt-3'
                                         className='relative'
                                     />
                                 </div>
@@ -529,7 +530,7 @@ export default function Index() {
                                         )}
                                     </div>
 
-                                    <div className='max-h-[300px] overflow-auto rounded-lg border bg-muted/30 p-4'>
+                                    <div className='max-h-[700px] overflow-auto rounded-lg border bg-muted/30 p-4'>
                                         {isCompiling ? (
                                             <div className='flex items-center justify-center py-8'>
                                                 <Loader2 className='h-8 w-8 animate-spin text-primary' />
