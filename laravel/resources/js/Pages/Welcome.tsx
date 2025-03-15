@@ -288,8 +288,8 @@ print(cognitive_levels.value_counts())`;
                 <div className='absolute inset-0 z-0'>
                     {!prefersReducedMotion && isDarkMode && (
                         <>
-                            <Meteors number={20} />
-                            <Particles size={2} quantity={100} className='absolute inset-0 z-0' />
+                            <Meteors number={10} />
+                            <Particles size={2} quantity={50} className='absolute inset-0 z-0' />
                         </>
                     )}
                 </div>
