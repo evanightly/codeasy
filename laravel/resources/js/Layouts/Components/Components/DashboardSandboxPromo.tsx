@@ -6,7 +6,7 @@ import { Sparkles, Terminal } from 'lucide-react';
 
 export const DashboardSandboxPromo = () => {
     return (
-        <div className='mt-4 rounded-lg bg-gradient-to-br from-primary to-primary/80 p-4 shadow-md'>
+        <div className='mt-4 rounded-lg bg-gradient-to-br from-primary/20 to-primary/60 p-4 shadow-md'>
             <div className='mb-3 flex items-center justify-center'>
                 <div className='flex h-12 w-12 items-center justify-center rounded-full bg-white/20'>
                     <Terminal className='h-6 w-6 text-white' />
@@ -22,8 +22,7 @@ export const DashboardSandboxPromo = () => {
                 href={route('sandbox.index')}
                 className={buttonVariants({
                     size: 'sm',
-                    className:
-                        'flex w-full items-center justify-center gap-1 bg-white/90 !text-primary hover:bg-white',
+                    className: 'flex w-full items-center justify-center gap-1',
                 })}
             >
                 <Sparkles className='h-3.5 w-3.5' />
