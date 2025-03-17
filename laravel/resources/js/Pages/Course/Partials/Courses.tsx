@@ -34,7 +34,8 @@ interface CoursesProps {
 
 const Courses = ({ response, filters, setFilters, baseKey, baseRoute }: CoursesProps) => {
     const { t } = useLaravelReactI18n();
-    const { roles } = usePage().props.auth.user;
+    const { roles, teachedSchools } = usePage().props.auth.user;
+
     const confirmAction = useConfirmation();
     const columnHelper = createColumnHelper<CourseResource>();
     const deleteMutation = courseServiceHook.useDelete();
@@ -133,7 +134,7 @@ const Courses = ({ response, filters, setFilters, baseKey, baseRoute }: CoursesP
             meta={response?.data?.meta}
             filters={filters}
             filterComponents={(_) => {
-                if (roles.includes(RoleEnum.SUPER_ADMIN)) {
+                if (roles.includes(RoleEnum.SUPER_ADMIN) || !teachedSchools.length) {
                     return null;
                 }
 
