@@ -3,15 +3,18 @@
 namespace App\Services;
 
 use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
+use App\Models\ClassRoom;
 use App\Repositories\CourseRepository;
 use App\Support\Enums\LearningMaterialTypeEnum;
 use App\Support\Enums\ProgrammingLanguageEnum;
+use App\Support\Enums\RoleEnum;
 use App\Support\Interfaces\Repositories\CourseRepositoryInterface;
 use App\Support\Interfaces\Services\Course\CourseImportServiceInterface;
 use App\Support\Interfaces\Services\CourseServiceInterface;
 use App\Traits\Services\HandlesPageSizeAll;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -127,7 +130,7 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
     }
 
     /**
-     * Create the Courses sheet
+     * Create the Courses sheet with classrooms for the authenticated teacher
      */
     private function createCoursesSheet(Spreadsheet $spreadsheet) {
         $sheet = $spreadsheet->getActiveSheet();
@@ -144,9 +147,59 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         $sheet->getStyle('A1:E1')->getFont()->setBold(true);
         $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDDDDD');
 
-        // Example row
-        $sheet->setCellValue('A2', 'Class A');
-        $sheet->setCellValue('B2', 'teacher@example.com');
+        // Get the authenticated user
+        $user = Auth::user();
+        if ($user) {
+            // Prefill the teacher's email
+            $sheet->setCellValue('B2', $user->email);
+
+            // Get classrooms for the authenticated teacher
+            $classrooms = $this->getTeacherClassrooms($user->id);
+
+            // Create dropdown for classroom selection if classrooms exist
+            if ($classrooms->count() > 0) {
+                // Create a comma-separated list of classroom names for the dropdown
+                $classroomsList = $classrooms->pluck('name')->map(function ($name) {
+                    // Escape any commas in classroom names
+                    return str_replace(',', '\,', $name);
+                })->implode(',');
+
+                // Create data validation for the classroom column
+                $validation = $sheet->getDataValidation('A2');
+                $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST)
+                    ->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION)
+                    ->setAllowBlank(false)
+                    ->setShowInputMessage(true)
+                    ->setShowErrorMessage(true)
+                    ->setShowDropDown(true)
+                    ->setErrorTitle('Input error')
+                    ->setError('Value is not in list.')
+                    ->setPromptTitle('Select classroom')
+                    ->setPrompt('Please select a classroom from the dropdown list.')
+                    ->setFormula1('"' . $classroomsList . '"');
+
+                // Apply validation to range A2:A100
+                for ($i = 2; $i <= 100; $i++) {
+                    $sheet->getCell('A' . $i)->setDataValidation(clone $validation);
+                }
+
+                // Add example classroom in first row if available
+                if ($classrooms->isNotEmpty()) {
+                    $sheet->setCellValue('A2', $classrooms->first()->name);
+                } else {
+                    $sheet->setCellValue('A2', 'Class A');
+                }
+            } else {
+                // If no classrooms are available, still add a sample
+                $sheet->setCellValue('A2', 'Class A');
+            }
+        } else {
+            // Default values for unauthenticated users or examples
+            $sheet->setCellValue('A2', 'Class A');
+            $sheet->setCellValue('B2', 'teacher@example.com');
+        }
+
+        // Example course name and description
         $sheet->setCellValue('C2', 'Introduction to Python for Data Science');
         $sheet->setCellValue('D2', 'Learn the fundamentals of Python programming for data science, including basic syntax, data types, and libraries.');
         $sheet->setCellValue('E2', '1');
@@ -157,15 +210,6 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         $sheet->getColumnDimension('C')->setWidth(40);
         $sheet->getColumnDimension('D')->setWidth(50);
         $sheet->getColumnDimension('E')->setWidth(10);
-
-        // Add notes
-        // $sheet->setCellComment('A1', 'Enter the classroom name or code exactly as it appears in the system');
-        // $sheet->setCellComment('B1', 'Enter the email address of a teacher account');
-
-        // $sheet->setComments([
-        //     'A1' => ['text' => 'Enter the classroom name or code exactly as it appears in the system'],
-        //     'B1' => ['text' => 'Enter the email address of a teacher account'],
-        // ]);
 
         // Add validation for active column
         $validation = $sheet->getDataValidation('E2');
@@ -216,6 +260,19 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         $sheet->getStyle('A8')->getFont()->setBold(true);
 
         return $spreadsheet;
+    }
+
+    /**
+     * Get classrooms associated with the authenticated teacher
+     *
+     * @param  int  $userId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getTeacherClassrooms($userId) {
+        return ClassRoom::whereHas('school.users', function ($query) use ($userId) {
+            $query->where('users.id', $userId)
+                ->where('school_user.role', RoleEnum::TEACHER->value);
+        })->get(['id', 'name']);
     }
 
     /**
@@ -473,9 +530,7 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
                 ->setFormula1('"1,0"');
 
             // Apply to each cell in the range
-            for ($i = 2; $i <= 100; $i++) {
-                $sheet->getCell($column . $i)->setDataValidation(clone $validation);
-            }
+            for ($i = 2; $i <= 100; $sheet->getCell($column . $i)->setDataValidation(clone $validation), $i++);
         }
 
         return $spreadsheet;
