@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\Enums\RoleEnum;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder {
     private const TEST_DATA_COUNT = [
@@ -34,7 +35,6 @@ class UserSeeder extends Seeder {
     private function seedDevelopmentData(): void {
         $this->createSuperAdmin();
         $this->createDemoUsers();
-
     }
 
     public function createSchoolAdmins(School $school, ?int $count = null): Collection {
@@ -110,11 +110,18 @@ class UserSeeder extends Seeder {
     }
 
     public function createSuperAdmin(): User {
-        $superadmin = User::factory()->create([
-            'name' => 'Super Admin',
-            'username' => 'superadmin',
-            'email' => 'superadmin@codeasy.com',
-        ]);
+        // Create super admin directly without factory to avoid Faker dependency in production
+        $superadmin = User::firstOrCreate(
+            ['email' => 'superadmin@codeasy.com'],
+            [
+                'name' => 'Super Admin',
+                'username' => 'superadmin',
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'), // Consider using env variable for security
+                'remember_token' => Str::random(10),
+            ]
+        );
+
         $superadmin->assignRole(RoleEnum::SUPER_ADMIN);
         $this->assignPermissionsToRole(Role::where('name', RoleEnum::SUPER_ADMIN)->first(), Permission::all());
 
