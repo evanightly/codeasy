@@ -112,51 +112,65 @@ export class TemplateProcessor {
         return null; // No custom template found or error occurred
     }
 
-    // New method to read from Laravel stub files
+    // New method to read from Laravel stub files with better error handling and logging
     private async readStubFile(stubType: string): Promise<string | null> {
         try {
             // Get workspace folder
             const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
             if (!workspaceFolder) {
+                console.log(`No workspace folder found when trying to load ${stubType} stub`);
                 return null;
             }
 
             // Map stub types to their relative paths in the Laravel project
             const stubPaths: Record<string, string> = {
                 // Backend stubs
-                'model': 'laravel/stubs/scaffold/backend/model.stub',
-                'migration': 'laravel/stubs/scaffold/backend/migration.stub',
-                'factory': 'laravel/stubs/scaffold/backend/factory.stub',
-                'seeder': 'laravel/stubs/scaffold/backend/seeder.stub',
-                'controller': 'laravel/stubs/scaffold/backend/controller.stub',
-                'apiController': 'laravel/stubs/scaffold/backend/controller.api.stub',
-                'repository': 'laravel/stubs/scaffold/backend/repository.stub',
-                'repositoryInterface': 'laravel/stubs/scaffold/backend/repository.interface.stub',
-                'service': 'laravel/stubs/scaffold/backend/service.stub',
-                'serviceInterface': 'laravel/stubs/scaffold/backend/service.interface.stub',
-                'resource': 'laravel/stubs/scaffold/backend/resource.stub',
-                'storeRequest': 'laravel/stubs/scaffold/backend/store.request.stub',
-                'updateRequest': 'laravel/stubs/scaffold/backend/update.request.stub',
+                'model': 'stubs/scaffold/backend/model.stub',
+                'migration': 'stubs/scaffold/backend/migration.stub',
+                'factory': 'stubs/scaffold/backend/factory.stub',
+                'seeder': 'stubs/scaffold/backend/seeder.stub',
+                'controller': 'stubs/scaffold/backend/controller.stub',
+                'apiController': 'stubs/scaffold/backend/controller.api.stub',
+                'repository': 'stubs/scaffold/backend/repository.stub',
+                'repositoryInterface': 'stubs/scaffold/backend/repository.interface.stub',
+                'service': 'stubs/scaffold/backend/service.stub',
+                'serviceInterface': 'stubs/scaffold/backend/service.interface.stub',
+                'resource': 'stubs/scaffold/backend/resource.stub',
+                'storeRequest': 'stubs/scaffold/backend/store.request.stub',
+                'updateRequest': 'stubs/scaffold/backend/update.request.stub',
                 
                 // Frontend stubs
-                'tsModel': 'laravel/stubs/scaffold/frontend/model.stub',
-                'tsResource': 'laravel/stubs/scaffold/frontend/resource.stub',
-                'tsServiceHook': 'laravel/stubs/scaffold/frontend/service.hook.stub',
+                'tsModel': 'stubs/scaffold/frontend/model.stub',
+                'tsResource': 'stubs/scaffold/frontend/resource.stub',
+                'tsServiceHook': 'stubs/scaffold/frontend/service.hook.stub',
             };
 
             const stubPath = stubPaths[stubType];
             if (!stubPath) {
+                console.log(`No stub path defined for ${stubType}`);
                 return null;
             }
 
-            const fullPath = path.join(workspaceFolder, stubPath);
-            if (fs.existsSync(fullPath)) {
-                return fs.readFileSync(fullPath, 'utf8');
+            // Try to read from '/laravel' directory first (common Laravel project root)
+            const laravelPath = path.join(workspaceFolder, 'laravel', stubPath);
+            if (fs.existsSync(laravelPath)) {
+                console.log(`Found ${stubType} stub at ${laravelPath}`);
+                return fs.readFileSync(laravelPath, 'utf8');
             }
+
+            // Then try project root (for projects where Laravel is at the root)
+            const projectRootPath = path.join(workspaceFolder, stubPath);
+            if (fs.existsSync(projectRootPath)) {
+                console.log(`Found ${stubType} stub at ${projectRootPath}`);
+                return fs.readFileSync(projectRootPath, 'utf8');
+            }
+
+            console.log(`Stub file for ${stubType} not found at either ${laravelPath} or ${projectRootPath}`);
+            return null;
         } catch (error) {
             console.error(`Error reading stub file for ${stubType}:`, error);
+            return null;
         }
-        return null;
     }
 
     // Process template with variables
@@ -346,19 +360,20 @@ export class TemplateProcessor {
 
     // Generate Model File
     public async getModelTemplate(name: string, attributes: any[], tableName?: string): Promise<string> {
-        // First try to use custom template
+        // First try to use custom template from settings
         const customTemplate = await this.readCustomTemplate('model', name, attributes, tableName);
         if (customTemplate) {
             return customTemplate;
         }
 
-        // Then try to use stub file
+        // Then try to use stub file as standard approach
         const stubTemplate = await this.readStubFile('model');
         if (stubTemplate) {
             return this.processTemplateWithVariables(stubTemplate, name, attributes, tableName);
         }
 
-        // Otherwise use the built-in template logic
+        // Otherwise use the built-in template logic as fallback
+        console.log('Using built-in model template as fallback');
         const modelName = this.toPascalCase(name);
         const casts = attributes
             .filter(attr => ['boolean', 'integer', 'float', 'decimal', 'date', 'dateTime', 'json'].includes(attr.type))
@@ -389,19 +404,21 @@ class ${modelName} extends Model
 
     // Generate Migration File
     public async getMigrationTemplate(name: string, tableName: string, attributes: any[]): Promise<string> {
-        // First try to use custom template
+        // First try to use custom template from settings
         const customTemplate = await this.readCustomTemplate('migration', name, tableName, attributes);
         if (customTemplate) {
             return customTemplate;
         }
 
-        // Then try to use stub file
+        // Try to use stub file as standard approach
         const stubTemplate = await this.readStubFile('migration');
         if (stubTemplate) {
             return this.processTemplateWithVariables(stubTemplate, name, attributes, tableName);
         }
 
-        // Otherwise use the built-in template logic
+        // Otherwise use the built-in template logic as fallback
+        console.log('Using built-in migration template as fallback');
+        
         const table = tableName || this.pluralize(this.toSnakeCase(name));
         const schema = attributes.map(attr => {
             let line = `$table->${attr.type}('${attr.name}')`;
@@ -1405,19 +1422,21 @@ class Update${modelName}Request extends FormRequest
 
     // Generate Controller using model-specific namespaced requests
     public async getControllerTemplate(name: string, attributes: any[]): Promise<string> {
-        // Check for custom template
+        // Check for custom template from settings
         const customTemplate = await this.readCustomTemplate('controller', name, attributes);
         if (customTemplate) {
             return customTemplate;
         }
         
-        // Try to use stub file
+        // Try to use stub file as standard approach
         const stubTemplate = await this.readStubFile('controller');
         if (stubTemplate) {
             return this.processTemplateWithVariables(stubTemplate, name, attributes);
         }
         
-        // Otherwise use the built-in template
+        // Otherwise use the built-in template logic as fallback
+        console.log('Using built-in controller template as fallback');
+        
         const modelName = this.toPascalCase(name);
         const modelVariable = this.toCamelCase(name);
         const routeName = this.toSnakeCase(this.pluralize(name));
@@ -1521,19 +1540,21 @@ class ${modelName}Controller extends Controller
 
     // Generate API Controller using model-specific namespaced requests
     public async getApiControllerTemplate(name: string, apiResource: string): Promise<string> {
-        // Check for custom template
+        // Check for custom template from settings
         const customTemplate = await this.readCustomTemplate('apiController', name);
         if (customTemplate) {
             return customTemplate;
         }
         
-        // Try to use stub file
+        // Try to use stub file as standard approach
         const stubTemplate = await this.readStubFile('apiController');
         if (stubTemplate) {
             return this.processTemplateWithVariables(stubTemplate, name, [], undefined);
         }
         
-        // Otherwise use the built-in template
+        // Otherwise use the built-in template logic as fallback
+        console.log('Using built-in API controller template as fallback');
+        
         const modelName = this.toPascalCase(name);
         const modelVariable = this.toCamelCase(name);
         const apiRoute = apiResource || `/api/${this.toSnakeCase(this.pluralize(name))}`;
