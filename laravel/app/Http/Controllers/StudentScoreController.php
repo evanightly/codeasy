@@ -6,10 +6,10 @@ use App\Http\Requests\StudentScore\StoreStudentScoreRequest;
 use App\Http\Requests\StudentScore\UpdateStudentScoreRequest;
 use App\Http\Resources\StudentScoreResource;
 use App\Models\StudentScore;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\StudentScoreServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use App\Support\Enums\PermissionEnum;
 
 class StudentScoreController extends Controller implements HasMiddleware {
     public function __construct(protected StudentScoreServiceInterface $studentScoreService) {}

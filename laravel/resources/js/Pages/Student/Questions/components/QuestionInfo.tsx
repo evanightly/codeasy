@@ -38,9 +38,7 @@ export function QuestionInfo({
     return (
         <div className={`p-4 ${className}`}>
             {/* <ReactMarkdown className='prose prose-sm dark:prose-invert max-w-none'> */}
-            <ReactMarkdown>
-                {question.description}
-            </ReactMarkdown>
+            <ReactMarkdown>{question.description}</ReactMarkdown>
 
             {question.file_url && (
                 <div className='mt-4'>

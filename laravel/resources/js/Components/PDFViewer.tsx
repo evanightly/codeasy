@@ -1,4 +1,4 @@
-'use-client'
+'use-client';
 import { Button } from '@/Components/UI/button';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
@@ -19,7 +19,7 @@ import { Document, Page, pdfjs } from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
     import.meta.url,
-  ).toString();
+).toString();
 
 // PDF Viewer constants
 const MIN_ZOOM_LEVEL = 0.1; // 10%
@@ -50,7 +50,7 @@ export const PDFViewer = ({
     const [numPages, setNumPages] = useState<number>();
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [containerWidth, setContainerWidth] = useState<number>(0);
-    const [zoomLevel, setZoomLevel] = useState<number>(.75); // 1 = 100% zoom
+    const [zoomLevel, setZoomLevel] = useState<number>(0.75); // 1 = 100% zoom
     const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
     const containerRef = useRef<HTMLDivElement>(null);
 

@@ -108,7 +108,6 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
         return (int) $maxOrder + 1;
     }
 
-
     /**
      * Get user progress for a learning material
      */
