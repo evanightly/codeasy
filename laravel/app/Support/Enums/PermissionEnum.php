@@ -101,4 +101,14 @@ enum PermissionEnum: string {
     case LEARNING_MATERIAL_QUESTION_TEST_CASE_READ = 'learning-material-question-test-case-read';
     case LEARNING_MATERIAL_QUESTION_TEST_CASE_UPDATE = 'learning-material-question-test-case-update';
     case LEARNING_MATERIAL_QUESTION_TEST_CASE_DELETE = 'learning-material-question-test-case-delete';
+
+    case STUDENT_SCORE_CREATE = 'student-score-create';
+    case STUDENT_SCORE_READ = 'student-score-read';
+    case STUDENT_SCORE_UPDATE = 'student-score-update';
+    case STUDENT_SCORE_DELETE = 'student-score-delete';
+
+    case EXECUTION_RESULT_CREATE = 'execution-result-create';
+    case EXECUTION_RESULT_READ = 'execution-result-read';
+    case EXECUTION_RESULT_UPDATE = 'execution-result-update';
+    case EXECUTION_RESULT_DELETE = 'execution-result-delete';
 }

@@ -20,12 +20,12 @@ return [
         ],
     ],
     'dropdown_menu' => [
-        'sr_open_menu' => 'Open Menu',
+        'sr_open_menu' => 'Open menu',
     ],
     'dashboard_sidebar' => [
         'dashboard' => 'Dashboard',
         'admin' => [
-            'title' => 'Admin',
+            'title' => 'Administration',
             'users' => 'Users',
             'roles' => 'Roles',
             'permissions' => 'Permissions',
@@ -41,8 +41,13 @@ return [
             'subjects' => 'Subjects',
             'exams' => 'Exams',
             'grades' => 'Grades',
-            'class_rooms' => 'Class Rooms',
+            'class_rooms' => 'Classrooms',
             'courses' => 'Courses',
+        ],
+        'student' => [
+            'title' => 'Student',
+            'courses' => 'My Courses',
+            'progress' => 'My Progress',
         ],
     ],
     'filepond' => [
@@ -76,5 +81,19 @@ return [
         'no_preview' => 'PDF preview not available',
         'open_in_new_tab' => 'Open in new tab',
         'page' => 'Page',
+    ],
+    'code_editor' => [
+        'theme' => 'Editor Theme',
+        'search_theme' => 'Search theme...',
+        'no_theme_found' => 'No theme found',
+    ],
+    'data_table' => [
+        'search' => 'Search...',
+        'per_page' => 'Per page',
+        'no_results' => 'No results found',
+        'filter_button' => 'Filter',
+        'filter_title' => 'Filters',
+        'clear_filters' => 'Clear Filters',
+        'apply_filters' => 'Apply Filters',
     ],
 ];

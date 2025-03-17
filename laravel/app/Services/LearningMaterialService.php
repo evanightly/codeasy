@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
+use App\Models\LearningMaterial;
+use App\Models\StudentScore;
 use App\Repositories\LearningMaterialRepository;
 use App\Support\Interfaces\Repositories\LearningMaterialRepositoryInterface;
 use App\Support\Interfaces\Services\LearningMaterialServiceInterface;
@@ -104,6 +106,126 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
         $maxOrder = $materials->max('order_number');
 
         return (int) $maxOrder + 1;
+    }
+
+
+    /**
+     * Get user progress for a learning material
+     */
+    public function getUserProgress(int $userId, int $materialId): array {
+        $material = $this->findOrFail($materialId);
+        // if (!$material) {
+        //     return [
+        //         'total' => 0,
+        //         'completed' => 0,
+        //         'percentage' => 0,
+        //         'questions' => [],
+        //     ];
+        // }
+
+        // Get all questions for this material
+        $questions = $material->questions()->where('active', true)->orderBy('order_number')->get();
+
+        // Get all student scores for this user and these questions
+        $questionIds = $questions->pluck('id')->toArray();
+        $scores = StudentScore::where('user_id', $userId)
+            ->whereIn('learning_material_question_id', $questionIds)
+            ->get()
+            ->keyBy('learning_material_question_id');
+
+        $total = $questions->count();
+        $completed = 0;
+        $questionsProgress = [];
+
+        foreach ($questions as $question) {
+            $score = $scores->get($question->id);
+            $isCompleted = $score && $score->completion_status;
+
+            if ($isCompleted) {
+                $completed++;
+            }
+
+            $questionsProgress[] = [
+                'id' => $question->id,
+                'title' => $question->title,
+                'order_number' => $question->order_number,
+                'completed' => $isCompleted,
+                'score' => $score ? $score->score : 0,
+                'coding_time' => $score ? $score->coding_time : 0,
+                'trial_status' => $score ? $score->trial_status : false,
+            ];
+        }
+
+        return [
+            'total' => $total,
+            'completed' => $completed,
+            'percentage' => $total > 0 ? round(($completed / $total) * 100) : 0,
+            'questions' => $questionsProgress,
+        ];
+    }
+
+    /**
+     * Get material details with user progress
+     */
+    public function getMaterialWithUserProgress(int $userId, int $materialId): ?array {
+        $material = LearningMaterial::with(['course'])->find($materialId);
+        if (!$material) {
+            return null;
+        }
+
+        $progress = $this->getUserProgress($userId, $materialId);
+
+        return [
+            'material' => $material,
+            'progress' => $progress,
+        ];
+    }
+
+    /**
+     * Check if a student has access to a learning material
+     */
+    public function studentHasAccess(int $userId, int $materialId): bool {
+        $material = LearningMaterial::with(['course.classroom.students'])->find($materialId);
+
+        if (!$material) {
+            return false;
+        }
+
+        return $material->course->classroom->students()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Get next and previous question information
+     */
+    public function getQuestionNavigation(int $materialId, int $currentQuestionId): array {
+        $material = $this->findOrFail($materialId);
+        // if (!$material) {
+        //     return ['next' => null, 'previous' => null];
+        // }
+
+        $questions = $material->questions()
+            ->where('active', true)
+            ->orderBy('order_number')
+            ->get();
+
+        $currentIndex = $questions->search(function ($question) use ($currentQuestionId) {
+            return $question->id === $currentQuestionId;
+        });
+
+        $previous = $currentIndex > 0 ? $questions[$currentIndex - 1] : null;
+        $next = $currentIndex < $questions->count() - 1 ? $questions[$currentIndex + 1] : null;
+
+        return [
+            'next' => $next ? [
+                'id' => $next->id,
+                'title' => $next->title,
+                'can_proceed' => true, // This will be overridden in StudentController
+            ] : null,
+            'previous' => $previous ? [
+                'id' => $previous->id,
+                'title' => $previous->title,
+            ] : null,
+        ];
     }
 
     /** @var LearningMaterialRepository */

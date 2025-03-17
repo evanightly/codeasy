@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeCheck, ChevronsUpDown, LogOut, Sparkles } from 'lucide-react';
+import { BadgeCheck, ChevronsUpDown, LogOut, Sparkles, Terminal } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/Components/UI/avatar';
 import {
@@ -22,8 +22,10 @@ import { Link, usePage } from '@inertiajs/react';
 import { DashboardNavbarDarkModeToggler } from './Components/DashboardDarkModeToggler';
 import { SetLocalization } from './Components/DashboardSetLocalization';
 import { DashboardSetTheme } from './Components/DashboardSetTheme';
+import { DashboardSandboxPromo } from './DashboardSandboxPromo';
 
 const DashboardSidebarUser = () => {
+    const { state } = useSidebar();
     const { isMobile } = useSidebar();
     const {
         auth: { user },
@@ -33,6 +35,20 @@ const DashboardSidebarUser = () => {
 
     return (
         <SidebarMenu>
+            {state === 'expanded' ? (
+                <SidebarMenuItem className='mb-6'>
+                    <DashboardSandboxPromo />
+                </SidebarMenuItem>
+            ) : (
+                <SidebarMenuItem className='mb-6'>
+                    <SidebarMenuButton variant='windui' asChild>
+                        <Link href={route('sandbox.index')}>
+                            <Terminal />
+                            <span>Sandbox</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            )}
             <SidebarMenuItem>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

@@ -51,4 +51,20 @@ class LearningMaterialQuestion extends Model {
     public function testCases(): HasMany {
         return $this->hasMany(LearningMaterialQuestionTestCase::class);
     }
+
+    /**
+     * Get the public test cases for the question (not hidden).
+     */
+    public function publicTestCases(): HasMany {
+        return $this->hasMany(LearningMaterialQuestionTestCase::class)
+            ->where('hidden', false)
+            ->where('active', true);
+    }
+
+    /**
+     * Get all student scores for this question.
+     */
+    public function studentScores(): HasMany {
+        return $this->hasMany(StudentScore::class);
+    }
 }

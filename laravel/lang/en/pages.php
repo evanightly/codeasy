@@ -783,6 +783,63 @@ return [
                 'learning_materials' => 'Learning Materials',
             ],
         ],
+        'import' => [
+            'title' => 'Import Courses',
+            'description' => 'Import courses from an Excel file or ZIP archive containing Excel and related files',
+            'upload_title' => 'Upload Course Import File',
+            'download_template' => 'Download Template',
+            'drag_drop' => 'Drag and drop your Excel file or ZIP archive here, or click to browse',
+            'supported_formats' => 'Supports .xlsx, .xls and .zip files up to 50MB',
+            'stats' => 'Imported: {courses} courses, {materials} materials, {questions} questions, {testCases} test cases',
+            'errors' => 'Errors:',
+            'instructions_title' => 'Instructions',
+            'instructions' => [
+                'download' => 'Download the template and fill in your course data',
+                'identifiers' => 'You can use classroom names and teacher emails instead of IDs',
+                'materials' => 'Materials must reference courses by name',
+                'questions' => 'Questions must reference materials by title and include the course name',
+                'test_cases' => 'Test cases must reference questions by title and include the material title and course name',
+                'order' => 'Fill out sheets in order: Courses → Materials → Questions → TestCases',
+                'backup' => 'Keep a backup of your Excel file and attachments',
+                'zip_use' => 'For file attachments, use a ZIP file containing both Excel and referenced files',
+                'file_references' => 'In Excel, add file paths relative to the ZIP root (e.g., "materials/lecture1.pdf")',
+                'file_handling' => 'All files will be stored and accessible to students without needing to specify paths',
+            ],
+            'buttons' => [
+                'import' => 'Import Courses',
+                'open_import' => 'Import',
+            ],
+            'downloading_template' => 'Downloading template...',
+            'download_success' => 'Template downloaded successfully',
+            'download_error' => 'Failed to download template',
+            'importing' => 'Importing courses...',
+            'import_success' => 'Courses imported successfully',
+            'import_error' => 'Failed to import courses',
+            'validation' => [
+                'file_required' => 'Please select a file to import',
+                'file_type' => 'Only .xlsx, .xls and .zip files are accepted',
+                'file_size' => 'File size must not exceed 50MB',
+            ],
+            'zip' => [
+                'title' => 'ZIP Archive Import',
+                'description' => 'Upload a ZIP file containing your Excel file and referenced materials',
+                'instructions' => 'The ZIP file should contain one Excel file and any files referenced in the Excel sheets',
+                'structure' => 'Organize your files in folders within the ZIP for better management',
+                'example' => 'Example: Place PDF materials in a "materials" folder and reference as "materials/file.pdf"',
+                'error' => [
+                    'no_excel' => 'No Excel file found in the ZIP archive',
+                    'missing_file' => 'Referenced file not found in the ZIP archive: {file}',
+                    'extraction' => 'Error extracting ZIP file: {error}',
+                ],
+                'file_handling' => [
+                    'title' => 'File Handling',
+                    'description' => 'Files are stored with unique names to avoid conflicts',
+                    'note' => 'When referencing files in Excel, just include the relative path within the ZIP archive',
+                    'example' => 'For example, use "materials/lecture1.pdf" to reference that file inside your ZIP',
+                    'storage' => 'All uploaded files will be accessible to students without needing to specify paths',
+                ],
+            ],
+        ],
     ],
     'learning_material' => [
         'common' => [
@@ -1172,6 +1229,84 @@ return [
         'delete_dialog' => [
             'title' => 'Are you sure?',
             'description' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
+        ],
+    ],
+    'student_courses' => [
+        'common' => [
+            'fields' => [
+                'name' => 'Name',
+                'classroom' => 'Classroom',
+                'description' => 'Description',
+            ],
+        ],
+        'index' => [
+            'title' => 'My Courses',
+        ],
+        'show' => [
+            'title' => 'Course Details',
+        ],
+        'actions' => [
+            'back_to_list' => 'Back to List',
+            'back_to_home' => 'Back to Home',
+            'back_to_dashboard' => 'Back to Dashboard',
+            'back_to_courses' => 'Back to Courses',
+            'back_to_course' => 'Back to Course',
+            'back_to_material' => 'Back to Material',
+        ],
+    ],
+
+    'student_materials' => [
+        'common' => [
+            'fields' => [
+                'title' => 'Title',
+                'type' => 'Type',
+                'description' => 'Description',
+            ],
+        ],
+        'index' => [
+            'title' => 'Learning Materials',
+        ],
+        'show' => [
+            'title' => 'Material Details',
+            'progress' => 'Your Progress',
+            'questions' => 'Questions',
+            'completed' => ':count of :total questions completed',
+            'completed_label' => 'Completed',
+            'in_progress' => 'In Progress',
+            'score' => 'Score',
+            'continue' => 'Continue',
+            'start' => 'Start',
+        ],
+    ],
+
+    'student_questions' => [
+        'workspace' => [
+            'question' => 'Question',
+            'time' => 'Time',
+            'time_spent' => 'Time Spent',
+            'view_image' => 'Question Image',
+            'clue' => 'Hint',
+            'test_cases' => 'Test Cases',
+            'code' => 'Code',
+            'output' => 'Output',
+            'run' => 'Run Code',
+            'running' => 'Running',
+            'next' => 'Next Question',
+            'previous' => 'Previous Question',
+            'run_first' => 'You must run your code at least once to proceed',
+            'completed' => 'Completed',
+            'no_output_yet' => 'No output yet. Run your code to see results.',
+            'error' => 'Error',
+            'test_results' => 'Test Results',
+            'passed' => ' passed',
+            'success' => [
+                'title' => 'Congratulations!',
+                'description' => 'All tests passed successfully.',
+            ],
+            'error' => [
+                'title' => 'Error Running Code',
+                'description' => 'There was a problem executing your code. Please check for errors.',
+            ],
         ],
     ],
 ];

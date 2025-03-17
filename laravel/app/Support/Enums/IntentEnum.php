@@ -16,4 +16,6 @@ enum IntentEnum: string {
     case SCHOOL_UPDATE_ASSIGN_STUDENT = 'school.update.assign.student';
     case SCHOOL_UPDATE_UNASSIGN_STUDENT = 'school.update.unassign.student';
     case USER_INDEX_CLASS_ROOM_STUDENTS = 'user.index.classroom.students';
+    case COURSE_STORE_IMPORT = 'course.store.import';
+    case COURSE_INDEX_IMPORT_TEMPLATE = 'course.index.import.template';
 }

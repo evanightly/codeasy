@@ -12,6 +12,8 @@ const intents = {
     SCHOOL_UPDATE_ASSIGN_STUDENT: 'school.update.assign.student',
     SCHOOL_UPDATE_UNASSIGN_STUDENT: 'school.update.unassign.student',
     USER_INDEX_CLASS_ROOM_STUDENTS: 'user.index.classroom.students',
+    COURSE_STORE_IMPORT: 'course.store.import',
+    COURSE_INDEX_IMPORT_TEMPLATE: 'course.index.import.template',
 };
 
 export const IntentEnum = intents;

@@ -21,6 +21,7 @@ import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { MoreHorizontal } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
+import Import from './Partials/Import';
 
 interface CoursesProps {
     response?: UseQueryResult<PaginateResponse<CourseResource>, Error>;
@@ -33,7 +34,8 @@ interface CoursesProps {
 
 const Courses = ({ response, filters, setFilters, baseKey, baseRoute }: CoursesProps) => {
     const { t } = useLaravelReactI18n();
-    const { roles } = usePage().props.auth.user;
+    const { roles, teachedSchools } = usePage().props.auth.user;
+
     const confirmAction = useConfirmation();
     const columnHelper = createColumnHelper<CourseResource>();
     const deleteMutation = courseServiceHook.useDelete();
@@ -132,17 +134,20 @@ const Courses = ({ response, filters, setFilters, baseKey, baseRoute }: CoursesP
             meta={response?.data?.meta}
             filters={filters}
             filterComponents={(_) => {
-                if (roles.includes(RoleEnum.SUPER_ADMIN)) {
+                if (roles.includes(RoleEnum.SUPER_ADMIN) || !teachedSchools.length) {
                     return null;
                 }
 
                 return (
-                    <Link
-                        href={route(`${ROUTES.COURSES}.create`)}
-                        className={buttonVariants({ variant: 'create' })}
-                    >
-                        {t('pages.course.index.buttons.create')}
-                    </Link>
+                    <>
+                        <Link
+                            href={route(`${ROUTES.COURSES}.create`)}
+                            className={buttonVariants({ variant: 'create' })}
+                        >
+                            {t('pages.course.index.buttons.create')}
+                        </Link>
+                        <Import />
+                    </>
                 );
             }}
             data={response?.data?.data ?? []}

@@ -16,11 +16,11 @@ class CourseRepository extends BaseRepository implements CourseRepositoryInterfa
     protected function applyFilters(array $searchParams = []): Builder {
         $query = $this->getQuery();
 
-        $query = $this->applySearchFilters($query, $searchParams, ['name', 'group']);
+        $query = $this->applySearchFilters($query, $searchParams, ['name']);
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
-        $query = $this->applyColumnFilters($query, $searchParams, ['created_at', 'updated_at']);
+        $query = $this->applyColumnFilters($query, $searchParams, ['teacher_id', 'created_at', 'updated_at']);
 
         $query = $this->applySorting($query, $searchParams);
 

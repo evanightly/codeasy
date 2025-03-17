@@ -6,6 +6,7 @@ use App\Http\Requests\Course\StoreCourseRequest;
 use App\Http\Requests\Course\UpdateCourseRequest;
 use App\Http\Resources\CourseResource;
 use App\Models\Course;
+use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\CourseServiceInterface;
 use Illuminate\Http\Request;
@@ -30,10 +31,17 @@ class CourseController extends Controller implements HasMiddleware {
     }
 
     public function index(Request $request) {
+        $intent = $request->get('intent');
         $perPage = $request->get('perPage', 10);
         $data = CourseResource::collection($this->courseService->getAllPaginated($request->query(), $perPage));
 
         if ($this->ajax()) {
+            switch ($intent) {
+                case IntentEnum::COURSE_INDEX_IMPORT_TEMPLATE->value:
+                    return $this->courseService->downloadTemplate();
+                    break;
+            }
+
             return $data;
         }
 
@@ -45,7 +53,15 @@ class CourseController extends Controller implements HasMiddleware {
     }
 
     public function store(StoreCourseRequest $request) {
+        $intent = $request->get('intent');
+
         if ($this->ajax()) {
+            switch ($intent) {
+                case IntentEnum::COURSE_STORE_IMPORT->value:
+                    return $this->courseService->import($request);
+                    break;
+            }
+
             return $this->courseService->create($request->validated());
         }
     }

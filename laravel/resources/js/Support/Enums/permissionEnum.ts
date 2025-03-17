@@ -67,6 +67,14 @@ const permissions = {
     LEARNING_MATERIAL_QUESTION_TEST_CASE_READ: 'learning-material-question-test-case-read',
     LEARNING_MATERIAL_QUESTION_TEST_CASE_UPDATE: 'learning-material-question-test-case-update',
     LEARNING_MATERIAL_QUESTION_TEST_CASE_DELETE: 'learning-material-question-test-case-delete',
+    STUDENT_SCORE_CREATE: 'student-score-create',
+    STUDENT_SCORE_READ: 'student-score-read',
+    STUDENT_SCORE_UPDATE: 'student-score-update',
+    STUDENT_SCORE_DELETE: 'student-score-delete',
+    EXECUTION_RESULT_CREATE: 'execution-result-create',
+    EXECUTION_RESULT_READ: 'execution-result-read',
+    EXECUTION_RESULT_UPDATE: 'execution-result-update',
+    EXECUTION_RESULT_DELETE: 'execution-result-delete',
 };
 
 export const PermissionEnum = permissions;

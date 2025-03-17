@@ -1,3 +1,4 @@
+'use-client'
 import { Button } from '@/Components/UI/button';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
@@ -15,10 +16,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 
 // Match the local pdfjs-dist version (4.8.69):
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-const options = {
-    standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts`,
-};
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url,
+  ).toString();
 
 // PDF Viewer constants
 const MIN_ZOOM_LEVEL = 0.1; // 10%
@@ -49,7 +50,7 @@ export const PDFViewer = ({
     const [numPages, setNumPages] = useState<number>();
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [containerWidth, setContainerWidth] = useState<number>(0);
-    const [zoomLevel, setZoomLevel] = useState<number>(1); // 1 = 100% zoom
+    const [zoomLevel, setZoomLevel] = useState<number>(.75); // 1 = 100% zoom
     const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -173,7 +174,6 @@ export const PDFViewer = ({
                 className='relative h-[700px] overflow-auto border border-gray-200 bg-white'
             >
                 <Document
-                    options={options}
                     onLoadSuccess={onDocumentLoadSuccess}
                     loading={
                         <div className='absolute inset-0 flex h-[500px] items-center justify-center bg-white/80'>

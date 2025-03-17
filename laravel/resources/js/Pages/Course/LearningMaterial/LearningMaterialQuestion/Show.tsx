@@ -47,16 +47,14 @@ interface Props {
 export default function Show({
     course: { data: courseData },
     learningMaterial: { data: learningMaterialData },
-    learningMaterialQuestion: { data: questionData },
+    learningMaterialQuestion: { data: learningMaterialQuestionData },
 }: Props) {
     const confirmAction = useConfirmation();
     const { t } = useLaravelReactI18n();
 
     const [filters, setFilters] = useState<ServiceFilterOptions>({
-        filters: {
-            column_filters: {
-                learning_material_question_id: questionData.id,
-            },
+        column_filters: {
+            learning_material_question_id: learningMaterialQuestionData.id,
         },
     });
 
@@ -64,9 +62,9 @@ export default function Show({
     const deleteTestCaseMutation = learningMaterialQuestionTestCaseServiceHook.useDelete();
 
     const isLiveCode = learningMaterialData.type === LearningMaterialTypeEnum.LIVE_CODE;
-    const fileType = questionData.file_url?.endsWith('.pdf')
+    const fileType = learningMaterialQuestionData.file_url?.endsWith('.pdf')
         ? 'application/pdf'
-        : questionData.file_url?.match(/\.(txt|py|js|java|cpp|c|html|css)$/)
+        : learningMaterialQuestionData.file_url?.match(/\.(txt|py|js|java|cpp|c|html|css)$/)
           ? 'text/plain'
           : null;
 
@@ -201,7 +199,7 @@ export default function Show({
                                                     [
                                                         courseData.id,
                                                         learningMaterialData.id,
-                                                        questionData.id,
+                                                        learningMaterialQuestionData.id,
                                                         testCase.id,
                                                     ],
                                                 )}
@@ -216,7 +214,7 @@ export default function Show({
                                                     [
                                                         courseData.id,
                                                         learningMaterialData.id,
-                                                        questionData.id,
+                                                        learningMaterialQuestionData.id,
                                                         testCase.id,
                                                     ],
                                                 )}
@@ -249,7 +247,7 @@ export default function Show({
             <Card className='mb-6'>
                 <CardHeader className='flex flex-row items-center justify-between'>
                     <div>
-                        <CardTitle>{questionData.title}</CardTitle>
+                        <CardTitle>{learningMaterialQuestionData.title}</CardTitle>
                         <div className='text-sm text-muted-foreground'>
                             {isLiveCode && (
                                 <Badge variant='outline'>
@@ -263,7 +261,7 @@ export default function Show({
                         href={route(`${ROUTES.COURSE_LEARNING_MATERIAL_QUESTIONS}.edit`, [
                             courseData.id,
                             learningMaterialData.id,
-                            questionData.id,
+                            learningMaterialQuestionData.id,
                         ])}
                         className={buttonVariants({ variant: 'outline', size: 'sm' })}
                     >
@@ -295,11 +293,11 @@ export default function Show({
                                         )}
                                     </h3>
                                     <div className='mt-1 rounded-md bg-background-2 p-4'>
-                                        {questionData?.description}
+                                        {learningMaterialQuestionData?.description}
                                     </div>
                                 </div>
 
-                                {questionData.clue && (
+                                {learningMaterialQuestionData.clue && (
                                     <div>
                                         <h3 className='font-medium'>
                                             {t(
@@ -307,12 +305,12 @@ export default function Show({
                                             )}
                                         </h3>
                                         <div className='mt-1 rounded-md bg-background-2 p-4 text-sm'>
-                                            {questionData.clue}
+                                            {learningMaterialQuestionData.clue}
                                         </div>
                                     </div>
                                 )}
 
-                                {questionData.file_url && (
+                                {learningMaterialQuestionData.file_url && (
                                     <div>
                                         <h3 className='font-medium'>
                                             {t(
@@ -322,19 +320,19 @@ export default function Show({
                                         <div className='mt-2 rounded-md border'>
                                             {fileType === 'application/pdf' ? (
                                                 <PDFViewer
-                                                    fileUrl={questionData.file_url}
+                                                    fileUrl={learningMaterialQuestionData.file_url}
                                                     filename={
-                                                        questionData.file ||
+                                                        learningMaterialQuestionData.file ||
                                                         t('components.pdf_viewer.document')
                                                     }
                                                 />
                                             ) : fileType?.startsWith('image/') ||
-                                              questionData.file_url?.match(
+                                              learningMaterialQuestionData.file_url?.match(
                                                   /\.(jpg|jpeg|png|gif|webp)$/i,
                                               ) ? (
                                                 <div className='mt-2 flex justify-center p-4'>
                                                     <img
-                                                        src={questionData.file_url}
+                                                        src={learningMaterialQuestionData.file_url}
                                                         className='max-w-full rounded object-contain'
                                                         alt={t(
                                                             'pages.learning_material_question.show.question_file',
@@ -346,10 +344,11 @@ export default function Show({
                                                     <a
                                                         target='_blank'
                                                         rel='noopener noreferrer'
-                                                        href={questionData.file_url}
+                                                        href={learningMaterialQuestionData.file_url}
                                                         className='inline-flex items-center text-blue-600 hover:underline'
                                                     >
-                                                        {t('action.view_file')}: {questionData.file}
+                                                        {t('action.view_file')}:{' '}
+                                                        {learningMaterialQuestionData.file}
                                                     </a>
                                                 </div>
                                             )}
@@ -362,7 +361,7 @@ export default function Show({
                                         {t('pages.learning_material_question.common.fields.active')}
                                     </h3>
                                     <div className='mt-1'>
-                                        {questionData.active ? (
+                                        {learningMaterialQuestionData.active ? (
                                             <Badge variant='success'>
                                                 {t(
                                                     'pages.learning_material_question.common.status.active',
@@ -390,7 +389,7 @@ export default function Show({
                                                 [
                                                     courseData.id,
                                                     learningMaterialData.id,
-                                                    questionData.id,
+                                                    learningMaterialQuestionData.id,
                                                 ],
                                             )}
                                             className={buttonVariants({ size: 'sm' })}

@@ -17,7 +17,7 @@ registerPlugin(
 interface FilePondUploaderProps {
     value?: File | null;
     onChange: (file: File | null) => void;
-    acceptedFileTypes?: string[];
+    acceptedFileTypes?: string[] | string;
     maxFileSize?: string; // e.g., "5MB"
     labelIdle?: string;
     className?: string;
@@ -52,46 +52,24 @@ export const FilePondUploader = ({
         }
     }, [value]);
 
-    // Create localized labels for FilePond
-    // const labels = useMemo(
-    //     () => ({
-    //         labelIdle: labelIdle || t('components.filepond.labels.label_idle'),
-    //         labelTapToCancel: t('components.filepond.labels.label_tap_to_cancel'),
-    //         labelTapToRetry: t('components.filepond.labels.label_tap_to_retry'),
-    //         labelTapToUndo: t('components.filepond.labels.label_tap_to_undo'),
-    //         labelButtonRemoveItem: t('components.filepond.labels.label_button_remove_item'),
-    //         labelButtonProcessItem: t('components.filepond.labels.label_button_process_item'),
-    //         labelButtonUndoItemProcessing: t(
-    //             'components.filepond.labels.label_button_undo_item_processing',
-    //         ),
-    //         labelButtonRetryItemProcessing: t(
-    //             'components.filepond.labels.label_button_retry_item_processing',
-    //         ),
-    //         labelButtonProcessItemUpload: t(
-    //             'components.filepond.labels.label_button_process_item_upload',
-    //         ),
-    //         labelFileWaitingForSizeCalculation: t(
-    //             'components.filepond.labels.label_file_waiting_for_size_calculation',
-    //         ),
-    //         labelFileSizeNotAvailable: t(
-    //             'components.filepond.labels.label_file_size_not_available',
-    //         ),
-    //         labelFileLoading: t('components.filepond.labels.label_file_loading_error'),
-    //         labelFileProcessing: t('components.filepond.labels.label_file_processing'),
-    //         labelFileProcessingComplete: t(
-    //             'components.filepond.labels.label_file_processing_complete',
-    //         ),
-    //         labelFileProcessingAborted: t(
-    //             'components.filepond.labels.label_file_processing_aborted',
-    //         ),
-    //         labelFileProcessingError: t('components.filepond.labels.label_file_processing_error'),
-    //     }),
-    //     [t, labelIdle],
-    // );
+    // Ensure acceptedFileTypes is always an array for FilePond
+    const normalizedAcceptedFileTypes = useMemo(() => {
+        return typeof acceptedFileTypes === 'string' ? [acceptedFileTypes] : acceptedFileTypes;
+    }, [acceptedFileTypes]);
 
-    // Errors messages
+    // Create a typeLabel for file extension display
     const fileValidateTypeLabelExpectedTypes = useMemo(() => {
-        return acceptedFileTypes?.join(', ') || '';
+        if (typeof acceptedFileTypes === 'string') {
+            return acceptedFileTypes;
+        }
+
+        return acceptedFileTypes
+            .map((type) => {
+                if (type.startsWith('.')) return type;
+                if (type.includes('/')) return type.split('/')[1];
+                return type;
+            })
+            .join(', ');
     }, [acceptedFileTypes]);
 
     return (
@@ -134,16 +112,25 @@ export const FilePondUploader = ({
                 maxFileSize={maxFileSize}
                 labelMaxFileSizeExceeded={t('components.filepond.errors.size_too_large', {
                     filesize: maxFileSize,
+                    defaultValue: `File is too large. Maximum size is ${maxFileSize}`,
                 })}
-                labelFileTypeNotAllowed={t('components.filepond.errors.file_type_not_allowed')}
+                labelIdle={
+                    labelIdle ||
+                    t('components.filepond.labels.label_idle', {
+                        defaultValue:
+                            'Drag & Drop your files or <span class="filepond--label-action">Browse</span>',
+                    })
+                }
+                labelFileTypeNotAllowed={t('components.filepond.errors.file_type_not_allowed', {
+                    defaultValue: 'File type not allowed',
+                })}
                 fileValidateTypeLabelExpectedTypes={fileValidateTypeLabelExpectedTypes}
                 files={files}
                 disabled={disabled}
                 credits={false}
+                className='filepond-import'
                 allowMultiple={false}
-                acceptedFileTypes={acceptedFileTypes}
-                // Spread all other labels
-                // {...labels}
+                acceptedFileTypes={normalizedAcceptedFileTypes}
             />
         </div>
     );
