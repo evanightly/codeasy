@@ -15,8 +15,13 @@ RUN apk update && apk add --no-cache \
     sqlite-libs \
     nodejs-current \
     npm \
+    # Add dependencies for GD extension
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
     # DSN
-    && docker-php-ext-install pdo pdo_mysql zip
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql zip gd
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
