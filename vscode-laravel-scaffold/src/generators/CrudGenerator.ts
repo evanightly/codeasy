@@ -386,7 +386,7 @@ export class CrudGenerator {
             }
             
             if (backendOptions.generateRepository) {
-                await this.generateRepositoryFiles(name);
+                await this.generateRepositoryFiles(name, attributes);
             }
             
             if (backendOptions.generateService) {
@@ -467,14 +467,14 @@ export class CrudGenerator {
         await this.fileGenerator.createFile(seederPath, seederTemplate);
     }
 
-    private async generateRepositoryFiles(name: string): Promise<void> {
+    private async generateRepositoryFiles(name: string, attributes: any[] = []): Promise<void> {
         // Repository Interface
         const repositoryInterfaceTemplate = await this.templateProcessor.getRepositoryInterfaceTemplate(name);
         const repositoryInterfacePath = await this.projectAnalyzer.getRepositoryInterfaceFilePath(name);
         await this.fileGenerator.createFile(repositoryInterfacePath, repositoryInterfaceTemplate);
         
         // Repository Implementation
-        const repositoryTemplate = await this.templateProcessor.getRepositoryTemplate(name);
+        const repositoryTemplate = await this.templateProcessor.getRepositoryTemplate(name, attributes);
         const repositoryPath = await this.projectAnalyzer.getRepositoryFilePath(name);
         await this.fileGenerator.createFile(repositoryPath, repositoryTemplate);
     }

@@ -601,7 +601,7 @@ interface ${modelName}RepositoryInterface extends BaseRepositoryInterface {}
     }
 
     // Generate Repository Implementation
-    public async getRepositoryTemplate(name: string): Promise<string> {
+    public async getRepositoryTemplate(name: string, attributes: any[] = []): Promise<string> {
         // Check for custom template
         const customTemplate = await this.readCustomTemplate('repository', name);
         if (customTemplate) {
@@ -610,6 +610,11 @@ interface ${modelName}RepositoryInterface extends BaseRepositoryInterface {}
 
         const modelName = this.toPascalCase(name);
         
+        // Extract attribute names for column filters
+        const columnNames = attributes
+            .map(attr => `'${attr.name}'`)
+            .join(', ');
+
         return `<?php
 
 namespace App\\Repositories;
@@ -631,13 +636,15 @@ class ${modelName}Repository extends BaseRepository implements ${modelName}Repos
     }
 
     protected function applyFilters(array $searchParams = []): Builder {
-        $query = $this->query();
+        $query = $this->getQuery();
 
-        // Add custom filters here
-        // Example:
-        // if (isset($searchParams['name'])) {
-        //     $query->where('name', 'like', '%' . $searchParams['name'] . '%');
-        // }
+        $query = $this->applySearchFilters($query, $searchParams, ['name']);
+
+        $query = $this->applyResolvedRelations($query, $searchParams);
+        
+        $query = $this->applyColumnFilters($query, $searchParams, ['id', ${columnNames}, 'created_at', 'updated_at']);
+        
+        $query = $this->applySorting($query, $searchParams);
 
         return $query;
     }
