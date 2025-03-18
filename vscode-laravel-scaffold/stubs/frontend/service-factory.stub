@@ -1,0 +1,28 @@
+import { {{modelName}}Service } from './{{modelName}}Service';
+
+/**
+ * Factory for creating {{modelName}} Services
+ */
+class {{modelName}}ServiceFactory {
+    /**
+     * Create a new instance of the {{modelName}}Service
+     */
+    public static createService(): {{modelName}}Service {
+        return new {{modelName}}Service();
+    }
+    
+    /**
+     * Get shared instance of the {{modelName}}Service
+     */
+    public static getInstance(): {{modelName}}Service {
+        if (!this._instance) {
+            this._instance = this.createService();
+        }
+        return this._instance;
+    }
+    
+    // Shared service instance
+    private static _instance: {{modelName}}Service;
+}
+
+export default {{modelName}}ServiceFactory;

@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Traits\Services;
+
+trait HandlesPageSizeAll
+{
+    /**
+     * Handle special case for pageSize=all
+     *
+     * @param int $pageSize
+     */
+    protected function handlePageSizeAll(int &$pageSize): void
+    {
+        // If frontend requests all records, use a large number
+        if ($pageSize === -1) {
+            $pageSize = 10000; // Or any large number that makes sense for your application
+        }
+    }
+}

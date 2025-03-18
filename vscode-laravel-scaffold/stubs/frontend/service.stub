@@ -1,0 +1,62 @@
+import axios from 'axios';
+import { {{modelName}} } from '../Support/Interfaces/Models/{{modelName}}';
+import { {{modelName}}Resource } from '../Support/Interfaces/Resources/{{modelName}}Resource';
+import { PaginatedResponse } from '../Support/Interfaces/PaginatedResponse';
+
+export class {{modelName}}Service {
+    /**
+     * Get all {{modelNamePlural}} with pagination
+     * 
+     * @param params Query parameters for filtering and pagination
+     * @returns Promise with paginated response of {{modelName}}Resource objects
+     */
+    public static async getAll(params: Record<string, any> = {}): Promise<PaginatedResponse<{{modelName}}Resource>> {
+        const response = await axios.get<PaginatedResponse<{{modelName}}Resource>>(`/api/{{routeName}}`, { params });
+        return response.data;
+    }
+
+    /**
+     * Get a single {{modelName}} by ID
+     * 
+     * @param id The ID of the {{modelVariable}}
+     * @returns Promise with the {{modelName}}Resource
+     */
+    public static async getById(id: number): Promise<{{modelName}}Resource> {
+        const response = await axios.get<{{modelName}}Resource>(`/api/{{routeName}}/${id}`);
+        return response.data;
+    }
+
+    /**
+     * Create a new {{modelName}}
+     * 
+     * @param data The {{modelName}} data to create
+     * @returns Promise with the created {{modelName}}Resource
+     */
+    public static async create(data: Partial<{{modelName}}>): Promise<{{modelName}}Resource> {
+        const response = await axios.post<{{modelName}}Resource>(`/api/{{routeName}}`, data);
+        return response.data;
+    }
+
+    /**
+     * Update an existing {{modelName}}
+     * 
+     * @param id The ID of the {{modelVariable}} to update
+     * @param data The {{modelName}} data to update
+     * @returns Promise with the updated {{modelName}}Resource
+     */
+    public static async update(id: number, data: Partial<{{modelName}}>): Promise<{{modelName}}Resource> {
+        const response = await axios.put<{{modelName}}Resource>(`/api/{{routeName}}/${id}`, data);
+        return response.data;
+    }
+
+    /**
+     * Delete a {{modelName}}
+     * 
+     * @param id The ID of the {{modelVariable}} to delete
+     * @returns Promise with the API response
+     */
+    public static async delete(id: number): Promise<any> {
+        const response = await axios.delete(`/api/{{routeName}}/${id}`);
+        return response.data;
+    }
+}

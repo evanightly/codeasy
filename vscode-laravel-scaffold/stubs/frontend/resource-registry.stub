@@ -1,0 +1,54 @@
+import { {{modelName}}Resource } from './{{modelName}}Resource';
+import { PaginatedResponse } from '../PaginatedResponse';
+
+/**
+ * Registry for {{modelName}} API endpoints
+ */
+export class {{modelName}}ResourceRegistry {
+    /**
+     * Base URL for {{modelName}} API endpoints
+     */
+    private static readonly BASE_URL = '/api/{{routeName}}';
+    
+    /**
+     * Get the URL for listing all {{modelNamePlural}}
+     */
+    public static getListUrl(): string {
+        return this.BASE_URL;
+    }
+    
+    /**
+     * Get the URL for a specific {{modelName}} by ID
+     */
+    public static getDetailUrl(id: number): string {
+        return `${this.BASE_URL}/${id}`;
+    }
+    
+    /**
+     * Get the URL for creating a new {{modelName}}
+     */
+    public static getCreateUrl(): string {
+        return this.BASE_URL;
+    }
+    
+    /**
+     * Get the URL for updating a {{modelName}}
+     */
+    public static getUpdateUrl(id: number): string {
+        return `${this.BASE_URL}/${id}`;
+    }
+    
+    /**
+     * Get the URL for deleting a {{modelName}}
+     */
+    public static getDeleteUrl(id: number): string {
+        return `${this.BASE_URL}/${id}`;
+    }
+    
+    /**
+     * Parse a paginated response from the API
+     */
+    public static parsePaginatedResponse(response: any): PaginatedResponse<{{modelName}}Resource> {
+        return response as PaginatedResponse<{{modelName}}Resource>;
+    }
+}

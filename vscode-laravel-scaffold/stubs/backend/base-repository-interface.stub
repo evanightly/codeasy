@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Support\Interfaces\Repositories;
+
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+
+interface BaseRepositoryInterface
+{
+    /**
+     * Get all items
+     *
+     * @param array $columns
+     * @return Collection
+     */
+    public function getAll(array $columns = ['*']): Collection;
+
+    /**
+     * Get all items with pagination
+     *
+     * @param array $searchParams
+     * @param int $pageSize
+     * @param array $columns
+     * @return LengthAwarePaginator
+     */
+    public function getAllPaginated(array $searchParams = [], int $pageSize = 15, array $columns = ['*']): LengthAwarePaginator;
+
+    /**
+     * Find by ID
+     *
+     * @param int $id
+     * @param array $columns
+     * @return ?Model
+     */
+    public function findById(int $id, array $columns = ['*']): ?Model;
+
+    /**
+     * Create new item
+     *
+     * @param array $data
+     * @return Model
+     */
+    public function create(array $data): Model;
+
+    /**
+     * Update existing item
+     *
+     * @param int $id
+     * @param array $data
+     * @return Model
+     */
+    public function update(int $id, array $data): Model;
+
+    /**
+     * Delete item by ID
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function delete(int $id): bool;
+    
+    /**
+     * Get basic query
+     *
+     * @return Builder
+     */
+    public function getQuery(): Builder;
+}

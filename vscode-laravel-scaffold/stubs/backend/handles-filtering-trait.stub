@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Traits\Repositories;
+
+use Illuminate\Database\Eloquent\Builder;
+
+trait HandlesFiltering
+{
+    /**
+     * Apply search query filters
+     *
+     * @param Builder $query
+     * @param array $searchParams
+     * @param array $searchableColumns
+     * @return Builder
+     */
+    protected function applySearchFilters(Builder $query, array $searchParams = [], array $searchableColumns = []): Builder
+    {
+        if (!empty($searchParams['search']) && !empty($searchableColumns)) {
+            $query->where(function (Builder $q) use ($searchParams, $searchableColumns) {
+                $search = $searchParams['search'];
+
+                foreach ($searchableColumns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Apply column-specific filters
+     *
+     * @param Builder $query
+     * @param array $searchParams
+     * @param array $filterableColumns
+     * @return Builder
+     */
+    protected function applyColumnFilters(Builder $query, array $searchParams = [], array $filterableColumns = []): Builder
+    {
+        foreach ($filterableColumns as $column) {
+            if (isset($searchParams[$column])) {
+                $value = $searchParams[$column];
+
+                if (is_array($value)) {
+                    $query->whereIn($column, $value);
+                } else {
+                    $query->where($column, $value);
+                }
+            }
+        }
+
+        return $query;
+    }
+}

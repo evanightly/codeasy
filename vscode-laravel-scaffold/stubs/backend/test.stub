@@ -1,0 +1,65 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\{{modelName}};
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class {{modelName}}Test extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * Test that the index page can be accessed.
+     */
+    public function test_index_page_can_be_rendered(): void
+    {
+        $user = User::factory()->create();
+        
+        $response = $this
+            ->actingAs($user)
+            ->get(route('{{routeName}}.index'));
+        
+        $response->assertStatus(200);
+    }
+
+    /**
+     * Test that the create page can be accessed.
+     */
+    public function test_create_page_can_be_rendered(): void
+    {
+        $user = User::factory()->create();
+        
+        $response = $this
+            ->actingAs($user)
+            ->get(route('{{routeName}}.create'));
+        
+        $response->assertStatus(200);
+    }
+
+    /**
+     * Test that a {{modelName}} can be created.
+     */
+    public function test_{{modelVariable}}_can_be_created(): void
+    {
+        $user = User::factory()->create();
+        
+        // Replace with actual test data
+        $data = [
+            // Add required fields here
+        ];
+        
+        $response = $this
+            ->actingAs($user)
+            ->post(route('{{routeName}}.store'), $data);
+
+        $response->assertRedirect(route('{{routeName}}.index'));
+        $response->assertSessionHas('message', '{{modelName}} created successfully.');
+        
+        $this->assertDatabaseHas('{{tableName}}', [
+            // Add key fields to verify here
+        ]);
+    }
+}

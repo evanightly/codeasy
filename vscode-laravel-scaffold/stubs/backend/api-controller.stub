@@ -1,0 +1,121 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\{{modelName}}\Store{{modelName}}Request;
+use App\Http\Requests\{{modelName}}\Update{{modelName}}Request;
+use App\Http\Resources\{{modelName}}Resource;
+use App\Models\{{modelName}};
+use App\Support\Interfaces\Services\{{modelName}}ServiceInterface;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+
+/**
+ * @group {{modelName}} Management
+ * 
+ * API endpoints for managing {{modelNamePlural}}
+ * 
+ * @authenticated
+ */
+class {{modelName}}Controller extends Controller
+{
+    public function __construct(protected {{modelName}}ServiceInterface ${{modelVariable}}Service)
+    {
+        // You may apply middleware here
+    }
+    
+    /**
+     * List all {{modelNamePlural}}
+     * 
+     * Get a paginated list of all {{modelNamePlural}}.
+     * 
+     * @queryParam search string Search query. Example: keyword
+     * @queryParam page integer Page number. Example: 1
+     * @queryParam pageSize integer Items per page. Example: 15
+     * @queryParam order string Sort column. Example: created_at
+     * @queryParam dir string Sort direction (asc or desc). Example: desc
+     * 
+     * @apiResource App\Http\Resources\{{modelName}}Resource
+     * @apiResourceModel App\Models\{{modelName}}
+     * 
+     * @return AnonymousResourceCollection
+     */
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $search = $request->only(['search', 'order', 'dir', 'page', 'pageSize']);
+        
+        ${{modelVariablePlural}} = $this->{{modelVariable}}Service->getAllPaginated($search);
+        
+        return {{modelName}}Resource::collection(${{modelVariablePlural}});
+    }
+
+    /**
+     * Create {{modelName}}
+     * 
+     * Store a new {{modelName}} in the database.
+     * 
+     * @apiResource App\Http\Resources\{{modelName}}Resource
+     * @apiResourceModel App\Models\{{modelName}}
+     * 
+     * @param Store{{modelName}}Request $request
+     * @return {{modelName}}Resource
+     */
+    public function store(Store{{modelName}}Request $request): {{modelName}}Resource
+    {
+        ${{modelVariable}} = $this->{{modelVariable}}Service->store($request->validated());
+        
+        return new {{modelName}}Resource(${{modelVariable}});
+    }
+
+    /**
+     * Get {{modelName}} details
+     * 
+     * Get detailed information about a specific {{modelName}}.
+     * 
+     * @apiResource App\Http\Resources\{{modelName}}Resource
+     * @apiResourceModel App\Models\{{modelName}}
+     * 
+     * @param {{modelName}} ${{modelVariable}}
+     * @return {{modelName}}Resource
+     */
+    public function show({{modelName}} ${{modelVariable}}): {{modelName}}Resource
+    {
+        return new {{modelName}}Resource(${{modelVariable}});
+    }
+
+    /**
+     * Update {{modelName}}
+     * 
+     * Update an existing {{modelName}} in the database.
+     * 
+     * @apiResource App\Http\Resources\{{modelName}}Resource
+     * @apiResourceModel App\Models\{{modelName}}
+     * 
+     * @param Update{{modelName}}Request $request
+     * @param {{modelName}} ${{modelVariable}}
+     * @return {{modelName}}Resource
+     */
+    public function update(Update{{modelName}}Request $request, {{modelName}} ${{modelVariable}}): {{modelName}}Resource
+    {
+        $updated{{modelName}} = $this->{{modelVariable}}Service->update(${{modelVariable}}->id, $request->validated());
+        
+        return new {{modelName}}Resource($updated{{modelName}});
+    }
+
+    /**
+     * Delete {{modelName}}
+     * 
+     * Remove a {{modelName}} from the database.
+     * 
+     * @param {{modelName}} ${{modelVariable}}
+     * @return JsonResponse
+     */
+    public function destroy({{modelName}} ${{modelVariable}}): JsonResponse
+    {
+        $this->{{modelVariable}}Service->delete(${{modelVariable}}->id);
+        
+        return response()->json(['message' => '{{modelName}} deleted successfully']);
+    }
+}

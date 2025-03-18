@@ -1,0 +1,96 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { {{modelName}} } from '../Support/Interfaces/Models/{{modelName}}';
+import { {{modelName}}Resource } from '../Support/Interfaces/Resources/{{modelName}}Resource';
+import { PaginatedResponse } from '../Support/Interfaces/PaginatedResponse';
+import { toast } from 'sonner';
+
+export const use{{modelName}}Service = () => {
+    const queryClient = useQueryClient();
+    
+    // Query key for {{modelVariable}}s
+    const {{modelVariablePlural}}QueryKey = ['{{modelVariablePlural}}'];
+    
+    // Fetch all {{modelVariable}}s with pagination and search
+    const useGet{{modelNamePlural}} = (params: Record<string, any> = {}) => {
+        return useQuery<PaginatedResponse<{{modelName}}Resource>>({
+            queryKey: [...{{modelVariablePlural}}QueryKey, params],
+            queryFn: async () => {
+                const response = await axios.get<PaginatedResponse<{{modelName}}Resource>>('{{apiResource}}', { params });
+                return response.data;
+            },
+            keepPreviousData: true
+        });
+    };
+    
+    // Fetch single {{modelVariable}} by ID
+    const useGet{{modelName}} = (id: number | null) => {
+        return useQuery<{{modelName}}Resource>({
+            queryKey: [...{{modelVariablePlural}}QueryKey, id],
+            queryFn: async () => {
+                if (!id) throw new Error('{{modelName}} ID is required');
+                const response = await axios.get<{{modelName}}Resource>(`{{apiResource}}/${id}`);
+                return response.data;
+            },
+            enabled: !!id
+        });
+    };
+    
+    // Create new {{modelVariable}}
+    const useCreate{{modelName}} = () => {
+        return useMutation<{{modelName}}Resource, Error, Partial<{{modelName}}>>({
+            mutationFn: async (data) => {
+                const response = await axios.post<{{modelName}}Resource>('{{apiResource}}', data);
+                return response.data;
+            },
+            onSuccess: (data) => {
+                queryClient.invalidateQueries({ queryKey: {{modelVariablePlural}}QueryKey });
+                toast.success('{{modelName}} created successfully');
+            },
+            onError: (error) => {
+                toast.error(`Error creating {{modelVariable}}: ${error.message}`);
+            }
+        });
+    };
+    
+    // Update existing {{modelVariable}}
+    const useUpdate{{modelName}} = () => {
+        return useMutation<{{modelName}}Resource, Error, { id: number; data: Partial<{{modelName}}> }>({
+            mutationFn: async ({ id, data }) => {
+                const response = await axios.put<{{modelName}}Resource>(`{{apiResource}}/${id}`, data);
+                return response.data;
+            },
+            onSuccess: (data) => {
+                queryClient.invalidateQueries({ queryKey: {{modelVariablePlural}}QueryKey });
+                toast.success('{{modelName}} updated successfully');
+            },
+            onError: (error) => {
+                toast.error(`Error updating {{modelVariable}}: ${error.message}`);
+            }
+        });
+    };
+    
+    // Delete {{modelVariable}}
+    const useDelete{{modelName}} = () => {
+        return useMutation<void, Error, number>({
+            mutationFn: async (id) => {
+                await axios.delete(`{{apiResource}}/${id}`);
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: {{modelVariablePlural}}QueryKey });
+                toast.success('{{modelName}} deleted successfully');
+            },
+            onError: (error) => {
+                toast.error(`Error deleting {{modelVariable}}: ${error.message}`);
+            }
+        });
+    };
+    
+    return {
+        useGet{{modelNamePlural}},
+        useGet{{modelName}},
+        useCreate{{modelName}},
+        useUpdate{{modelName}},
+        useDelete{{modelName}}
+    };
+};

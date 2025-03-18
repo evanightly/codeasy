@@ -1,0 +1,6 @@
+export interface {{modelName}} {
+    id: number;
+{{tsAttributes}}
+    created_at?: string;
+    updated_at?: string;
+}

@@ -1,0 +1,110 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Support\Interfaces\Repositories\BaseRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+
+abstract class BaseRepository implements BaseRepositoryInterface
+{
+    protected Model $model;
+
+    public function __construct()
+    {
+        $this->model = app($this->getModelClass());
+    }
+
+    /**
+     * Get the model class name
+     *
+     * @return string
+     */
+    abstract protected function getModelClass(): string;
+
+    /**
+     * @inheritdoc
+     */
+    public function getQuery(): Builder
+    {
+        return $this->model->newQuery();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAll(array $columns = ['*']): Collection
+    {
+        return $this->getQuery()->get($columns);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAllPaginated(array $searchParams = [], int $pageSize = 15, array $columns = ['*']): LengthAwarePaginator
+    {
+        $query = $this->applyFilters($searchParams);
+        
+        return $query->paginate($pageSize, $columns);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function findById(int $id, array $columns = ['*']): ?Model
+    {
+        return $this->getQuery()->find($id, $columns);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function create(array $data): Model
+    {
+        return $this->getQuery()->create($data);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function update(int $id, array $data): Model
+    {
+        $model = $this->findById($id);
+        
+        if (!$model) {
+            throw new \Exception(class_basename($this->getModelClass()) . " with ID {$id} not found.");
+        }
+        
+        $model->fill($data);
+        $model->save();
+        
+        return $model->fresh();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function delete(int $id): bool
+    {
+        $model = $this->findById($id);
+        
+        if (!$model) {
+            throw new \Exception(class_basename($this->getModelClass()) . " with ID {$id} not found.");
+        }
+        
+        return $model->delete();
+    }
+    
+    /**
+     * Apply filters to the query
+     *
+     * @param array $searchParams
+     * @return Builder
+     */
+    protected function applyFilters(array $searchParams = []): Builder
+    {
+        return $this->getQuery();
+    }
+}

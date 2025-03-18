@@ -1,0 +1,5 @@
+import { {{modelName}} } from '../Models/{{modelName}}';
+
+export interface {{modelName}}Resource extends {{modelName}} {
+    // Additional resource-specific properties can be added here
+}

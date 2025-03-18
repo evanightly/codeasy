@@ -3,6 +3,7 @@ import { ModelGenerator } from './ModelGenerator';
 import { FileGenerator } from '../utils/FileGenerator';
 import { TemplateProcessor } from '../utils/TemplateProcessor';
 import { LaravelProjectAnalyzer } from '../utils/LaravelProjectAnalyzer';
+import { TemplateHelper } from '../utils/helpers/TemplateHelper';
 
 export class CrudGenerator {
     private context: vscode.ExtensionContext;
@@ -509,8 +510,9 @@ export class CrudGenerator {
         await this.fileGenerator.createFile(controllerPath, controllerTemplate);
     }
     
-    private async generateApiControllerFile(name: string, apiResource: string): Promise<void> {
-        const apiControllerTemplate = await this.templateProcessor.getApiControllerTemplate(name, apiResource);
+    private async generateApiControllerFile(name: string, apiResource?: string): Promise<void> {
+        const apiPath = apiResource || `/api/${TemplateHelper.toSnakeCase(TemplateHelper.pluralize(name))}`;
+        const apiControllerTemplate = await this.templateProcessor.getApiControllerTemplate(name, apiPath);
         const apiControllerPath = await this.projectAnalyzer.getApiControllerFilePath(name);
         await this.fileGenerator.createFile(apiControllerPath, apiControllerTemplate);
     }

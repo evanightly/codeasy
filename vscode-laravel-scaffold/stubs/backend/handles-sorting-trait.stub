@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Traits\Repositories;
+
+use Illuminate\Database\Eloquent\Builder;
+
+trait HandlesSorting
+{
+    /**
+     * Apply sorting to the query
+     *
+     * @param Builder $query
+     * @param array $searchParams
+     * @param string $defaultColumn
+     * @param string $defaultDirection
+     * @return Builder
+     */
+    protected function applySorting(Builder $query, array $searchParams = [], string $defaultColumn = 'created_at', string $defaultDirection = 'desc'): Builder
+    {
+        // Get column to order by
+        $orderBy = $searchParams['order'] ?? $defaultColumn;
+        
+        // Get direction to sort
+        $direction = $searchParams['dir'] ?? $defaultDirection;
+        
+        // Validate direction input
+        if (!in_array(strtolower($direction), ['asc', 'desc'])) {
+            $direction = $defaultDirection;
+        }
+        
+        // Apply the ordering
+        return $query->orderBy($orderBy, $direction);
+    }
+}

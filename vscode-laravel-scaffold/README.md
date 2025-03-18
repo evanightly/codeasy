@@ -1,63 +1,38 @@
-# Laravel Full-Stack Scaffolding Extension
+# Laravel Scaffold - VS Code Extension
 
-A VS Code extension that helps you rapidly scaffold Laravel full-stack components including:
-
-- Models
-- Migrations
-- Factories and Seeders
-- Repositories and Services
-- Form Requests
-- Controllers (Web and API)
-- Resources and Collections
-- TypeScript interfaces and services
-- React/Inertia components
+This VS Code extension provides automated scaffolding for Laravel projects, helping you generate models, migrations, controllers, services, repositories, and more with a few clicks.
 
 ## Features
 
-- Interactive UI for defining models and attributes
-- Configurable options for generating related files
-- Support for both individual component generation and full CRUD setup
-- Generation of both backend and frontend files
-
-## Usage
-
-### Generate Model & Related Files
-
-1. Right-click on a folder in the Explorer view
-2. Select "Laravel Scaffold: Generate Model & Related Files"
-3. Define your model name, attributes, and select which related files to generate
-4. Click "Generate"
-
-### Generate Complete CRUD
-
-1. Right-click on a folder in the Explorer view
-2. Select "Laravel Scaffold: Generate Complete CRUD"
-3. Define your model name, attributes, and configure CRUD options
-4. Click "Generate"
+- **Model Generation**: Create Laravel models with the corresponding migration
+- **CRUD Generation**: Generate complete CRUD functionality including:
+  - Models, Migrations, Factories, and Seeders
+  - Repository pattern (Repository + Interface)
+  - Service pattern (Service + Interface)
+  - Controllers (Web + API)
+  - Form Requests (Store + Update)
+  - Resources and Collections
+  - TypeScript interfaces for frontend
 
 ## Requirements
 
-- VS Code 1.60.0 or higher
-- A Laravel project with standard directory structure
+- VS Code 1.50.0 or higher
+- Laravel 8.0+ project
 
-## Extension Settings
+## Usage
 
-This extension contributes the following commands:
+1. Open a Laravel project in VS Code
+2. Press `Ctrl+Shift+P` to open the Command Palette
+3. Type "Laravel Scaffold" and select either:
+   - `Laravel Scaffold: Generate Model` - to create a model and related files
+   - `Laravel Scaffold: Generate CRUD` - to create a complete CRUD setup
 
-- `laravelScaffold.generateModel`: Generate a Laravel model with related files
-- `laravelScaffold.generateCRUD`: Generate a complete Laravel CRUD setup
+## Customization
 
-## Development Setup
+### Using Custom Stubs
 
-1. Clone the repository
-2. Run `npm install` to install dependencies
-3. Open the project in VS Code
-4. Press F5 to launch the extension in debug mode
+This extension uses a stub-based template system, which means you can customize the generated code by providing your own stub files. There are two ways to customize templates:
 
-## Building the Extension
+#### 1. Project-level Stubs
 
-Run `npm run vscode:prepublish` to compile the extension.
-
-## License
-
-MIT
+Create stub files in your project structure:

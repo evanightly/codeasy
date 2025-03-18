@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Traits\Repositories;
+
+use Illuminate\Database\Eloquent\Builder;
+
+trait RelationQueryable
+{
+    /**
+     * Query through a relation with where condition
+     *
+     * @param Builder $query
+     * @param string $relation
+     * @param string $column
+     * @param mixed $value
+     * @param string $operator
+     * @return Builder
+     */
+    protected function whereRelation(Builder $query, string $relation, string $column, $value, string $operator = '='): Builder
+    {
+        return $query->whereHas($relation, function ($q) use ($column, $value, $operator) {
+            $q->where($column, $operator, $value);
+        });
+    }
+
+    /**
+     * Query through a relation with whereIn condition
+     *
+     * @param Builder $query
+     * @param string $relation
+     * @param string $column
+     * @param array $values
+     * @return Builder
+     */
+    protected function whereRelationIn(Builder $query, string $relation, string $column, array $values): Builder
+    {
+        return $query->whereHas($relation, function ($q) use ($column, $values) {
+            $q->whereIn($column, $values);
+        });
+    }
+}

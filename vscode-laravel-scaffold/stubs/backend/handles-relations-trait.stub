@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Traits\Repositories;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+
+trait HandlesRelations
+{
+    /**
+     * Apply eager loading of relations
+     *
+     * @param Builder $query
+     * @param array $relations
+     * @return Builder
+     */
+    protected function withRelations(Builder $query, array $relations = []): Builder
+    {
+        if (!empty($relations)) {
+            $query->with($relations);
+        }
+        
+        return $query;
+    }
+    
+    /**
+     * Apply resolved relations from search params
+     *
+     * @param Builder $query
+     * @param array $searchParams
+     * @return Builder
+     */
+    protected function applyResolvedRelations(Builder $query, array $searchParams = []): Builder
+    {
+        // Check if 'with' parameter is provided
+        if (!empty($searchParams['with'])) {
+            $relations = is_array($searchParams['with']) 
+                ? $searchParams['with'] 
+                : explode(',', $searchParams['with']);
+                
+            return $this->withRelations($query, $relations);
+        }
+        
+        return $query;
+    }
+}
