@@ -87,12 +87,15 @@ export class TemplateProcessor {
         const pluralCamelName = TemplateHelper.toCamelCase(pluralName);
         const tableNameVal = tableName || TemplateHelper.toSnakeCase(pluralName);
         const routeName = TemplateHelper.toSnakeCase(pluralName);
+        const modelNameUpperSnake = TemplateHelper.toUpperSnakeCase(name);
         
         return content
             .replace(/\{\{\s*name\s*\}\}/g, name)
             .replace(/\{\{\s*modelName\s*\}\}/g, modelName)
             .replace(/\{\{\s*modelNamePlural\s*\}\}/g, TemplateHelper.toPascalCase(pluralName))
             .replace(/\{\{\s*modelVariable\s*\}\}/g, modelVariable)
+            .replace(/\{\{\s*modelNameUpperSnake\s*\}\}/g, modelNameUpperSnake)
+            .replace(/\{\{\s*modelNameCamel\s*\}\}/g, modelVariable) // modelNameCamel is the same as modelVariable
             .replace(/\{\{\s*modelVariablePlural\s*\}\}/g, pluralCamelName)
             .replace(/\{\{\s*tableName\s*\}\}/g, tableNameVal)
             .replace(/\{\{\s*routeName\s*\}\}/g, routeName);
@@ -387,12 +390,26 @@ export class TemplateProcessor {
     }
     
     public async getApiControllerTemplate(name: string, apiResource?: string): Promise<string> {
-        // We need to process apiResource separately since it's not a standard attribute
+        // Get the base template
         const template = await this.getTemplate('apiController', name);
-        if (apiResource) {
-            return template.replace(/\{\{\s*apiResource\s*\}\}/g, apiResource);
+        
+        if (!template) {
+            return '';
         }
-        return template;
+        
+        // Process the template with the standard variables
+        let processedTemplate = await this.processTemplateWithVariables(template, name);
+        
+        // Replace the API resource placeholder if provided
+        if (apiResource) {
+            processedTemplate = processedTemplate.replace(/\{\{\s*apiResource\s*\}\}/g, apiResource);
+        } else {
+            // If no API resource is provided, use a default based on the model name
+            const defaultApiResource = `/api/${TemplateHelper.toSnakeCase(TemplateHelper.pluralize(name))}`;
+            processedTemplate = processedTemplate.replace(/\{\{\s*apiResource\s*\}\}/g, defaultApiResource);
+        }
+        
+        return processedTemplate;
     }
     
     public async getTsModelInterfaceTemplate(name: string, attributes: AttributeDefinition[]): Promise<string> {

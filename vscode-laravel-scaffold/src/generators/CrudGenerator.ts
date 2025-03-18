@@ -511,9 +511,14 @@ export class CrudGenerator {
     }
     
     private async generateApiControllerFile(name: string, apiResource?: string): Promise<void> {
+        // Use apiResource if provided, otherwise construct a default path from the model name
         const apiPath = apiResource || `/api/${TemplateHelper.toSnakeCase(TemplateHelper.pluralize(name))}`;
+        
+        // Get the API controller template with the apiResource parameter
         const apiControllerTemplate = await this.templateProcessor.getApiControllerTemplate(name, apiPath);
         const apiControllerPath = await this.projectAnalyzer.getApiControllerFilePath(name);
+        
+        // Write the file
         await this.fileGenerator.createFile(apiControllerPath, apiControllerTemplate);
     }
     

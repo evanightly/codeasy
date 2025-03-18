@@ -36,6 +36,13 @@ export class TemplateHelper {
     }
 
     /**
+     * Convert string to UPPER_SNAKE_CASE
+     */
+    static toUpperSnakeCase(str: string): string {
+        return this.toSnakeCase(str).toUpperCase();
+    }
+
+    /**
      * Simple pluralization for English nouns
      */
     static pluralize(word: string): string {

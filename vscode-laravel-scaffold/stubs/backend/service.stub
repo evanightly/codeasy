@@ -3,20 +3,22 @@
 namespace App\Services;
 
 use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
-use App\Support\Interfaces\Repositories\{{modelName}}RepositoryInterface;
-use App\Support\Interfaces\Services\{{modelName}}ServiceInterface;
+use App\Support\Interfaces\Repositories\{{ modelName }}RepositoryInterface;
+use App\Support\Interfaces\Services\{{ modelName }}ServiceInterface;
 use App\Traits\Services\HandlesPageSizeAll;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class {{modelName}}Service extends BaseCrudService implements {{modelName}}ServiceInterface {
+class {{ modelName }}Service extends BaseCrudService implements {{ modelName }}ServiceInterface {
     use HandlesPageSizeAll;
 
     protected function getRepositoryClass(): string {
-        return {{modelName}}RepositoryInterface::class;
+        return {{ modelName }}RepositoryInterface::class;
     }
 
+    /** @var {{ modelName }}Repository */
+    protected $repository;
+
     public function getAllPaginated(array $search = [], int $pageSize = 15): LengthAwarePaginator {
-        // Handle "all" pageSize for frontend
         $this->handlePageSizeAll($pageSize);
         
         return parent::getAllPaginated($search, $pageSize);

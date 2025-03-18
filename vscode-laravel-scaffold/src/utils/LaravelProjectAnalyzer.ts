@@ -155,7 +155,7 @@ export class LaravelProjectAnalyzer {
     public async getApiControllerFilePath(name: string): Promise<string> {
         const apiControllerPath = path.join(this.rootPath, 'app', 'Http', 'Controllers', 'Api');
         await this.ensureDirectoryExists(apiControllerPath);
-        return path.join(apiControllerPath, `${this.toPascalCase(name)}Controller.php`);
+        return path.join(apiControllerPath, `Api${this.toPascalCase(name)}Controller.php`);
     }
 
     /**

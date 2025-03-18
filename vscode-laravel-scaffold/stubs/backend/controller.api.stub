@@ -44,11 +44,9 @@ class {{modelName}}Controller extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $search = $request->only(['search', 'order', 'dir', 'page', 'pageSize']);
-        
-        ${{modelVariablePlural}} = $this->{{modelVariable}}Service->getAllPaginated($search);
-        
-        return {{modelName}}Resource::collection(${{modelVariablePlural}});
+        $perPage = request()->get('perPage', 5);
+
+        return {{modelName}}Resource::collection($this->{{modelVariable}}Service->getAllPaginated($request->query(), $perPage));
     }
 
     /**
@@ -64,9 +62,7 @@ class {{modelName}}Controller extends Controller
      */
     public function store(Store{{modelName}}Request $request): {{modelName}}Resource
     {
-        ${{modelVariable}} = $this->{{modelVariable}}Service->store($request->validated());
-        
-        return new {{modelName}}Resource(${{modelVariable}});
+        return $this->{{modelVariable}}Service->create($request->validated());
     }
 
     /**
@@ -82,7 +78,7 @@ class {{modelName}}Controller extends Controller
      */
     public function show({{modelName}} ${{modelVariable}}): {{modelName}}Resource
     {
-        return new {{modelName}}Resource(${{modelVariable}});
+        return new {{modelName}}Resource(${{modelVariable}}->load(['roles' => ['division', 'permissions']]));
     }
 
     /**
@@ -99,9 +95,7 @@ class {{modelName}}Controller extends Controller
      */
     public function update(Update{{modelName}}Request $request, {{modelName}} ${{modelVariable}}): {{modelName}}Resource
     {
-        $updated{{modelName}} = $this->{{modelVariable}}Service->update(${{modelVariable}}->id, $request->validated());
-        
-        return new {{modelName}}Resource($updated{{modelName}});
+        return $this->{{modelVariable}}Service->update(${{modelVariable}}, $request->validated());
     }
 
     /**
@@ -112,10 +106,8 @@ class {{modelName}}Controller extends Controller
      * @param {{modelName}} ${{modelVariable}}
      * @return JsonResponse
      */
-    public function destroy({{modelName}} ${{modelVariable}}): JsonResponse
+    public function destroy(Request $request, {{modelName}} ${{modelVariable}}): JsonResponse
     {
-        $this->{{modelVariable}}Service->delete(${{modelVariable}}->id);
-        
-        return response()->json(['message' => '{{modelName}} deleted successfully']);
+        return $this->{{modelVariable}}Service->delete(${{modelVariable}});
     }
 }
