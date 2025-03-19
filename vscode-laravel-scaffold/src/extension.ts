@@ -5,6 +5,7 @@ import { ModelGenerator } from './generators/ModelGenerator';
 import { CrudGenerator } from './generators/CrudGenerator';
 import { LaravelProjectAnalyzer } from './utils/LaravelProjectAnalyzer';
 import { SetupManager } from './utils/SetupManager';
+import { InitializerGenerator } from './generators/InitializerGenerator'; // Add this import
 
 /**
  * Ensure stubs directory exists
@@ -317,6 +318,7 @@ export function activate(context: vscode.ExtensionContext) {
     const modelGenerator = new ModelGenerator(context);
     const crudGenerator = new CrudGenerator(context);
     const projectAnalyzer = new LaravelProjectAnalyzer();
+    const initializerGenerator = new InitializerGenerator(context); // Add this line
 
     // Check if we're in a Laravel project
     projectAnalyzer.isLaravelProject().then(isLaravel => {
@@ -340,7 +342,12 @@ export function activate(context: vscode.ExtensionContext) {
         await SetupManager.initializeStubs();
     });
 
-    context.subscriptions.push(modelDisposable, crudDisposable, initDisposable);
+    // Register the scaffold initialization command for new projects
+    let initScaffoldDisposable = vscode.commands.registerCommand('laravelScaffold.initializeScaffold', async () => {
+        await initializerGenerator.showInitializerUI();
+    });
+
+    context.subscriptions.push(modelDisposable, crudDisposable, initDisposable, initScaffoldDisposable);
 }
 
 export function deactivate() {}
