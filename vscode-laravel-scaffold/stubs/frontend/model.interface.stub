@@ -1,0 +1,8 @@
+/**
+ * Base model interface that all models should extend
+ */
+export interface Model {
+    id: number;
+    created_at?: string;
+    updated_at?: string;
+}

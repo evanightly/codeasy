@@ -1,0 +1,5 @@
+export interface GenericBreadcrumbItem {
+    title: string;
+    href?: string;
+    active?: boolean;
+}

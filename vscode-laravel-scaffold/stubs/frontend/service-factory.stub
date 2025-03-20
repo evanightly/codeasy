@@ -1,3 +1,9 @@
+import axios from 'axios';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ServiceFilterOptions, ServiceHooksFactory } from '@/Support/Interfaces/Others';
+import { generateServiceHooksFactoryQueryKey } from '@/Helpers';
+import { getErrorMessage } from '@/Helpers/tanstackQueryHelpers';
+
 import { {{modelName}}Service } from './{{modelName}}Service';
 
 /**
@@ -26,3 +32,104 @@ class {{modelName}}ServiceFactory {
 }
 
 export default {{modelName}}ServiceFactory;
+
+/**
+ * Generic service hooks factory to create API service hooks
+ */
+export function createServiceHooks<TData, TResource, TPayload = Partial<TData>>(
+    apiEndpoint: string
+): ServiceHooksFactory<TData, TResource, TPayload> {
+    return {
+        useGetAll: (options?: ServiceFilterOptions) => {
+            return useQuery({
+                queryKey: generateServiceHooksFactoryQueryKey(apiEndpoint, options),
+                queryFn: async () => {
+                    const params = options || {};
+                    const response = await axios.get(apiEndpoint, { params });
+                    return response.data.data;
+                },
+                meta: {
+                    errorMessage: 'Failed to fetch data'
+                }
+            });
+        },
+        
+        useGetPaginated: (options?: ServiceFilterOptions) => {
+            return useQuery({
+                queryKey: generateServiceHooksFactoryQueryKey(apiEndpoint, options),
+                queryFn: async () => {
+                    const params = options || {};
+                    const response = await axios.get(apiEndpoint, { params });
+                    return response.data;
+                },
+                meta: {
+                    errorMessage: 'Failed to fetch paginated data'
+                }
+            });
+        },
+        
+        useGetById: (id: number) => {
+            return useQuery({
+                queryKey: generateServiceHooksFactoryQueryKey(apiEndpoint, undefined, id),
+                queryFn: async () => {
+                    const response = await axios.get(`${apiEndpoint}/${id}`);
+                    return response.data.data;
+                },
+                meta: {
+                    errorMessage: `Failed to fetch item #${id}`
+                }
+            });
+        },
+        
+        useCreate: () => {
+            const queryClient = useQueryClient();
+            
+            return useMutation({
+                mutationFn: async (payload: TPayload) => {
+                    const response = await axios.post(apiEndpoint, payload);
+                    return response.data;
+                },
+                onSuccess: () => {
+                    queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+                },
+                onError: (error) => {
+                    console.error('Create error:', getErrorMessage(error));
+                }
+            });
+        },
+        
+        useUpdate: (id: number) => {
+            const queryClient = useQueryClient();
+            
+            return useMutation({
+                mutationFn: async (payload: TPayload) => {
+                    const response = await axios.put(`${apiEndpoint}/${id}`, payload);
+                    return response.data;
+                },
+                onSuccess: () => {
+                    queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+                    queryClient.invalidateQueries({ queryKey: generateServiceHooksFactoryQueryKey(apiEndpoint, undefined, id) });
+                },
+                onError: (error) => {
+                    console.error('Update error:', getErrorMessage(error));
+                }
+            });
+        },
+        
+        useDelete: () => {
+            const queryClient = useQueryClient();
+            
+            return useMutation({
+                mutationFn: async (id: number) => {
+                    await axios.delete(`${apiEndpoint}/${id}`);
+                },
+                onSuccess: () => {
+                    queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+                },
+                onError: (error) => {
+                    console.error('Delete error:', getErrorMessage(error));
+                }
+            });
+        }
+    };
+}

@@ -1,0 +1,12 @@
+import { PaginateMeta } from './PaginateMeta';
+
+export interface PaginateResponse<T> {
+    data: T[];
+    links: {
+        first: string | null;
+        last: string | null;
+        prev: string | null;
+        next: string | null;
+    };
+    meta: PaginateMeta;
+}

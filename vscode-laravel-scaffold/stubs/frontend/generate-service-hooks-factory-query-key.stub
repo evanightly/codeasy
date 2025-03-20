@@ -1,0 +1,22 @@
+import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+
+/**
+ * Generate a unique query key for tanstack query based on endpoint and options
+ */
+export function generateServiceHooksFactoryQueryKey(
+    endpoint: string,
+    options?: ServiceFilterOptions,
+    suffix?: string | number
+): (string | Record<string, any> | number | undefined)[] {
+    const queryKey = [endpoint];
+    
+    if (options) {
+        queryKey.push(options);
+    }
+    
+    if (suffix !== undefined) {
+        queryKey.push(suffix);
+    }
+    
+    return queryKey;
+}

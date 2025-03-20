@@ -1,0 +1,11 @@
+/**
+ * Options for filtering API requests
+ */
+export interface ServiceFilterOptions {
+    page?: number;
+    per_page?: number | 'all';
+    search?: string;
+    sort_by?: string;
+    sort_dir?: 'asc' | 'desc';
+    [key: string]: any;
+}

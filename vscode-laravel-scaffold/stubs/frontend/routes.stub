@@ -1,49 +1,15 @@
-import { {{modelName}} } from '../Support/Interfaces/Models/{{modelName}}';
+export const ROUTES = {
+    // Dashboard
+    DASHBOARD: 'dashboard',
+    
+    // Auth
+    LOGIN: 'login',
+    LOGOUT: 'logout',
+    REGISTER: 'register',
+    FORGOT_PASSWORD: 'forgot-password',
+    RESET_PASSWORD: 'reset-password',
+    
+    // Add your model routes here as you create them
+    // Example: USERS: 'users',
+};
 
-// Add route registration for {{modelName}}
-const {{modelVariablePlural}}Routes = [
-    {
-        path: '/{{routeName}}',
-        name: '{{routeName}}.index',
-        component: () => import('../Pages/{{modelName}}/Index'),
-        meta: {
-            requiresAuth: true,
-            title: '{{modelNamePlural}} List'
-        }
-    },
-    {
-        path: '/{{routeName}}/create',
-        name: '{{routeName}}.create',
-        component: () => import('../Pages/{{modelName}}/Create'),
-        meta: {
-            requiresAuth: true,
-            title: 'Create {{modelName}}'
-        }
-    },
-    {
-        path: '/{{routeName}}/:id/edit',
-        name: '{{routeName}}.edit',
-        component: () => import('../Pages/{{modelName}}/Edit'),
-        meta: {
-            requiresAuth: true,
-            title: 'Edit {{modelName}}'
-        },
-        props: (route: { params: { id: string } }) => ({
-            id: Number(route.params.id)
-        })
-    },
-    {
-        path: '/{{routeName}}/:id',
-        name: '{{routeName}}.show',
-        component: () => import('../Pages/{{modelName}}/Show'),
-        meta: {
-            requiresAuth: true,
-            title: '{{modelName}} Details'
-        },
-        props: (route: { params: { id: string } }) => ({
-            id: Number(route.params.id)
-        })
-    },
-];
-
-export default {{modelVariablePlural}}Routes;

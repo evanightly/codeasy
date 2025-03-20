@@ -1,0 +1,31 @@
+import { GenericBreadcrumbItem } from '@/Support/Interfaces/Others';
+import { ROUTES } from '@/Support/Constants/routes';
+
+/**
+ * Generate breadcrumb items for a route
+ */
+export function generateDynamicBreadcrumbs(
+    baseRoute: string, 
+    currentPage: 'index' | 'create' | 'edit' | 'show',
+    entityName?: string,
+    entityId?: number
+): GenericBreadcrumbItem[] {
+    const breadcrumbs: GenericBreadcrumbItem[] = [
+        { title: 'Dashboard', href: route(ROUTES.DASHBOARD) },
+        { title: baseRoute.charAt(0).toUpperCase() + baseRoute.slice(1), href: route(baseRoute + '.index') }
+    ];
+    
+    switch (currentPage) {
+        case 'create':
+            breadcrumbs.push({ title: 'Create', active: true });
+            break;
+        case 'edit':
+            breadcrumbs.push({ title: `Edit ${entityName || ''}`, active: true });
+            break;
+        case 'show':
+            breadcrumbs.push({ title: entityName || `#${entityId}`, active: true });
+            break;
+    }
+    
+    return breadcrumbs;
+}

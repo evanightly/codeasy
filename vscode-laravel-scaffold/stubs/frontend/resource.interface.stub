@@ -1,0 +1,8 @@
+import { Model } from '../Models/Model';
+
+/**
+ * Base resource interface that all API resources should extend
+ */
+export interface Resource<T extends Model = Model> {
+    data: T;
+}

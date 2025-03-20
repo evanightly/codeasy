@@ -1,0 +1,16 @@
+import { UseQueryResult, UseMutationResult } from '@tanstack/react-query';
+import { ServiceFilterOptions } from './ServiceFilterOptions';
+import { PaginateResponse } from './PaginateResponse';
+import { Resource } from '../Resources/Resource';
+
+export interface ServiceHooksFactory<TData, TResource, TPayload = Partial<TData>> {
+    // Query hooks
+    useGetAll: (options?: ServiceFilterOptions) => UseQueryResult<TData[], Error>;
+    useGetPaginated: (options?: ServiceFilterOptions) => UseQueryResult<PaginateResponse<TData>, Error>;
+    useGetById: (id: number) => UseQueryResult<TData, Error>;
+    
+    // Mutation hooks
+    useCreate: () => UseMutationResult<Resource<TData>, Error, TPayload>;
+    useUpdate: (id: number) => UseMutationResult<Resource<TData>, Error, TPayload>;
+    useDelete: () => UseMutationResult<void, Error, number>;
+}
