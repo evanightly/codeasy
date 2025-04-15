@@ -100,7 +100,7 @@ Langkah-langkah dasar untuk memulai pengembangan lokal:
 
 6. **Akses Aplikasi**
 
-    Laravel + Inertia di http://localhost:8080 (menyesuaikan mapping di docker-compose.yml).
+    Laravel + Inertia di http://localhost:9001 (menyesuaikan mapping di docker-compose.yml).
 
 ---
 
