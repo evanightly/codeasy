@@ -25,7 +25,10 @@
         "editor.defaultFormatter": "open-southeners.laravel-pint"
     },
     "php.suggest.basic": false,
-    "files.associations": { "*.module": "php" },
+    "files.associations": {
+        "*.module": "php"
+    },
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true,
     // "i18n-ally.dirStructure": "dir",
     // "i18n-ally.localesPaths": [
     //     "laravel/lang"
