@@ -73,6 +73,7 @@ services:
       context: .
       dockerfile: docker/laravel.dev.Dockerfile
     container_name: codeasy_laravel_dev
+    command: composer dev
     volumes:
       - ./laravel:/var/www/html
     networks:
