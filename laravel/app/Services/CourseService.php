@@ -92,6 +92,9 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         // Create new Spreadsheet object
         $spreadsheet = new Spreadsheet;
 
+        // Generate the Instructions sheet first
+        $this->createInstructionsSheet($spreadsheet);
+
         // Generate the Courses sheet
         $this->createCoursesSheet($spreadsheet);
 
@@ -130,10 +133,46 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
     }
 
     /**
+     * Create the Instructions sheet with help text
+     */
+    private function createInstructionsSheet(Spreadsheet $spreadsheet) {
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Instructions');
+
+        $sheet->setCellValue('A1', 'Course Import Instructions');
+        $sheet->setCellValue('A3', '1. Fill out the Courses sheet first');
+        $sheet->setCellValue('A4', '2. Then fill out the Materials sheet using the course names from the Courses sheet');
+        $sheet->setCellValue('A5', '3. Then fill out the Questions sheet using the material titles and course names');
+        $sheet->setCellValue('A6', '4. Finally, fill out the TestCases sheet using the question titles, material titles, and course names');
+        $sheet->setCellValue('A8', 'Notes:');
+        $sheet->setCellValue('A9', '- You can use classroom names/codes instead of IDs');
+        $sheet->setCellValue('A10', '- You can use teacher email addresses instead of IDs');
+        $sheet->setCellValue('A11', '- Materials must reference a course by name');
+        $sheet->setCellValue('A12', '- Questions must reference a material by title and include the course name');
+        $sheet->setCellValue('A13', '- Test cases must reference a question by title and include the material title and course name');
+
+        // Add ZIP file instructions
+        $sheet->setCellValue('A15', 'ZIP File Instructions:');
+        $sheet->setCellValue('A16', '- You can include all files in a ZIP archive along with this Excel file');
+        $sheet->setCellValue('A17', '- In the Excel file, use relative paths to reference files within the ZIP');
+        $sheet->setCellValue('A18', '- Example: "materials/lecture1.pdf" would reference a file in a "materials" folder in the ZIP');
+        $sheet->setCellValue('A19', '- Files for learning materials should be referenced in the "file" column');
+        $sheet->setCellValue('A20', '- Files for questions should be referenced in the "file" column');
+        $sheet->setCellValue('A21', '- Files for test cases should be referenced in the "expected_output_file" column');
+
+        // Format headers
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A15')->getFont()->setBold(true);
+        $sheet->getStyle('A8')->getFont()->setBold(true);
+
+        return $spreadsheet;
+    }
+
+    /**
      * Create the Courses sheet with classrooms for the authenticated teacher
      */
     private function createCoursesSheet(Spreadsheet $spreadsheet) {
-        $sheet = $spreadsheet->getActiveSheet();
+        $sheet = $spreadsheet->createSheet();
         $sheet->setTitle('Courses');
 
         // Set header row
@@ -230,35 +269,6 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
             $sheet->getCell('E' . $i)->setDataValidation(clone $validation);
         }
 
-        // Add some help text at the top
-        $sheet = $spreadsheet->createSheet();
-        $sheet->setTitle('Instructions');
-        $sheet->setCellValue('A1', 'Course Import Instructions');
-        $sheet->setCellValue('A3', '1. Fill out the Courses sheet first');
-        $sheet->setCellValue('A4', '2. Then fill out the Materials sheet using the course names from the Courses sheet');
-        $sheet->setCellValue('A5', '3. Then fill out the Questions sheet using the material titles and course names');
-        $sheet->setCellValue('A6', '4. Finally, fill out the TestCases sheet using the question titles, material titles, and course names');
-        $sheet->setCellValue('A8', 'Notes:');
-        $sheet->setCellValue('A9', '- You can use classroom names/codes instead of IDs');
-        $sheet->setCellValue('A10', '- You can use teacher email addresses instead of IDs');
-        $sheet->setCellValue('A11', '- Materials must reference a course by name');
-        $sheet->setCellValue('A12', '- Questions must reference a material by title and include the course name');
-        $sheet->setCellValue('A13', '- Test cases must reference a question by title and include the material title and course name');
-
-        // Add ZIP file instructions
-        $sheet->setCellValue('A15', 'ZIP File Instructions:');
-        $sheet->setCellValue('A16', '- You can include all files in a ZIP archive along with this Excel file');
-        $sheet->setCellValue('A17', '- In the Excel file, use relative paths to reference files within the ZIP');
-        $sheet->setCellValue('A18', '- Example: "materials/lecture1.pdf" would reference a file in a "materials" folder in the ZIP');
-        $sheet->setCellValue('A19', '- Files for learning materials should be referenced in the "file" column');
-        $sheet->setCellValue('A20', '- Files for questions should be referenced in the "file" column');
-        $sheet->setCellValue('A21', '- Files for test cases should be referenced in the "expected_output_file" column');
-
-        // Format headers
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A15')->getFont()->setBold(true);
-        $sheet->getStyle('A8')->getFont()->setBold(true);
-
         return $spreadsheet;
     }
 
@@ -312,15 +322,6 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         $sheet->getColumnDimension('E')->setWidth(20);
         $sheet->getColumnDimension('F')->setWidth(20);
         $sheet->getColumnDimension('G')->setWidth(10);
-
-        // Add comments
-        // $sheet->setCellComment('A1', 'Enter the exact course name from the Courses sheet');
-        // $sheet->setCellComment('D1', 'Valid types: ' . implode(', ', LearningMaterialTypeEnum::toArray()));
-
-        // $sheet->setComments([
-        //     'A1' => ['text' => 'Enter the exact course name from the Courses sheet'],
-        //     'D1' => ['text' => 'Valid types: ' . implode(', ', LearningMaterialTypeEnum::toArray())],
-        // ]);
 
         // Add validation for type column
         $validation = $sheet->getDataValidation('D2');
@@ -404,15 +405,6 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         $sheet->getColumnDimension('G')->setWidth(20);
         $sheet->getColumnDimension('H')->setWidth(10);
 
-        // Add comments
-        // $sheet->setCellComment('A1', 'Enter the exact course name from the Courses sheet');
-        // $sheet->setCellComment('B1', 'Enter the exact material title from the Materials sheet');
-
-        // $sheet->setComments([
-        //     'A1' => ['text' => 'Enter the exact course name from the Courses sheet'],
-        //     'B1' => ['text' => 'Enter the exact material title from the Materials sheet'],
-        // ]);
-
         // Add validation for active column
         $validation = $sheet->getDataValidation('H2');
         $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST)
@@ -481,19 +473,6 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         $sheet->getColumnDimension('H')->setWidth(15);
         $sheet->getColumnDimension('I')->setWidth(10);
         $sheet->getColumnDimension('J')->setWidth(10);
-
-        // Add comments
-        // $sheet->setCellComment('A1', 'Enter the exact course name from the Courses sheet');
-        // $sheet->setCellComment('B1', 'Enter the exact material title from the Materials sheet');
-        // $sheet->setCellComment('C1', 'Enter the exact question title from the Questions sheet');
-        // $sheet->setCellComment('H1', 'Valid languages: ' . implode(', ', ProgrammingLanguageEnum::toArray()));
-
-        // $sheet->setComments([
-        //     'A1' => ['text' => 'Enter the exact course name from the Courses sheet'],
-        //     'B1' => ['text' => 'Enter the exact material title from the Materials sheet'],
-        //     'C1' => ['text' => 'Enter the exact question title from the Questions sheet'],
-        //     'H1' => ['text' => 'Valid languages: ' . implode(', ', ProgrammingLanguageEnum::toArray())],
-        // ]);
 
         // Add validation for language column
         $validation = $sheet->getDataValidation('H2');
