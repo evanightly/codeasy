@@ -81,15 +81,17 @@ export default function Workspace({
     material,
     question,
     testCases,
-    tracking,
+    tracking: initialTracking,
     latestCode,
-    navigation,
+    navigation: initialNavigation,
 }: Props) {
     const { t } = useLaravelReactI18n();
     const [code, setCode] = useState(latestCode || '');
     const [isCompiling, setIsCompiling] = useState(false);
     const [output, setOutput] = useState<FastApiOutput[]>([]);
-    const [timeSpent, setTimeSpent] = useState(tracking.current_time);
+    const [tracking, setTracking] = useState(initialTracking);
+    const [navigation, setNavigation] = useState(initialNavigation);
+    const [timeSpent, setTimeSpent] = useState(initialTracking.current_time);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [lastSyncTime, setLastSyncTime] = useState(Date.now());
 
@@ -122,23 +124,25 @@ export default function Workspace({
             setOutput(response.data.output || []);
 
             // Check for completion status
-            if (response.data.success && tracking.completion_status) {
-                // toast({
-                //     title: t('pages.student_questions.workspace.success.title'),
-                //     description: t('pages.student_questions.workspace.success.description'),
-                //     variant: 'success',
-                // });
+            if (response.data.success) {
+                // Update the local tracking state to reflect completion
+                setTracking((prev) => ({
+                    ...prev,
+                    completion_status: true,
+                }));
+
+                // Enable the next button
+                if (navigation.next) {
+                    setNavigation((prev) => ({
+                        ...prev,
+                        next: prev.next ? { ...prev.next, can_proceed: true } : null,
+                    }));
+                }
 
                 toast.success(t('pages.student_questions.workspace.success.description'));
             }
         } catch (error) {
             console.error('Error executing code:', error);
-            // toast({
-            //     title: t('pages.student_questions.workspace.error.title'),
-            //     description: t('pages.student_questions.workspace.error.description'),
-            //     variant: 'destructive',
-            // });
-
             toast.error(t('pages.student_questions.workspace.error.description'));
             setOutput([{ type: 'error', content: 'Failed to execute code' }]);
         } finally {
