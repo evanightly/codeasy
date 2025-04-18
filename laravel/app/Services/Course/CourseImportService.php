@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Smalot\PdfParser\Parser as PdfParser;
 use ZipArchive;
 
 class CourseImportService implements CourseImportServiceInterface {
@@ -39,6 +40,13 @@ class CourseImportService implements CourseImportServiceInterface {
     protected $extractDir;
     protected $isZipImport = false;
     protected $uploadedFiles = [];
+
+    // PDF Parser instance
+    protected $pdfParser;
+
+    public function __construct() {
+        $this->pdfParser = new PdfParser();
+    }
 
     public function import(string $filePath) {
         try {
@@ -368,8 +376,25 @@ class CourseImportService implements CourseImportServiceInterface {
 
                 $this->successCount['materials']++;
 
-                // Process questions for this material
-                $this->processQuestionsSheet($material);
+                // Check if this material has a PDF file attached and we're doing a ZIP import
+                if ($this->isZipImport &&
+                    !empty($materialData['file']) &&
+                    strtolower($materialData['file_extension'] ?? '') === 'pdf') {
+
+                    // Get the full path to the PDF file
+                    $pdfPath = storage_path('app/public/learning-materials/' . $materialData['file']);
+
+                    // Parse PDF to extract questions and test cases
+                    $extractedContent = $this->parsePdfContent($pdfPath);
+
+                    // If questions were found in the PDF, create them
+                    if (!empty($extractedContent['questions'])) {
+                        $this->createQuestionsFromPdf($material, $extractedContent);
+                    }
+                } else {
+                    // Process questions for this material from the spreadsheet
+                    $this->processQuestionsSheet($material);
+                }
 
             } catch (\Exception $e) {
                 $this->errors[] = "Materials Row {$index}: {$e->getMessage()}";
@@ -599,5 +624,160 @@ class CourseImportService implements CourseImportServiceInterface {
                 $query->whereName('teacher');
             })
             ->first();
+    }
+
+    /**
+     * Parse PDF file and extract structured content
+     *
+     * @param string $filePath Full path to the PDF file
+     * @return array Array containing extracted questions and test cases
+     */
+    protected function parsePdfContent(string $filePath): array {
+        if (!file_exists($filePath)) {
+            $this->errors[] = "PDF file not found: {$filePath}";
+            return ['questions' => [], 'testCases' => []];
+        }
+
+        try {
+            // Parse PDF file
+            $pdf = $this->pdfParser->parseFile($filePath);
+            $text = $pdf->getText();
+
+            // Extract questions section
+            $questionsData = $this->extractQuestionsFromPdf($text);
+
+            return $questionsData;
+        } catch (\Exception $e) {
+            $this->errors[] = "Error parsing PDF: " . $e->getMessage();
+            Log::error("Error parsing PDF: {$filePath}", ['exception' => $e]);
+            return ['questions' => [], 'testCases' => []];
+        }
+    }
+
+    /**
+     * Extract questions and test cases from PDF content
+     *
+     * @param string $pdfText The text content of the PDF
+     * @return array Array of questions with their test cases
+     */
+    protected function extractQuestionsFromPdf(string $pdfText): array {
+        $questions = [];
+        $testCases = [];
+
+        // Look for "Pertanyaan Modul" section
+        if (preg_match('/Pertanyaan Modul\s*(.*?)(?:\n\s*$|\Z)/s', $pdfText, $questionsSection)) {
+            $questionsSectionText = $questionsSection[1];
+
+            // Extract individual questions
+            preg_match_all('/Judul:\s*(.*?)\s*Deskripsi:\s*(.*?)\s*Test Case:\s*(.*?)(?=Judul:|$)/s', $questionsSectionText, $matches, PREG_SET_ORDER);
+
+            foreach ($matches as $index => $match) {
+                $title = trim($match[1]);
+                $description = trim($match[2]);
+                $testCaseText = trim($match[3]);
+
+                // Create question array
+                $questionData = [
+                    'title' => $title,
+                    'description' => $description,
+                    'order_number' => $index + 1,
+                ];
+                $questions[] = $questionData;
+
+                // Extract test cases for this question
+                $questionTestCases = $this->extractTestCasesFromQuestion($testCaseText, $index);
+                $testCases = array_merge($testCases, $questionTestCases);
+            }
+        }
+
+        return [
+            'questions' => $questions,
+            'testCases' => $testCases
+        ];
+    }
+
+    /**
+     * Extract test cases from a question's test case section
+     *
+     * @param string $testCaseText The test case text from the question
+     * @param int $questionIndex The index of the question (for ordering)
+     * @return array Array of test cases for the question
+     */
+    protected function extractTestCasesFromQuestion(string $testCaseText, int $questionIndex): array {
+        $testCases = [];
+
+        // Split test case assertions
+        $assertions = explode("\n", $testCaseText);
+        $assertions = array_filter($assertions, 'trim');
+
+        foreach ($assertions as $index => $assertion) {
+            // Clean up the assertion text
+            $assertion = trim($assertion);
+            if (empty($assertion)) continue;
+
+            // Extract the test code from the assertion
+            if (preg_match('/self\.assert(?:In|Equal)?\((.*)\)/', $assertion, $match)) {
+                $testInput = trim($match[1]);
+
+                // Create test case
+                $testCases[] = [
+                    'question_index' => $questionIndex,
+                    'description' => "Test case " . ($index + 1),
+                    'input' => $assertion,
+                    'hidden' => false,
+                    'order_number' => $index + 1,
+                ];
+            }
+        }
+
+        return $testCases;
+    }
+
+    /**
+     * Create questions and test cases from extracted PDF content
+     *
+     * @param LearningMaterial $material The material to associate the questions with
+     * @param array $extractedContent The extracted content from the PDF
+     */
+    protected function createQuestionsFromPdf(LearningMaterial $material, array $extractedContent) {
+        $orderNumber = 1;
+
+        foreach ($extractedContent['questions'] as $questionData) {
+            try {
+                // Create question
+                $question = LearningMaterialQuestion::create([
+                    'learning_material_id' => $material->id,
+                    'title' => $questionData['title'],
+                    'description' => $questionData['description'] ?? null,
+                    'type' => $material->type,
+                    'order_number' => $orderNumber++,
+                    'active' => true,
+                ]);
+
+                // Store for reference by title
+                $questionKey = $material->id . '|' . $question->title;
+                $this->createdQuestions[$questionKey] = $question->id;
+
+                $this->successCount['questions']++;
+
+                // Create test cases for this question
+                foreach ($extractedContent['testCases'] as $testCaseData) {
+                    if ($testCaseData['question_index'] === $orderNumber - 1) {
+                        LearningMaterialQuestionTestCase::create([
+                            'learning_material_question_id' => $question->id,
+                            'description' => $testCaseData['description'] ?? null,
+                            'input' => $testCaseData['input'] ?? null,
+                            'hidden' => $testCaseData['hidden'] ?? true,
+                            'active' => true,
+                        ]);
+
+                        $this->successCount['testCases']++;
+                    }
+                }
+            } catch (\Exception $e) {
+                $this->errors[] = "Error creating question from PDF: {$e->getMessage()}";
+                Log::error("Error creating question from PDF", ['exception' => $e]);
+            }
+        }
     }
 }
