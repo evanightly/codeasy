@@ -161,9 +161,13 @@ async def test_code(input: CodeInput):
             import sys
             import json
 
+            # Store student code in a variable for tests to access
+            student_code = '''{}'''
+
             class TestUserCode(unittest.TestCase):
                 pass
-            """
+            """.format(input.code.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"'))
+            
             kernel_mgr.execute_code(setup_code)
             
             # Add test methods
