@@ -561,9 +561,11 @@ export default function Workspace({
                                                                     </div>
                                                                     <Progress
                                                                         value={
-                                                                            (out.success /
-                                                                                out.total_tests) *
-                                                                            100
+                                                                            out.success
+                                                                                ? (out.success /
+                                                                                      out.total_tests) *
+                                                                                  100
+                                                                                : 0
                                                                         }
                                                                         className='h-2'
                                                                     />
