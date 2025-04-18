@@ -715,15 +715,22 @@ class CourseImportService implements CourseImportServiceInterface {
             $assertion = trim($assertion);
             if (empty($assertion)) continue;
 
+            // Sanitize list symbols (bullets and numbers with dots)
+            // Remove bullet points (•, *, -, etc.)
+            $assertion = preg_replace('/^[\s•\*\-\+]+\s*/', '', $assertion);
+
+            // Remove numbered list markers (1., 2., etc.)
+            $assertion = preg_replace('/^\d+\.\s*/', '', $assertion);
+
             // Extract the test code from the assertion
-            if (preg_match('/self\.assert(?:In|Equal)?\((.*)\)/', $assertion, $match)) {
-                $testInput = trim($match[1]);
+            if (preg_match('/self\.assert(?:In|Equal|True|False)?\((.*)\)/', $assertion, $match)) {
+                $testInput = trim($match[0]); // Get the full assertion
 
                 // Create test case
                 $testCases[] = [
                     'question_index' => $questionIndex,
                     'description' => "Test case " . ($index + 1),
-                    'input' => $assertion,
+                    'input' => $testInput,
                     'hidden' => false,
                     'order_number' => $index + 1,
                 ];
@@ -741,8 +748,10 @@ class CourseImportService implements CourseImportServiceInterface {
      */
     protected function createQuestionsFromPdf(LearningMaterial $material, array $extractedContent) {
         $orderNumber = 1;
+        $createdQuestions = [];
 
-        foreach ($extractedContent['questions'] as $questionData) {
+        // First, create all questions and store them by index
+        foreach ($extractedContent['questions'] as $index => $questionData) {
             try {
                 // Create question
                 $question = LearningMaterialQuestion::create([
@@ -758,25 +767,44 @@ class CourseImportService implements CourseImportServiceInterface {
                 $questionKey = $material->id . '|' . $question->title;
                 $this->createdQuestions[$questionKey] = $question->id;
 
+                // Store the created question with its original index (0-based)
+                $createdQuestions[$index] = $question;
+
                 $this->successCount['questions']++;
-
-                // Create test cases for this question
-                foreach ($extractedContent['testCases'] as $testCaseData) {
-                    if ($testCaseData['question_index'] === $orderNumber - 1) {
-                        LearningMaterialQuestionTestCase::create([
-                            'learning_material_question_id' => $question->id,
-                            'description' => $testCaseData['description'] ?? null,
-                            'input' => $testCaseData['input'] ?? null,
-                            'hidden' => $testCaseData['hidden'] ?? true,
-                            'active' => true,
-                        ]);
-
-                        $this->successCount['testCases']++;
-                    }
-                }
             } catch (\Exception $e) {
                 $this->errors[] = "Error creating question from PDF: {$e->getMessage()}";
                 Log::error("Error creating question from PDF", ['exception' => $e]);
+            }
+        }
+
+        // Then, create test cases for each question by matching the original index
+        foreach ($extractedContent['testCases'] as $testCaseData) {
+            try {
+                $questionIndex = $testCaseData['question_index']; // This is the 0-based index
+
+                // Skip if we don't have a question for this index
+                if (!isset($createdQuestions[$questionIndex])) {
+                    $this->errors[] = "Test case skipped: No question found for index {$questionIndex}";
+                    continue;
+                }
+
+                // Get the question from our stored array
+                $question = $createdQuestions[$questionIndex];
+
+                // Create the test case associated with this specific question
+                LearningMaterialQuestionTestCase::create([
+                    'learning_material_question_id' => $question->id,
+                    'description' => $testCaseData['description'] ?? null,
+                    'input' => $testCaseData['input'] ?? null,
+                    'hidden' => $testCaseData['hidden'] ?? true,
+                    'active' => true,
+                    'order_number' => $testCaseData['order_number'] ?? 1,
+                ]);
+
+                $this->successCount['testCases']++;
+            } catch (\Exception $e) {
+                $this->errors[] = "Error creating test case from PDF: {$e->getMessage()}";
+                Log::error("Error creating test case from PDF", ['exception' => $e, 'testCaseData' => $testCaseData]);
             }
         }
     }
