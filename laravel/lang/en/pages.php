@@ -1296,7 +1296,6 @@ return [
             'run_first' => 'You must run your code at least once to proceed',
             'completed' => 'Completed',
             'no_output_yet' => 'No output yet. Run your code to see results.',
-            'error' => 'Error',
             'test_results' => 'Test Results',
             'passed' => ' passed',
             'success' => [

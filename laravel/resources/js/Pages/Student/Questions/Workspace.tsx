@@ -526,7 +526,7 @@ export default function Workspace({
                                                                 <AlertCircle className='h-4 w-4' />
                                                                 <AlertTitle>
                                                                     {t(
-                                                                        'pages.student_questions.workspace.error',
+                                                                        'pages.student_questions.workspace.error.title',
                                                                     )}
                                                                 </AlertTitle>
                                                                 <AlertDescription>
