@@ -3,20 +3,23 @@ export interface CourseImportPreview {
     materials: any[];
     questions: any[];
     testCases: any[];
-    pdfContent: Record<string, {
-        questions: {
-            title: string;
-            description: string;
-            order_number: number;
-        }[];
-        testCases: {
-            question_index: number;
-            description: string;
-            input: string;
-            hidden: boolean;
-            order_number: number;
-        }[];
-    }>;
+    pdfContent: Record<
+        string,
+        {
+            questions: {
+                title: string;
+                description: string;
+                order_number: number;
+            }[];
+            testCases: {
+                question_index: number;
+                description: string;
+                input: string;
+                hidden: boolean;
+                order_number: number;
+            }[];
+        }
+    >;
     isZipImport: boolean;
     stats: {
         courses: number;

@@ -44,7 +44,9 @@ export function OutputPanel({ output, isCompiling, className = '' }: OutputPanel
                     return (
                         <Alert variant='destructive' key={i}>
                             <AlertCircle className='h-4 w-4' />
-                            <AlertTitle>{t('pages.student_questions.workspace.error.title')}</AlertTitle>
+                            <AlertTitle>
+                                {t('pages.student_questions.workspace.error.title')}
+                            </AlertTitle>
                             <AlertDescription>
                                 <pre className='whitespace-pre-wrap text-xs'>{out.content}</pre>
                             </AlertDescription>

@@ -95,12 +95,13 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
                     'status' => 'success',
                     'preview' => $result['preview'],
                 ]);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $result['message'],
-                ], 422);
             }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => $result['message'],
+            ], 422);
+
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Validation failed',

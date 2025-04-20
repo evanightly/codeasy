@@ -2,36 +2,23 @@
 
 namespace App\Services;
 
-use App\Models\ClassRoom;
-use App\Models\Course;
-use App\Models\LearningMaterial;
-use App\Models\LearningMaterialQuestion;
-use App\Models\LearningMaterialQuestionTestCase;
-use App\Models\User;
 use App\Support\Interfaces\Repositories\CourseRepositoryInterface;
 use App\Support\Interfaces\Services\CourseImportServiceInterface;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use ZipArchive;
 
-class CourseImportService implements CourseImportServiceInterface
-{
-    public function __construct(protected CourseRepositoryInterface $courseRepository)
-    {
-    }
+class CourseImportService implements CourseImportServiceInterface {
+    public function __construct(protected CourseRepositoryInterface $courseRepository) {}
 
     /**
      * Preview import data without saving to database
      *
-     * @param string $filePath Path to the uploaded file
+     * @param  string  $filePath  Path to the uploaded file
      * @return array Preview data with success/error status
      */
-    public function preview(string $filePath): array
-    {
+    public function preview(string $filePath): array {
         try {
             $pathInfo = pathinfo($filePath);
             $extension = strtolower($pathInfo['extension'] ?? '');
@@ -51,7 +38,7 @@ class CourseImportService implements CourseImportServiceInterface
                     'testCases' => 0,
                     'pdfQuestions' => 0,
                     'pdfTestCases' => 0,
-                ]
+                ],
             ];
 
             $excelPath = $filePath;
@@ -65,7 +52,7 @@ class CourseImportService implements CourseImportServiceInterface
                     mkdir($extractPath, 0777, true);
                 }
 
-                $zip = new ZipArchive();
+                $zip = new ZipArchive;
                 if ($zip->open($filePath) !== true) {
                     throw new FileException('Unable to open ZIP file');
                 }
@@ -104,7 +91,9 @@ class CourseImportService implements CourseImportServiceInterface
                 $headers = array_shift($coursesData); // Remove header row
 
                 foreach ($coursesData as $row) {
-                    if (empty($row[0])) continue; // Skip empty rows
+                    if (empty($row[0])) {
+                        continue;
+                    } // Skip empty rows
 
                     $courseData = [
                         'name' => $row[array_search('name', $headers, true)] ?? null,
@@ -132,7 +121,9 @@ class CourseImportService implements CourseImportServiceInterface
                 $headers = array_shift($materialsData); // Remove header row
 
                 foreach ($materialsData as $row) {
-                    if (empty($row[0])) continue; // Skip empty rows
+                    if (empty($row[0])) {
+                        continue;
+                    } // Skip empty rows
 
                     $materialData = [
                         'course_name' => $row[array_search('course_name', $headers, true)] ?? null,
@@ -162,7 +153,9 @@ class CourseImportService implements CourseImportServiceInterface
                 $headers = array_shift($questionsData); // Remove header row
 
                 foreach ($questionsData as $row) {
-                    if (empty($row[0])) continue; // Skip empty rows
+                    if (empty($row[0])) {
+                        continue;
+                    } // Skip empty rows
 
                     $questionData = [
                         'material_title' => $row[array_search('material_title', $headers, true)] ?? null,
@@ -192,7 +185,9 @@ class CourseImportService implements CourseImportServiceInterface
                 $headers = array_shift($testCasesData); // Remove header row
 
                 foreach ($testCasesData as $row) {
-                    if (empty($row[0])) continue; // Skip empty rows
+                    if (empty($row[0])) {
+                        continue;
+                    } // Skip empty rows
 
                     $testCaseData = [
                         'question_title' => $row[array_search('question_title', $headers, true)] ?? null,
@@ -223,7 +218,7 @@ class CourseImportService implements CourseImportServiceInterface
 
             return [
                 'success' => true,
-                'preview' => $previewData
+                'preview' => $previewData,
             ];
 
         } catch (\Exception $e) {
@@ -231,7 +226,7 @@ class CourseImportService implements CourseImportServiceInterface
 
             return [
                 'success' => false,
-                'message' => 'Error previewing import: ' . $e->getMessage()
+                'message' => 'Error previewing import: ' . $e->getMessage(),
             ];
         }
     }
@@ -241,8 +236,7 @@ class CourseImportService implements CourseImportServiceInterface
      * This is a simplified implementation that would need to be expanded
      * with actual NLP or parsing logic for production use
      */
-    private function analyzePdfContent(string $pdfPath): array
-    {
+    private function analyzePdfContent(string $pdfPath): array {
         // This is a placeholder implementation
         // In a real implementation, you would use a PDF parser library
         // and possibly NLP to identify questions and test cases
@@ -250,7 +244,7 @@ class CourseImportService implements CourseImportServiceInterface
         // For demonstration purposes, we'll just return some mock data
         $result = [
             'questions' => [],
-            'testCases' => []
+            'testCases' => [],
         ];
 
         // Simplified mock detection of questions and test cases
@@ -262,9 +256,9 @@ class CourseImportService implements CourseImportServiceInterface
         for ($i = 0; $i < $questionCount; $i++) {
             $questionIndex = $i;
             $result['questions'][] = [
-                'title' => "Question " . ($i + 1) . " from " . $filename,
-                'description' => "Auto-detected question content would appear here.",
-                'order_number' => $i + 1
+                'title' => 'Question ' . ($i + 1) . ' from ' . $filename,
+                'description' => 'Auto-detected question content would appear here.',
+                'order_number' => $i + 1,
             ];
 
             // Add 2-4 test cases per question
@@ -272,10 +266,10 @@ class CourseImportService implements CourseImportServiceInterface
             for ($j = 0; $j < $testCaseCount; $j++) {
                 $result['testCases'][] = [
                     'question_index' => $questionIndex,
-                    'description' => "Test case " . ($j + 1) . " for question " . ($i + 1),
-                    'input' => "test(input) == expected_output",
+                    'description' => 'Test case ' . ($j + 1) . ' for question ' . ($i + 1),
+                    'input' => 'test(input) == expected_output',
                     'hidden' => rand(0, 1) === 1,
-                    'order_number' => $j + 1
+                    'order_number' => $j + 1,
                 ];
             }
         }
@@ -286,11 +280,10 @@ class CourseImportService implements CourseImportServiceInterface
     /**
      * Import courses from a file
      *
-     * @param string $filePath Path to the uploaded file
+     * @param  string  $filePath  Path to the uploaded file
      * @return array Import results with success/error status
      */
-    public function import(string $filePath): array
-    {
+    public function import(string $filePath): array {
         // Implementation of the import logic would go here
         // For now, we'll just return a placeholder response
         return [
@@ -300,8 +293,8 @@ class CourseImportService implements CourseImportServiceInterface
                 'courses' => 0,
                 'materials' => 0,
                 'questions' => 0,
-                'testCases' => 0
-            ]
+                'testCases' => 0,
+            ],
         ];
     }
 

@@ -16,7 +16,7 @@ class StoreCourseRequest extends FormRequest {
                 ];
             case IntentEnum::COURSE_STORE_PREVIEW_IMPORT->value:
                 return [
-                    'import_file' => ['required', 'file', 'max:50000']
+                    'import_file' => ['required', 'file', 'max:50000'],
                 ];
         }
 

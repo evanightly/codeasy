@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->foreignId('learning_material_question_id')
                 ->constrained()
                 ->name('fk_test_cases_question_id')
-            ->onDelete('cascade');
+                ->onDelete('cascade');
             $table->text('input')->nullable();
             $table->text('expected_output_file')->nullable();
             $table->string('expected_output_file_extension')->nullable();

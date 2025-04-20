@@ -1,3 +1,4 @@
+export * from './CourseImportPreviewInterfaces';
 export * from './DashboardMenuItem';
 export * from './FastApiOutput';
 export * from './GenericBreadcrumbItem';
@@ -6,4 +7,3 @@ export * from './PaginateMetaLink';
 export * from './PaginateResponse';
 export * from './ServiceFilterOptions';
 export * from './ServiceHooksFactory';
-export * from './CourseImportPreviewInterfaces';

@@ -45,7 +45,7 @@ class CourseImportService implements CourseImportServiceInterface {
     protected $pdfParser;
 
     public function __construct() {
-        $this->pdfParser = new PdfParser();
+        $this->pdfParser = new PdfParser;
     }
 
     public function import(string $filePath) {
@@ -109,7 +109,7 @@ class CourseImportService implements CourseImportServiceInterface {
     /**
      * Preview the content of an import file without committing changes
      *
-     * @param string $filePath Path to the import file (Excel or ZIP)
+     * @param  string  $filePath  Path to the import file (Excel or ZIP)
      * @return array Preview data with courses, materials, questions and test cases
      */
     public function preview(string $filePath): array {
@@ -166,13 +166,13 @@ class CourseImportService implements CourseImportServiceInterface {
                     'materials' => count($materialsSheet ? $this->readSheetToCollection($materialsSheet) : []),
                     'questions' => count($questionsSheet ? $this->readSheetToCollection($questionsSheet) : []),
                     'testCases' => count($testCasesSheet ? $this->readSheetToCollection($testCasesSheet) : []),
-                    'pdfQuestions' => array_sum(array_map(function($pdf) {
+                    'pdfQuestions' => array_sum(array_map(function ($pdf) {
                         return count($pdf['questions'] ?? []);
                     }, $pdfQuestionData)),
-                    'pdfTestCases' => array_sum(array_map(function($pdf) {
+                    'pdfTestCases' => array_sum(array_map(function ($pdf) {
                         return count($pdf['testCases'] ?? []);
                     }, $pdfQuestionData)),
-                ]
+                ],
             ];
 
             // Clean up temporary extraction directory if this was a ZIP import
@@ -720,12 +720,13 @@ class CourseImportService implements CourseImportServiceInterface {
     /**
      * Parse PDF file and extract structured content
      *
-     * @param string $filePath Full path to the PDF file
+     * @param  string  $filePath  Full path to the PDF file
      * @return array Array containing extracted questions and test cases
      */
     protected function parsePdfContent(string $filePath): array {
         if (!file_exists($filePath)) {
             $this->errors[] = "PDF file not found: {$filePath}";
+
             return ['questions' => [], 'testCases' => []];
         }
 
@@ -739,8 +740,9 @@ class CourseImportService implements CourseImportServiceInterface {
 
             return $questionsData;
         } catch (\Exception $e) {
-            $this->errors[] = "Error parsing PDF: " . $e->getMessage();
+            $this->errors[] = 'Error parsing PDF: ' . $e->getMessage();
             Log::error("Error parsing PDF: {$filePath}", ['exception' => $e]);
+
             return ['questions' => [], 'testCases' => []];
         }
     }
@@ -748,7 +750,7 @@ class CourseImportService implements CourseImportServiceInterface {
     /**
      * Extract questions and test cases from PDF content
      *
-     * @param string $pdfText The text content of the PDF
+     * @param  string  $pdfText  The text content of the PDF
      * @return array Array of questions with their test cases
      */
     protected function extractQuestionsFromPdf(string $pdfText): array {
@@ -783,15 +785,15 @@ class CourseImportService implements CourseImportServiceInterface {
 
         return [
             'questions' => $questions,
-            'testCases' => $testCases
+            'testCases' => $testCases,
         ];
     }
 
     /**
      * Extract test cases from a question's test case section
      *
-     * @param string $testCaseText The test case text from the question
-     * @param int $questionIndex The index of the question (for ordering)
+     * @param  string  $testCaseText  The test case text from the question
+     * @param  int  $questionIndex  The index of the question (for ordering)
      * @return array Array of test cases for the question
      */
     protected function extractTestCasesFromQuestion(string $testCaseText, int $questionIndex): array {
@@ -804,7 +806,9 @@ class CourseImportService implements CourseImportServiceInterface {
         foreach ($assertions as $index => $assertion) {
             // Clean up the assertion text
             $assertion = trim($assertion);
-            if (empty($assertion)) continue;
+            if (empty($assertion)) {
+                continue;
+            }
 
             // Sanitize list symbols (bullets and numbers with dots)
             // Remove bullet points (•, *, -, etc.)
@@ -820,7 +824,7 @@ class CourseImportService implements CourseImportServiceInterface {
                 // Create test case
                 $testCases[] = [
                     'question_index' => $questionIndex,
-                    'description' => "Test case " . ($index + 1),
+                    'description' => 'Test case ' . ($index + 1),
                     'input' => $testInput,
                     'hidden' => false,
                     'order_number' => $index + 1,
@@ -834,8 +838,8 @@ class CourseImportService implements CourseImportServiceInterface {
     /**
      * Create questions and test cases from extracted PDF content
      *
-     * @param LearningMaterial $material The material to associate the questions with
-     * @param array $extractedContent The extracted content from the PDF
+     * @param  LearningMaterial  $material  The material to associate the questions with
+     * @param  array  $extractedContent  The extracted content from the PDF
      */
     protected function createQuestionsFromPdf(LearningMaterial $material, array $extractedContent) {
         $orderNumber = 1;
@@ -864,7 +868,7 @@ class CourseImportService implements CourseImportServiceInterface {
                 $this->successCount['questions']++;
             } catch (\Exception $e) {
                 $this->errors[] = "Error creating question from PDF: {$e->getMessage()}";
-                Log::error("Error creating question from PDF", ['exception' => $e]);
+                Log::error('Error creating question from PDF', ['exception' => $e]);
             }
         }
 
@@ -876,6 +880,7 @@ class CourseImportService implements CourseImportServiceInterface {
                 // Skip if we don't have a question for this index
                 if (!isset($createdQuestions[$questionIndex])) {
                     $this->errors[] = "Test case skipped: No question found for index {$questionIndex}";
+
                     continue;
                 }
 
@@ -895,7 +900,7 @@ class CourseImportService implements CourseImportServiceInterface {
                 $this->successCount['testCases']++;
             } catch (\Exception $e) {
                 $this->errors[] = "Error creating test case from PDF: {$e->getMessage()}";
-                Log::error("Error creating test case from PDF", ['exception' => $e, 'testCaseData' => $testCaseData]);
+                Log::error('Error creating test case from PDF', ['exception' => $e, 'testCaseData' => $testCaseData]);
             }
         }
     }
