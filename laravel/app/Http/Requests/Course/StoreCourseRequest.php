@@ -14,6 +14,10 @@ class StoreCourseRequest extends FormRequest {
                 return [
                     'import_file' => 'required|file|mimes:xlsx,xls,zip|max:51200', // Increased max size to 50MB to accommodate ZIP files
                 ];
+            case IntentEnum::COURSE_STORE_PREVIEW_IMPORT->value:
+                return [
+                    'import_file' => ['required', 'file', 'max:50000']
+                ];
         }
 
         return [

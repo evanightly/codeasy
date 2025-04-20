@@ -55,4 +55,18 @@ export const courseServiceHook = {
             invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
         });
     },
+    previewImport: () => {
+        return createMutation({
+            mutationFn: async (formData: FormData) => {
+                return mutationApi({
+                    method: 'post',
+                    url: route(`${ROUTES.COURSES}.store`),
+                    params: {
+                        intent: IntentEnum.COURSE_STORE_PREVIEW_IMPORT,
+                    },
+                    data: formData,
+                });
+            },
+        });
+    },
 };

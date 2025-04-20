@@ -107,6 +107,97 @@ class CourseImportService implements CourseImportServiceInterface {
     }
 
     /**
+     * Preview the content of an import file without committing changes
+     *
+     * @param string $filePath Path to the import file (Excel or ZIP)
+     * @return array Preview data with courses, materials, questions and test cases
+     */
+    public function preview(string $filePath): array {
+        try {
+            // Determine if this is a ZIP file
+            $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
+            $isZipImport = strtolower($fileExtension) === 'zip';
+            $pdfQuestionData = [];
+
+            if ($isZipImport) {
+                $excelPath = $this->extractZipFile($filePath);
+                if (!$excelPath) {
+                    throw new \Exception('No Excel file found in the ZIP archive');
+                }
+
+                // Also scan for PDF files to extract questions - use recursive search
+                $pdfFiles = [];
+                $directory = new \RecursiveDirectoryIterator($this->extractDir);
+                $iterator = new \RecursiveIteratorIterator($directory);
+                foreach ($iterator as $file) {
+                    if ($file->isFile() && strtolower($file->getExtension()) === 'pdf') {
+                        $pdfFiles[] = $file->getPathname();
+                    }
+                }
+
+                foreach ($pdfFiles as $pdfFile) {
+                    $pdfData = $this->parsePdfContent($pdfFile);
+                    if (!empty($pdfData['questions'])) {
+                        $fileName = basename($pdfFile);
+                        $pdfQuestionData[$fileName] = $pdfData;
+                    }
+                }
+            } else {
+                $excelPath = $filePath;
+            }
+
+            $spreadsheet = IOFactory::load($excelPath);
+
+            // Read data from sheets but don't commit to database
+            $courseSheet = $spreadsheet->getSheetByName('Courses');
+            $materialsSheet = $spreadsheet->getSheetByName('Materials');
+            $questionsSheet = $spreadsheet->getSheetByName('Questions');
+            $testCasesSheet = $spreadsheet->getSheetByName('TestCases');
+
+            $previewData = [
+                'courses' => $courseSheet ? $this->readSheetToCollection($courseSheet) : [],
+                'materials' => $materialsSheet ? $this->readSheetToCollection($materialsSheet) : [],
+                'questions' => $questionsSheet ? $this->readSheetToCollection($questionsSheet) : [],
+                'testCases' => $testCasesSheet ? $this->readSheetToCollection($testCasesSheet) : [],
+                'pdfContent' => $pdfQuestionData,
+                'isZipImport' => $isZipImport,
+                'stats' => [
+                    'courses' => count($courseSheet ? $this->readSheetToCollection($courseSheet) : []),
+                    'materials' => count($materialsSheet ? $this->readSheetToCollection($materialsSheet) : []),
+                    'questions' => count($questionsSheet ? $this->readSheetToCollection($questionsSheet) : []),
+                    'testCases' => count($testCasesSheet ? $this->readSheetToCollection($testCasesSheet) : []),
+                    'pdfQuestions' => array_sum(array_map(function($pdf) {
+                        return count($pdf['questions'] ?? []);
+                    }, $pdfQuestionData)),
+                    'pdfTestCases' => array_sum(array_map(function($pdf) {
+                        return count($pdf['testCases'] ?? []);
+                    }, $pdfQuestionData)),
+                ]
+            ];
+
+            // Clean up temporary extraction directory if this was a ZIP import
+            if ($isZipImport) {
+                $this->cleanupTempFiles();
+            }
+
+            return [
+                'success' => true,
+                'preview' => $previewData,
+            ];
+        } catch (\Exception $e) {
+            // Clean up temporary files if needed
+            if (isset($isZipImport) && $isZipImport) {
+                $this->cleanupTempFiles();
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Preview generation failed: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * Extract a ZIP file and find the Excel file within
      *
      * @param  string  $zipPath  Path to the ZIP file

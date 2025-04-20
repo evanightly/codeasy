@@ -1,160 +1,141 @@
-import { FilePondUploader } from '@/Components/FilePondUploader';
+import { ImportPreviewDialog } from '@/Components/ImportPreviewDialog';
 import { Button } from '@/Components/UI/button';
-import { Card, CardContent } from '@/Components/UI/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
     Dialog,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/Components/UI/dialog';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/Components/UI/form';
 import { courseServiceHook } from '@/Services/courseServiceHook';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm as useInertiaForm } from '@inertiajs/react';
+import { CourseImportPreview } from '@/Support/Interfaces/Others';
+import { FilePondCallbackProps, FilePondFile } from 'filepond';
+import 'filepond/dist/filepond.min.css';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { FileIcon } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { FileSpreadsheet, ListChecks, Loader2, Upload } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { FilePond } from 'react-filepond';
 import { toast } from 'sonner';
-import { z } from 'zod';
 
-interface ImportProps {
-    errors?: Record<string, string>;
-    stats?: {
-        courses: number;
-        materials: number;
-        questions: number;
-        testCases: number;
-    };
-    message?: string;
-    status?: 'success' | 'error';
-}
-
-export default function Import({ errors, stats, message, status }: ImportProps) {
+const Import = () => {
     const { t } = useLaravelReactI18n();
+    const [open, setOpen] = useState(false);
+    const [files, setFiles] = useState<FilePondFile[]>([]);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewData, setPreviewData] = useState<CourseImportPreview | null>(null);
 
+    const templateMutation = courseServiceHook.downloadImportTemplate();
     const courseImportMutation = courseServiceHook.importCourses();
-    const courseDownloadImportTemplateMutation = courseServiceHook.downloadImportTemplate();
+    const previewImportMutation = courseServiceHook.previewImport();
 
-    // Inertia form for file upload progress
-    const inertiaForm = useInertiaForm({
-        import_file: null as File | null,
-    });
-
-    // Define Zod schema for validation
-    const formSchema = z.object({
-        import_file: z
-            .instanceof(File, { message: t('validation.required', { attribute: 'file' }) })
-            .refine(
-                (file) =>
-                    [
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                        'application/vnd.ms-excel',
-                        'application/zip',
-                        'application/x-zip-compressed',
-                        'multipart/x-zip',
-                    ].includes(file.type) ||
-                    file.name.endsWith('.xlsx') ||
-                    file.name.endsWith('.xls') ||
-                    file.name.endsWith('.zip'),
-                {
-                    message: t('pages.course.import.validation.file_type', {
-                        defaultValue: 'Only .xlsx, .xls and .zip files are accepted',
-                    }),
-                },
-            )
-            .refine((file) => file.size <= 50 * 1024 * 1024, {
-                message: t('pages.course.import.validation.file_size', {
-                    defaultValue: 'File size must not exceed 50MB',
-                }),
-            }),
-    });
-
-    // React Hook Form with Zod validation
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            import_file: undefined,
-        },
-    });
-
-    const handleDownload = () => {
-        toast.promise(courseDownloadImportTemplateMutation.mutateAsync({}), {
+    const handleDownloadTemplate = () => {
+        toast.promise(templateMutation.mutateAsync({}), {
             loading: t('pages.course.import.downloading_template', {
                 defaultValue: 'Downloading template...',
             }),
-            success: (res) => {
-                // Handle the blob response correctly
-                const blob = new Blob([res.data], {
-                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                });
-                const url = URL.createObjectURL(blob);
+            success: (response) => {
+                // Create a blob from the response
+                const blob = new Blob([response.data], { type: response.headers['content-type'] });
+
+                // Create a temporary URL for the blob
+                const url = window.URL.createObjectURL(blob);
+
+                // Create a temporary anchor element
                 const link = document.createElement('a');
                 link.href = url;
 
-                // Extract filename from Content-Disposition header if available
-                let filename = 'course_import_template.xlsx';
-                const disposition = res.headers?.['content-disposition'];
-                if (disposition) {
-                    const filenameMatch = disposition.match(
-                        /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/,
-                    );
-                    if (filenameMatch && filenameMatch[1]) {
-                        filename = filenameMatch[1].replace(/['"]/g, '');
-                    }
-                }
+                // Get the filename from Content-Disposition header or use a default
+                const contentDisposition = response.headers['content-disposition'];
+                const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                const matches = filenameRegex.exec(contentDisposition);
+                const filename =
+                    matches && matches[1]
+                        ? matches[1].replace(/['"]/g, '')
+                        : 'course_import_template.xlsx';
 
                 link.setAttribute('download', filename);
                 document.body.appendChild(link);
                 link.click();
-                URL.revokeObjectURL(url);
+
+                // Clean up
+                window.URL.revokeObjectURL(url);
                 document.body.removeChild(link);
+
                 return t('pages.course.import.download_success', {
                     defaultValue: 'Template downloaded successfully',
                 });
             },
-            error: t('pages.course.import.download_error', {
-                defaultValue: 'Failed to download template',
-            }),
+            error: () =>
+                t('pages.course.import.download_error', {
+                    defaultValue: 'Failed to download template',
+                }),
         });
     };
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        const formData = new FormData();
-        formData.append('import_file', values.import_file);
+    const handleImport = () => {
+        if (files.length === 0) {
+            toast.error(
+                t('pages.course.import.validation.file_required', {
+                    defaultValue: 'Please select a file to import',
+                }),
+            );
+            return;
+        }
 
+        // Prepare form data with the selected file
+        const formData = new FormData();
+        const fileData = files[0].file as File;
+        formData.append('import_file', fileData);
+
+        // First generate a preview
+        toast.promise(previewImportMutation.mutateAsync(formData), {
+            loading: t('pages.course.import.previewing', {
+                defaultValue: 'Analyzing import file...',
+            }),
+            success: (response) => {
+                if (response.data?.status === 'success') {
+                    setPreviewData(response.data.preview);
+                    setPreviewOpen(true);
+                    return t('pages.course.import.preview_success', {
+                        defaultValue: 'Preview generated successfully',
+                    });
+                } else {
+                    throw new Error(response.data?.message || 'Unknown error');
+                }
+            },
+            error: (error) => {
+                console.error('Preview error:', error);
+                return t('pages.course.import.preview_error', {
+                    defaultValue: 'Failed to generate preview',
+                });
+            },
+        });
+    };
+
+    const handleConfirmImport = () => {
+        if (files.length === 0) return;
+
+        // Prepare form data with the selected file
+        const formData = new FormData();
+        const fileData = files[0].file as File;
+        formData.append('import_file', fileData);
+
+        // Actual import after preview confirmation
         toast.promise(courseImportMutation.mutateAsync(formData), {
             loading: t('pages.course.import.importing', {
                 defaultValue: 'Importing courses...',
             }),
             success: (response) => {
-                // Check if we got an error status in the response
-                if (response.data?.status === 'error') {
-                    // Handle API errors with success HTTP status but error in payload
-                    if (response.data?.errors) {
-                        Object.entries(response.data.errors).forEach(([key, messages]) => {
-                            const message = Array.isArray(messages) ? messages[0] : messages;
-                            form.setError('import_file' as any, { message: message as string });
-                        });
-                    }
-
-                    throw new Error(response.data.message || 'Import failed');
-                }
-
+                setPreviewOpen(false);
+                setOpen(false);
+                setFiles([]);
                 return t('pages.course.import.import_success', {
                     defaultValue: 'Courses imported successfully',
                 });
             },
-            error: (err) => {
-                // Display validation errors
-                if (err.response?.data?.errors) {
-                    Object.entries(err.response.data.errors).forEach(([key, messages]) => {
-                        const message = Array.isArray(messages) ? messages[0] : messages;
-                        form.setError('import_file' as any, { message: message as string });
-                    });
-                }
-
+            error: (error) => {
+                console.error('Import error:', error);
                 return t('pages.course.import.import_error', {
                     defaultValue: 'Failed to import courses',
                 });
@@ -162,190 +143,184 @@ export default function Import({ errors, stats, message, status }: ImportProps) 
         });
     };
 
+    const onProcessFile: FilePondCallbackProps['onprocessfile'] = useCallback(() => {
+        // This is a placeholder for any post-processing after file is uploaded to FilePond
+    }, []);
+
+    const onUpdateFiles: FilePondCallbackProps['onupdatefiles'] = useCallback((fileItems: any) => {
+        setFiles(fileItems);
+    }, []);
+
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button>
-                    {t('pages.course.import.buttons.open_import', { defaultValue: 'Import' })}
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>
-                        {t('pages.course.import.title', { defaultValue: 'Import Courses' })}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {t('pages.course.import.description', {
-                            defaultValue:
-                                'Import courses from an Excel file or ZIP archive containing Excel and related files',
-                        })}
-                    </DialogDescription>
-                </DialogHeader>
-                <Card className='mx-auto max-w-4xl'>
-                    <CardContent className='mt-6'>
-                        {status === 'success' && (
-                            <div className='mb-6 rounded-md bg-green-50 p-4 text-green-800'>
-                                <p>{message}</p>
-                                {stats && (
-                                    <div className='mt-2'>
-                                        <p>
-                                            {t('pages.course.import.stats', {
-                                                defaultValue:
-                                                    'Imported: {courses} courses, {materials} materials, {questions} questions, {testCases} test cases',
-                                                courses: stats.courses,
-                                                materials: stats.materials,
-                                                questions: stats.questions,
-                                                testCases: stats.testCases,
-                                            })}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+        <>
+            <Button size='sm' onClick={() => setOpen(true)} className='whitespace-nowrap'>
+                <Upload className='mr-2 h-4 w-4' />
+                {t('pages.course.import.buttons.open_import', {
+                    defaultValue: 'Import',
+                })}
+            </Button>
 
-                        {status === 'error' && (
-                            <div className='mb-6 rounded-md bg-red-50 p-4 text-red-800'>
-                                <p>{message}</p>
-                                {errors && Object.keys(errors).length > 0 && (
-                                    <div className='mt-2'>
-                                        <strong>
-                                            {t('pages.course.import.errors', {
-                                                defaultValue: 'Errors:',
-                                            })}
-                                        </strong>
-                                        <ul className='list-inside list-disc'>
-                                            {Object.entries(errors).map(([key, error]) => (
-                                                <li key={key}>{error}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className='max-w-2xl'>
+                    <DialogHeader>
+                        <DialogTitle>
+                            {t('pages.course.import.title', {
+                                defaultValue: 'Import Courses',
+                            })}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {t('pages.course.import.description', {
+                                defaultValue:
+                                    'Import courses from an Excel file or ZIP archive containing Excel and related files',
+                            })}
+                        </DialogDescription>
+                    </DialogHeader>
 
-                        <div className='mb-6 flex items-center justify-between'>
-                            <h3 className='text-lg font-semibold'>
-                                {t('pages.course.import.upload_title', {
-                                    defaultValue: 'Upload Course Import File',
-                                })}
-                            </h3>
+                    <CardContent className='flex flex-col gap-4'>
+                        <Card className='bg-background'>
+                            <CardHeader className='pb-3'>
+                                <CardTitle className='text-base'>
+                                    {t('pages.course.import.upload_title', {
+                                        defaultValue: 'Upload Course Import File',
+                                    })}
+                                </CardTitle>
+                                <CardDescription>
+                                    <Button
+                                        variant='link'
+                                        size='sm'
+                                        onClick={handleDownloadTemplate}
+                                        disabled={templateMutation.isPending}
+                                        className='h-auto p-0 text-xs'
+                                    >
+                                        {templateMutation.isPending ? (
+                                            <Loader2 className='mr-1 h-3 w-3 animate-spin' />
+                                        ) : (
+                                            <FileSpreadsheet className='mr-1 h-3 w-3' />
+                                        )}
+                                        {t('pages.course.import.download_template', {
+                                            defaultValue: 'Download Template',
+                                        })}
+                                    </Button>
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className='pb-2'>
+                                <FilePond
+                                    onupdatefiles={onUpdateFiles}
+                                    onprocessfile={onProcessFile}
+                                    maxFiles={1}
+                                    labelIdle={t('pages.course.import.drag_drop', {
+                                        defaultValue:
+                                            'Drag and drop your Excel file or ZIP archive here, or click to browse',
+                                    })}
+                                    files={files.map((file) => file.file)}
+                                    credits={false}
+                                    allowRevert={false}
+                                    allowMultiple={false}
+                                    acceptedFileTypes={[
+                                        'application/vnd.ms-excel',
+                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                        'application/zip',
+                                        'application/x-zip-compressed',
+                                    ]}
+                                />
+                                <p className='mt-2 text-center text-xs text-muted-foreground'>
+                                    {t('pages.course.import.supported_formats', {
+                                        defaultValue:
+                                            'Supports .xlsx, .xls and .zip files up to 50MB',
+                                    })}
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className='bg-background'>
+                            <CardHeader className='pb-2'>
+                                <CardTitle className='text-base'>
+                                    {t('pages.course.import.instructions_title', {
+                                        defaultValue: 'Instructions',
+                                    })}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ul className='ml-6 list-disc text-sm text-muted-foreground [&>li]:mt-2'>
+                                    <li>
+                                        {t('pages.course.import.instructions.download', {
+                                            defaultValue:
+                                                'Download the template and fill in your course data',
+                                        })}
+                                    </li>
+                                    <li>
+                                        {t('pages.course.import.instructions.identifiers', {
+                                            defaultValue:
+                                                'You can use classroom names and teacher emails instead of IDs',
+                                        })}
+                                    </li>
+                                    <li>
+                                        {t('pages.course.import.instructions.materials', {
+                                            defaultValue:
+                                                'Materials must reference courses by name',
+                                        })}
+                                    </li>
+                                    <li>
+                                        {t('pages.course.import.instructions.questions', {
+                                            defaultValue:
+                                                'Questions must reference materials by title and include the course name',
+                                        })}
+                                    </li>
+                                    <li>
+                                        {t('pages.course.import.instructions.test_cases', {
+                                            defaultValue:
+                                                'Test cases must reference questions by title and include the material title and course name',
+                                        })}
+                                    </li>
+                                    <li>
+                                        {t('pages.course.import.instructions.order', {
+                                            defaultValue:
+                                                'Fill out sheets in order: Courses → Materials → Questions → TestCases',
+                                        })}
+                                    </li>
+                                    <li>
+                                        {t('pages.course.import.instructions.backup', {
+                                            defaultValue:
+                                                'Keep a backup of your Excel file and attachments',
+                                        })}
+                                    </li>
+                                    <li>
+                                        {t('pages.course.import.instructions.zip_use', {
+                                            defaultValue:
+                                                'For file attachments, use a ZIP file containing both Excel and referenced files',
+                                        })}
+                                    </li>
+                                </ul>
+                            </CardContent>
+                        </Card>
+
+                        <div className='flex justify-end space-x-2'>
                             <Button
-                                onClick={handleDownload}
-                                className='inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700'
+                                variant='default'
+                                type='button'
+                                onClick={handleImport}
+                                disabled={files.length === 0}
                             >
-                                <FileIcon className='mr-2 h-4 w-4' />
-                                {t('pages.course.import.download_template', {
-                                    defaultValue: 'Download Template',
+                                <ListChecks className='mr-2 h-4 w-4' />
+                                {t('pages.course.import.buttons.import', {
+                                    defaultValue: 'Import Courses',
                                 })}
                             </Button>
                         </div>
-
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)}>
-                                <FormField
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <FilePondUploader
-                                                    value={field.value}
-                                                    onChange={(file) => {
-                                                        field.onChange(file);
-                                                        inertiaForm.setData('import_file', file);
-                                                    }}
-                                                    maxFileSize='50MB'
-                                                    labelIdle={t('pages.course.import.drag_drop', {
-                                                        defaultValue:
-                                                            'Drag and drop your Excel file or ZIP archive here, or click to browse',
-                                                    })}
-                                                    acceptedFileTypes={[
-                                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                                        'application/vnd.ms-excel',
-                                                        'application/zip',
-                                                        'application/x-zip-compressed',
-                                                        'multipart/x-zip',
-                                                        '.xlsx',
-                                                        '.xls',
-                                                        '.zip',
-                                                    ]}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                    name='import_file'
-                                    control={form.control}
-                                />
-
-                                <div className='mt-4 flex justify-end'>
-                                    <Button
-                                        type='submit'
-                                        loading={courseImportMutation.isPending}
-                                        disabled={
-                                            !form.watch('import_file') ||
-                                            courseImportMutation.isPending
-                                        }
-                                    >
-                                        {t('pages.course.import.buttons.import', {
-                                            defaultValue: 'Import Courses',
-                                        })}
-                                    </Button>
-                                </div>
-                            </form>
-                        </Form>
-
-                        <div className='mt-8 rounded-lg border border-blue-200 bg-blue-50 p-4 text-blue-700'>
-                            <h4 className='mb-2 font-semibold'>
-                                {t('pages.course.import.instructions_title', {
-                                    defaultValue: 'Instructions',
-                                })}
-                            </h4>
-                            <ul className='list-disc space-y-1 pl-5 text-sm'>
-                                <li>
-                                    {t('pages.course.import.instructions.download', {
-                                        defaultValue:
-                                            'Download the template and fill in your course data',
-                                    })}
-                                </li>
-                                <li>
-                                    {t('pages.course.import.instructions.identifiers', {
-                                        defaultValue:
-                                            'You can use classroom names and teacher emails instead of IDs',
-                                    })}
-                                </li>
-                                <li>
-                                    {t('pages.course.import.instructions.materials', {
-                                        defaultValue: 'Materials must reference courses by name',
-                                    })}
-                                </li>
-                                <li>
-                                    {t('pages.course.import.instructions.zip_use', {
-                                        defaultValue:
-                                            'For file attachments, use a ZIP file containing both Excel and referenced files',
-                                    })}
-                                </li>
-                                <li>
-                                    {t('pages.course.import.instructions.file_references', {
-                                        defaultValue:
-                                            'In Excel, add file paths relative to the ZIP root (e.g., "materials/lecture1.pdf")',
-                                    })}
-                                </li>
-                                <li>
-                                    {t('pages.course.import.instructions.file_handling', {
-                                        defaultValue:
-                                            'Referenced files are stored with unique names - you only need to specify the path within the ZIP',
-                                    })}
-                                </li>
-                                <li>
-                                    {t('pages.course.import.instructions.backup', {
-                                        defaultValue:
-                                            'Keep a backup of your Excel file and attachments',
-                                    })}
-                                </li>
-                            </ul>
-                        </div>
                     </CardContent>
-                </Card>
-            </DialogContent>
-        </Dialog>
+                </DialogContent>
+            </Dialog>
+
+            {/* Import Preview Dialog */}
+            <ImportPreviewDialog
+                previewData={previewData}
+                open={previewOpen}
+                onOpenChange={setPreviewOpen}
+                onConfirmImport={handleConfirmImport}
+                isLoading={courseImportMutation.isPending}
+            />
+        </>
     );
-}
+};
+
+export default Import;

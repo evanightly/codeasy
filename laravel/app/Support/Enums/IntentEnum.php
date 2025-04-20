@@ -18,4 +18,5 @@ enum IntentEnum: string {
     case USER_INDEX_CLASS_ROOM_STUDENTS = 'user.index.classroom.students';
     case COURSE_STORE_IMPORT = 'course.store.import';
     case COURSE_INDEX_IMPORT_TEMPLATE = 'course.index.import.template';
+    case COURSE_STORE_PREVIEW_IMPORT = 'course.store.preview.import';
 }

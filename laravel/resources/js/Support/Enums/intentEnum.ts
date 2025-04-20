@@ -14,6 +14,7 @@ const intents = {
     USER_INDEX_CLASS_ROOM_STUDENTS: 'user.index.classroom.students',
     COURSE_STORE_IMPORT: 'course.store.import',
     COURSE_INDEX_IMPORT_TEMPLATE: 'course.index.import.template',
+    COURSE_STORE_PREVIEW_IMPORT: 'course.store.preview.import',
 };
 
 export const IntentEnum = intents;

@@ -77,6 +77,44 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
     }
 
     /**
+     * Preview the import file contents
+     */
+    public function previewImport(Request $request) {
+        try {
+            $file = $request->file('import_file');
+            $path = $file->store('temp');
+            $fullPath = Storage::path($path);
+
+            $result = $this->courseImport->preview($fullPath);
+
+            // Clean up the temporary file
+            Storage::delete($path);
+
+            if ($result['success']) {
+                return response()->json([
+                    'status' => 'success',
+                    'preview' => $result['preview'],
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $result['message'],
+                ], 422);
+            }
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Preview failed: ' . $e->getMessage(),
+                'errors' => ['import_file' => 'Error processing file: ' . $e->getMessage()],
+            ], 422);
+        }
+    }
+
+    /**
      * Create a marker file to indicate that import was used
      */
     private function createImportMarker() {
@@ -509,7 +547,9 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
                 ->setFormula1('"1,0"');
 
             // Apply to each cell in the range
-            for ($i = 2; $i <= 100; $sheet->getCell($column . $i)->setDataValidation(clone $validation), $i++);
+            for ($i = 2; $i <= 100; $i++) {
+                $sheet->getCell($column . $i)->setDataValidation(clone $validation);
+            }
         }
 
         return $spreadsheet;

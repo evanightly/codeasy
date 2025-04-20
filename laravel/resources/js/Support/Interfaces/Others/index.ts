@@ -6,3 +6,4 @@ export * from './PaginateMetaLink';
 export * from './PaginateResponse';
 export * from './ServiceFilterOptions';
 export * from './ServiceHooksFactory';
+export * from './CourseImportPreviewInterfaces';

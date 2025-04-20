@@ -39,7 +39,6 @@ class CourseController extends Controller implements HasMiddleware {
             switch ($intent) {
                 case IntentEnum::COURSE_INDEX_IMPORT_TEMPLATE->value:
                     return $this->courseService->downloadTemplate();
-                    break;
             }
 
             return $data;
@@ -59,7 +58,8 @@ class CourseController extends Controller implements HasMiddleware {
             switch ($intent) {
                 case IntentEnum::COURSE_STORE_IMPORT->value:
                     return $this->courseService->import($request);
-                    break;
+                case IntentEnum::COURSE_STORE_PREVIEW_IMPORT->value:
+                    return $this->courseService->previewImport($request);
             }
 
             return $this->courseService->create($request->validated());
