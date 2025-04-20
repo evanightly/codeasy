@@ -52,4 +52,6 @@
     //     "id": "php_id",
     //     "de": "php_de"
     // }
+    "Laravel.translation.completion": false,
+    "Laravel.translation.link": false
 }
