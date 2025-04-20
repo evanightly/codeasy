@@ -334,10 +334,13 @@ Steps:
     ```tsx
     const { mutateAsync: deleteUser, isPending: isDeleting } = userServiceHook.useDelete();
     ```
+
+    10. Any custom services goes to app\Providers\RepositoryServiceProvider.php NOT app\Providers\AppServiceProvider.php
         
 Special Notes
 - Since this project is using docker, make sure to run the command inside the docker container, to access laravel container use 
 ```sh
 docker compose -f docker-compose.dev.yml --env-file laravel/.env exec -it laravel bash
 ```
+- to run artisan, composer, npm command, please refer to [dc.sh](../../dc.sh)
 - Don't delete commented code, todos.
