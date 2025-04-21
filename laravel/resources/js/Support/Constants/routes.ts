@@ -23,6 +23,6 @@ export const ROUTES = {
     STUDENT_SCORES: 'student-scores',
     EXECUTION_RESULTS: 'execution-results',
     STUDENT_COURSES: 'student.courses',
-    STUDENT_MATERIALS: 'student.materials',
-    STUDENT_QUESTIONS: 'student.questions',
+    STUDENT_COURSE_MATERIALS: 'student.courses.materials',
+    STUDENT_COURSE_MATERIAL_QUESTIONS: 'student.courses.materials.questions',
 } as const;

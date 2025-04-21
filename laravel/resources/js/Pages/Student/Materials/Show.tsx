@@ -3,6 +3,7 @@ import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { Progress } from '@/Components/UI/progress';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { ROUTES } from '@/Support/Constants/routes';
 import { LearningMaterialTypeEnum } from '@/Support/Enums/learningMaterialTypeEnum';
 import { CourseResource, LearningMaterialResource } from '@/Support/Interfaces/Resources';
 import { Link } from '@inertiajs/react';
@@ -53,7 +54,7 @@ export default function Show({ course, material, progress }: Props) {
     return (
         <AuthenticatedLayout title={material.data.title}>
             <div className='mb-6 flex items-center justify-between'>
-                <Link href={route('student.courses.show', course.data.id)}>
+                <Link href={route(`${ROUTES.STUDENT_COURSES}.show`, course.data.id)}>
                     <Button variant='outline' size='sm' className='gap-1'>
                         <ArrowLeft className='h-4 w-4' />
                         {t('pages.student_courses.actions.back_to_courses')}
@@ -162,11 +163,10 @@ export default function Show({ course, material, progress }: Props) {
                                     </div>
 
                                     <Link
-                                        href={route('student.questions.show', [
-                                            course.data.id,
-                                            material.data.id,
-                                            question.id,
-                                        ])}
+                                        href={route(
+                                            `${ROUTES.STUDENT_COURSE_MATERIAL_QUESTIONS}.show`,
+                                            [course.data.id, material.data.id, question.id],
+                                        )}
                                         className='flex items-center gap-1 text-blue-600 hover:underline'
                                     >
                                         {question.trial_status

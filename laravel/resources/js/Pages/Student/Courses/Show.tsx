@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { DataTable } from '@/Components/UI/data-table';
 import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { ROUTES } from '@/Support/Constants/routes';
 import { LearningMaterialTypeEnum } from '@/Support/Enums/learningMaterialTypeEnum';
 import { CourseResource, LearningMaterialResource } from '@/Support/Interfaces/Resources';
 import { Link } from '@inertiajs/react';
@@ -54,7 +55,10 @@ export default function Show({ course, materials }: Props) {
             cell: ({ row }) => (
                 <div className='font-medium'>
                     <Link
-                        href={route('student.materials.show', [course.data.id, row.original.id])}
+                        href={route(`${ROUTES.STUDENT_COURSE_MATERIALS}.show`, [
+                            course.data.id,
+                            row.original.id,
+                        ])}
                         className='text-blue-600 hover:underline'
                     >
                         {row.original.title}
@@ -93,7 +97,10 @@ export default function Show({ course, materials }: Props) {
             id: 'action',
             cell: ({ row }) => (
                 <Link
-                    href={route('student.materials.show', [course.data.id, row.original.id])}
+                    href={route(`${ROUTES.STUDENT_COURSE_MATERIALS}.show`, [
+                        course.data.id,
+                        row.original.id,
+                    ])}
                     className='inline-flex items-center gap-1 text-blue-600 hover:underline'
                 >
                     {t('action.view')}

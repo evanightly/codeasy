@@ -30,7 +30,7 @@ class StudentController extends Controller {
     /**
      * Show the student's courses.
      */
-    public function courses(): Response {
+    public function index(): Response {
         $user = Auth::user();
 
         $courses = $this->courseService->with(['classroom'])->find([
@@ -57,9 +57,9 @@ class StudentController extends Controller {
     }
 
     /**
-     * Show course details with learning materials.
+     * Resource-style show method for student courses (for Route::resource).
      */
-    public function showCourse(Course $course): Response {
+    public function show(Course $course): Response {
         // Check if the user belongs to this course's classroom
         $user = Auth::user();
 
@@ -88,7 +88,7 @@ class StudentController extends Controller {
     /**
      * Show learning material details with questions.
      */
-    public function showMaterial(Course $course, LearningMaterial $material): Response {
+    public function courseMaterial(Course $course, LearningMaterial $material): Response {
         // Check if the user belongs to this course's classroom
         $user = Auth::user();
 
@@ -118,9 +118,9 @@ class StudentController extends Controller {
     }
 
     /**
-     * Show question workspace for attempting a question.
+     * Show a question in a material in a course (for nested resource route).
      */
-    public function showQuestion(Course $course, LearningMaterial $material, LearningMaterialQuestion $question): Response {
+    public function courseMaterialQuestion(Course $course, LearningMaterial $material, LearningMaterialQuestion $question): Response {
         // Check if the user belongs to this course's classroom
         $user = Auth::user();
 

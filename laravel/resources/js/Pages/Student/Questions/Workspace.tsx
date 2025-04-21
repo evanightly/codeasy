@@ -14,6 +14,7 @@ import {
 } from '@/Components/UI/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { ROUTES } from '@/Support/Constants/routes';
 import { ProgrammingLanguageEnum } from '@/Support/Enums/programmingLanguageEnum';
 import { FastApiOutput } from '@/Support/Interfaces/Others';
 import {
@@ -38,14 +39,6 @@ import {
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
-
-// interface TestCase {
-//     id: number;
-//     description: string;
-//     input: string;
-//     hidden: boolean;
-//     active: boolean;
-// }
 
 interface TrackingInfo {
     score_id: number;
@@ -155,7 +148,11 @@ export default function Workspace({
         // Always sync time before navigating away
         syncTime().then(() => {
             router.visit(
-                route('student.questions.show', [course.data.id, material.data.id, questionId]),
+                route(`${ROUTES.STUDENT_COURSE_MATERIAL_QUESTIONS}.show`, [
+                    course.data.id,
+                    material.data.id,
+                    questionId,
+                ]),
             );
         });
     };
@@ -236,7 +233,7 @@ export default function Workspace({
                     <div className='flex items-center justify-between p-4'>
                         <div className='flex items-center gap-4'>
                             <Link
-                                href={route('student.materials.show', [
+                                href={route(`${ROUTES.STUDENT_COURSES}.show`, [
                                     course.data.id,
                                     material.data.id,
                                 ])}

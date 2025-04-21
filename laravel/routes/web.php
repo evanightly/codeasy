@@ -132,12 +132,16 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    // TODO: refactor nested controllers to use Route::resource() instead
     Route::prefix('student')->name('student.')->group(function () {
-        Route::get('/courses', [StudentController::class, 'courses'])->name('courses.index');
-        Route::get('/courses/{course}', [StudentController::class, 'showCourse'])->name('courses.show');
-        Route::get('/courses/{course}/materials/{material}', [StudentController::class, 'showMaterial'])->name('materials.show');
-        Route::get('/courses/{course}/materials/{material}/questions/{question}', [StudentController::class, 'showQuestion'])->name('questions.show');
+        Route::resource('courses', StudentController::class)
+            ->only(['index', 'show']);
+
+        Route::get('/courses/{course}/materials/{material}', [StudentController::class, 'courseMaterial'])
+            ->name('courses.materials.show');
+
+        Route::get('/courses/{course}/materials/{material}/questions/{question}', [StudentController::class, 'courseMaterialQuestion'])
+            ->name('courses.materials.questions.show');
+
         Route::post('/questions/execute', [StudentController::class, 'executeCode'])->name('questions.execute');
         Route::post('/questions/update-time', [StudentController::class, 'updateCodingTime'])->name('questions.update-time');
     });

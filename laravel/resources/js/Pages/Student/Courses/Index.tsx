@@ -34,7 +34,7 @@ export default function Index({ courses }: Props) {
             cell: ({ row }) => (
                 <div className='font-medium'>
                     <Link
-                        href={route('student.courses.show', row.original.id)}
+                        href={route(`${ROUTES.STUDENT_COURSES}.show`, row.original.id)}
                         className='text-blue-600 hover:underline'
                     >
                         {row.original.name}
@@ -65,7 +65,7 @@ export default function Index({ courses }: Props) {
             id: 'action',
             cell: ({ row }) => (
                 <Link
-                    href={route('student.courses.show', row.original.id)}
+                    href={route(`${ROUTES.STUDENT_COURSES}.show`, row.original.id)}
                     className='inline-flex items-center gap-1 text-blue-600 hover:underline'
                 >
                     {t('action.view')}
