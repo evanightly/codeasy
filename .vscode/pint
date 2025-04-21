@@ -1,0 +1,32 @@
+#!/bin/bash
+LOCAL_PATH=`pwd`
+SERVICE_NAME='laravel'
+REMOTE_PATH='/var/www/html'
+LARAVEL_SUBDIR='laravel' # Leave empty string if not using subdirectory
+DOCKER_COMPOSE_FILE='./docker-compose.dev.yml'
+
+# Initialize the new parameters array
+newparams=()
+
+for param; do
+  # Check if the parameter is an absolute path to a file in the project
+  if [[ "$param" == "$LOCAL_PATH"* ]]; then
+    # This is an absolute path, convert it
+    rel_path="${param#$LOCAL_PATH/}"
+    
+    # Remove the laravel/ prefix if it exists
+    if [[ "$rel_path" == $LARAVEL_SUBDIR/* ]]; then
+      new_param="${rel_path#$LARAVEL_SUBDIR/}"
+      echo "Converting absolute path: $param -> $new_param (removed $LARAVEL_SUBDIR/ prefix)"
+    else
+      new_param="$rel_path"
+      echo "Converting absolute path: $param -> $new_param"
+    fi
+    
+    param=$new_param
+  fi
+
+  newparams+=("$param")
+done
+
+docker compose -f $DOCKER_COMPOSE_FILE exec $SERVICE_NAME php vendor/bin/pint ${newparams[@]}

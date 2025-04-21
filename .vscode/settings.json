@@ -9,18 +9,6 @@
     },
     "prettier.configPath": "./laravel/.prettierrc",
     "prettier.requireConfig": true,
-    "prettier.arrowParens": "avoid",
-    "prettier.jsxSingleQuote": true,
-    "prettier.semi": false,
-    "prettier.singleQuote": true,
-    "prettier.trailingComma": "none",
-    "prettier.useTabs": true,
-    "prettier.printWidth": 120,
-    "prettier.htmlWhitespaceSensitivity": "ignore",
-    "prettier.bracketSameLine": true,
-    "laravel-pint.configPath": "./laravel/pint.json",
-    "laravel-pint.executablePath": "./laravel/vendor/bin/pint",
-    "laravel-pint.enableDebugLogs": true,
     "[php]": {
         "editor.defaultFormatter": "open-southeners.laravel-pint"
     },
@@ -53,5 +41,10 @@
     //     "de": "php_de"
     // }
     "Laravel.translation.completion": false,
-    "Laravel.translation.link": false
+    "Laravel.translation.link": false,
+    "laravel-pint.configPath": "./laravel/pint.json",
+    "laravel-pint.enableDebugLogs": true,
+    "laravel-pint.runInLaravelSail": false,
+    "laravel-pint.fallbackToGlobalBin": false,
+    "laravel-pint.executablePath": ".vscode/pint",
 }
