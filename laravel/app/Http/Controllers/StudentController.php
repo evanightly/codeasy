@@ -80,11 +80,17 @@ class StudentController extends Controller {
             ->orderBy('order_number')
             ->get();
 
+        // Add material progress for each material in this course for the current user
+        $materialsWithProgress = $this->courseService->getStudentMaterialsProgress($user->id, $materials);
+
         return Inertia::render('Student/Courses/Show', [
             'course' => [
                 'data' => $course->load('classroom'),
             ],
             'materials' => [
+                'data' => $materialsWithProgress,
+            ],
+            'materials_raw' => [
                 'data' => $materials,
             ],
         ]);

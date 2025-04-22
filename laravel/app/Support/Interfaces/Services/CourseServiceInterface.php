@@ -27,4 +27,11 @@ interface CourseServiceInterface extends BaseCrudServiceInterface {
      * @param  array|\Illuminate\Support\Collection  $courses
      */
     public function getStudentCoursesProgress(int $userId, $courses): array;
+
+    /**
+     * Get student progress percentage for each material in a course.
+     *
+     * @param  array|\Illuminate\Support\Collection  $materials
+     */
+    public function getStudentMaterialsProgress(int $userId, $materials): array;
 }

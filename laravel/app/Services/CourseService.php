@@ -5,6 +5,8 @@ namespace App\Services;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Models\ClassRoom;
 use App\Models\Course;
+use App\Models\LearningMaterial;
+use App\Models\StudentScore;
 use App\Repositories\CourseRepository;
 use App\Support\Enums\LearningMaterialTypeEnum;
 use App\Support\Enums\ProgrammingLanguageEnum;
@@ -593,6 +595,39 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
             $courseArr['progress_percentage'] = $progress;
 
             return $courseArr;
+        })->toArray();
+    }
+
+    /**
+     * Get student progress percentage for each material in a course.
+     *
+     * @param int $userId
+     * @param array|\Illuminate\Support\Collection $materials
+     * @return array
+     */
+    public function getStudentMaterialsProgress(int $userId, $materials): array {
+        return collect($materials)->map(function (LearningMaterial $material) use ($userId) {
+            // Get all questions for this material
+            $questions = $material->questions()->where('active', true)->get();
+            $questionCount = $questions->count();
+            $questionIds = $questions->pluck('id')->all();
+
+            // Count completed questions for this user
+            $completedCount = 0;
+            if (!empty($questionIds)) {
+                $completedCount = StudentScore::whereIn('learning_material_question_id', $questionIds)
+                    ->where('user_id', $userId)
+                    ->where('completion_status', true)
+                    ->count();
+            }
+
+            // Calculate percentage
+            $progress = $questionCount > 0 ? round(($completedCount / $questionCount) * 100) : 0;
+
+            // Add to material object/array
+            $materialArr = $material->toArray();
+            $materialArr['progress_percentage'] = $progress;
+            return $materialArr;
         })->toArray();
     }
 }

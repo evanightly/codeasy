@@ -70,15 +70,13 @@ export default function Index({ courses }: Props) {
 
                 return (
                     <div className='group relative flex min-w-[120px] items-center'>
-                        <Progress value={progress} />
+                        <Progress
+                            value={progress}
+                            indicatorClassName={progress === 100 ? 'bg-green-500' : 'bg-blue-500'}
+                        />
                         <span className='absolute right-2 text-xs font-semibold text-success-foreground drop-shadow'>
                             {progress}%
                         </span>
-                        {progress === 100 && (
-                            <span className='ml-2 rounded bg-green-500 px-2 py-0.5 text-xs font-bold text-white'>
-                                {t('pages.student_courses.index.progress_label')}
-                            </span>
-                        )}
                     </div>
                 );
             },
