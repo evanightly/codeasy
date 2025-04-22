@@ -336,6 +336,8 @@ Steps:
     ```
 
     10. Any custom services goes to app\Providers\RepositoryServiceProvider.php NOT app\Providers\AppServiceProvider.php
+
+    11. When implementing localization in frontend, please use respective component, for example, when implementing localization in dashboard that shows user graph and in user pages has its needed localization, then please create and use the dashboard localization instead of user localization, this is to maintain the localization consistency. 
         
 Special Notes
 - Since this project is using docker, make sure to run the command inside the docker container, to access laravel container use 
