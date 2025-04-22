@@ -91,14 +91,6 @@ Route::post('/sandbox', function (\Illuminate\Http\Request $request) {
 
 Route::middleware('auth')->group(function () {
     Route::resource('dashboard', DashboardController::class);
-
-    // Dashboard API routes for detailed progress tracking
-    Route::prefix('dashboard')->name('dashboard.')->group(function () {
-        Route::get('courses/{courseId}/progress', [DashboardController::class, 'getCourseProgress'])->name('courses.progress');
-        Route::get('materials/{materialId}/progress', [DashboardController::class, 'getMaterialProgress'])->name('materials.progress');
-        Route::get('students/{userId}/progress', [DashboardController::class, 'getStudentProgress'])->name('students.progress');
-    });
-
     Route::resource('permissions', PermissionController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);

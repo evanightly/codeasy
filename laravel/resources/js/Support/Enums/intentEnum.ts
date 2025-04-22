@@ -15,6 +15,10 @@ const intents = {
     COURSE_STORE_IMPORT: 'course.store.import',
     COURSE_INDEX_IMPORT_TEMPLATE: 'course.index.import.template',
     COURSE_STORE_PREVIEW_IMPORT: 'course.store.preview.import',
+    DASHBOARD_INDEX_GET_DATA: 'dashboard.index.get.data',
+    DASHBOARD_INDEX_GET_STUDENT_COURSE_PROGRESS: 'dashboard.index.get.student.course.progress',
+    DASHBOARD_INDEX_GET_STUDENT_MATERIAL_PROGRESS: 'dashboard.index.get.student.material.progress',
+    DASHBOARD_INDEX_GET_STUDENT_PROGRESS: 'dashboard.index.get.student.progress',
 };
 
 export const IntentEnum = intents;

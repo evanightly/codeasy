@@ -19,4 +19,8 @@ enum IntentEnum: string {
     case COURSE_STORE_IMPORT = 'course.store.import';
     case COURSE_INDEX_IMPORT_TEMPLATE = 'course.index.import.template';
     case COURSE_STORE_PREVIEW_IMPORT = 'course.store.preview.import';
+    case DASHBOARD_INDEX_GET_DATA = 'dashboard.index.get.data';
+    case DASHBOARD_INDEX_GET_STUDENT_COURSE_PROGRESS = 'dashboard.index.get.student.course.progress';
+    case DASHBOARD_INDEX_GET_STUDENT_MATERIAL_PROGRESS = 'dashboard.index.get.student.material.progress';
+    case DASHBOARD_INDEX_GET_STUDENT_PROGRESS = 'dashboard.index.get.student.progress';
 }

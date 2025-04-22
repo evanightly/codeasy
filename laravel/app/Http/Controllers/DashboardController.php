@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Enums\IntentEnum;
 use App\Support\Interfaces\Services\DashboardServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,43 +17,40 @@ class DashboardController extends Controller {
     /**
      * Display the dashboard with student progress tracking.
      */
-    public function index(Request $request): Response|array {
+    public function index(Request $request): Response|JsonResponse {
         $user = $request->user();
-        $dashboardData = $this->dashboardService->getDashboardData($user);
+        $intent = $request->get('intent', IntentEnum::DASHBOARD_INDEX_GET_DATA);
 
-        if ($this->ajax()) {
-            return $dashboardData;
+        switch ($intent) {
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_COURSE_PROGRESS->value:
+                $courseId = $request->get('courseId');
+                $data = $this->dashboardService->getDetailedCourseProgress($courseId);
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_MATERIAL_PROGRESS->value:
+                $materialId = $request->get('materialId');
+                $data = $this->dashboardService->getDetailedMaterialProgress($materialId);
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_PROGRESS->value:
+                $userId = $request->get('userId');
+                $data = $this->dashboardService->getStudentDetailedProgress($userId);
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_DATA->value:
+            default:
+                $dashboardData = $this->dashboardService->getDashboardData($user);
+
+                if ($this->ajax()) {
+                    return response()->json(['dashboardData' => $dashboardData]);
+                }
+
+                return Inertia::render('Dashboard/Index', [
+                    'dashboardData' => $dashboardData,
+                ]);
         }
-
-        return Inertia::render('Dashboard/Index', [
-            'dashboardData' => $dashboardData,
-        ]);
-    }
-
-    /**
-     * Get detailed progress data for a specific course.
-     */
-    public function getCourseProgress(Request $request, int $courseId): JsonResponse {
-        $courseProgressData = $this->dashboardService->getDetailedCourseProgress($courseId);
-
-        return response()->json($courseProgressData);
-    }
-
-    /**
-     * Get detailed progress data for a specific material.
-     */
-    public function getMaterialProgress(Request $request, int $materialId): JsonResponse {
-        $materialProgressData = $this->dashboardService->getDetailedMaterialProgress($materialId);
-
-        return response()->json($materialProgressData);
-    }
-
-    /**
-     * Get detailed progress data for a specific student.
-     */
-    public function getStudentProgress(Request $request, int $userId): JsonResponse {
-        $studentProgressData = $this->dashboardService->getStudentDetailedProgress($userId);
-
-        return response()->json($studentProgressData);
     }
 }

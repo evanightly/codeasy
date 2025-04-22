@@ -1,5 +1,6 @@
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
+import { IntentEnum } from '@/Support/Enums/intentEnum';
 import { useQuery } from '@tanstack/react-query';
 import {
     CourseProgressData,
@@ -16,8 +17,12 @@ export const dashboardServiceHook = {
         return useQuery<DashboardProgressData>({
             queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD],
             queryFn: async () => {
-                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`));
-                return response.data;
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_DATA,
+                    },
+                });
+                return response.data.dashboardData;
             },
         });
     },
@@ -29,9 +34,12 @@ export const dashboardServiceHook = {
         return useQuery<CourseProgressData>({
             queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD, 'course', courseId],
             queryFn: async () => {
-                const response = await window.axios.get(
-                    route(`${ROUTES.DASHBOARD}.courses.progress`, { courseId }),
-                );
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_STUDENT_COURSE_PROGRESS,
+                        courseId,
+                    },
+                });
                 return response.data;
             },
             enabled: !!courseId,
@@ -45,9 +53,12 @@ export const dashboardServiceHook = {
         return useQuery<DetailedMaterialProgressData>({
             queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD, 'material', materialId],
             queryFn: async () => {
-                const response = await window.axios.get(
-                    route(`${ROUTES.DASHBOARD}.materials.progress`, { materialId }),
-                );
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_STUDENT_MATERIAL_PROGRESS,
+                        materialId,
+                    },
+                });
                 return response.data;
             },
             enabled: !!materialId,
@@ -61,9 +72,12 @@ export const dashboardServiceHook = {
         return useQuery<StudentDetailedProgressData>({
             queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD, 'student', userId],
             queryFn: async () => {
-                const response = await window.axios.get(
-                    route(`${ROUTES.DASHBOARD}.students.progress`, { userId }),
-                );
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_STUDENT_PROGRESS,
+                        userId,
+                    },
+                });
                 return response.data;
             },
             enabled: !!userId,
