@@ -1265,10 +1265,14 @@ return [
                 'name' => 'Name',
                 'classroom' => 'Classroom',
                 'description' => 'Description',
+                'progress' => 'Progress',
+                'progress_label' => 'Questions Completed',
             ],
         ],
         'index' => [
             'title' => 'My Courses',
+            'progress' => 'Progress',
+            'progress_label' => 'Questions Completed',
         ],
         'show' => [
             'title' => 'Course Details',

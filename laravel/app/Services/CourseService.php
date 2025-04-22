@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Models\ClassRoom;
+use App\Models\Course;
 use App\Repositories\CourseRepository;
 use App\Support\Enums\LearningMaterialTypeEnum;
 use App\Support\Enums\ProgrammingLanguageEnum;
@@ -554,5 +555,44 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
         }
 
         return $spreadsheet;
+    }
+
+    /**
+     * Get student progress percentage for each course.
+     *
+     * @param  array|\Illuminate\Support\Collection  $courses
+     */
+    public function getStudentCoursesProgress(int $userId, $courses): array {
+        return collect($courses)->map(function (Course $course) use ($userId) {
+            // Get all materials for the course
+            $materials = $course->learning_materials()->where('active', true)->get();
+
+            // Get all questions for these materials
+            $questionCount = 0;
+            $questionIds = [];
+            foreach ($materials as $material) {
+                $questions = $material->questions()->where('active', true)->get();
+                $questionCount += $questions->count();
+                $questionIds = array_merge($questionIds, $questions->pluck('id')->all());
+            }
+
+            // Count completed questions for this user
+            $completedCount = 0;
+            if (!empty($questionIds)) {
+                $completedCount = \App\Models\StudentScore::whereIn('learning_material_question_id', $questionIds)
+                    ->where('user_id', $userId)
+                    ->where('completion_status', true)
+                    ->count();
+            }
+
+            // Calculate percentage
+            $progress = $questionCount > 0 ? round(($completedCount / $questionCount) * 100) : 0;
+
+            // Add to course object/array
+            $courseArr = $course->toArray();
+            $courseArr['progress_percentage'] = $progress;
+
+            return $courseArr;
+        })->toArray();
     }
 }

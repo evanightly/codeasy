@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { DataTable } from '@/Components/UI/data-table';
 import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
+import { Progress } from '@/Components/UI/progress';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
@@ -8,7 +9,7 @@ import { CourseResource } from '@/Support/Interfaces/Resources';
 import { Link } from '@inertiajs/react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { ArrowRight, SchoolIcon } from 'lucide-react';
+import { SchoolIcon } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface Props {
@@ -62,16 +63,25 @@ export default function Index({ courses }: Props) {
             ),
         }),
         columnHelper.display({
-            id: 'action',
-            cell: ({ row }) => (
-                <Link
-                    href={route(`${ROUTES.STUDENT_COURSES}.show`, row.original.id)}
-                    className='inline-flex items-center gap-1 text-blue-600 hover:underline'
-                >
-                    {t('action.view')}
-                    <ArrowRight className='h-4 w-4' />
-                </Link>
-            ),
+            id: 'progress',
+            header: () => t('pages.student_courses.index.progress'),
+            cell: ({ row }) => {
+                const progress = row.original.progress_percentage ?? 0;
+
+                return (
+                    <div className='group relative flex min-w-[120px] items-center'>
+                        <Progress value={progress} />
+                        <span className='absolute right-2 text-xs font-semibold text-success-foreground drop-shadow'>
+                            {progress}%
+                        </span>
+                        {progress === 100 && (
+                            <span className='ml-2 rounded bg-green-500 px-2 py-0.5 text-xs font-bold text-white'>
+                                {t('pages.student_courses.index.progress_label')}
+                            </span>
+                        )}
+                    </div>
+                );
+            },
         }),
     ] as Array<ColumnDef<CourseResource, CourseResource>>;
 

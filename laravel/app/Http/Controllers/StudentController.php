@@ -49,8 +49,13 @@ class StudentController extends Controller {
         //     // ->orderBy('name')
         //     ->get();
 
+        $coursesWithProgress = $this->courseService->getStudentCoursesProgress($user->id, $courses);
+
         return Inertia::render('Student/Courses/Index', [
             'courses' => [
+                'data' => $coursesWithProgress,
+            ],
+            'courses_raw' => [
                 'data' => $courses,
             ],
         ]);
@@ -70,7 +75,7 @@ class StudentController extends Controller {
         }
 
         // Get materials for this course
-        $materials = $course->learningMaterials()
+        $materials = $course->learning_materials()
             ->where('active', true)
             ->orderBy('order_number')
             ->get();

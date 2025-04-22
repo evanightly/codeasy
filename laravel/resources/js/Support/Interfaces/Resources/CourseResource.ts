@@ -8,4 +8,9 @@ export interface CourseResource extends Resource, Course {
     classroom?: ClassRoomResource;
     teacher?: UserResource;
     learning_materials?: LearningMaterialResource[];
+    /**
+     * Percentage of completed questions for the current user in this course (0-100).
+     * Added by backend for progress indicator in student course list.
+     */
+    progress_percentage?: number;
 }

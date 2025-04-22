@@ -20,7 +20,7 @@ class CourseResource extends JsonResource {
             'updated_at' => $this->updated_at->toDateTimeString(),
             'classroom' => new ClassRoomResource($this->whenLoaded('classroom')),
             'teacher' => new UserResource($this->whenLoaded('teacher')),
-            'learning_materials' => LearningMaterialResource::collection($this->whenLoaded('learningMaterials')),
+            'learning_materials' => LearningMaterialResource::collection($this->whenLoaded('learning_materials')),
         ];
 
         return $this->filterData($request, $dataSource);

@@ -20,4 +20,11 @@ interface CourseServiceInterface extends BaseCrudServiceInterface {
      * Preview the import file contents
      */
     public function previewImport(Request $request);
+
+    /**
+     * Get student progress percentage for each course.
+     *
+     * @param  array|\Illuminate\Support\Collection  $courses
+     */
+    public function getStudentCoursesProgress(int $userId, $courses): array;
 }
