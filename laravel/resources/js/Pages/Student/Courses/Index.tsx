@@ -74,7 +74,7 @@ export default function Index({ courses }: Props) {
                             value={progress}
                             indicatorClassName={progress === 100 ? 'bg-green-500' : 'bg-blue-500'}
                         />
-                        <span className='absolute right-2 text-xs font-semibold text-success-foreground drop-shadow'>
+                        <span className='absolute right-2 text-xs font-semibold text-white drop-shadow'>
                             {progress}%
                         </span>
                     </div>
