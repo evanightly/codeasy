@@ -55,6 +55,8 @@ class RepositoryServiceProvider extends ServiceProvider {
         $this->app->bind(ExecutionResultServiceInterface::class, ExecutionResultService::class);
 
         $this->app->bind(CourseImportServiceInterface::class, CourseImportService::class);
+
+        $this->app->bind(\App\Support\Interfaces\Services\DashboardServiceInterface::class, \App\Services\DashboardService::class);
     }
 
     /**

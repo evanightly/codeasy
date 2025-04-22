@@ -6,6 +6,7 @@ use App\Http\Controllers\Course\LearningMaterial\LearningMaterialQuestion\Learni
 use App\Http\Controllers\Course\LearningMaterial\LearningMaterialQuestionController as CourseLearningMaterialQuestionController;
 use App\Http\Controllers\Course\LearningMaterialController as CourseLearningMaterialController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExecutionResultController;
 use App\Http\Controllers\LearningMaterialController;
 use App\Http\Controllers\LearningMaterialQuestionController;
@@ -89,7 +90,14 @@ Route::post('/sandbox', function (\Illuminate\Http\Request $request) {
 })->name('sandbox.store');
 
 Route::middleware('auth')->group(function () {
-    Route::inertia('dashboard', 'Dashboard/Index')->name('dashboard.index');
+    Route::resource('dashboard', DashboardController::class);
+
+    // Dashboard API routes for detailed progress tracking
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('courses/{courseId}/progress', [DashboardController::class, 'getCourseProgress'])->name('courses.progress');
+        Route::get('materials/{materialId}/progress', [DashboardController::class, 'getMaterialProgress'])->name('materials.progress');
+        Route::get('students/{userId}/progress', [DashboardController::class, 'getStudentProgress'])->name('students.progress');
+    });
 
     Route::resource('permissions', PermissionController::class);
     Route::resource('roles', RoleController::class);
