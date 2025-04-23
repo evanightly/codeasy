@@ -1,3 +1,4 @@
+import { buttonVariants } from '@/Components/UI/button';
 import {
     Card,
     CardContent,
@@ -7,6 +8,9 @@ import {
     CardTitle,
 } from '@/Components/UI/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/Components/UI/chart';
+import { dashboardServiceHook } from '@/Services/dashboardServiceHook';
+import { ROUTES } from '@/Support/Constants/routes';
+import { Link } from '@inertiajs/react';
 import {
     Area,
     AreaChart,
@@ -21,11 +25,106 @@ import {
 import { studentAreaData, studentBarData, studentConfig, studentPieData } from '../../chartData';
 
 export function StudentCharts() {
+    const { data: latestWorkData, isLoading } = dashboardServiceHook.useGetStudentLatestWork();
+
     return (
         <>
             <div className='space-y-2'>
                 <h1 className='text-2xl font-bold'>Siswa Dashboard</h1>
                 <p className='text-muted-foreground'>Lihat perkembangan belajarmu di sini</p>
+            </div>
+
+            {/* Latest Work Card - New Addition */}
+            <div className='mb-4'>
+                <Card className='w-full'>
+                    <CardHeader>
+                        <CardTitle>Progres Pembelajaran Terakhir</CardTitle>
+                        <CardDescription>Lanjutkan belajar dari terakhir kali</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {isLoading ? (
+                            <div className='flex h-20 items-center justify-center'>
+                                <p>Memuat data...</p>
+                            </div>
+                        ) : !latestWorkData ? (
+                            <div className='flex h-20 items-center justify-center'>
+                                <p>Belum ada progres pembelajaran.</p>
+                            </div>
+                        ) : (
+                            <div className='space-y-4'>
+                                <div className='space-y-2'>
+                                    <div className='flex items-center justify-between'>
+                                        <h3 className='text-lg font-semibold'>Kursus:</h3>
+                                        <span>{latestWorkData.course.name}</span>
+                                    </div>
+                                    <div className='flex items-center justify-between'>
+                                        <h3 className='text-lg font-semibold'>Materi:</h3>
+                                        <span>{latestWorkData.material.title}</span>
+                                    </div>
+                                    <div className='flex items-center justify-between'>
+                                        <h3 className='text-lg font-semibold'>
+                                            Progress pertanyaan saat ini:
+                                        </h3>
+                                        <span>{latestWorkData.currentQuestion.title}</span>
+                                    </div>
+                                </div>
+
+                                <div className='flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0'>
+                                    {!latestWorkData.currentQuestion.isCompleted && (
+                                        <Link
+                                            href={route(
+                                                `${ROUTES.STUDENT_COURSE_MATERIAL_QUESTIONS}.show`,
+                                                [
+                                                    latestWorkData.course.id,
+                                                    latestWorkData.material.id,
+                                                    latestWorkData.currentQuestion.id,
+                                                ],
+                                            )}
+                                            // href={route(
+                                            //     'learning-material-questions.show',
+                                            //     latestWorkData.currentQuestion.id,
+                                            // )}
+                                            className={buttonVariants({
+                                                variant: 'outline',
+                                                className: 'flex-1',
+                                            })}
+                                        >
+                                            Lanjutkan Pertanyaan Saat Ini
+                                        </Link>
+                                    )}
+
+                                    {latestWorkData.nextQuestion && (
+                                        <Link
+                                            // href={route(
+                                            //     'learning-material-questions.show',
+                                            //     latestWorkData.nextQuestion.id,
+                                            // )}
+
+                                            href={route(
+                                                `${ROUTES.STUDENT_COURSE_MATERIAL_QUESTIONS}.show`,
+                                                [
+                                                    latestWorkData.course.id,
+                                                    latestWorkData.material.id,
+                                                    latestWorkData.currentQuestion.id,
+                                                ],
+                                            )}
+                                            className={buttonVariants({
+                                                variant: !latestWorkData.currentQuestion.isCompleted
+                                                    ? 'outline'
+                                                    : 'default',
+                                                className: 'flex-1',
+                                            })}
+                                        >
+                                            {!latestWorkData.currentQuestion.isCompleted
+                                                ? 'Lompat ke Pertanyaan Berikutnya'
+                                                : 'Mulai Pertanyaan Berikutnya'}
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
 
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>

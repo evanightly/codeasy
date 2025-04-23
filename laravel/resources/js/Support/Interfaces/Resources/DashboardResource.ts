@@ -106,3 +106,23 @@ export interface StudentQuestionDetailedProgress {
     attempts: number;
     coding_time: number;
 }
+
+export interface StudentLatestWorkData {
+    course: {
+        id: number;
+        name: string;
+    };
+    material: {
+        id: number;
+        title: string;
+    };
+    currentQuestion: {
+        id: number;
+        title: string;
+        isCompleted: boolean;
+    };
+    nextQuestion?: {
+        id: number;
+        title: string;
+    };
+}

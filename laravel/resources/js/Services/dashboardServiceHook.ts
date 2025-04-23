@@ -7,6 +7,7 @@ import {
     DashboardProgressData,
     DetailedMaterialProgressData,
     StudentDetailedProgressData,
+    StudentLatestWorkData,
 } from '../Support/Interfaces/Resources/DashboardResource';
 
 export const dashboardServiceHook = {
@@ -81,6 +82,23 @@ export const dashboardServiceHook = {
                 return response.data;
             },
             enabled: !!userId,
+        });
+    },
+
+    /**
+     * Get the latest work data for the current student
+     */
+    useGetStudentLatestWork: () => {
+        return useQuery<StudentLatestWorkData>({
+            queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD, 'latest-work'],
+            queryFn: async () => {
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_STUDENT_LATEST_WORK,
+                    },
+                });
+                return response.data;
+            },
         });
     },
 };

@@ -27,6 +27,12 @@ interface MaterialProgress {
     questions: QuestionProgress[];
 }
 
+interface NextMaterial {
+    id: number;
+    title: string;
+    first_question_id?: number;
+}
+
 interface Props {
     course: {
         data: CourseResource;
@@ -35,9 +41,10 @@ interface Props {
         data: LearningMaterialResource;
     };
     progress: MaterialProgress;
+    nextMaterial?: NextMaterial;
 }
 
-export default function Show({ course, material, progress }: Props) {
+export default function Show({ course, material, progress, nextMaterial }: Props) {
     const { t } = useLaravelReactI18n();
 
     const formatTime = (seconds: number) => {
@@ -60,6 +67,28 @@ export default function Show({ course, material, progress }: Props) {
                         {t('pages.student_courses.actions.back_to_courses')}
                     </Button>
                 </Link>
+
+                {progress.percentage === 100 && nextMaterial && (
+                    <Link
+                        href={
+                            nextMaterial.first_question_id
+                                ? route(`${ROUTES.STUDENT_COURSE_MATERIAL_QUESTIONS}.show`, [
+                                      course.data.id,
+                                      nextMaterial.id,
+                                      nextMaterial.first_question_id,
+                                  ])
+                                : route(`${ROUTES.STUDENT_COURSE_MATERIALS}.show`, [
+                                      course.data.id,
+                                      nextMaterial.id,
+                                  ])
+                        }
+                    >
+                        <Button size='sm' className='gap-1'>
+                            {t('pages.student_materials.show.next_material')}
+                            <ArrowRight className='h-4 w-4' />
+                        </Button>
+                    </Link>
+                )}
             </div>
 
             <Card className='mb-6'>

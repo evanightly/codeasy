@@ -29,4 +29,9 @@ interface DashboardServiceInterface {
      * Get detailed progress for a specific student.
      */
     public function getStudentDetailedProgress(int $userId): array;
+
+    /**
+     * Get the latest work data for a specific student.
+     */
+    public function getStudentLatestWork(int $userId): array;
 }

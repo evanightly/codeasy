@@ -1308,6 +1308,7 @@ return [
             'score' => 'Score',
             'continue' => 'Continue',
             'start' => 'Start',
+            'next_material' => 'Next Material',
         ],
     ],
 

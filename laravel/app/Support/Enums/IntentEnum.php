@@ -23,4 +23,5 @@ enum IntentEnum: string {
     case DASHBOARD_INDEX_GET_STUDENT_COURSE_PROGRESS = 'dashboard.index.get.student.course.progress';
     case DASHBOARD_INDEX_GET_STUDENT_MATERIAL_PROGRESS = 'dashboard.index.get.student.material.progress';
     case DASHBOARD_INDEX_GET_STUDENT_PROGRESS = 'dashboard.index.get.student.progress';
+    case DASHBOARD_INDEX_GET_STUDENT_LATEST_WORK = 'dashboard.index.get.student.latest.work';
 }

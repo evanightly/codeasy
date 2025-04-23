@@ -1,7 +1,7 @@
 import CodeEditor from '@/Components/CodeEditor';
 import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
 import { Badge } from '@/Components/UI/badge';
-import { Button } from '@/Components/UI/button';
+import { Button, buttonVariants } from '@/Components/UI/button';
 import { Card, CardContent } from '@/Components/UI/card';
 import { Progress } from '@/Components/UI/progress';
 import {
@@ -67,6 +67,11 @@ interface Props {
     tracking: TrackingInfo;
     latestCode: string | null;
     navigation: NavigationInfo;
+    nextMaterial?: {
+        id: number;
+        title: string;
+        first_question_id?: number;
+    };
 }
 
 export default function Workspace({
@@ -77,6 +82,7 @@ export default function Workspace({
     tracking: initialTracking,
     latestCode,
     navigation: initialNavigation,
+    nextMaterial,
 }: Props) {
     const { t } = useLaravelReactI18n();
     const [code, setCode] = useState(latestCode || '');
@@ -129,6 +135,14 @@ export default function Workspace({
                     setNavigation((prev) => ({
                         ...prev,
                         next: prev.next ? { ...prev.next, can_proceed: true } : null,
+                    }));
+                }
+
+                // Enable Next Material button if this is the last question
+                if (!navigation.next && nextMaterial) {
+                    setNavigation((prev) => ({
+                        ...prev,
+                        next: { id: nextMaterial.id, title: nextMaterial.title, can_proceed: true },
                     }));
                 }
 
@@ -371,6 +385,34 @@ export default function Workspace({
                                         </span>
                                         <ArrowRight className='h-4 w-4' />
                                     </Button>
+                                )}
+
+                                {/* Show Next Material button when this is the last question and it's completed */}
+                                {!navigation.next && tracking.completion_status && nextMaterial && (
+                                    <Link
+                                        href={
+                                            nextMaterial.first_question_id
+                                                ? route(
+                                                      `${ROUTES.STUDENT_COURSE_MATERIAL_QUESTIONS}.show`,
+                                                      [
+                                                          course.data.id,
+                                                          nextMaterial.id,
+                                                          nextMaterial.first_question_id,
+                                                      ],
+                                                  )
+                                                : route(`${ROUTES.STUDENT_COURSE_MATERIALS}.show`, [
+                                                      course.data.id,
+                                                      nextMaterial.id,
+                                                  ])
+                                        }
+                                        className={buttonVariants({
+                                            size: 'sm',
+                                            className: 'gap-1',
+                                        })}
+                                    >
+                                        {t('pages.student_materials.show.next_material')}
+                                        <ArrowRight className='h-4 w-4' />
+                                    </Link>
                                 )}
                             </div>
                         </div>

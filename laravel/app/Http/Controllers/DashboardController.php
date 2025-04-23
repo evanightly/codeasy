@@ -40,6 +40,11 @@ class DashboardController extends Controller {
 
                 return response()->json($data);
 
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_LATEST_WORK->value:
+                $data = $this->dashboardService->getStudentLatestWork($user->id);
+
+                return response()->json($data);
+
             case IntentEnum::DASHBOARD_INDEX_GET_DATA->value:
             default:
                 $dashboardData = $this->dashboardService->getDashboardData($user);

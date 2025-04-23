@@ -210,6 +210,119 @@ class DashboardService implements DashboardServiceInterface {
     }
 
     /**
+     * Get the latest work data for a specific student.
+     * This includes the current course, material, question, and next question if available.
+     */
+    public function getStudentLatestWork(int $userId): array {
+        $user = User::findOrFail($userId);
+        $studentClassrooms = $user->classrooms;
+
+        // Find the most recent student score to determine where the student left off
+        $latestScore = StudentScore::where('user_id', $userId)
+            ->orderBy('updated_at', 'desc')
+            ->first();
+
+        // If no activity yet, try to find the first available course and material
+        if (!$latestScore) {
+            foreach ($studentClassrooms as $classroom) {
+                foreach ($classroom->courses as $course) {
+                    if ($course->learning_materials->isNotEmpty()) {
+                        $material = $course->learning_materials->first();
+                        if ($material->learning_material_questions->isNotEmpty()) {
+                            $question = $material->learning_material_questions->first();
+
+                            return [
+                                'course' => [
+                                    'id' => $course->id,
+                                    'name' => $course->name,
+                                ],
+                                'material' => [
+                                    'id' => $material->id,
+                                    'title' => $material->title,
+                                ],
+                                'currentQuestion' => [
+                                    'id' => $question->id,
+                                    'title' => $question->title,
+                                    'isCompleted' => false,
+                                ],
+                                // No next question yet since this is the first one
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // No courses or materials available
+            return [];
+        }
+
+        // We have a latest score, so let's find the current question and material
+        $currentQuestion = $latestScore->learning_material_question;
+        $currentMaterial = $currentQuestion->learning_material;
+        $currentCourse = $currentMaterial->course;
+
+        // Check if there's a next question in the same material
+        $nextQuestion = null;
+        $allQuestionsInMaterial = $currentMaterial->learning_material_questions->sortBy('id');
+        $foundCurrentQuestion = false;
+
+        foreach ($allQuestionsInMaterial as $question) {
+            if ($foundCurrentQuestion) {
+                $nextQuestion = $question;
+                break;
+            }
+
+            if ($question->id === $currentQuestion->id) {
+                $foundCurrentQuestion = true;
+            }
+        }
+
+        // If no next question in current material, check if there's a next material in the course
+        if (!$nextQuestion) {
+            $allMaterialsInCourse = $currentCourse->learning_materials->sortBy('id');
+            $foundCurrentMaterial = false;
+
+            foreach ($allMaterialsInCourse as $material) {
+                if ($foundCurrentMaterial) {
+                    if ($material->learning_material_questions->isNotEmpty()) {
+                        $nextQuestion = $material->learning_material_questions->sortBy('id')->first();
+                        break;
+                    }
+                }
+
+                if ($material->id === $currentMaterial->id) {
+                    $foundCurrentMaterial = true;
+                }
+            }
+        }
+
+        $result = [
+            'course' => [
+                'id' => $currentCourse->id,
+                'name' => $currentCourse->name,
+            ],
+            'material' => [
+                'id' => $currentMaterial->id,
+                'title' => $currentMaterial->title,
+            ],
+            'currentQuestion' => [
+                'id' => $currentQuestion->id,
+                'title' => $currentQuestion->title,
+                'isCompleted' => (bool) $latestScore->completion_status,
+            ],
+        ];
+
+        if ($nextQuestion) {
+            $result['nextQuestion'] = [
+                'id' => $nextQuestion->id,
+                'title' => $nextQuestion->title,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
      * Calculate completion statistics for multiple courses.
      */
     private function calculateCompletionStatistics($courses): array {

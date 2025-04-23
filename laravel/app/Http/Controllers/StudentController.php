@@ -117,6 +117,28 @@ class StudentController extends Controller {
         // Get user progress for this material
         $progress = $this->learningMaterialService->getUserProgress($user->id, $material->id);
 
+        // Find the next material in the course, if any
+        $nextMaterial = null;
+        if ($progress['percentage'] == 100) {
+            $nextMaterial = $course->learning_materials()
+                ->where('active', true)
+                ->where('order_number', '>', $material->order_number)
+                ->orderBy('order_number')
+                ->first();
+
+            // If we found a next material, let's get its first question ID for direct navigation
+            if ($nextMaterial) {
+                $firstQuestion = $nextMaterial->learning_material_questions()
+                    ->where('active', true)
+                    ->orderBy('order_number')
+                    ->first();
+
+                if ($firstQuestion) {
+                    $nextMaterial->first_question_id = $firstQuestion->id;
+                }
+            }
+        }
+
         return Inertia::render('Student/Materials/Show', [
             'course' => [
                 'data' => $course->load('classroom'),
@@ -125,6 +147,7 @@ class StudentController extends Controller {
                 'data' => $material,
             ],
             'progress' => $progress,
+            'nextMaterial' => $nextMaterial,
         ]);
     }
 
@@ -203,6 +226,28 @@ class StudentController extends Controller {
             $navigation['next']['can_proceed'] = $latestExecution && $latestExecution->compile_status;
         }
 
+        // Find the next material if this is the last question and completed
+        $nextMaterial = null;
+        if (!$navigation['next'] && $studentScore->completion_status) {
+            $nextMaterial = $course->learning_materials()
+                ->where('active', true)
+                ->where('order_number', '>', $material->order_number)
+                ->orderBy('order_number')
+                ->first();
+
+            // If we found a next material, let's get its first question ID for direct navigation
+            if ($nextMaterial) {
+                $firstQuestion = $nextMaterial->learning_material_questions()
+                    ->where('active', true)
+                    ->orderBy('order_number')
+                    ->first();
+
+                if ($firstQuestion) {
+                    $nextMaterial->first_question_id = $firstQuestion->id;
+                }
+            }
+        }
+
         return Inertia::render('Student/Questions/Workspace', [
             'course' => [
                 'data' => $course->load('classroom'),
@@ -223,6 +268,7 @@ class StudentController extends Controller {
             ],
             'latestCode' => $latestExecution ? $latestExecution->code : null,
             'navigation' => $navigation,
+            'nextMaterial' => $nextMaterial,
         ]);
     }
 

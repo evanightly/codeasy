@@ -19,6 +19,7 @@ const intents = {
     DASHBOARD_INDEX_GET_STUDENT_COURSE_PROGRESS: 'dashboard.index.get.student.course.progress',
     DASHBOARD_INDEX_GET_STUDENT_MATERIAL_PROGRESS: 'dashboard.index.get.student.material.progress',
     DASHBOARD_INDEX_GET_STUDENT_PROGRESS: 'dashboard.index.get.student.progress',
+    DASHBOARD_INDEX_GET_STUDENT_LATEST_WORK: 'dashboard.index.get.student.latest.work',
 };
 
 export const IntentEnum = intents;
