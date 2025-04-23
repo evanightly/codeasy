@@ -601,9 +601,7 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
     /**
      * Get student progress percentage for each material in a course.
      *
-     * @param int $userId
-     * @param array|\Illuminate\Support\Collection $materials
-     * @return array
+     * @param  array|\Illuminate\Support\Collection  $materials
      */
     public function getStudentMaterialsProgress(int $userId, $materials): array {
         return collect($materials)->map(function (LearningMaterial $material) use ($userId) {
@@ -627,6 +625,7 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
             // Add to material object/array
             $materialArr = $material->toArray();
             $materialArr['progress_percentage'] = $progress;
+
             return $materialArr;
         })->toArray();
     }
