@@ -573,7 +573,7 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
             $questionCount = 0;
             $questionIds = [];
             foreach ($materials as $material) {
-                $questions = $material->questions()->where('active', true)->get();
+                $questions = $material->learning_material_questions()->where('active', true)->get();
                 $questionCount += $questions->count();
                 $questionIds = array_merge($questionIds, $questions->pluck('id')->all());
             }
@@ -581,7 +581,7 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
             // Count completed questions for this user
             $completedCount = 0;
             if (!empty($questionIds)) {
-                $completedCount = \App\Models\StudentScore::whereIn('learning_material_question_id', $questionIds)
+                $completedCount = StudentScore::whereIn('learning_material_question_id', $questionIds)
                     ->where('user_id', $userId)
                     ->where('completion_status', true)
                     ->count();
@@ -608,7 +608,7 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
     public function getStudentMaterialsProgress(int $userId, $materials): array {
         return collect($materials)->map(function (LearningMaterial $material) use ($userId) {
             // Get all questions for this material
-            $questions = $material->questions()->where('active', true)->get();
+            $questions = $material->learning_material_questions()->where('active', true)->get();
             $questionCount = $questions->count();
             $questionIds = $questions->pluck('id')->all();
 

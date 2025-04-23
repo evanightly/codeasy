@@ -29,12 +29,12 @@ class LearningMaterial extends Model {
         return $this->belongsTo(Course::class);
     }
 
-    public function questions() {
+    public function learning_material_questions() {
         return $this->hasMany(LearningMaterialQuestion::class)
             ->orderBy('order_number');
     }
 
-    public function studentScores() {
+    public function student_scores() {
         return $this->hasManyThrough(
             StudentScore::class,
             LearningMaterialQuestion::class,

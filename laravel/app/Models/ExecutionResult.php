@@ -29,7 +29,7 @@ class ExecutionResult extends Model {
     /**
      * Get the student score that owns the execution result.
      */
-    public function studentScore() {
+    public function student_score() {
         return $this->belongsTo(StudentScore::class);
     }
 }

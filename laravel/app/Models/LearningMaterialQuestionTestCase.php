@@ -38,9 +38,9 @@ class LearningMaterialQuestionTestCase extends Model {
     ];
 
     /**
-     * Get the question that owns the test case.
+     * Get the learning material question that owns the test case.
      */
-    public function question(): BelongsTo {
+    public function learning_material_question(): BelongsTo {
         return $this->belongsTo(LearningMaterialQuestion::class, 'learning_material_question_id');
     }
 }

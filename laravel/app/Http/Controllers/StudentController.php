@@ -152,7 +152,7 @@ class StudentController extends Controller {
         }
 
         // Get visible test cases
-        $testCases = $question->testCases()
+        $testCases = $question->learning_material_question_test_cases()
             ->where('active', true)
             ->get()
             ->map(function ($testCase) {
@@ -191,7 +191,7 @@ class StudentController extends Controller {
         );
 
         // Get the latest code (if any)
-        $latestExecution = $studentScore->executionResults()
+        $latestExecution = $studentScore->execution_results()
             ->orderBy('created_at', 'desc')
             ->first();
 
@@ -244,8 +244,10 @@ class StudentController extends Controller {
         }
 
         // Get the question
-        $question = $studentScore->question;
-        $testCases = $question->testCases()->where('active', true)->get();
+        /** @var LearningMaterialQuestion */
+        $question = $studentScore->learning_material_question;
+
+        $testCases = $question->learning_material_question_test_cases()->where('active', true)->get();
 
         // If question is already completed, just execute the code without updating tracking data
         if (!$studentScore->completion_status) {

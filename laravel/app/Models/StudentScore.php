@@ -39,16 +39,16 @@ class StudentScore extends Model {
     }
 
     /**
-     * Get the question that owns the score.
+     * Get the learning material question that owns the score.
      */
-    public function question() {
+    public function learning_material_question() {
         return $this->belongsTo(LearningMaterialQuestion::class, 'learning_material_question_id');
     }
 
     /**
      * Get the execution results for this student score.
      */
-    public function executionResults() {
+    public function execution_results() {
         return $this->hasMany(ExecutionResult::class);
     }
 }

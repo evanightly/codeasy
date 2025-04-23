@@ -112,6 +112,7 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
      * Get user progress for a learning material
      */
     public function getUserProgress(int $userId, int $materialId): array {
+        /** @var LearningMaterial */
         $material = $this->findOrFail($materialId);
         // if (!$material) {
         //     return [
@@ -123,7 +124,7 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
         // }
 
         // Get all questions for this material
-        $questions = $material->questions()->where('active', true)->orderBy('order_number')->get();
+        $questions = $material->learning_material_questions()->where('active', true)->orderBy('order_number')->get();
 
         // Get all student scores for this user and these questions
         $questionIds = $questions->pluck('id')->toArray();
@@ -197,12 +198,13 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
      * Get next and previous question information
      */
     public function getQuestionNavigation(int $materialId, int $currentQuestionId): array {
+        /** @var LearningMaterial */
         $material = $this->findOrFail($materialId);
         // if (!$material) {
         //     return ['next' => null, 'previous' => null];
         // }
 
-        $questions = $material->questions()
+        $questions = $material->learning_material_questions()
             ->where('active', true)
             ->orderBy('order_number')
             ->get();

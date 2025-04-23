@@ -19,7 +19,7 @@ class DashboardController extends Controller {
      */
     public function index(Request $request): Response|JsonResponse {
         $user = $request->user();
-        $intent = $request->get('intent', IntentEnum::DASHBOARD_INDEX_GET_DATA);
+        $intent = $request->get('intent');
 
         switch ($intent) {
             case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_COURSE_PROGRESS->value:
@@ -45,7 +45,7 @@ class DashboardController extends Controller {
                 $dashboardData = $this->dashboardService->getDashboardData($user);
 
                 if ($this->ajax()) {
-                    return response()->json(['dashboardData' => $dashboardData]);
+                    return response()->json(data: ['dashboardData' => $dashboardData]);
                 }
 
                 return Inertia::render('Dashboard/Index', [

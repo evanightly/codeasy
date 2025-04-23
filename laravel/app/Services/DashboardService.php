@@ -114,10 +114,10 @@ class DashboardService implements DashboardServiceInterface {
      */
     public function getDetailedMaterialProgress(int $materialId): array {
         $material = LearningMaterial::with(['course.classroom.students', 'questions'])->findOrFail($materialId);
-        $students = $material->course->classroom->students;
+        $students = $material->c->classroom->students;
 
         $questionProgressData = [];
-        foreach ($material->questions as $question) {
+        foreach ($material->learning_material_questions as $question) {
             $studentProgress = [];
             foreach ($students as $student) {
                 // Get student score for this question
@@ -169,7 +169,7 @@ class DashboardService implements DashboardServiceInterface {
                 $materialProgress = [];
                 foreach ($course->learning_materials as $material) {
                     $questionProgress = [];
-                    foreach ($material->questions as $question) {
+                    foreach ($material->learning_material_questions as $question) {
                         $score = StudentScore::where([
                             'user_id' => $userId,
                             'learning_material_question_id' => $question->id,
@@ -373,8 +373,8 @@ class DashboardService implements DashboardServiceInterface {
      * Get student progress for a specific material.
      */
     private function getStudentMaterialProgress(int $studentId, int $materialId): array {
-        $material = LearningMaterial::with('questions')->findOrFail($materialId);
-        $totalQuestions = count($material->questions);
+        $material = LearningMaterial::with('learning_material_questions')->findOrFail($materialId);
+        $totalQuestions = count($material->learning_material_questions);
 
         if ($totalQuestions === 0) {
             return [
@@ -387,7 +387,7 @@ class DashboardService implements DashboardServiceInterface {
         $completedCount = StudentScore::where([
             'user_id' => $studentId,
         ])
-            ->whereIn('learning_material_question_id', $material->questions->pluck('id'))
+            ->whereIn('learning_material_question_id', $material->learning_material_questions->pluck('id'))
             ->where('completion_status', true)
             ->count();
 

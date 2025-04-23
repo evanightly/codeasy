@@ -41,21 +41,21 @@ class LearningMaterialQuestion extends Model {
     /**
      * Get the learning material that owns the question.
      */
-    public function learningMaterial(): BelongsTo {
+    public function learning_material(): BelongsTo {
         return $this->belongsTo(LearningMaterial::class);
     }
 
     /**
      * Get the test cases for the question.
      */
-    public function testCases(): HasMany {
+    public function learning_material_question_test_cases(): HasMany {
         return $this->hasMany(LearningMaterialQuestionTestCase::class);
     }
 
     /**
      * Get the public test cases for the question (not hidden).
      */
-    public function publicTestCases(): HasMany {
+    public function public_learning_material_question_test_cases(): HasMany {
         return $this->hasMany(LearningMaterialQuestionTestCase::class)
             ->where('hidden', false)
             ->where('active', true);
@@ -64,7 +64,7 @@ class LearningMaterialQuestion extends Model {
     /**
      * Get all student scores for this question.
      */
-    public function studentScores(): HasMany {
+    public function student_scores(): HasMany {
         return $this->hasMany(StudentScore::class);
     }
 }
