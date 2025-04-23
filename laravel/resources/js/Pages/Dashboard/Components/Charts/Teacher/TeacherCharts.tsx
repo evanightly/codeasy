@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/UI/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/Components/UI/chart';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
     Bar,
     BarChart,
@@ -24,19 +25,25 @@ import {
 } from '../../chartData';
 
 export function TeacherCharts() {
+    const { t } = useLaravelReactI18n();
+
     return (
         <>
             <div className='space-y-2'>
-                <h1 className='text-2xl font-bold'>Guru Overview</h1>
-                <p className='text-muted-foreground'>Dashboard ringkasan untuk Guru</p>
+                <h1 className='text-2xl font-bold'>{t('pages.dashboard.teacher.title')}</h1>
+                <p className='text-muted-foreground'>{t('pages.dashboard.teacher.subtitle')}</p>
             </div>
 
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* Class Average Bar Chart */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Rata-rata Nilai Tiap Kelas</CardTitle>
-                        <CardDescription>Bar Chart</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.teacher.chart_titles.class_scores')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.teacher.chart_titles.class_scores_description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={teacherConfig} className='h-[300px] w-full'>
@@ -58,8 +65,14 @@ export function TeacherCharts() {
                 {/* Module Completion Pie Chart */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Module Completion (Pie Chart)</CardTitle>
-                        <CardDescription>All Classes</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.teacher.chart_titles.module_completion')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t(
+                                'pages.dashboard.teacher.chart_titles.module_completion_description',
+                            )}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={teacherConfig} className='mx-auto h-[300px] w-full'>
@@ -83,8 +96,12 @@ export function TeacherCharts() {
                 {/* Module Mastery Radar Chart */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Module Mastery (Radar)</CardTitle>
-                        <CardDescription>Comparison Score by Guru</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.teacher.chart_titles.subject_mastery')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.teacher.chart_titles.subject_mastery_description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className='flex justify-center'>
                         <ChartContainer config={teacherConfig} className='mx-auto h-[300px] w-full'>
@@ -109,8 +126,12 @@ export function TeacherCharts() {
                 {/* Top Students Radial Chart */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Top 5 Siswa (Radial)</CardTitle>
-                        <CardDescription>Progress Tertinggi</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.teacher.chart_titles.top_students')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.teacher.chart_titles.top_students_description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={teacherConfig} className='mx-auto h-[300px] w-full'>

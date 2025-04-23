@@ -1,7 +1,14 @@
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/UI/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/Components/UI/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/Components/UI/dialog';
 import { Progress } from '@/Components/UI/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import { dashboardServiceHook } from '@/Services/dashboardServiceHook';
@@ -9,17 +16,20 @@ import {
     CourseProgressData,
     StudentDetailedProgressData,
 } from '@/Support/Interfaces/Resources/DashboardResource';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { BarChart3, BookOpen, CheckCircle, User, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 // Course Details Modal View Component
 const CourseDetailsView = ({ courseData }: { courseData?: CourseProgressData }) => {
+    const { t } = useLaravelReactI18n();
+
     if (!courseData) {
         return (
             <div className='flex h-40 items-center justify-center'>
                 <div className='flex items-center space-x-4'>
                     <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
-                    <p>Loading course details...</p>
+                    <p>{t('pages.dashboard.student_tracking.loading.course_details')}</p>
                 </div>
             </div>
         );
@@ -31,8 +41,10 @@ const CourseDetailsView = ({ courseData }: { courseData?: CourseProgressData }) 
                 <div>
                     <h3 className='text-lg font-medium'>{courseData.name}</h3>
                     <p className='text-sm text-muted-foreground'>
-                        {courseData.total_students} students | {courseData.materials.length}{' '}
-                        materials
+                        {courseData.total_students}{' '}
+                        {t('pages.dashboard.student_tracking.labels.students')} |{' '}
+                        {courseData.materials.length}{' '}
+                        {t('pages.dashboard.student_tracking.labels.materials')}
                     </p>
                 </div>
                 <div>
@@ -45,13 +57,16 @@ const CourseDetailsView = ({ courseData }: { courseData?: CourseProgressData }) 
                                   : 'secondary'
                         }
                     >
-                        {Math.round(courseData.avg_completion)}% Avg. Completion
+                        {Math.round(courseData.avg_completion)}%{' '}
+                        {t('pages.dashboard.student_tracking.labels.avg_completion')}
                     </Badge>
                 </div>
             </div>
 
             <div className='space-y-4'>
-                <h4 className='text-md font-medium'>Learning Materials</h4>
+                <h4 className='text-md font-medium'>
+                    {t('pages.dashboard.student_tracking.sections.learning_materials')}
+                </h4>
 
                 {courseData.materials.map((material) => (
                     <Card key={material.id} className='overflow-hidden'>
@@ -71,18 +86,30 @@ const CourseDetailsView = ({ courseData }: { courseData?: CourseProgressData }) 
                                 </Badge>
                             </div>
                             <CardDescription>
-                                {material.total_questions} questions |{' '}
-                                {material.student_progress.length} students
+                                {material.total_questions}{' '}
+                                {t('pages.dashboard.student_tracking.labels.questions')} |{' '}
+                                {material.student_progress.length}{' '}
+                                {t('pages.dashboard.student_tracking.labels.students')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className='max-h-60 space-y-2 overflow-auto'>
                                 <div className='rounded-lg border'>
                                     <div className='grid grid-cols-4 gap-2 border-b bg-muted p-2 text-sm font-medium'>
-                                        <div>Student</div>
-                                        <div>Completed</div>
-                                        <div>Progress</div>
-                                        <div>Status</div>
+                                        <div>
+                                            {t('pages.dashboard.student_tracking.columns.student')}
+                                        </div>
+                                        <div>
+                                            {t(
+                                                'pages.dashboard.student_tracking.columns.completed',
+                                            )}
+                                        </div>
+                                        <div>
+                                            {t('pages.dashboard.student_tracking.columns.progress')}
+                                        </div>
+                                        <div>
+                                            {t('pages.dashboard.student_tracking.columns.status')}
+                                        </div>
                                     </div>
                                     {material.student_progress.map((student) => (
                                         <div
@@ -104,17 +131,23 @@ const CourseDetailsView = ({ courseData }: { courseData?: CourseProgressData }) 
                                                 {student.progress_percentage === 100 ? (
                                                     <span className='flex items-center text-green-500'>
                                                         <CheckCircle className='mr-1 h-3 w-3' />{' '}
-                                                        Complete
+                                                        {t(
+                                                            'pages.dashboard.student_tracking.status.complete',
+                                                        )}
                                                     </span>
                                                 ) : student.progress_percentage > 0 ? (
                                                     <span className='flex items-center text-yellow-500'>
-                                                        <BarChart3 className='mr-1 h-3 w-3' /> In
-                                                        Progress
+                                                        <BarChart3 className='mr-1 h-3 w-3' />{' '}
+                                                        {t(
+                                                            'pages.dashboard.student_tracking.status.in_progress',
+                                                        )}
                                                     </span>
                                                 ) : (
                                                     <span className='flex items-center text-gray-500'>
-                                                        <XCircle className='mr-1 h-3 w-3' /> Not
-                                                        Started
+                                                        <XCircle className='mr-1 h-3 w-3' />{' '}
+                                                        {t(
+                                                            'pages.dashboard.student_tracking.status.not_started',
+                                                        )}
                                                     </span>
                                                 )}
                                             </div>
@@ -132,12 +165,14 @@ const CourseDetailsView = ({ courseData }: { courseData?: CourseProgressData }) 
 
 // Student Details Modal View Component
 const StudentDetailsView = ({ studentData }: { studentData?: StudentDetailedProgressData }) => {
+    const { t } = useLaravelReactI18n();
+
     if (!studentData) {
         return (
             <div className='flex h-40 items-center justify-center'>
                 <div className='flex items-center space-x-4'>
                     <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
-                    <p>Loading student details...</p>
+                    <p>{t('pages.dashboard.student_tracking.loading.student_details')}</p>
                 </div>
             </div>
         );
@@ -148,7 +183,9 @@ const StudentDetailsView = ({ studentData }: { studentData?: StudentDetailedProg
             <div>
                 <h3 className='text-lg font-medium'>{studentData.name}</h3>
                 <p className='text-sm text-muted-foreground'>
-                    Enrolled in {studentData.courses.length} courses
+                    {t('pages.dashboard.student_tracking.labels.enrolled_in')}{' '}
+                    {studentData.courses.length}{' '}
+                    {t('pages.dashboard.student_tracking.labels.courses')}
                 </p>
             </div>
 
@@ -176,9 +213,15 @@ const StudentDetailsView = ({ studentData }: { studentData?: StudentDetailedProg
 
                             <div className='rounded-lg border'>
                                 <div className='grid grid-cols-3 gap-2 border-b bg-muted p-2 text-sm font-medium'>
-                                    <div>Material</div>
-                                    <div>Progress</div>
-                                    <div>Status</div>
+                                    <div>
+                                        {t('pages.dashboard.student_tracking.columns.material')}
+                                    </div>
+                                    <div>
+                                        {t('pages.dashboard.student_tracking.columns.progress')}
+                                    </div>
+                                    <div>
+                                        {t('pages.dashboard.student_tracking.columns.status')}
+                                    </div>
                                 </div>
 
                                 {course.materials.map((material) => (
@@ -198,16 +241,23 @@ const StudentDetailsView = ({ studentData }: { studentData?: StudentDetailedProg
                                             {material.progress_percentage === 100 ? (
                                                 <span className='flex items-center text-green-500'>
                                                     <CheckCircle className='mr-1 h-3 w-3' />{' '}
-                                                    Complete
+                                                    {t(
+                                                        'pages.dashboard.student_tracking.status.complete',
+                                                    )}
                                                 </span>
                                             ) : material.progress_percentage > 0 ? (
                                                 <span className='flex items-center text-yellow-500'>
-                                                    <BarChart3 className='mr-1 h-3 w-3' /> In
-                                                    Progress
+                                                    <BarChart3 className='mr-1 h-3 w-3' />{' '}
+                                                    {t(
+                                                        'pages.dashboard.student_tracking.status.in_progress',
+                                                    )}
                                                 </span>
                                             ) : (
                                                 <span className='flex items-center text-gray-500'>
-                                                    <XCircle className='mr-1 h-3 w-3' /> Not Started
+                                                    <XCircle className='mr-1 h-3 w-3' />{' '}
+                                                    {t(
+                                                        'pages.dashboard.student_tracking.status.not_started',
+                                                    )}
                                                 </span>
                                             )}
                                         </div>
@@ -224,6 +274,7 @@ const StudentDetailsView = ({ studentData }: { studentData?: StudentDetailedProg
 
 // Main Student Task Tracking Section Component
 export default function StudentTaskTrackingSection() {
+    const { t } = useLaravelReactI18n();
     const { data: dashboardData, isLoading } = dashboardServiceHook.useGetDashboardData();
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
     const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(null);
@@ -246,13 +297,15 @@ export default function StudentTaskTrackingSection() {
         return (
             <Card className='w-full'>
                 <CardHeader>
-                    <CardTitle>Student Progress Tracking</CardTitle>
-                    <CardDescription>Loading dashboard data...</CardDescription>
+                    <CardTitle>{t('pages.dashboard.student_tracking.title')}</CardTitle>
+                    <CardDescription>
+                        {t('pages.dashboard.student_tracking.loading.dashboard_data')}
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className='flex justify-center py-6'>
                     <div className='flex items-center space-x-4'>
                         <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
-                        <p>Loading student progress data...</p>
+                        <p>{t('pages.dashboard.student_tracking.loading.progress_data')}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -263,11 +316,13 @@ export default function StudentTaskTrackingSection() {
         return (
             <Card className='w-full'>
                 <CardHeader>
-                    <CardTitle>Student Progress Tracking</CardTitle>
-                    <CardDescription>No data available</CardDescription>
+                    <CardTitle>{t('pages.dashboard.student_tracking.title')}</CardTitle>
+                    <CardDescription>
+                        {t('pages.dashboard.student_tracking.no_data.title')}
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p>No student progress data is currently available.</p>
+                    <p>{t('pages.dashboard.student_tracking.no_data.description')}</p>
                 </CardContent>
             </Card>
         );
@@ -275,15 +330,17 @@ export default function StudentTaskTrackingSection() {
 
     const { courses, stats } = dashboardData.teacherData;
 
-    if(!courses || courses.length === 0) {
+    if (!courses || courses.length === 0) {
         return (
             <Card className='w-full'>
                 <CardHeader>
-                    <CardTitle>No Courses Available</CardTitle>
-                    <CardDescription>Please check back later.</CardDescription>
+                    <CardTitle>{t('pages.dashboard.student_tracking.no_courses.title')}</CardTitle>
+                    <CardDescription>
+                        {t('pages.dashboard.student_tracking.no_courses.subtitle')}
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p>No courses are currently available for tracking.</p>
+                    <p>{t('pages.dashboard.student_tracking.no_courses.description')}</p>
                 </CardContent>
             </Card>
         );
@@ -292,17 +349,23 @@ export default function StudentTaskTrackingSection() {
     return (
         <Card className='w-full'>
             <CardHeader>
-                <CardTitle>Student Task Tracking System</CardTitle>
+                <CardTitle>{t('pages.dashboard.student_tracking.title')}</CardTitle>
                 <CardDescription>
-                    Track student progress through courses, materials, and questions
+                    {t('pages.dashboard.student_tracking.description')}
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue='overview' className='w-full'>
                     <TabsList className='mb-4'>
-                        <TabsTrigger value='overview'>Overview</TabsTrigger>
-                        <TabsTrigger value='courses'>Courses</TabsTrigger>
-                        <TabsTrigger value='students'>Students</TabsTrigger>
+                        <TabsTrigger value='overview'>
+                            {t('pages.dashboard.student_tracking.tabs.overview')}
+                        </TabsTrigger>
+                        <TabsTrigger value='courses'>
+                            {t('pages.dashboard.student_tracking.tabs.courses')}
+                        </TabsTrigger>
+                        <TabsTrigger value='students'>
+                            {t('pages.dashboard.student_tracking.tabs.students')}
+                        </TabsTrigger>
                     </TabsList>
 
                     {/* Overview Tab */}
@@ -311,7 +374,9 @@ export default function StudentTaskTrackingSection() {
                             <div className='rounded-lg border bg-card p-4'>
                                 <div className='flex items-center gap-2'>
                                     <BookOpen className='h-5 w-5 text-primary' />
-                                    <h3 className='text-lg font-medium'>Total Courses</h3>
+                                    <h3 className='text-lg font-medium'>
+                                        {t('pages.dashboard.student_tracking.stats.total_courses')}
+                                    </h3>
                                 </div>
                                 <p className='mt-2 text-3xl font-bold'>{courses.length}</p>
                             </div>
@@ -319,7 +384,9 @@ export default function StudentTaskTrackingSection() {
                             <div className='rounded-lg border bg-card p-4'>
                                 <div className='flex items-center gap-2'>
                                     <User className='h-5 w-5 text-primary' />
-                                    <h3 className='text-lg font-medium'>Total Students</h3>
+                                    <h3 className='text-lg font-medium'>
+                                        {t('pages.dashboard.student_tracking.stats.total_students')}
+                                    </h3>
                                 </div>
                                 <p className='mt-2 text-3xl font-bold'>{stats.total_students}</p>
                             </div>
@@ -327,21 +394,30 @@ export default function StudentTaskTrackingSection() {
                             <div className='rounded-lg border bg-card p-4'>
                                 <div className='flex items-center gap-2'>
                                     <CheckCircle className='h-5 w-5 text-green-500' />
-                                    <h3 className='text-lg font-medium'>Completed Courses</h3>
+                                    <h3 className='text-lg font-medium'>
+                                        {t(
+                                            'pages.dashboard.student_tracking.stats.completed_courses',
+                                        )}
+                                    </h3>
                                 </div>
                                 <p className='mt-2 text-3xl font-bold'>{stats.completed_courses}</p>
                             </div>
                         </div>
 
                         <div className='mt-6 space-y-2'>
-                            <h3 className='text-lg font-medium'>Course Completion Overview</h3>
+                            <h3 className='text-lg font-medium'>
+                                {t('pages.dashboard.student_tracking.sections.course_completion')}
+                            </h3>
                             <div className='space-y-4'>
                                 {courses.map((course) => (
                                     <div key={course.id} className='space-y-2'>
                                         <div className='flex items-center justify-between'>
                                             <span className='font-medium'>{course.name}</span>
                                             <span className='text-sm'>
-                                                {Math.round(course.avg_completion)}% Complete
+                                                {Math.round(course.avg_completion)}%{' '}
+                                                {t(
+                                                    'pages.dashboard.student_tracking.labels.complete',
+                                                )}
                                             </span>
                                         </div>
                                         <Progress
@@ -354,12 +430,20 @@ export default function StudentTaskTrackingSection() {
                         </div>
 
                         <div className='mt-6'>
-                            <h3 className='mb-2 text-lg font-medium'>Top Performing Students</h3>
+                            <h3 className='mb-2 text-lg font-medium'>
+                                {t('pages.dashboard.student_tracking.sections.top_students')}
+                            </h3>
                             <div className='rounded-lg border'>
                                 <div className='grid grid-cols-3 gap-4 border-b p-3 font-medium'>
-                                    <div>Student</div>
-                                    <div>Courses</div>
-                                    <div>Avg. Score</div>
+                                    <div>
+                                        {t('pages.dashboard.student_tracking.columns.student')}
+                                    </div>
+                                    <div>
+                                        {t('pages.dashboard.student_tracking.columns.courses')}
+                                    </div>
+                                    <div>
+                                        {t('pages.dashboard.student_tracking.columns.avg_score')}
+                                    </div>
                                 </div>
                                 {stats.top_students.map((student) => (
                                     <div
@@ -383,14 +467,19 @@ export default function StudentTaskTrackingSection() {
                                     <CardHeader className='pb-2'>
                                         <CardTitle>{course.name}</CardTitle>
                                         <CardDescription>
-                                            {course.total_students} students enrolled
+                                            {course.total_students}{' '}
+                                            {t(
+                                                'pages.dashboard.student_tracking.labels.students_enrolled',
+                                            )}
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className='pb-2'>
                                         <div className='mb-4 flex items-center gap-2'>
                                             <div>
                                                 <div className='text-sm text-muted-foreground'>
-                                                    Average Completion
+                                                    {t(
+                                                        'pages.dashboard.student_tracking.labels.avg_completion',
+                                                    )}
                                                 </div>
                                                 <div className='text-2xl font-bold'>
                                                     {Math.round(course.avg_completion)}%
@@ -404,7 +493,10 @@ export default function StudentTaskTrackingSection() {
 
                                         <div className='space-y-2'>
                                             <h4 className='text-sm font-medium'>
-                                                Materials ({course.materials.length})
+                                                {t(
+                                                    'pages.dashboard.student_tracking.labels.materials',
+                                                )}{' '}
+                                                ({course.materials.length})
                                             </h4>
                                             <div className='max-h-40 space-y-2 overflow-auto pr-2'>
                                                 {course.materials.map((material) => (
@@ -438,16 +530,23 @@ export default function StudentTaskTrackingSection() {
                                                     onClick={() => setSelectedCourseId(course.id)}
                                                     className='w-full'
                                                 >
-                                                    View Details
+                                                    {t(
+                                                        'pages.dashboard.student_tracking.actions.view_details',
+                                                    )}
                                                 </Button>
                                             </DialogTrigger>
                                             <DialogContent className='max-h-[90vh] overflow-auto sm:max-w-[80vw]'>
                                                 <DialogHeader>
                                                     <DialogTitle>
-                                                        Course Details: {course.name}
+                                                        {t(
+                                                            'pages.dashboard.student_tracking.dialogs.course_details.title',
+                                                            { name: course.name },
+                                                        )}
                                                     </DialogTitle>
                                                     <DialogDescription>
-                                                        Student progress for each learning material
+                                                        {t(
+                                                            'pages.dashboard.student_tracking.dialogs.course_details.description',
+                                                        )}
                                                     </DialogDescription>
                                                 </DialogHeader>
                                                 <CourseDetailsView
@@ -464,16 +563,19 @@ export default function StudentTaskTrackingSection() {
                     {/* Students Tab */}
                     <TabsContent value='students'>
                         <p className='mb-4 text-muted-foreground'>
-                            Click on a student to view their detailed progress across all courses
-                            and materials.
+                            {t('pages.dashboard.student_tracking.instructions.click_student')}
                         </p>
 
                         <div className='rounded-lg border'>
                             <div className='grid grid-cols-4 gap-4 border-b bg-muted p-3 font-medium'>
-                                <div>Student Name</div>
-                                <div>Courses</div>
-                                <div>Progress</div>
-                                <div className='text-right'>Actions</div>
+                                <div>
+                                    {t('pages.dashboard.student_tracking.columns.student_name')}
+                                </div>
+                                <div>{t('pages.dashboard.student_tracking.columns.courses')}</div>
+                                <div>{t('pages.dashboard.student_tracking.columns.progress')}</div>
+                                <div className='text-right'>
+                                    {t('pages.dashboard.student_tracking.columns.actions')}
+                                </div>
                             </div>
 
                             {courses
@@ -533,17 +635,23 @@ export default function StudentTaskTrackingSection() {
                                                             setSelectedStudentId(student.id)
                                                         }
                                                     >
-                                                        View Progress
+                                                        {t(
+                                                            'pages.dashboard.student_tracking.actions.view_progress',
+                                                        )}
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent className='max-h-[90vh] overflow-auto sm:max-w-[80vw]'>
                                                     <DialogHeader>
                                                         <DialogTitle>
-                                                            Student Progress: {student.name}
+                                                            {t(
+                                                                'pages.dashboard.student_tracking.dialogs.student_progress.title',
+                                                                { name: student.name },
+                                                            )}
                                                         </DialogTitle>
                                                         <DialogDescription>
-                                                            Detailed progress across all courses and
-                                                            materials
+                                                            {t(
+                                                                'pages.dashboard.student_tracking.dialogs.student_progress.description',
+                                                            )}
                                                         </DialogDescription>
                                                     </DialogHeader>
                                                     <StudentDetailsView
