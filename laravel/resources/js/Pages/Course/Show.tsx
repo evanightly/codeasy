@@ -25,7 +25,7 @@ export default function Show({ data: { data } }: Props) {
         perPage: 10,
         sortBy: [['order_number', 'asc']],
         learning_material_resource:
-            'id,title,description,type,order_number,active,file,file_extension',
+            'id,title,description,type,order_number,active,file,file_extension,file_url',
         column_filters: {
             course_id: data.id,
         },

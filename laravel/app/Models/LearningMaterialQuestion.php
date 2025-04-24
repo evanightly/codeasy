@@ -38,6 +38,21 @@ class LearningMaterialQuestion extends Model {
         'type' => LearningMaterialTypeEnum::class,
     ];
 
+    protected $appends = [
+        'file_url',
+    ];
+
+    /**
+     * Get the file URL for the question.
+     */
+    public function getFileUrlAttribute(): ?string {
+        if (empty($this->file) || empty($this->file_extension)) {
+            return null;
+        }
+
+        return asset('storage/learning-material-questions/' . $this->file);
+    }
+
     /**
      * Get the learning material that owns the question.
      */

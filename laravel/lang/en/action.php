@@ -26,4 +26,5 @@ return [
     'prev' => 'Prev',
     'next' => 'Next',
     'back_to_top' => 'Back to Top',
+    'actions' => 'Actions',
 ];

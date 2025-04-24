@@ -1,8 +1,17 @@
 import CodeEditor from '@/Components/CodeEditor';
+import { PDFViewer } from '@/Components/PDFViewer';
 import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
 import { Badge } from '@/Components/UI/badge';
 import { Button, buttonVariants } from '@/Components/UI/button';
 import { Card, CardContent } from '@/Components/UI/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/Components/UI/dialog';
 import { Progress } from '@/Components/UI/progress';
 import {
     Sheet,
@@ -33,6 +42,7 @@ import {
     ArrowRight,
     Check,
     FileQuestion,
+    FileTextIcon,
     Loader2,
     Redo2,
 } from 'lucide-react';
@@ -93,6 +103,7 @@ export default function Workspace({
     const [timeSpent, setTimeSpent] = useState(initialTracking.current_time);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [lastSyncTime, setLastSyncTime] = useState(Date.now());
+    const [materialDialogOpen, setMaterialDialogOpen] = useState(false);
 
     // Function to format seconds into readable time
     const formatTime = (seconds: number) => {
@@ -287,6 +298,48 @@ export default function Workspace({
                         </div>
 
                         <div className='flex items-center gap-3'>
+                            {/* Material PDF Viewer Button */}
+                            {material.data.file_url &&
+                                material.data.file_extension?.toLowerCase() === 'pdf' && (
+                                    <Dialog
+                                        open={materialDialogOpen}
+                                        onOpenChange={setMaterialDialogOpen}
+                                    >
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                variant='outline'
+                                                title={t(
+                                                    'pages.student_questions.workspace.view_material',
+                                                )}
+                                                size='sm'
+                                                className='flex items-center gap-1'
+                                            >
+                                                <FileTextIcon className='h-4 w-4' />
+                                                <span className='hidden md:inline'>
+                                                    {t(
+                                                        'pages.student_questions.workspace.view_material',
+                                                    )}
+                                                </span>
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className='max-h-[90vh] max-w-[90vw] overflow-hidden'>
+                                            <DialogHeader>
+                                                <DialogTitle>{material.data.title}</DialogTitle>
+                                                <DialogDescription />
+                                            </DialogHeader>
+                                            <div className='overflow-auto'>
+                                                <PDFViewer
+                                                    fileUrl={material.data.file_url}
+                                                    filename={
+                                                        material.data.file || material.data.title
+                                                    }
+                                                    className='max-h-[80vh]'
+                                                />
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
+                                )}
+
                             <div className='hidden items-center gap-2 lg:flex'>
                                 <span className='text-sm font-medium'>
                                     {t('pages.student_questions.workspace.time')}:

@@ -25,6 +25,18 @@ class LearningMaterial extends Model {
         'active' => 'boolean',
     ];
 
+    protected $appends = [
+        'file_url',
+    ];
+
+    public function getFileUrlAttribute() {
+        if (empty($this->file) || empty($this->file_extension)) {
+            return null;
+        }
+
+        return asset('storage/learning-materials/' . $this->file);
+    }
+
     public function course(): BelongsTo {
         return $this->belongsTo(Course::class);
     }

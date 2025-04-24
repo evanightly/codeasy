@@ -1,8 +1,10 @@
+import { PDFViewer } from '@/Components/PDFViewer';
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { DataTable } from '@/Components/UI/data-table';
 import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/Components/UI/dialog';
 import { Progress } from '@/Components/UI/progress';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { ROUTES } from '@/Support/Constants/routes';
@@ -11,8 +13,8 @@ import { CourseResource, LearningMaterialResource } from '@/Support/Interfaces/R
 import { Link } from '@inertiajs/react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { ArrowLeft, BookIcon, Code, FileTextIcon } from 'lucide-react';
-import { useMemo } from 'react';
+import { ArrowLeft, BookIcon, Code, Eye, FileTextIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 interface Props {
     course: {
@@ -26,6 +28,18 @@ interface Props {
 export default function Show({ course, materials }: Props) {
     const { t } = useLaravelReactI18n();
     const columnHelper = createColumnHelper<LearningMaterialResource>();
+    const [previewMaterial, setPreviewMaterial] = useState<LearningMaterialResource | null>(null);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+    const handleOpenPreview = (material: LearningMaterialResource) => {
+        setPreviewMaterial(material);
+        setIsPreviewOpen(true);
+    };
+
+    const handleClosePreview = () => {
+        setIsPreviewOpen(false);
+        setPreviewMaterial(null);
+    };
 
     const renderTypeIcon = (type: string) => {
         switch (type) {
@@ -112,6 +126,28 @@ export default function Show({ course, materials }: Props) {
                 );
             },
         }),
+        columnHelper.display({
+            id: 'actions',
+            header: () => <div className='text-right'>{t('action.actions')}</div>,
+            cell: ({ row }) => {
+                const material = row.original;
+                return (
+                    <div className='flex justify-end'>
+                        {material.file_url && material.file_extension?.toLowerCase() === 'pdf' && (
+                            <Button
+                                variant='ghost'
+                                size='sm'
+                                onClick={() => handleOpenPreview(material)}
+                                className='flex items-center gap-1'
+                            >
+                                <Eye className='h-4 w-4' />
+                                <span>{t('pages.learning_material.show.view_file')}</span>
+                            </Button>
+                        )}
+                    </div>
+                );
+            },
+        }),
     ] as Array<ColumnDef<LearningMaterialResource, LearningMaterialResource>>;
 
     const memoizedColumns = useMemo(() => columns, []);
@@ -168,6 +204,26 @@ export default function Show({ course, materials }: Props) {
                     />
                 </CardContent>
             </Card>
+
+            {/* PDF Viewer Dialog */}
+            <Dialog open={isPreviewOpen} onOpenChange={handleClosePreview}>
+                <DialogContent className='max-h-[90vh] max-w-[90vw] overflow-hidden'>
+                    <DialogHeader>
+                        <DialogTitle>{previewMaterial?.title}</DialogTitle>m
+                        <DialogDescription />
+                    </DialogHeader>
+                    <div className='overflow-auto'>
+                        {previewMaterial?.file_url &&
+                            previewMaterial?.file_extension?.toLowerCase() === 'pdf' && (
+                                <PDFViewer
+                                    fileUrl={previewMaterial.file_url}
+                                    filename={previewMaterial.file || previewMaterial.title}
+                                    className='max-h-[80vh]'
+                                />
+                            )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AuthenticatedLayout>
     );
 }

@@ -970,6 +970,7 @@ return [
                 'questions' => 'Questions',
             ],
             'file_info' => 'File: :name (:extension)',
+            'view_file' => 'View File',
         ],
     ],
     'learning_material_question' => [
@@ -1339,6 +1340,7 @@ return [
                 'title' => 'Error Running Code',
                 'description' => 'There was a problem executing your code. Please check for errors.',
             ],
+            'view_material' => 'View Material',
         ],
     ],
     'dashboard' => [

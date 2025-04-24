@@ -1,7 +1,15 @@
+import { PDFViewer } from '@/Components/PDFViewer';
 import { Badge } from '@/Components/UI/badge';
 import { Button, buttonVariants } from '@/Components/UI/button';
 import { DataTable } from '@/Components/UI/data-table';
 import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/Components/UI/dialog';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,8 +25,8 @@ import { Link } from '@inertiajs/react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { Code, MoreHorizontal } from 'lucide-react';
-import { useMemo } from 'react';
+import { Code, FileText, MoreHorizontal } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 interface LearningMaterialsProps {
@@ -43,6 +51,8 @@ export const LearningMaterials = ({
     const confirmAction = useConfirmation();
     const columnHelper = createColumnHelper<LearningMaterialResource>();
     const deleteMutation = learningMaterialServiceHook.useDelete();
+    const [previewMaterial, setPreviewMaterial] = useState<LearningMaterialResource | null>(null);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     const handleDelete = async (material: LearningMaterialResource) => {
         if (!material.id) return;
@@ -53,6 +63,16 @@ export const LearningMaterials = ({
                 error: t('pages.learning_material.common.messages.error.delete'),
             });
         });
+    };
+
+    const handleOpenPreview = (material: LearningMaterialResource) => {
+        setPreviewMaterial(material);
+        setIsPreviewOpen(true);
+    };
+
+    const handleClosePreview = () => {
+        setIsPreviewOpen(false);
+        setPreviewMaterial(null);
     };
 
     const renderTypeIcon = (type: string) => {
@@ -135,6 +155,13 @@ export const LearningMaterials = ({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
+                            {material.file_url &&
+                                material.file_extension?.toLowerCase() === 'pdf' && (
+                                    <DropdownMenuItem onClick={() => handleOpenPreview(material)}>
+                                        <FileText className='mr-2 h-4 w-4' />
+                                        {t('pages.learning_material.show.view_file')}
+                                    </DropdownMenuItem>
+                                )}
                             <DropdownMenuItem asChild>
                                 <Link href={route(`${baseRoute}.show`, [courseId, material.id])}>
                                     {t('action.show')}
@@ -176,6 +203,26 @@ export const LearningMaterials = ({
                 baseRoute={baseRoute}
                 baseKey={baseKey}
             />
+
+            {/* PDF Viewer Dialog */}
+            <Dialog open={isPreviewOpen} onOpenChange={handleClosePreview}>
+                <DialogContent className='max-h-[90vh] max-w-[90vw] overflow-hidden'>
+                    <DialogHeader>
+                        <DialogTitle>{previewMaterial?.title}</DialogTitle>
+                        <DialogDescription />
+                    </DialogHeader>
+                    <div className='overflow-auto'>
+                        {previewMaterial?.file_url &&
+                            previewMaterial?.file_extension?.toLowerCase() === 'pdf' && (
+                                <PDFViewer
+                                    fileUrl={previewMaterial.file_url}
+                                    filename={previewMaterial.file || previewMaterial.title}
+                                    className='max-h-[80vh]'
+                                />
+                            )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 };

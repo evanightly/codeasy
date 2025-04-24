@@ -9,11 +9,6 @@ class LearningMaterialResource extends JsonResource {
     use HandlesResourceDataSelection;
 
     public function toArray($request): array {
-        $fileUrl = null;
-        if ($this->file && $this->file_extension) {
-            $fileUrl = asset('storage/learning-materials/' . $this->file);
-        }
-
         $dataSource = [
             'id' => $this->id,
             'course_id' => $this->course_id,
@@ -21,7 +16,7 @@ class LearningMaterialResource extends JsonResource {
             'description' => $this->description,
             'file' => $this->file,
             'file_extension' => $this->file_extension,
-            'file_url' => $fileUrl,
+            'file_url' => $this->file_url, // Using the accessor from the model
             'type' => $this->type,
             'order_number' => $this->order_number,
             'active' => $this->active,
