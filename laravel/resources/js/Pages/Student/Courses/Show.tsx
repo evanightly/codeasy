@@ -4,7 +4,13 @@ import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { DataTable } from '@/Components/UI/data-table';
 import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/Components/UI/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/Components/UI/dialog';
 import { Progress } from '@/Components/UI/progress';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { ROUTES } from '@/Support/Constants/routes';

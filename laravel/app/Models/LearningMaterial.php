@@ -24,7 +24,6 @@ class LearningMaterial extends Model {
         'type' => LearningMaterialTypeEnum::class,
         'active' => 'boolean',
     ];
-
     protected $appends = [
         'file_url',
     ];
