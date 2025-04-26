@@ -7,6 +7,7 @@ import uuid
 import base64
 import json
 import re
+import ast
 
 app = FastAPI()
 
@@ -14,6 +15,68 @@ class CodeInput(BaseModel):
     code: str
     testcases: Optional[List[str]] = None
     type: Optional[str] = None
+    question_id: Optional[int] = None
+
+# Function to count variables and functions in Python code
+def analyze_code_complexity(code: str):
+    try:
+        # Parse the code into an abstract syntax tree
+        tree = ast.parse(code)
+        
+        # Initialize counters
+        variable_count = 0
+        function_count = 0
+        
+        # Keep track of variable names to avoid counting duplicates
+        variable_names = set()
+        
+        # Count variable assignments and function definitions
+        for node in ast.walk(tree):
+            # Count variable assignments
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    # Handle simple variable assignments (a = 1)
+                    if isinstance(target, ast.Name):
+                        if target.id not in variable_names:
+                            variable_names.add(target.id)
+                            variable_count += 1
+                    # Handle tuple unpacking assignments (a, b, c = 1, 2, 3)
+                    elif isinstance(target, ast.Tuple):
+                        for elt in target.elts:
+                            if isinstance(elt, ast.Name):
+                                if elt.id not in variable_names:
+                                    variable_names.add(elt.id)
+                                    variable_count += 1
+            
+            # Count variable declarations in for loops
+            elif isinstance(node, ast.For):
+                # Handle simple loop variable (for i in range(10))
+                if isinstance(node.target, ast.Name):
+                    if node.target.id not in variable_names:
+                        variable_names.add(node.target.id)
+                        variable_count += 1
+                # Handle tuple unpacking in loops (for i, j in enumerate(items))
+                elif isinstance(node.target, ast.Tuple):
+                    for elt in node.target.elts:
+                        if isinstance(elt, ast.Name):
+                            if elt.id not in variable_names:
+                                variable_names.add(elt.id)
+                                variable_count += 1
+            
+            # Count function definitions
+            elif isinstance(node, ast.FunctionDef):
+                function_count += 1
+        
+        return {
+            "variable_count": variable_count,
+            "function_count": function_count
+        }
+    except SyntaxError:
+        # If code has syntax errors, return default values
+        return {
+            "variable_count": 0,
+            "function_count": 0
+        }
 
 # Function to strip ANSI color codes
 def strip_ansi_codes(text):
@@ -151,7 +214,19 @@ kernel_mgr = JupyterKernelManager()
 async def test_code(input: CodeInput):
     try:
         is_sandbox = input.type == "sandbox"
+        
+        # Analyze code complexity
+        code_analysis = analyze_code_complexity(input.code)
+        
+        # Execute the code
         outputs = kernel_mgr.execute_code(input.code, is_sandbox)
+        
+        # Add code complexity metrics
+        outputs.append({
+            "type": "code_metrics",
+            "variable_count": code_analysis["variable_count"],
+            "function_count": code_analysis["function_count"]
+        })
         
         if input.testcases:
             # Setup test environment

@@ -16,6 +16,8 @@ class ExecutionResultResource extends JsonResource {
             'compile_count' => $this->compile_count,
             'compile_status' => $this->compile_status,
             'output_image' => $this->output_image,
+            'variable_count' => $this->variable_count,
+            'function_count' => $this->function_count,
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
             'student_score' => StudentScoreResource::make($this->whenLoaded('studentScore')),

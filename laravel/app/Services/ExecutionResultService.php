@@ -95,14 +95,20 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
             // Check if there's any test stats in the output
             $testStats = null;
             $imageUrl = null;
+            $variableCount = 0;
+            $functionCount = 0;
 
             foreach ($output as $item) {
                 if ($item['type'] === 'test_stats') {
                     $testStats = $item;
                 }
-
                 if ($item['type'] === 'image') {
                     $imageUrl = $item['content'];
+                }
+                // Extract code metrics
+                if ($item['type'] === 'code_metrics') {
+                    $variableCount = $item['variable_count'] ?? 0;
+                    $functionCount = $item['function_count'] ?? 0;
                 }
             }
 
@@ -113,6 +119,8 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
                 'compile_count' => $compileCount,
                 'compile_status' => !isset($output[0]['type']) || $output[0]['type'] !== 'error',
                 'output_image' => $imageUrl,
+                'variable_count' => $variableCount,
+                'function_count' => $functionCount,
             ]);
 
             // Update score if there are test results
@@ -134,6 +142,8 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
                 'output' => $output,
                 'success' => true,
                 'compile_count' => $compileCount,
+                'variable_count' => $variableCount,
+                'function_count' => $functionCount,
             ];
 
         } catch (\Exception $e) {
@@ -145,6 +155,8 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
                 'code' => $code,
                 'compile_count' => $compileCount,
                 'compile_status' => false,
+                'variable_count' => 0,
+                'function_count' => 0,
             ]);
 
             return [

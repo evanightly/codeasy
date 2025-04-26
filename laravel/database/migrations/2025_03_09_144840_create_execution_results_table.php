@@ -15,6 +15,8 @@ return new class extends Migration {
             $table->text('code');
             $table->boolean('compile_status')->default(false);
             $table->string('output_image')->nullable();
+            $table->integer('variable_count')->default(0); // Count of declared variables
+            $table->integer('function_count')->default(0); // Count of declared functions
             $table->timestamps();
         });
     }

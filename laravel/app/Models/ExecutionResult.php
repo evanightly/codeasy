@@ -15,6 +15,8 @@ class ExecutionResult extends Model {
         'code',
         'compile_status',
         'output_image',
+        'variable_count',
+        'function_count',
     ];
 
     /**
@@ -24,6 +26,8 @@ class ExecutionResult extends Model {
      */
     protected $casts = [
         'compile_status' => 'boolean',
+        'variable_count' => 'integer',
+        'function_count' => 'integer',
     ];
 
     /**

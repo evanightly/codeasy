@@ -307,6 +307,8 @@ class StudentController extends Controller {
             'student_score_id' => $studentScoreId,
             'code' => $code,
             'compile_status' => true, // We'll assume success initially
+            'variable_count' => 0, // Initial value, will be updated with actual count
+            'function_count' => 0, // Initial value, will be updated with actual count
         ]);
 
         // Prepare test cases for FastAPI
@@ -334,6 +336,24 @@ class StudentController extends Controller {
                 //     }
                 // }
 
+                // Initialize code metrics values
+                $variableCount = 0;
+                $functionCount = 0;
+
+                // Look for code metrics in the results
+                foreach ($results as $index => $result) {
+                    if (isset($result['type']) && $result['type'] === 'code_metrics') {
+                        $variableCount = $result['variable_count'] ?? 0;
+                        $functionCount = $result['function_count'] ?? 0;
+
+                        // Remove the code_metrics item from results as it's for internal use
+                        unset($results[$index]);
+                    }
+                }
+
+                // Reindex the array after removing elements
+                $results = array_values($results);
+
                 // Check if at least one test case passed
                 $somePassed = false;
                 foreach ($results as $result) {
@@ -342,6 +362,12 @@ class StudentController extends Controller {
                         break;
                     }
                 }
+
+                // Update the execution result with the code metrics
+                $this->executionResultService->update($executionResult->id, [
+                    'variable_count' => $variableCount,
+                    'function_count' => $functionCount,
+                ]);
 
                 // Only update the student score if not already completed
                 if ($somePassed && !$studentScore->completion_status) {
@@ -365,6 +391,10 @@ class StudentController extends Controller {
                 return response()->json([
                     'output' => $processedResults,
                     'success' => $somePassed,
+                    'code_metrics' => [
+                        'variable_count' => $variableCount,
+                        'function_count' => $functionCount,
+                    ],
                 ]);
             }
 

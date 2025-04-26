@@ -6,4 +6,6 @@ export interface ExecutionResult extends Model {
     compile_count: number;
     compile_status: string;
     output_image: string;
+    variable_count: number;
+    function_count: number;
 }
