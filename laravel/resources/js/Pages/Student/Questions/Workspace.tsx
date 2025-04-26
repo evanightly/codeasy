@@ -13,6 +13,7 @@ import {
     DialogTrigger,
 } from '@/Components/UI/dialog';
 import { Progress } from '@/Components/UI/progress';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/Components/UI/resizable';
 import {
     Sheet,
     SheetContent,
@@ -21,7 +22,6 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/Components/UI/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { ROUTES } from '@/Support/Constants/routes';
 import { ProgrammingLanguageEnum } from '@/Support/Enums/programmingLanguageEnum';
@@ -472,7 +472,7 @@ export default function Workspace({
                     </div>
                 </div>
 
-                {/* Main workspace content */}
+                {/* Main workspace content with resizable panels */}
                 <div className='flex flex-1 overflow-hidden'>
                     {/* Question description panel - desktop */}
                     <div className='hidden w-1/3 overflow-y-auto border-r lg:block'>
@@ -530,64 +530,43 @@ export default function Workspace({
                         </div>
                     </div>
 
-                    {/* Code editor and output panel */}
+                    {/* Code editor and output panel - now with resizable layout */}
                     <div className='flex flex-1 flex-col overflow-hidden'>
-                        <Tabs defaultValue='code' className='flex flex-1 flex-col'>
-                            <div className='border-b px-4'>
-                                <TabsList>
-                                    <TabsTrigger value='code'>
-                                        {t('pages.student_questions.workspace.code')}
-                                    </TabsTrigger>
-                                    <TabsTrigger value='output'>
-                                        {t('pages.student_questions.workspace.output')}
-                                    </TabsTrigger>
-                                </TabsList>
-                            </div>
-
-                            <TabsContent
-                                value='code'
-                                className='flex-1 overflow-hidden p-0 data-[state=active]:flex-1'
+                        <ResizablePanelGroup direction='vertical' className='flex-1'>
+                            {/* Code Editor Panel */}
+                            <ResizablePanel
+                                minSize={30}
+                                defaultSize={60}
+                                className='overflow-hidden'
                             >
                                 <div className='flex h-full flex-col'>
+                                    <div className='border-b bg-muted/30 px-4 py-2'>
+                                        <h3 className='font-medium'>
+                                            {t('pages.student_questions.workspace.code')}
+                                        </h3>
+                                    </div>
                                     <div className='flex-1'>
                                         <CodeEditor
                                             value={code}
                                             showThemePicker={true}
                                             onChange={handleCodeChange}
                                             language={ProgrammingLanguageEnum.PYTHON}
-                                            height='calc(100vh - 13rem)'
+                                            height='100%'
                                         />
                                     </div>
-
-                                    <div className='flex items-center justify-between border-t bg-background p-4'>
-                                        <div className='text-sm text-muted-foreground lg:hidden'>
-                                            {t('pages.student_questions.workspace.time')}:{' '}
-                                            {formatTime(timeSpent)}
-                                        </div>
-
-                                        <Button
-                                            onClick={handleRunCode}
-                                            disabled={isCompiling}
-                                            className='ml-auto flex items-center gap-2'
-                                        >
-                                            {isCompiling ? (
-                                                <Loader2 className='h-4 w-4 animate-spin' />
-                                            ) : (
-                                                <Redo2 className='h-4 w-4' />
-                                            )}
-                                            {isCompiling
-                                                ? t('pages.student_questions.workspace.running')
-                                                : t('pages.student_questions.workspace.run')}
-                                        </Button>
-                                    </div>
                                 </div>
-                            </TabsContent>
+                            </ResizablePanel>
 
-                            <TabsContent
-                                value='output'
-                                className='flex-1 overflow-auto p-0 data-[state=active]:flex-1'
-                            >
+                            <ResizableHandle withHandle />
+
+                            {/* Output Panel */}
+                            <ResizablePanel minSize={20} defaultSize={40}>
                                 <div className='flex h-full flex-col'>
+                                    <div className='border-b bg-muted/30 px-4 py-2'>
+                                        <h3 className='font-medium'>
+                                            {t('pages.student_questions.workspace.output')}
+                                        </h3>
+                                    </div>
                                     <div className='flex-1 overflow-auto p-4'>
                                         {output.length === 0 && !isCompiling ? (
                                             <div className='flex h-full items-center justify-center text-center text-muted-foreground'>
@@ -702,31 +681,32 @@ export default function Workspace({
                                             </div>
                                         )}
                                     </div>
-
-                                    <div className='flex items-center justify-between border-t bg-background p-4'>
-                                        <div className='text-sm text-muted-foreground lg:hidden'>
-                                            {t('pages.student_questions.workspace.time')}:
-                                            {formatTime(timeSpent)}
-                                        </div>
-
-                                        <Button
-                                            onClick={handleRunCode}
-                                            disabled={isCompiling}
-                                            className='ml-auto flex items-center gap-2'
-                                        >
-                                            {isCompiling ? (
-                                                <Loader2 className='h-4 w-4 animate-spin' />
-                                            ) : (
-                                                <Redo2 className='h-4 w-4' />
-                                            )}
-                                            {isCompiling
-                                                ? t('pages.student_questions.workspace.running')
-                                                : t('pages.student_questions.workspace.run')}
-                                        </Button>
-                                    </div>
                                 </div>
-                            </TabsContent>
-                        </Tabs>
+                            </ResizablePanel>
+                        </ResizablePanelGroup>
+
+                        {/* Run Button Footer - Fixed at bottom */}
+                        <div className='flex items-center justify-between border-t bg-background p-4'>
+                            <div className='text-sm text-muted-foreground lg:hidden'>
+                                {t('pages.student_questions.workspace.time')}:{' '}
+                                {formatTime(timeSpent)}
+                            </div>
+
+                            <Button
+                                onClick={handleRunCode}
+                                disabled={isCompiling}
+                                className='ml-auto flex items-center gap-2'
+                            >
+                                {isCompiling ? (
+                                    <Loader2 className='h-4 w-4 animate-spin' />
+                                ) : (
+                                    <Redo2 className='h-4 w-4' />
+                                )}
+                                {isCompiling
+                                    ? t('pages.student_questions.workspace.running')
+                                    : t('pages.student_questions.workspace.run')}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
