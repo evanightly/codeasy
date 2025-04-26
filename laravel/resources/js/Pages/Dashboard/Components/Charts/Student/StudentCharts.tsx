@@ -55,43 +55,46 @@ export function StudentCharts() {
                                 <div className='space-y-2'>
                                     <div className='flex items-center justify-between'>
                                         <h3 className='text-lg font-semibold'>Kursus:</h3>
-                                        <span>{latestWorkData.course.name}</span>
+                                        <span>{latestWorkData.course?.name}</span>
                                     </div>
                                     <div className='flex items-center justify-between'>
                                         <h3 className='text-lg font-semibold'>Materi:</h3>
-                                        <span>{latestWorkData.material.title}</span>
+                                        <span>{latestWorkData?.material?.title}</span>
                                     </div>
                                     <div className='flex items-center justify-between'>
                                         <h3 className='text-lg font-semibold'>
                                             Progress pertanyaan saat ini:
                                         </h3>
-                                        <span>{latestWorkData.currentQuestion.title}</span>
+                                        <span>{latestWorkData?.currentQuestion?.title}</span>
                                     </div>
                                 </div>
 
                                 <div className='flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0'>
-                                    {!latestWorkData.currentQuestion.isCompleted && (
-                                        <Link
-                                            href={route(
-                                                `${ROUTES.STUDENT_COURSE_MATERIAL_QUESTIONS}.show`,
-                                                [
-                                                    latestWorkData.course.id,
-                                                    latestWorkData.material.id,
-                                                    latestWorkData.currentQuestion.id,
-                                                ],
-                                            )}
-                                            // href={route(
-                                            //     'learning-material-questions.show',
-                                            //     latestWorkData.currentQuestion.id,
-                                            // )}
-                                            className={buttonVariants({
-                                                variant: 'outline',
-                                                className: 'flex-1',
-                                            })}
-                                        >
-                                            Lanjutkan Pertanyaan Saat Ini
-                                        </Link>
-                                    )}
+                                    {!latestWorkData?.currentQuestion?.isCompleted &&
+                                        latestWorkData?.course?.id &&
+                                        latestWorkData?.material?.id &&
+                                        latestWorkData?.currentQuestion?.id && (
+                                            <Link
+                                                href={route(
+                                                    `${ROUTES.STUDENT_COURSE_MATERIAL_QUESTIONS}.show`,
+                                                    [
+                                                        latestWorkData?.course?.id,
+                                                        latestWorkData?.material?.id,
+                                                        latestWorkData?.currentQuestion?.id,
+                                                    ],
+                                                )}
+                                                // href={route(
+                                                //     'learning-material-questions.show',
+                                                //     latestWorkData.currentQuestion.id,
+                                                // )}
+                                                className={buttonVariants({
+                                                    variant: 'outline',
+                                                    className: 'flex-1',
+                                                })}
+                                            >
+                                                Lanjutkan Pertanyaan Saat Ini
+                                            </Link>
+                                        )}
 
                                     {latestWorkData.nextQuestion && (
                                         <Link
@@ -103,19 +106,20 @@ export function StudentCharts() {
                                             href={route(
                                                 `${ROUTES.STUDENT_COURSE_MATERIAL_QUESTIONS}.show`,
                                                 [
-                                                    latestWorkData.course.id,
-                                                    latestWorkData.material.id,
-                                                    latestWorkData.currentQuestion.id,
+                                                    latestWorkData?.course?.id,
+                                                    latestWorkData?.material?.id,
+                                                    latestWorkData?.currentQuestion?.id,
                                                 ],
                                             )}
                                             className={buttonVariants({
-                                                variant: !latestWorkData.currentQuestion.isCompleted
+                                                variant: !latestWorkData?.currentQuestion
+                                                    ?.isCompleted
                                                     ? 'outline'
                                                     : 'default',
                                                 className: 'flex-1',
                                             })}
                                         >
-                                            {!latestWorkData.currentQuestion.isCompleted
+                                            {!latestWorkData?.currentQuestion?.isCompleted
                                                 ? 'Lompat ke Pertanyaan Berikutnya'
                                                 : 'Mulai Pertanyaan Berikutnya'}
                                         </Link>

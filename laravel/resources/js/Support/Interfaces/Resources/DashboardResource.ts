@@ -108,21 +108,21 @@ export interface StudentQuestionDetailedProgress {
 }
 
 export interface StudentLatestWorkData {
-    course: {
+    course?: {
         id: number;
-        name: string;
+        name?: string;
     };
-    material: {
+    material?: {
         id: number;
-        title: string;
+        title?: string;
     };
-    currentQuestion: {
+    currentQuestion?: {
         id: number;
-        title: string;
-        isCompleted: boolean;
+        title?: string;
+        isCompleted?: boolean;
     };
     nextQuestion?: {
         id: number;
-        title: string;
+        title?: string;
     };
 }
