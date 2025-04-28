@@ -41,8 +41,8 @@ class RegisteredUserController extends Controller {
             ],
         ];
 
-        // Add school_id validation if role is Teacher
-        if ($request->input('role') === RoleEnum::TEACHER->value) {
+        // Add school_id validation if role is Teacher or Student
+        if ($request->input('role') === RoleEnum::TEACHER->value || $request->input('role') === RoleEnum::STUDENT->value) {
             $validationRules['school_id'] = 'required|exists:schools,id';
         }
 
@@ -58,12 +58,15 @@ class RegisteredUserController extends Controller {
         if (!empty($validated['role'])) {
             $user->assignRole($validated['role']);
 
-            // Handle teacher role with school request
-            if ($validated['role'] === RoleEnum::TEACHER->value && isset($validated['school_id'])) {
+            // Handle teacher or student role with school request
+            if (in_array($validated['role'], [RoleEnum::TEACHER->value, RoleEnum::STUDENT->value]) && isset($validated['school_id'])) {
                 SchoolRequest::create([
                     'user_id' => $user->id,
                     'school_id' => $validated['school_id'],
                     'status' => 'pending', // Default status
+                    'message' => $validated['role'] === RoleEnum::STUDENT->value
+                        ? 'Student registration request'
+                        : ($validated['message'] ?? 'Teacher registration request'),
                 ]);
             }
         }

@@ -76,6 +76,10 @@ class SchoolRequestController extends Controller implements HasMiddleware {
                     return $this->schoolRequestService->approveTeacherRequest($schoolRequest);
                 case IntentEnum::SCHOOL_REQUEST_UPDATE_REJECT_TEACHER->value:
                     return $this->schoolRequestService->rejectTeacherRequest($schoolRequest);
+                case IntentEnum::SCHOOL_REQUEST_UPDATE_APPROVE_STUDENT->value:
+                    return $this->schoolRequestService->approveStudentRequest($schoolRequest);
+                case IntentEnum::SCHOOL_REQUEST_UPDATE_REJECT_STUDENT->value:
+                    return $this->schoolRequestService->rejectStudentRequest($schoolRequest);
             }
 
             return $this->schoolRequestService->update($schoolRequest, $request->validated());

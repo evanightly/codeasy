@@ -26,9 +26,13 @@ import { z } from 'zod';
 
 export default function Create() {
     const { t } = useLaravelReactI18n();
-    const { id: userId, teachedSchools } = usePage().props.auth.user;
+    const { id: userId, teachedSchools, roles } = usePage().props.auth.user;
     const createMutation = schoolRequestServiceHook.useCreate();
     const [schools, setSchools] = useState<SchoolResource[]>([]);
+    const isStudent = roles.includes('student');
+    const defaultMessage = isStudent
+        ? t('pages.school_request.common.default_messages.student')
+        : t('pages.school_request.common.default_messages.teacher');
 
     const formSchema = z.object({
         user_id: z.coerce
@@ -47,7 +51,7 @@ export default function Create() {
         defaultValues: {
             user_id: userId,
             school_id: undefined,
-            message: '',
+            message: defaultMessage,
         },
     });
 

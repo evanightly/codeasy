@@ -11,6 +11,8 @@ enum IntentEnum: string {
     case SCHOOL_UPDATE_UNASSIGN_TEACHER = 'school.update.unassign.teacher';
     case SCHOOL_REQUEST_UPDATE_APPROVE_TEACHER = 'school.request.update.approve.teacher';
     case SCHOOL_REQUEST_UPDATE_REJECT_TEACHER = 'school.request.update.reject.teacher';
+    case SCHOOL_REQUEST_UPDATE_APPROVE_STUDENT = 'school.request.update.approve.student';
+    case SCHOOL_REQUEST_UPDATE_REJECT_STUDENT = 'school.request.update.reject.student';
     case CLASS_ROOM_UPDATE_ASSIGN_STUDENT = 'classroom.update.assign.student';
     case CLASS_ROOM_UPDATE_UNASSIGN_STUDENT = 'classroom.update.unassign.student';
     case SCHOOL_UPDATE_ASSIGN_STUDENT = 'school.update.assign.student';

@@ -65,6 +65,14 @@ export default function Register() {
                 value: RoleEnum.TEACHER,
             }),
             path: ['school_id'],
+        })
+        .refine((data) => !(data.role === RoleEnum.STUDENT && !data.school_id), {
+            message: t('validation.required_if', {
+                attribute: 'school',
+                other: 'role',
+                value: RoleEnum.STUDENT,
+            }),
+            path: ['school_id'],
         });
 
     // Setup form with react-hook-form
@@ -82,11 +90,12 @@ export default function Register() {
 
     // Watch role to show/hide school selector
     const selectedRole = form.watch('role');
-    const showSchoolSelector = selectedRole === RoleEnum.TEACHER;
+    const showSchoolSelector =
+        selectedRole === RoleEnum.TEACHER || selectedRole === RoleEnum.STUDENT;
 
-    // Reset school_id when role changes
+    // Reset school_id when role changes to something other than Teacher or Student
     useEffect(() => {
-        if (selectedRole !== RoleEnum.TEACHER) {
+        if (selectedRole !== RoleEnum.TEACHER && selectedRole !== RoleEnum.STUDENT) {
             form.setValue('school_id', null);
         }
     }, [selectedRole, form]);

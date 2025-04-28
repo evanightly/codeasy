@@ -502,6 +502,10 @@ return [
                 'school' => 'Select a school',
                 'message' => 'Enter your request message',
             ],
+            'default_messages' => [
+                'student' => 'Student registration request',
+                'teacher' => 'Teacher registration request',
+            ],
             'validations' => [
                 'school_id' => [
                     'required' => 'School is required',

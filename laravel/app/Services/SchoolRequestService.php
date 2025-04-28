@@ -25,7 +25,6 @@ class SchoolRequestService extends BaseCrudService implements SchoolRequestServi
     }
 
     public function approveTeacherRequest(SchoolRequest $schoolRequest): void {
-        dump($schoolRequest->all());
         if (!$schoolRequest->isPending()) {
             throw new \Exception('SchoolRequest has already been processed');
         }
@@ -47,7 +46,37 @@ class SchoolRequestService extends BaseCrudService implements SchoolRequestServi
         });
     }
 
+    public function approveStudentRequest(SchoolRequest $schoolRequest): void {
+        if (!$schoolRequest->isPending()) {
+            throw new \Exception('SchoolRequest has already been processed');
+        }
+
+        DB::transaction(function () use ($schoolRequest) {
+            // Attach the student to school using the base users relationship
+            $schoolRequest->school->users()->attach($schoolRequest->user_id, [
+                'role' => RoleEnum::STUDENT->value,
+            ]);
+
+            // Assign student role if they don't have it
+            $user = $this->userService->findOrFail($schoolRequest->user_id);
+            if (!$user->hasRole(RoleEnum::STUDENT->value)) {
+                $user->assignRole(RoleEnum::STUDENT->value);
+            }
+
+            // Mark request as approved
+            $schoolRequest->approve();
+        });
+    }
+
     public function rejectTeacherRequest(SchoolRequest $schoolRequest): void {
+        if (!$schoolRequest->isPending()) {
+            throw new \Exception('Request has already been processed');
+        }
+
+        $schoolRequest->reject();
+    }
+
+    public function rejectStudentRequest(SchoolRequest $schoolRequest): void {
         if (!$schoolRequest->isPending()) {
             throw new \Exception('Request has already been processed');
         }

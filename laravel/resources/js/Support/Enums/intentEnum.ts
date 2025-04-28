@@ -7,6 +7,8 @@ const intents = {
     SCHOOL_UPDATE_UNASSIGN_TEACHER: 'school.update.unassign.teacher',
     SCHOOL_REQUEST_UPDATE_APPROVE_TEACHER: 'school.request.update.approve.teacher',
     SCHOOL_REQUEST_UPDATE_REJECT_TEACHER: 'school.request.update.reject.teacher',
+    SCHOOL_REQUEST_UPDATE_APPROVE_STUDENT: 'school.request.update.approve.student',
+    SCHOOL_REQUEST_UPDATE_REJECT_STUDENT: 'school.request.update.reject.student',
     CLASS_ROOM_UPDATE_ASSIGN_STUDENT: 'classroom.update.assign.student',
     CLASS_ROOM_UPDATE_UNASSIGN_STUDENT: 'classroom.update.unassign.student',
     SCHOOL_UPDATE_ASSIGN_STUDENT: 'school.update.assign.student',

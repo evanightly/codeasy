@@ -14,7 +14,7 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { SchoolRequestStatusEnum } from '@/Support/Enums/schoolRequestStatusEnum';
 import { PaginateMeta, PaginateResponse, ServiceFilterOptions } from '@/Support/Interfaces/Others';
-import { SchoolRequestResource } from '@/Support/Interfaces/Resources';
+import { RoleResource, SchoolRequestResource } from '@/Support/Interfaces/Resources';
 import { Link, usePage } from '@inertiajs/react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
@@ -58,10 +58,16 @@ const SchoolRequests = ({
     };
 
     const handleApprove = async (request: SchoolRequestResource) => {
+        // Determine if the request is from a student or teacher based on message or user role
+        const isStudentRequest =
+            request.user?.roles?.includes(RoleEnum.STUDENT as unknown as RoleResource) ||
+            request.message?.toLowerCase().includes('student');
+
         confirmAction(async () => {
             toast.promise(
                 approveMutation.mutateAsync({
                     id: request.id,
+                    userRole: isStudentRequest ? RoleEnum.STUDENT : RoleEnum.TEACHER,
                 }),
                 {
                     loading: 'Approving request...',
@@ -73,10 +79,16 @@ const SchoolRequests = ({
     };
 
     const handleReject = async (request: SchoolRequestResource) => {
+        // Determine if the request is from a student or teacher based on message or user role
+        const isStudentRequest =
+            request.user?.roles?.includes(RoleEnum.STUDENT as unknown as RoleResource) ||
+            request.message?.toLowerCase().includes('student');
+
         confirmAction(async () => {
             toast.promise(
                 rejectMutation.mutateAsync({
                     id: request.id,
+                    userRole: isStudentRequest ? RoleEnum.STUDENT : RoleEnum.TEACHER,
                 }),
                 {
                     loading: 'Rejecting request...',
@@ -104,6 +116,13 @@ const SchoolRequests = ({
     const columns = [
         columnHelper.accessor('user.name', {
             header: ({ column }) => <DataTableColumnHeader title='User' column={column} />,
+        }),
+        columnHelper.accessor('user.roles', {
+            header: ({ column }) => <DataTableColumnHeader title='Role' column={column} />,
+            cell: ({ getValue }) => {
+                const roles = getValue();
+                return Array.isArray(roles) ? roles.join(', ') : roles;
+            },
         }),
         columnHelper.accessor('school.name', {
             header: ({ column }) => <DataTableColumnHeader title='School' column={column} />,
@@ -179,7 +198,8 @@ const SchoolRequests = ({
             filters={filters}
             filterComponents={(_) => {
                 return (
-                    user.roles.includes(RoleEnum.TEACHER) && (
+                    (user.roles.includes(RoleEnum.TEACHER) ||
+                        user.roles.includes(RoleEnum.STUDENT)) && (
                         <Link
                             href={route(`${ROUTES.SCHOOL_REQUESTS}.create`)}
                             className={buttonVariants({ variant: 'create' })}
