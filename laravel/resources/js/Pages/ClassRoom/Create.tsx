@@ -33,7 +33,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 export default function Create() {
-    const { teachedSchools, roles } = usePage().props.auth.user;
+    const { teachedSchools, roles, administeredSchools } = usePage().props.auth.user;
     const { t } = useLaravelReactI18n();
     const createMutation = classRoomServiceHook.useCreate();
     const formSchema = z.object({
@@ -92,6 +92,12 @@ export default function Create() {
                         return {
                             id: teachedSchools,
                             // , active: 1
+                        };
+                    }
+
+                    if (roles.includes(RoleEnum.SCHOOL_ADMIN)) {
+                        return {
+                            id: administeredSchools,
                         };
                     }
 

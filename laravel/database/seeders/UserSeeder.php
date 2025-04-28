@@ -49,10 +49,7 @@ class UserSeeder extends Seeder {
             ]);
 
             $admin->assignRole(RoleEnum::SCHOOL_ADMIN);
-            $this->assignPermissionsToRole(
-                Role::where('name', RoleEnum::SCHOOL_ADMIN)->first(),
-                Permission::query()->whereIn('group', ['school', 'school-request', 'classroom', 'classroom-student'])->get()
-            );
+            // Permission assignment is now handled by RolePermissionSeeder
 
             $school->users()->attach($admin->id, ['role' => RoleEnum::SCHOOL_ADMIN]);
             $admins->push($admin);
@@ -73,10 +70,7 @@ class UserSeeder extends Seeder {
             ]);
 
             $teacher->assignRole(RoleEnum::TEACHER);
-            $this->assignPermissionsToRole(
-                Role::where('name', RoleEnum::TEACHER)->first(),
-                Permission::query()->whereIn('group', ['school-request', 'student', 'class', 'subject', 'exam', 'course', 'learning-material', 'learning-material-question', 'learning-material-question-test-case'])->get()
-            );
+            // Permission assignment is now handled by RolePermissionSeeder
 
             $school->users()->attach($teacher->id, ['role' => RoleEnum::TEACHER]);
             $teachers->push($teacher);
@@ -97,10 +91,7 @@ class UserSeeder extends Seeder {
             ]);
 
             $student->assignRole(RoleEnum::STUDENT);
-            $this->assignPermissionsToRole(
-                Role::where('name', RoleEnum::STUDENT)->first(),
-                Permission::query()->whereIn('group', ['subject', 'exam', 'result'])->get()
-            );
+            // Permission assignment is now handled by RolePermissionSeeder
 
             $school->users()->attach($student->id, ['role' => RoleEnum::STUDENT]);
             $students->push($student);
@@ -123,7 +114,7 @@ class UserSeeder extends Seeder {
         );
 
         $superadmin->assignRole(RoleEnum::SUPER_ADMIN);
-        $this->assignPermissionsToRole(Role::where('name', RoleEnum::SUPER_ADMIN)->first(), Permission::all());
+        // Permission assignment is now handled by RolePermissionSeeder
 
         return $superadmin;
     }
@@ -149,6 +140,8 @@ class UserSeeder extends Seeder {
         ])->assignRole(RoleEnum::STUDENT);
     }
 
+    // This method is kept for backward compatibility but is no longer actively used
+    // since permissions are now centrally managed in RolePermissionSeeder
     private function assignPermissionsToRole(Role $role, Collection $permissions): void {
         $role->syncPermissions($permissions);
     }

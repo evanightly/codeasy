@@ -47,6 +47,11 @@ Proyek ini sekaligus menjadi bagian dari penelitian skripsi untuk meningkatkan k
 
 ---
 
+## Reminder
+
+1. **Assign Teacher**  
+   - Fitur assign teacher pada halaman admin tidak akan diimplementasikan untuk mitigasi kesalahan admin menugaskan guru ke sekolah yang salah.
+
 ## Struktur Teknologi
 - **Backend**:  
   - **Laravel (PHP 8.3)** - FPM/NGINX untuk portal utama dan manajemen user.  
