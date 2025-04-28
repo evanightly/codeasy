@@ -27,7 +27,7 @@ class SchoolController extends Controller implements HasMiddleware {
         return [
             self::createPermissionMiddleware([PermissionEnum::SCHOOL_CREATE->value], ['create', 'store']),
             self::createPermissionMiddleware([PermissionEnum::SCHOOL_UPDATE->value], ['edit', 'update']),
-            self::createPermissionMiddleware($schoolReadPermissions, ['index', 'show']),
+            self::createPermissionMiddleware($schoolReadPermissions, ['show']),
             self::createPermissionMiddleware([PermissionEnum::SCHOOL_DELETE->value], ['destroy']),
         ];
     }
