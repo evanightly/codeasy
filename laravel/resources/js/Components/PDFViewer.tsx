@@ -15,11 +15,9 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 
-// Match the local pdfjs-dist version (4.8.69):
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url,
-).toString();
+// Use a CDN version of the PDF.js worker to avoid MIME type issues
+// This resolves the "Failed to load module script" error
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 // PDF Viewer constants
 const MIN_ZOOM_LEVEL = 0.1; // 10%
