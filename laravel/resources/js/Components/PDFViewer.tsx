@@ -15,9 +15,19 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 
-// Use a CDN version of the PDF.js worker to avoid MIME type issues
-// This resolves the "Failed to load module script" error
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Configure PDF.js worker - use local worker first, fallback to CDN if there are MIME type issues
+// MIME types are now properly set in nginx config
+try {
+    // Try to use local worker file first
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+        'pdfjs-dist/build/pdf.worker.min.mjs',
+        import.meta.url,
+    ).toString();
+} catch (error) {
+    // Fallback to CDN in case of issues
+    console.warn('Failed to load local PDF.js worker, falling back to CDN', error);
+    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+}
 
 // PDF Viewer constants
 const MIN_ZOOM_LEVEL = 0.1; // 10%
