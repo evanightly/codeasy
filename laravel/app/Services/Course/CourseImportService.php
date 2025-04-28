@@ -826,7 +826,7 @@ class CourseImportService implements CourseImportServiceInterface {
                     'question_index' => $questionIndex,
                     'description' => 'Test case ' . ($index + 1),
                     'input' => $testInput,
-                    'hidden' => false,
+                    'hidden' => true,
                     'order_number' => $index + 1,
                 ];
             }
