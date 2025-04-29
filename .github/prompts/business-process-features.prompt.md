@@ -213,7 +213,7 @@ Steps:
 
     6. Use model bindings, whether in controller, or in services
 
-    7. Note for implementing data fetching like User::create, consider to use the built-in service or repository method, or access the model through service class, see [service repository package docs](../docs/service-repository-pattern.md) for reference, for example
+    7. Note for implementing data fetching like User::create, consider to use the built-in service or repository method, or access the model through service class, see [service repository package docs](https://github.com/adobrovolsky97/laravel-repository-service-pattern) for reference, for example
 
     DON'T ❌
     ```php
@@ -311,7 +311,7 @@ Steps:
 
     the code above is using isPending as the loading state.
 
-    5. Note: when using the api for data transfer, like "post" and "update" data do not forget to use ```toast.promise``` to make the UX value greater, see the example of [bookmark-user-card.tsx](../../laravel/resources/js/components/bookmark-url/bookmark-url-card.tsx)
+    5. Note: when using the api for data transfer, like "post" and "update" data do not forget to use ```toast.promise``` to make the UX value greater, see the example of [Register Page](../../laravel/resources/js/Pages/Auth/Register.tsx)
 
     6. Maintain consistency, for example when creating context menu, if one of the menu item has an icon, then the other must have, otherwise all menu item must not have icon
 
