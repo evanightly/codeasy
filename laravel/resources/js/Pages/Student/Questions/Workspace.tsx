@@ -1,3 +1,7 @@
+/**
+ * TODO: Refactor the view material dialog for web and mobile sheet
+ */
+
 import CodeEditor from '@/Components/CodeEditor';
 import { PDFViewer } from '@/Components/PDFViewer';
 import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
@@ -298,48 +302,6 @@ export default function Workspace({
                         </div>
 
                         <div className='flex items-center gap-3'>
-                            {/* Material PDF Viewer Button */}
-                            {material.data.file_url &&
-                                material.data.file_extension?.toLowerCase() === 'pdf' && (
-                                    <Dialog
-                                        open={materialDialogOpen}
-                                        onOpenChange={setMaterialDialogOpen}
-                                    >
-                                        <DialogTrigger asChild>
-                                            <Button
-                                                variant='outline'
-                                                title={t(
-                                                    'pages.student_questions.workspace.view_material',
-                                                )}
-                                                size='sm'
-                                                className='flex items-center gap-1'
-                                            >
-                                                <FileTextIcon className='h-4 w-4' />
-                                                <span className='hidden md:inline'>
-                                                    {t(
-                                                        'pages.student_questions.workspace.view_material',
-                                                    )}
-                                                </span>
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className='max-h-[90vh] max-w-[90vw] overflow-hidden'>
-                                            <DialogHeader>
-                                                <DialogTitle>{material.data.title}</DialogTitle>
-                                                <DialogDescription />
-                                            </DialogHeader>
-                                            <div className='overflow-auto'>
-                                                <PDFViewer
-                                                    fileUrl={material.data.file_url}
-                                                    filename={
-                                                        material.data.file || material.data.title
-                                                    }
-                                                    className='max-h-[80vh]'
-                                                />
-                                            </div>
-                                        </DialogContent>
-                                    </Dialog>
-                                )}
-
                             <div className='hidden items-center gap-2 lg:flex'>
                                 <span className='text-sm font-medium'>
                                     {t('pages.student_questions.workspace.time')}:
@@ -363,7 +325,52 @@ export default function Workspace({
                                             {question.data.order_number}
                                         </SheetDescription>
                                     </SheetHeader>
-                                    <div className='mt-4'>
+                                    <div className='flex flex-col gap-3'>
+                                        {material.data.file_url &&
+                                            material.data.file_extension?.toLowerCase() ===
+                                                'pdf' && (
+                                                <Dialog
+                                                    open={materialDialogOpen}
+                                                    onOpenChange={setMaterialDialogOpen}
+                                                >
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            variant='outline'
+                                                            title={t(
+                                                                'pages.student_questions.workspace.view_material',
+                                                            )}
+                                                            size='sm'
+                                                            className='w-fit'
+                                                        >
+                                                            <FileTextIcon />
+                                                            <span className='hidden md:inline'>
+                                                                {t(
+                                                                    'pages.student_questions.workspace.view_material',
+                                                                )}
+                                                            </span>
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className='max-h-[90vh] max-w-[90vw] overflow-hidden'>
+                                                        <DialogHeader>
+                                                            <DialogTitle>
+                                                                {material.data.title}
+                                                            </DialogTitle>
+                                                            <DialogDescription />
+                                                        </DialogHeader>
+                                                        <div className='overflow-auto'>
+                                                            <PDFViewer
+                                                                fileUrl={material.data.file_url}
+                                                                filename={
+                                                                    material.data.file ||
+                                                                    material.data.title
+                                                                }
+                                                                className='max-h-[80vh]'
+                                                            />
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            )}
+
                                         {/* <ReactMarkdown className='prose prose-sm dark:prose-invert max-w-none'> */}
                                         <ReactMarkdown>{question.data.description}</ReactMarkdown>
 
@@ -377,7 +384,7 @@ export default function Workspace({
                                         )}
 
                                         {testCases.length > 0 && (
-                                            <div className='mt-4'>
+                                            <div>
                                                 <h4 className='mb-2 text-sm font-medium'>
                                                     {t(
                                                         'pages.student_questions.workspace.test_cases',
@@ -476,12 +483,54 @@ export default function Workspace({
                 <div className='flex flex-1 overflow-hidden'>
                     {/* Question description panel - desktop */}
                     <div className='hidden w-1/3 overflow-y-auto border-r lg:block'>
-                        <div className='p-4'>
+                        <div className='flex flex-col gap-4 p-4'>
                             {/* <ReactMarkdown className='prose prose-sm dark:prose-invert max-w-none'> */}
+
+                            {material.data.file_url &&
+                                material.data.file_extension?.toLowerCase() === 'pdf' && (
+                                    <Dialog
+                                        open={materialDialogOpen}
+                                        onOpenChange={setMaterialDialogOpen}
+                                    >
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                variant='outline'
+                                                title={t(
+                                                    'pages.student_questions.workspace.view_material',
+                                                )}
+                                                size='sm'
+                                                className='w-fit'
+                                            >
+                                                <FileTextIcon />
+                                                <span className='hidden md:inline'>
+                                                    {t(
+                                                        'pages.student_questions.workspace.view_material',
+                                                    )}
+                                                </span>
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className='max-h-[90vh] max-w-[90vw] overflow-hidden'>
+                                            <DialogHeader>
+                                                <DialogTitle>{material.data.title}</DialogTitle>
+                                                <DialogDescription />
+                                            </DialogHeader>
+                                            <div className='overflow-auto'>
+                                                <PDFViewer
+                                                    fileUrl={material.data.file_url}
+                                                    filename={
+                                                        material.data.file || material.data.title
+                                                    }
+                                                    className='max-h-[80vh]'
+                                                />
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
+                                )}
+
                             <ReactMarkdown>{question.data.description}</ReactMarkdown>
 
                             {question.data.file_url && (
-                                <div className='mt-4'>
+                                <div>
                                     <h3 className='mb-2 text-sm font-medium'>
                                         {t('pages.student_questions.workspace.view_image')}:
                                     </h3>
@@ -503,7 +552,7 @@ export default function Workspace({
                             )}
 
                             {testCases.length > 0 && (
-                                <div className='mt-4'>
+                                <div>
                                     <h4 className='mb-2 text-sm font-medium'>
                                         {t('pages.student_questions.workspace.test_cases')}:
                                     </h4>
@@ -552,6 +601,26 @@ export default function Workspace({
                                             onChange={handleCodeChange}
                                             language={ProgrammingLanguageEnum.PYTHON}
                                             height='100%'
+                                            headerClassName='pt-3 px-3'
+                                            headerChildren={
+                                                <Button
+                                                    onClick={handleRunCode}
+                                                    disabled={isCompiling}
+                                                >
+                                                    {isCompiling ? (
+                                                        <Loader2 className='animate-spin' />
+                                                    ) : (
+                                                        <Redo2 />
+                                                    )}
+                                                    {isCompiling
+                                                        ? t(
+                                                              'pages.student_questions.workspace.running',
+                                                          )
+                                                        : t(
+                                                              'pages.student_questions.workspace.run',
+                                                          )}
+                                                </Button>
+                                            }
                                         />
                                     </div>
                                 </div>
@@ -686,27 +755,12 @@ export default function Workspace({
                         </ResizablePanelGroup>
 
                         {/* Run Button Footer - Fixed at bottom */}
-                        <div className='flex items-center justify-between border-t bg-background p-4'>
+                        {/* <div className='flex items-center justify-between border-t bg-background p-4'>
                             <div className='text-sm text-muted-foreground lg:hidden'>
                                 {t('pages.student_questions.workspace.time')}:{' '}
                                 {formatTime(timeSpent)}
                             </div>
-
-                            <Button
-                                onClick={handleRunCode}
-                                disabled={isCompiling}
-                                className='ml-auto flex items-center gap-2'
-                            >
-                                {isCompiling ? (
-                                    <Loader2 className='h-4 w-4 animate-spin' />
-                                ) : (
-                                    <Redo2 className='h-4 w-4' />
-                                )}
-                                {isCompiling
-                                    ? t('pages.student_questions.workspace.running')
-                                    : t('pages.student_questions.workspace.run')}
-                            </Button>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>

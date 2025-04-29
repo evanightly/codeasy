@@ -73,6 +73,7 @@ interface CodeEditorProps {
     label?: string;
     className?: string;
     headerClassName?: string;
+    headerChildren?: React.ReactNode;
 }
 
 export default function CodeEditor({
@@ -84,6 +85,7 @@ export default function CodeEditor({
     label,
     className,
     headerClassName,
+    headerChildren,
 }: CodeEditorProps) {
     const [themeComboboxOpen, setThemeComboboxOpen] = useState(false);
     const [selectedThemeName, setSelectedThemeName] = useLocalStorage(
@@ -195,6 +197,10 @@ export default function CodeEditor({
                         >
                             {isDarkMode ? <Sun /> : <Moon />}
                         </Button>
+
+                        {headerChildren && (
+                            <div className='flex items-center gap-2'>{headerChildren}</div>
+                        )}
                     </div>
                 )}
 
