@@ -199,16 +199,16 @@ The intent system routes specific business logic through generic CRUD endpoints:
    queryKey: generateUseGetAllQueryKey(baseKey, filters);
    ```
 
-### Full Request Lifecycle Example
+### Full Custom Business Lifecycle Example
 
-1. User clicks "Sync Posts" button in UI
-2. React component calls `postServiceHook.useSyncPosts().mutate()`
-3. `serviceHooksFactory` creates a mutation with `IntentEnum.POST_SYNC_POSTS` intent
-4. Request is sent to `/posts` endpoint with intent parameter
-5. `PostController@index` receives request, detects intent, calls `PostService@syncPosts`
-6. `PostService` contains business logic, delegates to `PostRepository` for data operations
-7. `PostService` dispatches `SyncPostsJob` for background processing
-8. Job execution progress is broadcast via WebSockets using `SyncProgressEvent`
+1. User clicks "Accept Request" button in UI
+2. React component calls `employeeServiceHook.acceptRequest().mutate()`
+3. `serviceHooksFactory` creates a mutation with `IntentEnum.ACCEPT_REQUEST` intent
+4. Request is sent to `/employee` endpoint with intent parameter
+5. `RequestController@index` receives request, detects intent, calls `EmployeeService@acceptEmployee`
+6. `EmployeeService` contains business logic, delegates to `EmployeeRepository` for data operations
+7. `EmployeeService` dispatches `AcceptEmployeeJob` for background processing
+8. Job execution progress is broadcast via WebSockets using `AcceptProgressEvent`
 9. Frontend updates UI based on WebSocket events and refetches data when complete
 
 ## Custom Project Structure (with model user as an example)
@@ -262,3 +262,4 @@ The intent system routes specific business logic through generic CRUD endpoints:
 15. CRUCIAL!: DO NOT MODIFY UNRELATED CODE
 16. CRUCIAL!: In every prompt i have tested and modified the generated code to match the expected result, so please do not modify the code that i have tested and modified, just add the new code below the existing codem
 17. You have to use the docker command defined in [dc.sh](../dc.sh) to utilize the docker container, and you have to use the docker-compose command to utilize the docker-compose container, otherwise we got EACESS error
+18. If you wanna add frontend code, please learn from the existing code, and please use the same pattern as the existing code, so it will not break the existing code and maintain the consistency

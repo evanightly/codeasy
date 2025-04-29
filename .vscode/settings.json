@@ -59,5 +59,6 @@
         "othersPath": "resources/js/Support/Interfaces/Others",
         "componentsPath": "resources/js/Components"
     },
-    "laravelForgemate.useCustomStubs": true
+    "laravelForgemate.useCustomStubs": true,
+    "chat.tools.autoApprove": true
 }
