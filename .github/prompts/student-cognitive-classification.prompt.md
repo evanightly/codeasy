@@ -13,6 +13,8 @@
    - [ExecutionResult](../../laravel/app/Models/ExecutionResult.php)
     - variable_count: benefit
     - function_count: benefit
+
+    NOTE: we use StudentScore model with property of completed_execution_result_id to determine which execution result will be used
 6. Those data will be served as 2 2D tables
     - Left table header label is the learning material name with its ordered number
     - Top table header label is the question name with its ordered number
