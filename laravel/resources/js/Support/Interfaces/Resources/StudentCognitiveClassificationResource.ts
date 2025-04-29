@@ -1,9 +1,11 @@
-import { Resource } from '@/Support/Interfaces/Resources';
 import { StudentCognitiveClassification } from '@/Support/Interfaces/Models';
-import { UserResource } from './UserResource';
+import { Resource } from '@/Support/Interfaces/Resources';
 import { CourseResource } from './CourseResource';
+import { UserResource } from './UserResource';
 
-export interface StudentCognitiveClassificationResource extends Resource, StudentCognitiveClassification {
+export interface StudentCognitiveClassificationResource
+    extends Resource,
+        StudentCognitiveClassification {
     user?: UserResource;
     course?: CourseResource;
 }

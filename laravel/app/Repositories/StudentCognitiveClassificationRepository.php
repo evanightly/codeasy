@@ -10,8 +10,7 @@ use App\Traits\Repositories\HandlesSorting;
 use App\Traits\Repositories\RelationQueryable;
 use Illuminate\Database\Eloquent\Builder;
 
-class StudentCognitiveClassificationRepository extends BaseRepository implements StudentCognitiveClassificationRepositoryInterface
-{
+class StudentCognitiveClassificationRepository extends BaseRepository implements StudentCognitiveClassificationRepositoryInterface {
     use HandlesFiltering, HandlesRelations, HandlesSorting, RelationQueryable;
 
     protected function applyFilters(array $searchParams = []): Builder {
@@ -34,9 +33,6 @@ class StudentCognitiveClassificationRepository extends BaseRepository implements
 
     /**
      * Get all classifications with specified relations
-     *
-     * @param array $relations
-     * @return Builder
      */
     public function getAllWithRelationsQuery(array $relations = []): Builder {
         $query = $this->getQuery();

@@ -5,11 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
-class StudentCognitiveClassification extends Model
-{
+class StudentCognitiveClassification extends Model {
     use HasFactory;
-
 
     /**
      * The attributes that are mass assignable.
@@ -17,7 +14,7 @@ class StudentCognitiveClassification extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id', 'course_id', 'classification_type', 'classification_level', 'classification_score', 'raw_data', 'classified_at'
+        'user_id', 'course_id', 'classification_type', 'classification_level', 'classification_score', 'raw_data', 'classified_at',
     ];
 
     /**
@@ -35,16 +32,14 @@ class StudentCognitiveClassification extends Model
     /**
      * belongsTo relationship with User.
      */
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo(User::class);
     }
 
     /**
      * belongsTo relationship with Course.
      */
-    public function course()
-    {
+    public function course() {
         return $this->belongsTo(Course::class);
     }
 }

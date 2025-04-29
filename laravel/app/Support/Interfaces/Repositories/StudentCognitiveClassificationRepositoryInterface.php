@@ -8,9 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 interface StudentCognitiveClassificationRepositoryInterface extends BaseRepositoryInterface {
     /**
      * Get all classifications with specified relations
-     *
-     * @param array $relations
-     * @return Builder
      */
     public function getAllWithRelationsQuery(array $relations = []): Builder;
 }

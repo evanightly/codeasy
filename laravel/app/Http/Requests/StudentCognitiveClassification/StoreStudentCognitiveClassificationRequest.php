@@ -2,13 +2,11 @@
 
 namespace App\Http\Requests\StudentCognitiveClassification;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Support\Enums\IntentEnum;
+use Illuminate\Foundation\Http\FormRequest;
 
-class StoreStudentCognitiveClassificationRequest extends FormRequest
-{
-    public function rules(): array
-    {
+class StoreStudentCognitiveClassificationRequest extends FormRequest {
+    public function rules(): array {
         $rules = [
             'user_id' => ['required', 'integer'],
             'course_id' => ['required', 'integer'],
@@ -23,7 +21,7 @@ class StoreStudentCognitiveClassificationRequest extends FormRequest
             case IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_STORE_RUN_CLASSIFICATION->value:
                 $rules = [
                     'course_id' => ['required', 'integer', 'exists:courses,id'],
-                    'classification_type' => ['sometimes', 'string', 'in:topsis,fuzzy,neural']
+                    'classification_type' => ['sometimes', 'string', 'in:topsis,fuzzy,neural'],
                 ];
                 break;
         }
