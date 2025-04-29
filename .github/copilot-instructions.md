@@ -260,4 +260,5 @@ The intent system routes specific business logic through generic CRUD endpoints:
 13. CRUCIAL!: if editing existing code, do not replace the code with the comments like `ts // ...existing code...` it will make the code break and leave thousand of errors
 14. CRUCIAL!: DO NOT DELETE UNRELATED CODE, even if it looks like a dead code, just leave it as is, and add the new code below the existing code, so it will not break the existing code
 15. CRUCIAL!: DO NOT MODIFY UNRELATED CODE
-16. CRUCIAL!: In every prompt i have tested and modified the generated code to match the expected result, so please do not modify the code that i have tested and modified, just add the new code below the existing code
+16. CRUCIAL!: In every prompt i have tested and modified the generated code to match the expected result, so please do not modify the code that i have tested and modified, just add the new code below the existing codem
+17. You have to use the docker command defined in [dc.sh](../dc.sh) to utilize the docker container, and you have to use the docker-compose command to utilize the docker-compose container, otherwise we got EACESS error

@@ -13,7 +13,7 @@
         "*.module": "php"
     },
     "github.copilot.chat.codeGeneration.useInstructionFiles": true,
-    "chat.agent.maxRequests": 200,
+    "chat.agent.maxRequests": 10,
     "i18n-ally.keystyle": "nested",
     "i18n-ally.localesPaths": [
         "laravel/lang"
