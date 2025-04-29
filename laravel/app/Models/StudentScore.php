@@ -17,7 +17,8 @@ class StudentScore extends Model {
         'score',
         'completion_status',
         'trial_status',
-        'compile_count', // Added compile_count here
+        'compile_count',
+        'completed_execution_result_id',
     ];
 
     /**
@@ -50,5 +51,12 @@ class StudentScore extends Model {
      */
     public function execution_results() {
         return $this->hasMany(ExecutionResult::class);
+    }
+
+    /**
+     * Get the execution result that completed this score.
+     */
+    public function completed_execution_result() {
+        return $this->belongsTo(ExecutionResult::class, 'completed_execution_result_id');
     }
 }

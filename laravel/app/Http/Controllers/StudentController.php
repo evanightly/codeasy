@@ -374,6 +374,7 @@ class StudentController extends Controller {
                     $this->studentScoreService->update($studentScore->id, [
                         'completion_status' => true,
                         'score' => 100,
+                        'completed_execution_result_id' => $executionResult->id, // Store reference to the execution result that completed the question
                     ]);
                 }
 
