@@ -1,22 +1,23 @@
 {
-    "Laravel.basePath": "./laravel",
+    "[php]": {
+        "editor.defaultFormatter": "open-southeners.laravel-pint"
+    },
+    "eslint.options": {
+        "overrideConfigFile": "./eslint.config.js"
+    },
     "eslint.useFlatConfig": true,
     "eslint.workingDirectories": [
         "./laravel/"
     ],
-    "eslint.options": {
-        "overrideConfigFile": "./eslint.config.js"
-    },
-    "prettier.configPath": "./laravel/.prettierrc",
-    "prettier.requireConfig": true,
-    "[php]": {
-        "editor.defaultFormatter": "open-southeners.laravel-pint"
-    },
-    "php.suggest.basic": false,
     "files.associations": {
         "*.module": "php"
     },
     "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+    "chat.agent.maxRequests": 200,
+    "i18n-ally.keystyle": "nested",
+    "i18n-ally.localesPaths": [
+        "laravel/lang"
+    ],
     // "i18n-ally.dirStructure": "dir",
     // "i18n-ally.localesPaths": [
     //     "laravel/lang"
@@ -29,10 +30,12 @@
     // "i18n-ally.extract.keygenStyle": "nested",
     // "i18n-ally.namespace": true,
     "i18n-ally.pathMatcher": "php_{locale}.{ext}",
-    "i18n-ally.localesPaths": [
-        "laravel/lang"
-    ],
-    "i18n-ally.keystyle": "nested",
+    "laravel-pint.configPath": "./laravel/pint.json",
+    "laravel-pint.enableDebugLogs": true,
+    "laravel-pint.executablePath": ".vscode/pint",
+    "laravel-pint.fallbackToGlobalBin": false,
+    "laravel-pint.runInLaravelSail": false,
+    "Laravel.basePath": "./laravel",
     // "i18n-ally.regex.key": "[\\w-.]+",
     // "i18n-ally.extract.autoDetect": true,
     // "i18n-ally.localeCountryMap": {
@@ -42,9 +45,7 @@
     // }
     "Laravel.translation.completion": false,
     "Laravel.translation.link": false,
-    "laravel-pint.configPath": "./laravel/pint.json",
-    "laravel-pint.enableDebugLogs": true,
-    "laravel-pint.runInLaravelSail": false,
-    "laravel-pint.fallbackToGlobalBin": false,
-    "laravel-pint.executablePath": ".vscode/pint",
+    "php.suggest.basic": false,
+    "prettier.configPath": "./laravel/.prettierrc",
+    "prettier.requireConfig": true
 }
