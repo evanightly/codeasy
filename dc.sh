@@ -60,24 +60,24 @@ case "$1" in
   "logs")
     service=${2:-laravel}
     echo "Showing logs for $service..."
-    docker compose -f docker-compose.dev.yml logs -f "$service"
+    docker compose -f docker-compose.dev.yml --env-file laravel/.env logs -f "$service"
     ;;
   "shell")
     service=${2:-laravel}
     echo "Opening shell in $service container..."
-    docker compose -f docker-compose.dev.yml exec "$service" sh
+    docker compose -f docker-compose.dev.yml --env-file laravel/.env exec "$service" sh
     ;;
   "artisan")
     echo "Running Artisan command..."
-    docker compose -f docker-compose.dev.yml exec laravel php artisan "${@:2}"
+    docker compose -f docker-compose.dev.yml --env-file laravel/.env exec laravel php artisan "${@:2}"
     ;;
   "composer")
     echo "Running Composer command..."
-    docker compose -f docker-compose.dev.yml exec laravel composer "${@:2}"
+    docker compose -f docker-compose.dev.yml --env-file laravel/.env exec laravel composer "${@:2}"
     ;;
   "npm")
     echo "Running NPM command..."
-    docker compose -f docker-compose.dev.yml exec laravel npm "${@:2}"
+    docker compose -f docker-compose.dev.yml --env-file laravel/.env exec laravel npm "${@:2}"
     ;;
   *)
     echo "Codeasy Docker Commands"
