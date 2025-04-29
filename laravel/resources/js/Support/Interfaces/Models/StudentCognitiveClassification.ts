@@ -8,6 +8,7 @@ export interface StudentCognitiveClassification extends Model {
     course_id: number;
     classification_level: string;
     classification_score: number;
+    classification_type: string;
     raw_data: Record<string, any>;
     classified_at: string;
 }

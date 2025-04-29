@@ -6,6 +6,7 @@ use App\Http\Requests\StudentCognitiveClassification\StoreStudentCognitiveClassi
 use App\Http\Requests\StudentCognitiveClassification\UpdateStudentCognitiveClassificationRequest;
 use App\Http\Resources\StudentCognitiveClassificationResource;
 use App\Models\StudentCognitiveClassification;
+use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\StudentCognitiveClassificationServiceInterface;
 use Illuminate\Http\Request;
@@ -24,6 +25,21 @@ class StudentCognitiveClassificationController extends Controller implements Has
     }
 
     public function index(Request $request) {
+        $intent = $request->get('intent');
+
+        if ($intent === IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_INDEX_EXPORT->value) {
+            return $this->studentCognitiveClassificationService->exportToExcel($request->query());
+        }
+
+        if ($intent === IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_INDEX_EXPORT_RAW_DATA->value) {
+            $courseId = $request->get('course_id');
+            if (!$courseId) {
+                return response()->json(['error' => 'Course ID is required'], 422);
+            }
+
+            return $this->studentCognitiveClassificationService->exportRawDataToExcel($courseId);
+        }
+
         $perPage = $request->get('perPage', 10);
         $data = StudentCognitiveClassificationResource::collection($this->studentCognitiveClassificationService->getAllPaginated($request->query(), $perPage));
 
@@ -39,6 +55,12 @@ class StudentCognitiveClassificationController extends Controller implements Has
     }
 
     public function store(StoreStudentCognitiveClassificationRequest $request) {
+        $intent = $request->get('intent');
+
+        if ($intent === IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_STORE_RUN_CLASSIFICATION->value) {
+            return $this->studentCognitiveClassificationService->runClassification($request->validated());
+        }
+
         if ($this->ajax()) {
             return $this->studentCognitiveClassificationService->create($request->validated());
         }

@@ -20,8 +20,11 @@ class StoreStudentCognitiveClassificationRequest extends FormRequest
 
         // Handle custom intents if needed
         switch ($this->get('intent')) {
-            case IntentEnum::CUSTOM_ACTION->value:
-                // Add custom validation for specific actions
+            case IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_STORE_RUN_CLASSIFICATION->value:
+                $rules = [
+                    'course_id' => ['required', 'integer', 'exists:courses,id'],
+                    'classification_type' => ['sometimes', 'string', 'in:topsis,fuzzy,neural']
+                ];
                 break;
         }
 

@@ -44,7 +44,9 @@
 
 8. The cognitive classification will be calculated using TOPSIS method
 
-9. After the TOPSIS method is calculated, the result will be mapped to rule base
+9. Waktu is time using minutes instead of seconds (which is stored in database)
+
+10. After the TOPSIS method is calculated, the result will be mapped to rule base
 
 ```
 Rule Base		
@@ -56,11 +58,11 @@ CC >= 0.85		Create
 CC < 0.25		Remember
 ```
 
-10. Those final result will be recorded and attached to the respective [student](../../laravel/app/Models/User.php)
+11. Those final result will be recorded and attached to the respective [student](../../laravel/app/Models/User.php)
 
-11. The student cognitive results are one to many based, it will be used in the student charts. Each result will provide insights into the student's performance over time.
+12. The student cognitive results are one to many based, it will be used in the student charts. Each result will provide insights into the student's performance over time.
 
-12. You have to utilize the [fastapi server](../../fastapi/main.py) to do the classification process, so the laravel only needs to call the fastapi server and get the result
+13. You have to utilize the [fastapi server](../../fastapi/main.py) to do the classification process, so the laravel only needs to call the fastapi server and get the result
 
 ## Sidenotes
 1. When the [test case](../../laravel/app/Models/LearningMaterialQuestionTestCase.php) that has been done by the student is not the same as the one that is in the database (dirty), the cognitive classification will be reiterated to maintain the accuracy of the test case with the student's answer.

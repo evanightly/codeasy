@@ -17,11 +17,11 @@ class StudentCognitiveClassificationRepository extends BaseRepository implements
     protected function applyFilters(array $searchParams = []): Builder {
         $query = $this->getQuery();
 
-        $query = $this->applySearchFilters($query, $searchParams, ['user_id', 'course_id', 'classification_level', 'classification_score', 'raw_data', 'classified_at']);
+        $query = $this->applySearchFilters($query, $searchParams, ['user_id', 'course_id', 'classification_type', 'classification_level', 'classification_score', 'raw_data', 'classified_at']);
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
-        $query = $this->applyColumnFilters($query, $searchParams, ['id', 'user_id', 'course_id', 'classification_level', 'classification_score', 'raw_data', 'classified_at', 'created_at', 'updated_at']);
+        $query = $this->applyColumnFilters($query, $searchParams, ['id', 'user_id', 'course_id', 'classification_type', 'classification_level', 'classification_score', 'raw_data', 'classified_at', 'created_at', 'updated_at']);
 
         $query = $this->applySorting($query, $searchParams);
 
@@ -30,5 +30,27 @@ class StudentCognitiveClassificationRepository extends BaseRepository implements
 
     protected function getModelClass(): string {
         return StudentCognitiveClassification::class;
+    }
+
+    /**
+     * Get all classifications with specified relations
+     *
+     * @param array $relations
+     * @return Builder
+     */
+    public function getAllWithRelationsQuery(array $relations = []): Builder {
+        $query = $this->getQuery();
+
+        if (!empty($relations)) {
+            foreach ($relations as $relation => $callback) {
+                if (is_callable($callback)) {
+                    $query->with([$relation => $callback]);
+                } else {
+                    $query->with($relation);
+                }
+            }
+        }
+
+        return $query;
     }
 }

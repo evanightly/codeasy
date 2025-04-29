@@ -43,6 +43,7 @@ return [
             'grades' => 'Grades',
             'class_rooms' => 'Classrooms',
             'courses' => 'Courses',
+            'student_cognitive_classifications' => 'Student Cognitive Classifications',
         ],
         'student' => [
             'title' => 'Student',

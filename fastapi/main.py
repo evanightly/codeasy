@@ -1,13 +1,15 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from jupyter_client import KernelManager
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 import os
 import uuid
 import base64
 import json
 import re
 import ast
+import numpy as np
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -16,6 +18,23 @@ class CodeInput(BaseModel):
     testcases: Optional[List[str]] = None
     type: Optional[str] = None
     question_id: Optional[int] = None
+
+class StudentData(BaseModel):
+    user_id: int
+    materials: List[Dict[str, Any]]
+
+class ClassificationRequest(BaseModel):
+    student_data: List[StudentData]
+    classification_type: str = "topsis"
+
+class ClassificationResult(BaseModel):
+    user_id: int
+    level: str
+    score: float
+    raw_data: Dict[str, Any]
+
+class ClassificationResponse(BaseModel):
+    classifications: List[ClassificationResult]
 
 # Function to count variables and functions in Python code
 def analyze_code_complexity(code: str):
@@ -293,3 +312,156 @@ async def test_code(input: CodeInput):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/classify", response_model=ClassificationResponse)
+async def classify_students(request: ClassificationRequest):
+    try:
+        # Extract all student data
+        student_data = request.student_data
+        classification_type = request.classification_type
+        
+        # Prepare the result
+        classifications = []
+        
+        # Process each student
+        for student in student_data:
+            # Collect all metrics across all materials and questions
+            all_metrics = []
+            material_metrics = {}
+            
+            # Process each material
+            for material in student.materials:
+                material_id = material.get('material_id')
+                material_metrics[material_id] = {}
+                
+                # Process each question in the material
+                for question in material.get('questions', []):
+                    question_id = question.get('question_id')
+                    metrics = question.get('metrics', {})
+                    
+                    # Store metrics for this question
+                    material_metrics[material_id][question_id] = metrics
+                    all_metrics.append(metrics)
+            
+            # Determine cognitive level using TOPSIS
+            if classification_type == "topsis":
+                level, score = calculate_topsis(all_metrics)
+            else:
+                # Default to TOPSIS for now
+                level, score = calculate_topsis(all_metrics)
+            
+            # Create classification result
+            classifications.append(
+                ClassificationResult(
+                    user_id=student.user_id,
+                    level=level,
+                    score=score,
+                    raw_data={
+                        "materials": material_metrics,
+                        "method": classification_type
+                    }
+                )
+            )
+        
+        return ClassificationResponse(
+            classifications=classifications
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def calculate_topsis(metrics_list):
+    try:
+        if not metrics_list:
+            return "Remember", 0.0
+            
+        # Extract benefit and cost criteria
+        benefits = ['completion_status', 'variable_count', 'function_count']
+        costs = ['trial_status', 'compile_count', 'coding_time']
+        
+        # Create decision matrix
+        decision_matrix = []
+        for metrics in metrics_list:
+            row = []
+            # Add benefit criteria
+            for benefit in benefits:
+                row.append(float(metrics.get(benefit, 0)))
+            # Add cost criteria
+            for cost in costs:
+                row.append(float(metrics.get(cost, 0)))
+            decision_matrix.append(row)
+        
+        # Convert to numpy array for calculations
+        if not decision_matrix:
+            return "Remember", 0.0
+            
+        decision_matrix = np.array(decision_matrix)
+        
+        # If we have only one row, we can't perform TOPSIS
+        if len(decision_matrix) == 1:
+            # Determine level based on completion status
+            completion = decision_matrix[0][0]  # First benefit is completion_status
+            if completion > 0:
+                return "Apply", 0.45
+            else:
+                return "Remember", 0.2
+        
+        # Calculate column sums for normalization
+        col_sums = np.sqrt(np.sum(decision_matrix**2, axis=0))
+        
+        # Handle zeros in col_sums
+        col_sums[col_sums == 0] = 1
+        
+        # Normalize the decision matrix
+        normalized_matrix = decision_matrix / col_sums
+        
+        # Define weights (equal weights for simplicity)
+        num_criteria = len(benefits) + len(costs)
+        weights = np.ones(num_criteria) / num_criteria
+        
+        # Apply weights
+        weighted_matrix = normalized_matrix * weights
+        
+        # Determine ideal and negative-ideal solutions
+        ideal_best = np.zeros(num_criteria)
+        ideal_worst = np.zeros(num_criteria)
+        
+        # For benefit criteria, max is best; for cost criteria, min is best
+        for i in range(len(benefits)):
+            ideal_best[i] = np.max(weighted_matrix[:, i])
+            ideal_worst[i] = np.min(weighted_matrix[:, i])
+        
+        for i in range(len(costs)):
+            j = i + len(benefits)
+            ideal_best[j] = np.min(weighted_matrix[:, j])
+            ideal_worst[j] = np.max(weighted_matrix[:, j])
+        
+        # Calculate separation measures
+        separation_best = np.sqrt(np.sum((weighted_matrix - ideal_best)**2, axis=1))
+        separation_worst = np.sqrt(np.sum((weighted_matrix - ideal_worst)**2, axis=1))
+        
+        # Calculate performance score
+        performance = separation_worst / (separation_best + separation_worst)
+        
+        # Calculate average performance
+        avg_performance = float(np.mean(performance))
+        
+        # Map to Bloom's Taxonomy based on the rule base
+        if avg_performance >= 0.85:
+            level = "Create"
+        elif avg_performance >= 0.70:
+            level = "Evaluate"
+        elif avg_performance >= 0.55:
+            level = "Analyze"
+        elif avg_performance >= 0.40:
+            level = "Apply"
+        elif avg_performance >= 0.25:
+            level = "Understand"
+        else:
+            level = "Remember"
+        
+        return level, avg_performance
+        
+    except Exception as e:
+        print(f"TOPSIS calculation error: {str(e)}")
+        return "Remember", 0.0

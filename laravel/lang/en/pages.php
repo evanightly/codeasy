@@ -1,23 +1,5 @@
 <?php
 
-/**
- * Current structure example:
- * following directory structure
- *
- * pages
- *   - component name
- *     - fields (for form fields)
- *     - messages (for flash messages)
- *     - buttons (for button names)
- *     - actions (for action names)
- *     - dialogs (for dialog element)
- *       - messages (for messages in dialog)
- *       - buttons (for button names in dialog)
- *       - actions (for action names in dialog)
- *   - components (for page components)
- *   - partials (for page partials)
- */
-
 return [
     'common' => [
         'columns' => [
@@ -1492,6 +1474,89 @@ return [
                     'description' => 'Detailed progress across all courses and materials',
                 ],
             ],
+        ],
+    ],
+    'student_cognitive_classification' => [
+        'index' => [
+            'title' => 'Student Cognitive Classifications',
+        ],
+        'create' => [
+            'title' => 'Create Student Cognitive Classification',
+        ],
+        'edit' => [
+            'title' => 'Edit Student Cognitive Classification',
+        ],
+        'show' => [
+            'title' => 'Student Cognitive Classification Details',
+        ],
+        'columns' => [
+            'student' => 'Student',
+            'course' => 'Course',
+            'classification_type' => 'Classification Type',
+            'classification_level' => 'Classification Level',
+            'classification_score' => 'Classification Score',
+            'classified_at' => 'Classified At',
+        ],
+        'fields' => [
+            'user_id' => 'Student',
+            'course_id' => 'Course',
+            'course' => 'Course',
+            'classification_type' => 'Classification Type',
+            'classification_level' => 'Classification Level',
+            'classification_score' => 'Classification Score',
+            'raw_data' => 'Raw Data',
+            'classified_at' => 'Classified At',
+        ],
+        'placeholders' => [
+            'select_student' => 'Select a student',
+            'select_course' => 'Select a course',
+            'select_classification_type' => 'Select classification type',
+        ],
+        'buttons' => [
+            'run_classification' => 'Run Classification',
+            'start_classification' => 'Start Classification',
+            'export_excel' => 'Export Classifications',
+            'export_raw_data' => 'Export Raw Data',
+            'start_export' => 'Start Export',
+        ],
+        'dialogs' => [
+            'classification' => [
+                'title' => 'Run Cognitive Classification',
+                'description' => 'Select a course and classification type to run the cognitive classification process for all students in the course.',
+            ],
+            'export' => [
+                'title' => 'Export Classifications',
+                'description' => 'This will export all classification data to an Excel file',
+            ],
+            'export_raw_data' => [
+                'title' => 'Export Raw Classification Data',
+                'description' => 'This will export the raw student data used for classification to an Excel file. Select a course to export data for.',
+            ],
+            'delete' => [
+                'title' => 'Delete Classification',
+                'description' => 'Are you sure you want to delete this classification? This action cannot be undone.',
+            ],
+        ],
+        'messages' => [
+            'classification_running' => 'Running classification process...',
+            'classification_success' => 'Classification completed successfully',
+            'classification_error' => 'Error running classification',
+            'export_started' => 'Export started. Your download will begin shortly.',
+            'raw_data_export_started' => 'Raw data export started. Your download will begin shortly.',
+            'deleting' => 'Deleting classification...',
+            'delete_success' => 'Classification deleted successfully',
+            'delete_error' => 'Error deleting classification',
+        ],
+        'sections' => [
+            'classifications' => 'Cognitive Classifications',
+        ],
+        'descriptions' => [
+            'classifications' => 'View all student cognitive classifications in the system',
+        ],
+        'classification_types' => [
+            'topsis' => 'TOPSIS Method',
+            'fuzzy' => 'Fuzzy Logic',
+            'neural' => 'Neural Network',
         ],
     ],
 ];
