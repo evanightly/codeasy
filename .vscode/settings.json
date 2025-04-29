@@ -50,4 +50,14 @@
     "prettier.requireConfig": true,
     "laravelForgemate.laravelProjectPath": "./laravel",
     "laravelForgemate.relationNameFormat": "snake_case",
+    "laravelForgemate.frontendPaths": {
+        "modelsPath": "resources/js/Support/Interfaces/Models",
+        "resourcesPath": "resources/js/Support/Interfaces/Resources",
+        "servicesPath": "resources/js/Services",
+        "constantsPath": "resources/js/Support/Constants",
+        "helpersPath": "resources/js/Helpers",
+        "othersPath": "resources/js/Support/Interfaces/Others",
+        "componentsPath": "resources/js/Components"
+    },
+    "laravelForgemate.useCustomStubs": true
 }
