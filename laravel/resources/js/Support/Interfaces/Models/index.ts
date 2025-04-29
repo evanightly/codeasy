@@ -20,4 +20,5 @@ export * from './LearningMaterialQuestion';
 export * from './LearningMaterialQuestionTestCase';
 
 export * from './ExecutionResult';
+export * from './StudentCognitiveClassification';
 export * from './StudentScore';

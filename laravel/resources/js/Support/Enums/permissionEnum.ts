@@ -75,6 +75,10 @@ const permissions = {
     EXECUTION_RESULT_READ: 'execution-result-read',
     EXECUTION_RESULT_UPDATE: 'execution-result-update',
     EXECUTION_RESULT_DELETE: 'execution-result-delete',
+    STUDENT_COGNITIVE_CLASSIFICATION_CREATE: 'student-cognitive-classification-create',
+    STUDENT_COGNITIVE_CLASSIFICATION_READ: 'student-cognitive-classification-read',
+    STUDENT_COGNITIVE_CLASSIFICATION_UPDATE: 'student-cognitive-classification-update',
+    STUDENT_COGNITIVE_CLASSIFICATION_DELETE: 'student-cognitive-classification-delete',
 };
 
 export const PermissionEnum = permissions;

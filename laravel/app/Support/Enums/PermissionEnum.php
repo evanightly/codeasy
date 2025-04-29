@@ -111,4 +111,9 @@ enum PermissionEnum: string {
     case EXECUTION_RESULT_READ = 'execution-result-read';
     case EXECUTION_RESULT_UPDATE = 'execution-result-update';
     case EXECUTION_RESULT_DELETE = 'execution-result-delete';
+
+    case STUDENT_COGNITIVE_CLASSIFICATION_CREATE = 'student-cognitive-classification-create';
+    case STUDENT_COGNITIVE_CLASSIFICATION_READ = 'student-cognitive-classification-read';
+    case STUDENT_COGNITIVE_CLASSIFICATION_UPDATE = 'student-cognitive-classification-update';
+    case STUDENT_COGNITIVE_CLASSIFICATION_DELETE = 'student-cognitive-classification-delete';
 }

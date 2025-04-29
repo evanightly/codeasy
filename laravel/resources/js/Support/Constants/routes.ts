@@ -25,4 +25,5 @@ export const ROUTES = {
     STUDENT_COURSES: 'student.courses',
     STUDENT_COURSE_MATERIALS: 'student.courses.materials',
     STUDENT_COURSE_MATERIAL_QUESTIONS: 'student.courses.materials.questions',
+    STUDENT_COGNITIVE_CLASSIFICATIONS: 'student-cognitive-classifications',
 } as const;

@@ -145,8 +145,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/questions/execute', [StudentController::class, 'executeCode'])->name('questions.execute');
         Route::post('/questions/update-time', [StudentController::class, 'updateCodingTime'])->name('questions.update-time');
     });
+
+    Route::resource('student-cognitive-classifications', App\Http\Controllers\StudentCognitiveClassificationController::class);
 });
 
 Route::resource('schools', SchoolController::class)->only(['index']);
 
 require __DIR__ . '/auth.php';
+
+// StudentCognitiveClassification routes
