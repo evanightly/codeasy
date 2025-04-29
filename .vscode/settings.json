@@ -47,5 +47,7 @@
     "Laravel.translation.link": false,
     "php.suggest.basic": false,
     "prettier.configPath": "./laravel/.prettierrc",
-    "prettier.requireConfig": true
+    "prettier.requireConfig": true,
+    "laravelForgemate.laravelProjectPath": "./laravel",
+    "laravelForgemate.relationNameFormat": "snake_case",
 }
