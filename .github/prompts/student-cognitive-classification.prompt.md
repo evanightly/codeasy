@@ -1,5 +1,9 @@
 # Student Cognitive Classification
 
+## Roles
+- Administrator: trigger the classification process
+- Teacher and Student: view the classification result
+
 ## Process
 1. Accumulate all student data in a single course
 2. Get all course [learning material](../../laravel/app/Models/LearningMaterial.php)
@@ -56,8 +60,7 @@ CC < 0.25		Remember
 
 11. The student cognitive results are one to many based, it will be used in the student charts. Each result will provide insights into the student's performance over time.
 
-12. You can utilize the [fastapi server](../../fastapi/main.py) to do the process, so the laravel only needs to call the fastapi server and get the result
+12. You have to utilize the [fastapi server](../../fastapi/main.py) to do the classification process, so the laravel only needs to call the fastapi server and get the result
 
 ## Sidenotes
 1. When the [test case](../../laravel/app/Models/LearningMaterialQuestionTestCase.php) that has been done by the student is not the same as the one that is in the database (dirty), the cognitive classification will be reiterated to maintain the accuracy of the test case with the student's answer.
-2. There will be adjustment to the student score to select the first completed execution result
