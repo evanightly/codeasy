@@ -22,6 +22,7 @@ class StudentCognitiveClassificationResource extends JsonResource {
             'course_id' => $this->course_id,
             'classification_level' => $this->classification_level,
             'classification_score' => $this->classification_score,
+            'classification_type' => $this->classification_type,
             'raw_data' => $this->raw_data,
             'classified_at' => $this->classified_at,
             'created_at' => $this->created_at,
