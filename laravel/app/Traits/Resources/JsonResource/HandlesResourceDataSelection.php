@@ -4,7 +4,7 @@ namespace App\Traits\Resources\JsonResource;
 
 use Closure;
 use Illuminate\Http\Request;
-use Str;
+use Illuminate\Support\Str;
 
 trait HandlesResourceDataSelection {
     /**

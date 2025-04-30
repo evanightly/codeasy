@@ -22,8 +22,9 @@ export default function Show({ data: { data } }: Props) {
 
     const [filters, setFilters] = useState<ServiceFilterOptions>({
         page: 1,
-        perPage: 10,
-        sortBy: [['order_number', 'asc']],
+        page_size: 10,
+        sort_by: 'order_number',
+        sort_dir: 'desc',
         learning_material_resource:
             'id,title,description,type,order_number,active,file,file_extension,file_url',
         column_filters: {

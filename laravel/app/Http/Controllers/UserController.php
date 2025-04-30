@@ -35,16 +35,15 @@ class UserController extends Controller implements HasMiddleware {
     }
 
     public function index(Request $request) {
-        $perPage = $request->get('perPage', 10);
         $intent = $request->get('intent');
 
         switch ($intent) {
             case IntentEnum::USER_INDEX_STUDENTS->value:
-                $data = UserResource::collection($this->userService->getAllPaginated($request->query(), $perPage));
+                $data = UserResource::collection($this->userService->getAllPaginated($request->query()));
 
                 break;
             default:
-                $data = UserResource::collection($this->userService->getAllPaginated($request->query(), $perPage));
+                $data = UserResource::collection($this->userService->getAllPaginated($request->query()));
                 break;
         }
 

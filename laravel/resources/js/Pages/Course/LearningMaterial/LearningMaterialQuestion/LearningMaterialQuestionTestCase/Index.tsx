@@ -34,8 +34,8 @@ export default function Index({
 
     const [filters, setFilters] = useState<ServiceFilterOptions>({
         page: 1,
-        perPage: 10,
-        sortBy: [['created_at', 'desc']],
+        page_size: 10,
+        sort_by: 'created_at',
         learning_material_question_test_case_resource: 'id,description,input,hidden,active',
         column_filters: {
             learning_material_question_id: question.id,

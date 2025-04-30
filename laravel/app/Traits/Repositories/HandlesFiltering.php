@@ -9,10 +9,11 @@ trait HandlesFiltering {
      * Apply filters to the query based on search parameter.
      */
     public function applySearchFilters(Builder $query, array $searchParams, array $filterableColumns): Builder {
-        if (isset($searchParams['search'])) {
-            $query->where(function ($query) use ($searchParams, $filterableColumns) {
+        $searchQueryKey = config('constants.handles_filtering_search_query_key');
+        if (isset($searchParams[$searchQueryKey])) {
+            $query->where(function ($query) use ($searchParams, $filterableColumns, $searchQueryKey) {
                 foreach ($filterableColumns as $column) {
-                    $query->orWhere($column, 'like', '%' . $searchParams['search'] . '%');
+                    $query->orWhere($column, 'like', '%' . $searchParams[$searchQueryKey] . '%');
                 }
             });
         }
@@ -21,8 +22,9 @@ trait HandlesFiltering {
     }
 
     public function applyColumnFilters(Builder $query, array $searchParams, array $filterableColumns): Builder {
-        if (isset($searchParams['column_filters'])) {
-            foreach ($searchParams['column_filters'] as $key => $value) {
+        $columnFiltersKey = config('constants.handles_filtering_column_filters_query_key');
+        if (isset($searchParams[$columnFiltersKey])) {
+            foreach ($searchParams[$columnFiltersKey] as $key => $value) {
                 if (!in_array($key, $filterableColumns)) {
                     continue;
                 }
@@ -49,14 +51,61 @@ trait HandlesFiltering {
      * Apply filters to the query based on search parameters for related models.
      */
     public function applyRelationSearchFilters(Builder $query, array $searchParams, array $relationFilterableColumns): Builder {
-        if (isset($searchParams['search'])) {
+        $searchQueryKey = config('constants.handles_filtering_search_query_key');
+        if (isset($searchParams[$searchQueryKey])) {
             foreach ($relationFilterableColumns as $relation => $columns) {
-                $query->orWhereHas($relation, function ($query) use ($searchParams, $columns) {
+                $query->orWhereHas($relation, function ($query) use ($searchParams, $columns, $searchQueryKey) {
                     foreach ($columns as $column) {
-                        $query->where($column, 'like', '%' . $searchParams['search'] . '%');
+                        $query->where($column, 'like', '%' . $searchParams[$searchQueryKey] . '%');
                     }
                 });
             }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Apply filters based on relationship array values, using the new safer nested structure.
+     *
+     * @param  Builder  $query  The query builder instance
+     * @param  array  $searchParams  The search parameters
+     * @param  array  $relationshipFilters  Configuration array mapping relation names to filters
+     */
+    public function applyRelationshipArrayFilters(Builder $query, array $searchParams, array $relationshipFilters): Builder {
+        $relationsArrayFilterKey = config('constants.handles_filtering_relations_array_filters_query_key');
+        // Check if relations_array_filter exists in the search params
+        if (!isset($searchParams[$relationsArrayFilterKey]) || !is_array($searchParams[$relationsArrayFilterKey])) {
+            return $query;
+        }
+
+        $relationsArrayFilter = $searchParams[$relationsArrayFilterKey];
+
+        foreach ($relationshipFilters as $paramKey => $config) {
+            // Skip if this relation isn't in the filters or is empty
+            if (!isset($relationsArrayFilter[$paramKey]) || empty($relationsArrayFilter[$paramKey])) {
+                continue;
+            }
+
+            $values = $relationsArrayFilter[$paramKey];
+
+            // Support both string and array formats for backward compatibility
+            if (is_string($values)) {
+                $values = explode(',', $values);
+            }
+
+            if (!is_array($values)) {
+                continue;
+            }
+
+            // Get relation and column from config
+            $relation = $config['relation'] ?? $paramKey;  // Default to param key if not specified
+            $column = $config['column'] ?? 'name';  // Default to 'name' if not specified
+
+            // Apply whereHas filter
+            $query->whereHas($relation, function ($subQuery) use ($column, $values) {
+                $subQuery->whereIn($column, $values);
+            });
         }
 
         return $query;

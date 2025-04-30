@@ -30,8 +30,7 @@ class SchoolRequestController extends Controller implements HasMiddleware {
     }
 
     public function index(Request $request) {
-        $perPage = $request->get('perPage', 10);
-        $data = SchoolRequestResource::collection($this->schoolRequestService->getAllPaginated($request->query(), $perPage));
+        $data = SchoolRequestResource::collection($this->schoolRequestService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             return $data;

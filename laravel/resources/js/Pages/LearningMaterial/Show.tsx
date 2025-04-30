@@ -23,8 +23,9 @@ export default function Show({ data: { data } }: Props) {
 
     const [filters, setFilters] = useState<ServiceFilterOptions>({
         page: 1,
-        perPage: 10,
-        sortBy: [['order_number', 'asc']],
+        page_size: 10,
+        sort_by: 'order_number',
+        sort_dir: 'asc',
         learning_material_question_resource: 'id,title,description,type,order_number,active',
         column_filters: {
             learning_material_id: data.id,

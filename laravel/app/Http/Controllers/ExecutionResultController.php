@@ -24,8 +24,7 @@ class ExecutionResultController extends Controller implements HasMiddleware {
     }
 
     public function index(Request $request) {
-        $perPage = $request->get('perPage', 10);
-        $data = ExecutionResultResource::collection($this->executionResultService->getAllPaginated($request->query(), $perPage));
+        $data = ExecutionResultResource::collection($this->executionResultService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             return $data;

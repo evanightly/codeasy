@@ -15,8 +15,8 @@ export default function Index() {
 
     const [filters, setFilters] = useState<ServiceFilterOptions>({
         page: 1,
-        perPage: 10,
-        sortBy: [['created_at', 'desc']],
+        page_size: 10,
+        sort_by: 'created_at',
         course_resource: 'id,name,description,active,class_room_id,teacher_id,classroom,teacher',
         relations: 'classroom,teacher',
         column_filters: (() => {

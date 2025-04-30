@@ -24,8 +24,7 @@ class LearningMaterialQuestionTestCaseController extends Controller implements H
     }
 
     public function index(Request $request) {
-        $perPage = $request->get('perPage', 10);
-        $data = LearningMaterialQuestionTestCaseResource::collection($this->learningMaterialQuestionTestCaseService->getAllPaginated($request->query(), $perPage));
+        $data = LearningMaterialQuestionTestCaseResource::collection($this->learningMaterialQuestionTestCaseService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             return $data;

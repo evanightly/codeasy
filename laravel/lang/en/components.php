@@ -17,6 +17,7 @@ return [
             'search_placeholder' => 'Search...',
             'select_placeholder' => 'Select',
             'pagination_placeholder' => 'Items per page',
+            'all' => 'All',
         ],
     ],
     'dropdown_menu' => [
@@ -96,5 +97,19 @@ return [
         'filter_title' => 'Filters',
         'clear_filters' => 'Clear Filters',
         'apply_filters' => 'Apply Filters',
+        'columns_visibility' => 'Columns Visibility',
+    ],
+    'sort_options_dialog' => [
+        'title' => 'Sort Options',
+        'description' => 'Choose how to sort the data',
+        'column_sort' => 'Sort by Column',
+        'relation_sort' => 'Sort by Relation Count',
+        'columns_tab' => 'Columns',
+        'relations_tab' => 'Relations',
+        'apply' => 'Apply Sorting',
+        'reset' => 'Reset All',
+        'reset_column' => 'Clear',
+        'reset_relation' => 'Clear',
+        'no_options' => 'No sort options available',
     ],
 ];

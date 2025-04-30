@@ -32,8 +32,7 @@ class CourseController extends Controller implements HasMiddleware {
 
     public function index(Request $request) {
         $intent = $request->get('intent');
-        $perPage = $request->get('perPage', 10);
-        $data = CourseResource::collection($this->courseService->getAllPaginated($request->query(), $perPage));
+        $data = CourseResource::collection($this->courseService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             switch ($intent) {

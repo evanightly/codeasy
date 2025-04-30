@@ -30,8 +30,7 @@ class LearningMaterialQuestionController extends Controller implements HasMiddle
     }
 
     public function index(Request $request) {
-        $perPage = $request->get('perPage', 10);
-        $data = LearningMaterialQuestionResource::collection($this->learningMaterialQuestionService->getAllPaginated($request->query(), $perPage));
+        $data = LearningMaterialQuestionResource::collection($this->learningMaterialQuestionService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             return $data;

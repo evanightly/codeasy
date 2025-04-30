@@ -30,8 +30,7 @@ class LearningMaterialController extends Controller implements HasMiddleware {
     }
 
     public function index(Request $request) {
-        $perPage = $request->get('perPage', 10);
-        $data = LearningMaterialResource::collection($this->learningMaterialService->getAllPaginated($request->query(), $perPage));
+        $data = LearningMaterialResource::collection($this->learningMaterialService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             return $data;

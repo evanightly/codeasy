@@ -33,8 +33,7 @@ class ClassRoomController extends Controller implements HasMiddleware {
     }
 
     public function index(Request $request) {
-        $perPage = $request->get('perPage', 10);
-        $data = ClassRoomResource::collection($this->classRoomService->getAllPaginated($request->query(), $perPage));
+        $data = ClassRoomResource::collection($this->classRoomService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             return $data;

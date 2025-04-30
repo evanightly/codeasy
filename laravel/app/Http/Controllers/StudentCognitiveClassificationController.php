@@ -40,8 +40,7 @@ class StudentCognitiveClassificationController extends Controller implements Has
             return $this->studentCognitiveClassificationService->exportRawDataToExcel($courseId);
         }
 
-        $perPage = $request->get('perPage', 10);
-        $data = StudentCognitiveClassificationResource::collection($this->studentCognitiveClassificationService->getAllPaginated($request->query(), $perPage));
+        $data = StudentCognitiveClassificationResource::collection($this->studentCognitiveClassificationService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             return $data;

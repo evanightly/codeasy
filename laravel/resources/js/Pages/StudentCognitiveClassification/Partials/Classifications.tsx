@@ -28,7 +28,7 @@ export function Classifications({ baseRoute, baseKey }: ClassificationsProps) {
     const columnHelper = createColumnHelper<StudentCognitiveClassificationResource>();
     const [filters, setFilters] = useState<ServiceFilterOptions>({
         page: 1,
-        perPage: 10,
+        page_size: 10,
         relations: 'user,course',
     });
 

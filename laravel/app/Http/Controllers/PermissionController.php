@@ -30,8 +30,7 @@ class PermissionController extends Controller implements HasMiddleware {
     }
 
     public function index(Request $request) {
-        $perPage = $request->get('perPage', 10);
-        $data = PermissionResource::collection($this->permissionService->getAllPaginated($request->query(), $perPage));
+        $data = PermissionResource::collection($this->permissionService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             return $data;

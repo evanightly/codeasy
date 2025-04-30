@@ -1,7 +1,6 @@
 'use client';
 
 import GenericFilters from '@/Components/GenericFilters';
-import GenericPagination from '@/Components/GenericPagination';
 import GenericQueryPagination from '@/Components/GenericQueryPagination';
 import { Button } from '@/Components/UI/button';
 import {
@@ -39,7 +38,24 @@ import { TableOptions } from '@tanstack/table-core';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Eye } from 'lucide-react';
 import * as React from 'react';
-import { HTMLAttributes } from 'react';
+import { HTMLAttributes, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// Keys to exclude from auto-detection (typically non-sortable fields or complex objects)
+const EXCLUDED_KEYS = ['metadata', 'pivot', 'permissions'];
+
+// Common sortable fields to include even if not explicitly defined
+const COMMON_SORTABLE_FIELDS = [
+    { key: 'id', label: 'ID' },
+    { key: 'created_at', label: 'Created At' },
+    { key: 'updated_at', label: 'Updated At' },
+];
+
+// Row height options for density control
+const ROW_HEIGHT_OPTIONS = {
+    compact: 35,
+    default: 48,
+    relaxed: 56,
+};
 
 interface DataTableProps<TData, TValue, R extends Resource = Resource> {
     baseRoute?: string;
@@ -54,14 +70,30 @@ interface DataTableProps<TData, TValue, R extends Resource = Resource> {
         filters: ServiceFilterOptions<R>,
         setFilters: (filters: ServiceFilterOptions<R>) => void,
     ) => React.ReactNode;
-    emptyStateMessage?: string;
+    /**
+     * Additional columns to make available for sorting beyond auto-detected ones
+     */
+    additionalSortColumns?: Array<{ key: string; label: string }>;
+    /**
+     * Relations available for relation count sorting beyond auto-detected ones
+     */
+    availableSortRelations?: Array<{ key: string; label: string }>;
+    /**
+     * Estimated row height for virtualization
+     */
+    estimatedRowHeight?: number;
+    /**
+     * Number of rows to render beyond the visible area (improves scrolling experience)
+     */
+    overscan?: number;
 }
 
-const tableVariants = cva('w-full text-sm min-h-[400px]', {
+const tableVariants = cva('w-full text-sm', {
     variants: {
         variant: {
-            compact: 'group table-compact [&_th]:h-8 [&_td]:p-0 [&_td]:px-2',
-            default: '[&_tr]:h-10',
+            compact: 'group table-compact [&_th]:h-8 [&_td]:py-2 [&_td]:px-2',
+            default: '[&_tr]:h-12',
+            relaxed: '[&_tr]:h-14 [&_td]:py-4',
         },
         header: {
             fixed: 'sticky top-0 z-10',
@@ -81,22 +113,145 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
     data,
     meta,
     className,
-    variant,
+    variant = 'default',
     header,
     showPagination = true,
     filters,
     setFilters,
     filterComponents,
     tableOptions,
-    emptyStateMessage = 'No data available',
+    additionalSortColumns = [],
+    availableSortRelations = [],
+    estimatedRowHeight = 60,
+    overscan = 10,
 }: DataTableProps<TData, TValue, R> &
     VariantProps<typeof tableVariants> &
     HTMLAttributes<HTMLTableSectionElement> & {
         tableOptions?: Partial<TableOptions<TData>>;
     }) {
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] = React.useState({});
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [columnVisibility, setColumnVisibility] = useState({});
+    const [density, setDensity] = useState<'compact' | 'default' | 'relaxed'>('default');
+
+    // Get the appropriate row height based on the selected density
+    const rowHeight = ROW_HEIGHT_OPTIONS[density];
+
+    // Container ref to measure available width/height
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+    // Update container size on mount and when window resizes
+    useEffect(() => {
+        const updateSize = () => {
+            if (containerRef.current) {
+                const rect = containerRef.current.getBoundingClientRect();
+                setContainerSize({
+                    width: rect.width,
+                    height: window.innerHeight - rect.top - 100, // Leave some space at the bottom
+                });
+            }
+        };
+
+        updateSize();
+        window.addEventListener('resize', updateSize);
+        return () => window.removeEventListener('resize', updateSize);
+    }, []);
+
+    // Detect columns from table data
+    const detectedSortColumns = useMemo(() => {
+        if (!data || data.length === 0) return [];
+
+        const firstItem = data[0];
+        const columns: Array<{ key: string; label: string }> = [];
+
+        if (firstItem) {
+            // Get column names from the first data item
+            Object.keys(firstItem).forEach((key) => {
+                // Skip if it's in excluded keys list
+                if (EXCLUDED_KEYS.some((excluded) => key.includes(excluded))) return;
+
+                // Skip if it's an array or object (likely a relation)
+                const value = firstItem[key as keyof typeof firstItem];
+                if (Array.isArray(value) || (typeof value === 'object' && value !== null)) return;
+
+                // Skip if it's already in common sortable fields
+                if (COMMON_SORTABLE_FIELDS.some((field) => field.key === key)) return;
+
+                // Add to auto-detected columns with translated label if available
+                columns.push({
+                    key,
+                    label: key,
+                });
+            });
+        }
+
+        return columns;
+    }, [data]);
+
+    // Detect relations from table data
+    const detectedSortRelations = useMemo(() => {
+        if (!data || data.length === 0) return [];
+
+        const firstItem = data[0];
+        const relations: Array<{ key: string; label: string }> = [];
+
+        if (firstItem) {
+            // Look for potential relation keys
+            Object.keys(firstItem).forEach((key) => {
+                // Check for relation count fields
+                if (key.endsWith('_count')) {
+                    const relationName = key.replace('_count', '');
+
+                    // Skip if already in available relations
+                    if (availableSortRelations.some((rel) => rel.key === relationName)) return;
+
+                    relations.push({
+                        key: relationName,
+                        label: relationName,
+                    });
+                }
+
+                // Check for actual relation objects
+                const value = firstItem[key as keyof typeof firstItem];
+                if (
+                    Array.isArray(value) ||
+                    (typeof value === 'object' &&
+                        value !== null &&
+                        key !== 'pivot' &&
+                        !key.includes('metadata'))
+                ) {
+                    // Skip if already in available relations
+                    if (availableSortRelations.some((rel) => rel.key === key)) return;
+
+                    relations.push({
+                        key,
+                        label: key,
+                    });
+                }
+            });
+        }
+
+        return relations;
+    }, [data, availableSortRelations]);
+
+    // Combine detected columns with manually specified ones
+    const combinedSortColumns = useMemo(() => {
+        return [...COMMON_SORTABLE_FIELDS, ...detectedSortColumns, ...additionalSortColumns].filter(
+            (column, index, self) =>
+                // Remove duplicates
+                index === self.findIndex((c) => c.key === column.key),
+        );
+    }, [detectedSortColumns, additionalSortColumns]);
+
+    // Combine detected relations with manually specified ones
+    const combinedSortRelations = useMemo(() => {
+        return [...detectedSortRelations, ...availableSortRelations].filter(
+            (relation, index, self) =>
+                // Remove duplicates
+                index === self.findIndex((r) => r.key === relation.key),
+        );
+    }, [detectedSortRelations, availableSortRelations]);
 
     const table = useReactTable({
         ...tableOptions,
@@ -121,120 +276,167 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
         getPaginationRowModel: getPaginationRowModel(),
     });
 
-    const parentRef = React.useRef<HTMLDivElement>(null);
     const { rows } = table.getRowModel();
 
-    const virtualizer = useVirtualizer({
+    // Create a virtualized list of rows
+    const rowVirtualizer = useVirtualizer({
         count: rows.length,
-        getScrollElement: () => parentRef.current,
-        estimateSize: () => 35,
-        overscan: 20,
+        getScrollElement: () => containerRef.current,
+        estimateSize: useCallback(() => rowHeight, [rowHeight]),
+        overscan,
+        scrollMargin: 0,
     });
+
+    const virtualRows = rowVirtualizer.getVirtualItems();
+    const totalHeight = rowVirtualizer.getTotalSize();
+    const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+    const paddingBottom =
+        virtualRows.length > 0 ? totalHeight - virtualRows[virtualRows.length - 1].end : 0;
 
     const handlePageChange = (page: number) => {
         if (!setFilters) return;
         setFilters({ ...filters, page });
+
+        // Scroll back to top when changing pages
+        if (containerRef.current) {
+            containerRef.current.scrollTop = 0;
+        }
     };
+
+    // const toggleDensity = () => {
+    //     setDensity((prev) => {
+    //         if (prev === 'compact') return 'default';
+    //         if (prev === 'default') return 'relaxed';
+    //         return 'compact';
+    //     });
+    // };
+
+    // const densityIcon =
+    //     density === 'compact' ? (
+    //         <ZoomIn className='h-4 w-4' />
+    //     ) : density === 'relaxed' ? (
+    //         <ZoomOut className='h-4 w-4' />
+    //     ) : (
+    //         <ZoomIn className='h-4 w-4 opacity-50' />
+    //     );
 
     return (
         <>
             {filters && setFilters && (
-                <GenericFilters setFilters={setFilters} filters={filters}>
+                <GenericFilters
+                    setFilters={setFilters}
+                    filters={filters}
+                    data={data as unknown as R[]}
+                    availableSortRelations={combinedSortRelations}
+                    additionalSortColumns={combinedSortColumns}
+                >
                     {typeof filterComponents === 'function' &&
                         filterComponents(filters, setFilters)}
 
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant='outline' className='ml-auto'>
-                                Columns Visibility <Eye opacity={0.5} />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align='end'>
-                            {table
-                                .getAllColumns()
-                                .filter((column) => column.getCanHide())
-                                .map((column: any) => {
-                                    return (
-                                        <DropdownMenuCheckboxItem
-                                            onSelect={(e) => e.preventDefault()}
-                                            onCheckedChange={(value) =>
-                                                column.toggleVisibility(value)
-                                            }
-                                            key={column.id}
-                                            className='capitalize'
-                                            checked={column.getIsVisible()}
-                                        >
-                                            {column.columnDef.meta?.title ?? column.id}
-                                        </DropdownMenuCheckboxItem>
-                                    );
-                                })}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className='ml-auto flex items-center gap-2'>
+                        {/* <Button onClick={toggleDensity} size='icon' title={`Current density: ${density}`} variant='outline'>
+                            {densityIcon}
+                        </Button> */}
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant='outline'>
+                                    Columns <Eye className='ml-2 h-4 w-4 opacity-50' />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end'>
+                                {table
+                                    .getAllColumns()
+                                    .filter((column) => column.getCanHide())
+                                    .map((column: any) => {
+                                        return (
+                                            <DropdownMenuCheckboxItem
+                                                onSelect={(e) => e.preventDefault()}
+                                                onCheckedChange={(value) =>
+                                                    column.toggleVisibility(value)
+                                                }
+                                                key={column.id}
+                                                className='capitalize'
+                                                checked={column.getIsVisible()}
+                                            >
+                                                {column.columnDef.meta?.title ?? column.id}
+                                            </DropdownMenuCheckboxItem>
+                                        );
+                                    })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </GenericFilters>
             )}
 
-            <div className={ny(tableVariants({ variant, header }), className)}>
-                <div ref={parentRef}>
-                    <Table style={{ height: `${virtualizer.getTotalSize()}px` }}>
-                        <TableHeader className={header === 'fixed' ? 'bg-background' : ''}>
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => {
-                                        return (
-                                            <TableHead key={header.id} colSpan={header.colSpan}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                          header.column.columnDef.header,
-                                                          header.getContext(),
-                                                      )}
-                                            </TableHead>
-                                        );
-                                    })}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
-                        <TableBody className='relative h-full'>
-                            {data.length === 0 ? (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columns.length}
-                                        className='h-24 text-center'
-                                    >
-                                        <div className='text-muted-foreground'>
-                                            {emptyStateMessage}
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                virtualizer.getVirtualItems().map((virtualRow, index) => {
-                                    const row = rows[virtualRow.index];
-                                    return (
-                                        <TableRow
-                                            style={{
-                                                height: `${virtualRow.size}px`,
-                                                transform: `translateY(${
-                                                    virtualRow.start - index * virtualRow.size
-                                                }px)`,
-                                            }}
-                                            key={row.id}
-                                            data-state={row.getIsSelected() && 'selected'}
+            <div
+                style={{
+                    height: containerSize.height > 0 ? `${containerSize.height}px` : '600px',
+                    width: '100%',
+                    overflow: 'auto',
+                }}
+                ref={containerRef}
+                className={ny(tableVariants({ variant, header }), className)}
+            >
+                <Table>
+                    <TableHeader
+                        className={header === 'fixed' ? 'sticky top-0 z-10 bg-background' : ''}
+                    >
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <TableHead key={header.id} colSpan={header.colSpan}>
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                  header.column.columnDef.header,
+                                                  header.getContext(),
+                                              )}
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {paddingTop > 0 && (
+                            <tr>
+                                <td
+                                    style={{ height: `${paddingTop}px` }}
+                                    colSpan={columns.length}
+                                />
+                            </tr>
+                        )}
+                        {virtualRows.map((virtualRow) => {
+                            const row = rows[virtualRow.index];
+                            return (
+                                <TableRow
+                                    key={row.id}
+                                    data-state={row.getIsSelected() && 'selected'}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell
+                                            style={{ height: `${rowHeight}px` }}
+                                            key={cell.id}
                                         >
-                                            {row.getVisibleCells().map((cell) => (
-                                                <TableCell key={cell.id}>
-                                                    {flexRender(
-                                                        cell.column.columnDef.cell,
-                                                        cell.getContext(),
-                                                    )}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    );
-                                })
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext(),
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            );
+                        })}
+                        {paddingBottom > 0 && (
+                            <tr>
+                                <td
+                                    style={{ height: `${paddingBottom}px` }}
+                                    colSpan={columns.length}
+                                />
+                            </tr>
+                        )}
+                    </TableBody>
+                </Table>
             </div>
 
             <div className='flex flex-1 items-center justify-end space-x-2 py-4'>
@@ -245,7 +447,7 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
                     </div>
                 )}
 
-                {showPagination && meta && setFilters && baseKey && baseRoute ? (
+                {showPagination && meta && setFilters && baseKey && baseRoute && (
                     <GenericQueryPagination
                         meta={meta}
                         handleChangePage={handlePageChange}
@@ -254,8 +456,6 @@ export function DataTable<TData, TValue, R extends Resource = Resource>({
                         baseRoute={baseRoute}
                         baseKey={baseKey}
                     />
-                ) : (
-                    <GenericPagination meta={meta} handleChangePage={handlePageChange} />
                 )}
             </div>
         </>

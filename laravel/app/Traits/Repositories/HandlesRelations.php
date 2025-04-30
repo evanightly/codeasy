@@ -9,8 +9,8 @@ trait HandlesRelations {
      * Automatically apply relations to the query based on request parameters.
      */
     protected function applyResolvedRelations(Builder $query, array $params = []): Builder {
-        $relations = $params[HANDLES_RELATIONS_RELATIONS_QUERY_KEY] ?? '';
-        $relation_count = $params[HANDLES_RELATIONS_RELATION_COUNT_QUERY_KEY] ?? '';
+        $relations = $params[config('constants.handles_relations_relations_query_key', 'relations')] ?? '';
+        $relation_count = $params[config('constants.handles_relations_relation_count_query_key', 'relations_count')] ?? '';
 
         if ($relations) {
             // Split the relations string into individual relations
