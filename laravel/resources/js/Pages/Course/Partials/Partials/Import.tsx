@@ -153,8 +153,8 @@ const Import = () => {
 
     return (
         <>
-            <Button size='sm' onClick={() => setOpen(true)} className='whitespace-nowrap'>
-                <Upload className='mr-2 h-4 w-4' />
+            <Button onClick={() => setOpen(true)}>
+                <Upload />
                 {t('pages.course.import.buttons.open_import', {
                     defaultValue: 'Import',
                 })}
