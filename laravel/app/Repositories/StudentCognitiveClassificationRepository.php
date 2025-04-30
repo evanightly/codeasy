@@ -20,6 +20,7 @@ class StudentCognitiveClassificationRepository extends BaseRepository implements
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
+        // TODO: implement relation filters, e.g. student name
         $query = $this->applyColumnFilters($query, $searchParams, ['id', 'user_id', 'course_id', 'classification_type', 'classification_level', 'classification_score', 'raw_data', 'classified_at', 'created_at', 'updated_at']);
 
         $query = $this->applySorting($query, $searchParams);
