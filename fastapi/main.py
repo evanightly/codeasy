@@ -350,12 +350,16 @@ async def classify_students(request: ClassificationRequest):
                 # Default to TOPSIS for now
                 level, score = calculate_topsis(all_metrics)
             
+            # Final sanity check for JSON serialization
+            if np.isnan(score) or np.isinf(score):
+                score = 0.0
+            
             # Create classification result
             classifications.append(
                 ClassificationResult(
                     user_id=student.user_id,
                     level=level,
-                    score=score,
+                    score=float(score),
                     raw_data={
                         "materials": material_metrics,
                         "method": classification_type
@@ -368,6 +372,7 @@ async def classify_students(request: ClassificationRequest):
         )
         
     except Exception as e:
+        print(f"Classification error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 def calculate_topsis(metrics_list):
@@ -440,11 +445,17 @@ def calculate_topsis(metrics_list):
         separation_best = np.sqrt(np.sum((weighted_matrix - ideal_best)**2, axis=1))
         separation_worst = np.sqrt(np.sum((weighted_matrix - ideal_worst)**2, axis=1))
         
-        # Calculate performance score
-        performance = separation_worst / (separation_best + separation_worst)
+        # Calculate performance score - Safely handle division by zero
+        performance = np.zeros_like(separation_best)
+        non_zero_indices = (separation_best + separation_worst) > 0
+        performance[non_zero_indices] = separation_worst[non_zero_indices] / (separation_best[non_zero_indices] + separation_worst[non_zero_indices])
         
-        # Calculate average performance
-        avg_performance = float(np.mean(performance))
+        # Calculate average performance and handle NaN/Infinity values
+        avg_performance = float(np.nanmean(performance))
+        
+        # Final check for NaN/Infinity values
+        if np.isnan(avg_performance) or np.isinf(avg_performance):
+            avg_performance = 0.0
         
         # Map to Bloom's Taxonomy based on the rule base
         if avg_performance >= 0.85:
@@ -460,7 +471,7 @@ def calculate_topsis(metrics_list):
         else:
             level = "Remember"
         
-        return level, avg_performance
+        return level, float(avg_performance)
         
     except Exception as e:
         print(f"TOPSIS calculation error: {str(e)}")
