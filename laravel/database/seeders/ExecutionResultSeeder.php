@@ -5,97 +5,81 @@ namespace Database\Seeders;
 use App\Models\ExecutionResult;
 use App\Models\StudentScore;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class ExecutionResultSeeder extends Seeder {
     public function run(): void {
         if (app()->isProduction()) {
-            $this->seedProductionData();
-
             return;
         }
 
-        $this->seedDevelopmentData();
-    }
+        $this->info('Seeding execution results with static data...');
 
-    private function seedProductionData(): void {
-        // Production data would go here if needed
-    }
+        // We'll only create additional execution results for scores that have been tried
+        // This adds some history to each student's work
+        $studentScores = StudentScore::where('trial_status', true)->get();
+        $count = count($studentScores);
 
-    private function seedDevelopmentData(): void {
-        // Get all student scores
-        $studentScores = StudentScore::all();
+        $this->info("Found {$count} student scores with trial status");
 
-        foreach ($studentScores as $studentScore) {
-            $this->createExecutionResultsForStudentScore($studentScore);
+        foreach ($studentScores as $score) {
+            // Skip scores that don't have a completed execution result yet
+            if (!$score->completed_execution_result_id) {
+                continue;
+            }
+
+            // Create 1-3 additional execution results as history
+            $attempts = rand(1, 3);
+
+            for ($i = 1; $i <= $attempts; $i++) {
+                // Create execution result with progressive improvement
+                ExecutionResult::create([
+                    'student_score_id' => $score->id,
+                    'code' => "# Attempt {$i} for question\n\n" . $this->getCodeForAttempt($score->learning_material_question->title, $i, $attempts),
+                    'compile_status' => $i === $attempts, // Last attempt always compiles
+                    'variable_count' => max(1, $score->completed_execution_result->variable_count - ($attempts - $i)),
+                    'function_count' => max(0, $score->completed_execution_result->function_count - ($attempts - $i)),
+                    'created_at' => now()->subMinutes(($attempts - $i + 1) * 10), // Space out the attempts
+                ]);
+            }
         }
-    }
 
-    /**
-     * Create sample execution results for a student score
-     */
-    private function createExecutionResultsForStudentScore(StudentScore $studentScore): void {
-        // Randomly decide if the student made multiple attempts
-        $attempts = rand(1, 5);
-
-        for ($i = 1; $i <= $attempts; $i++) {
-            // Generate sample code based on the question type
-            $code = $this->generateSampleCode($studentScore);
-
-            // Create execution result
-            ExecutionResult::create([
-                'student_score_id' => $studentScore->id,
-                'code' => $code,
-                'compile_count' => $i,
-                'compile_status' => $i === $attempts ? true : rand(0, 1),
-                'output_image' => null, // No image for seeded data
-                'created_at' => now()->subMinutes(($attempts - $i) * 5), // Space out the attempts
-            ]);
-        }
+        $this->info('Execution results seeded successfully!');
     }
 
     /**
-     * Generate sample code based on question content
+     * Generate sample code for an attempt
      */
-    private function generateSampleCode(StudentScore $studentScore): string {
-        $question = $studentScore->question;
+    private function getCodeForAttempt(string $title, int $attempt, int $totalAttempts): string {
+        // More errors in earlier attempts, better code in later attempts
+        $errorProbability = (($totalAttempts - $attempt) / $totalAttempts) * 100;
 
-        if (!$question) {
-            return "# Sample Python code\nprint('Hello, World!')";
+        $code = "# Working on: {$title}\n\n";
+
+        if (rand(0, 100) < $errorProbability) {
+            // Add a syntax error in earlier attempts
+            $code .= "# This attempt has a syntax error\ndef my_function(:\n    print('Missing parenthesis')\n\n";
+        } else {
+            $code .= "# This attempt is syntactically correct\ndef my_function():\n    print('Hello, Data Science!')\n\n";
         }
 
-        $title = $question->title;
-
-        // Sample code templates based on question titles
-        if (Str::contains($title, 'Variables')) {
-            return "# Define a variable and print it\ndata_science = 'Python for Data Analysis'\nprint(data_science)\nprint(type(data_science))";
+        // Add some variables - more in later attempts
+        $variables = $attempt + 1;
+        for ($i = 1; $i <= $variables; $i++) {
+            $code .= "var_{$i} = {$i} * 10\n";
         }
 
-        if (Str::contains($title, 'Lists')) {
-            return "# Create a list of data science tools\ndata_tools = ['pandas', 'numpy', 'matplotlib', 'scikit-learn']\nprint(data_tools[1])  # Print second element\nprint(len(data_tools))  # Print list length";
-        }
+        $code .= "\n# Main code\n";
+        $code .= "print('Attempt #{$attempt}')\n";
 
-        if (Str::contains($title, 'Function')) {
-            return "# Define a function to calculate mean\ndef calculate_mean(numbers):\n    return sum(numbers) / len(numbers)\n\n# Test the function\nnumbers = [10, 15, 20, 25, 30]\nresult = calculate_mean(numbers)\nprint(f'Mean: {result}')";
-        }
+        return $code;
+    }
 
-        if (Str::contains($title, 'Import')) {
-            return "# Import essential data science libraries\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\n# Show versions\nprint(f'NumPy version: {np.__version__}')\nprint(f'Pandas version: {pd.__version__}')";
-        }
-
-        if (Str::contains($title, 'NumPy')) {
-            return "# Working with NumPy arrays\nimport numpy as np\n\n# Create array and perform operations\narray1 = np.array([1, 2, 3, 4])\narray2 = np.array([5, 6, 7, 8])\n\n# Show array addition\nprint(array1 + array2)";
-        }
-
-        if (Str::contains($title, 'DataFrame')) {
-            return "# Creating a pandas DataFrame\nimport pandas as pd\n\n# Create sample data\ndata = {\n    'Name': ['Alice', 'Bob', 'Charlie', 'David'],\n    'Age': [25, 30, 35, 40],\n    'Score': [85, 92, 78, 96]\n}\n\n# Create DataFrame\ndf = pd.DataFrame(data)\n\n# Display DataFrame\nprint(df)\n\n# Filter by score > 80\nprint('\\nScores greater than 80:')\nprint(df[df['Score'] > 80])";
-        }
-
-        if (Str::contains($title, 'Visualization') || Str::contains($title, 'Plot')) {
-            return "# Data visualization with Matplotlib\nimport matplotlib.pyplot as plt\nimport numpy as np\n\n# Create data\nx = np.array([1, 2, 3, 4, 5])\ny = np.array([10, 12, 5, 8, 14])\n\n# Create plot\nplt.figure(figsize=(8, 4))\nplt.plot(x, y, 'b-', marker='o')\nplt.title('Simple Line Plot')\nplt.xlabel('X Axis')\nplt.ylabel('Y Axis')\nplt.grid(True)\n\n# Show plot\nplt.show()";
-        }
-
-        // Default code for other types of questions
-        return "# Python code for data analysis\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\n# Sample data\ndata = np.random.randn(100)\n\n# Calculate statistics\nprint(f'Mean: {np.mean(data):.2f}')\nprint(f'Standard Deviation: {np.std(data):.2f}')\nprint(f'Min: {np.min(data):.2f}')\nprint(f'Max: {np.max(data):.2f}')";
+    /**
+     * Output info message during seeding
+     */
+    protected function info($message): void {
+        $this->command->info($message);
+        Log::info($message);
     }
 }
