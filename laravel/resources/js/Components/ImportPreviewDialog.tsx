@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import { CourseImportPreview } from '@/Support/Interfaces/Others';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { CodeIcon, FileTextIcon, FolderIcon, TableIcon } from 'lucide-react';
+import { Badge } from './UI/badge';
 
 interface ImportPreviewDialogProps {
     open: boolean;
@@ -295,9 +296,12 @@ export const ImportPreviewDialog = ({
                                                                                                         testCase.description
                                                                                                     }
                                                                                                     {testCase.hidden && (
-                                                                                                        <span className='ml-2 rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px]'>
+                                                                                                        <Badge
+                                                                                                            variant='secondary'
+                                                                                                            className='ml-2 rounded-full px-1.5 py-0.5 text-[10px]'
+                                                                                                        >
                                                                                                             Hidden
-                                                                                                        </span>
+                                                                                                        </Badge>
                                                                                                     )}
                                                                                                 </div>
                                                                                                 {testCase.input && (
