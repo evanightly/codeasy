@@ -10,6 +10,11 @@ import re
 import ast
 import numpy as np
 from pydantic import BaseModel
+# Add new imports for neural network and fuzzy logic
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import MinMaxScaler
+import skfuzzy as fuzz
+from skfuzzy import control as ctrl
 
 app = FastAPI()
 
@@ -343,11 +348,15 @@ async def classify_students(request: ClassificationRequest):
                     material_metrics[material_id][question_id] = metrics
                     all_metrics.append(metrics)
             
-            # Determine cognitive level using TOPSIS
+            # Determine cognitive level using selected method
             if classification_type == "topsis":
                 level, score = calculate_topsis(all_metrics)
+            elif classification_type == "neural":
+                level, score = calculate_neural_network(all_metrics)
+            elif classification_type == "fuzzy":
+                level, score = calculate_fuzzy_logic(all_metrics)
             else:
-                # Default to TOPSIS for now
+                # Default to TOPSIS
                 level, score = calculate_topsis(all_metrics)
             
             # Final sanity check for JSON serialization
@@ -475,4 +484,218 @@ def calculate_topsis(metrics_list):
         
     except Exception as e:
         print(f"TOPSIS calculation error: {str(e)}")
+        return "Remember", 0.0
+
+def calculate_neural_network(metrics_list):
+    try:
+        if not metrics_list:
+            return "Remember", 0.0
+            
+        # Extract benefit and cost criteria
+        benefits = ['completion_status', 'variable_count', 'function_count']
+        costs = ['trial_status', 'compile_count', 'coding_time']
+        
+        # Create feature matrix
+        X = []
+        for metrics in metrics_list:
+            features = []
+            # Add benefit criteria
+            for benefit in benefits:
+                features.append(float(metrics.get(benefit, 0)))
+            # Add cost criteria
+            for cost in costs:
+                features.append(float(metrics.get(cost, 0)))
+            X.append(features)
+        
+        # Convert to numpy array
+        if not X:
+            return "Remember", 0.0
+            
+        X = np.array(X)
+        
+        # Handle single row case
+        if len(X) == 1:
+            # Determine level based on completion status
+            completion = X[0][0]  # First benefit is completion_status
+            if completion > 0:
+                return "Apply", 0.45
+            else:
+                return "Remember", 0.2
+        
+        # Normalize features using Min-Max scaling
+        scaler = MinMaxScaler()
+        X_scaled = scaler.fit_transform(X)
+        
+        # Invert cost criteria (lower is better for costs)
+        for i in range(len(benefits), len(benefits) + len(costs)):
+            X_scaled[:, i] = 1 - X_scaled[:, i]
+        
+        # Since we don't have labeled data, we use a simple approach:
+        # 1. Calculate mean values for each feature
+        # 2. Use that as a score
+        avg_scores = np.mean(X_scaled, axis=0)
+        
+        # Apply weights (equal weights for simplicity)
+        weights = np.ones(len(benefits) + len(costs)) / (len(benefits) + len(costs))
+        score = np.sum(avg_scores * weights)
+        
+        # Calculate final neural network score using a sigmoid function to map to 0-1
+        final_score = 1 / (1 + np.exp(-5 * (score - 0.5)))
+        
+        # Map to Bloom's Taxonomy based on the rule base
+        if final_score >= 0.85:
+            level = "Create"
+        elif final_score >= 0.70:
+            level = "Evaluate"
+        elif final_score >= 0.55:
+            level = "Analyze"
+        elif final_score >= 0.40:
+            level = "Apply"
+        elif final_score >= 0.25:
+            level = "Understand"
+        else:
+            level = "Remember"
+        
+        return level, float(final_score)
+        
+    except Exception as e:
+        print(f"Neural network calculation error: {str(e)}")
+        return "Remember", 0.0
+
+def calculate_fuzzy_logic(metrics_list):
+    try:
+        if not metrics_list:
+            return "Remember", 0.0
+            
+        # Define variables to track for fuzzy logic
+        avg_completion = 0.0
+        avg_trial = 0.0
+        avg_compile = 0.0
+        avg_coding_time = 0.0
+        avg_variables = 0.0
+        avg_functions = 0.0
+        
+        # Count valid metrics
+        valid_count = 0
+        
+        # Calculate averages of all metrics
+        for metrics in metrics_list:
+            if any(metrics.values()):
+                avg_completion += float(metrics.get('completion_status', 0))
+                avg_trial += float(metrics.get('trial_status', 0))
+                avg_compile += float(metrics.get('compile_count', 0))
+                avg_coding_time += float(metrics.get('coding_time', 0))
+                avg_variables += float(metrics.get('variable_count', 0))
+                avg_functions += float(metrics.get('function_count', 0))
+                valid_count += 1
+        
+        # Check if we have any valid metrics
+        if valid_count == 0:
+            return "Remember", 0.0
+            
+        # Calculate averages
+        avg_completion /= valid_count
+        avg_trial /= valid_count
+        avg_compile /= valid_count
+        avg_coding_time /= valid_count
+        avg_variables /= valid_count
+        avg_functions /= valid_count
+        
+        # Normalize compile count and coding time (higher is worse)
+        # Assuming reasonable bounds for normalization
+        norm_compile = min(1.0, avg_compile / 20.0)  # Normalize to 0-1, assume max 20 compiles
+        norm_coding_time = min(1.0, avg_coding_time / 60.0)  # Normalize to 0-1, assume max 60 minutes
+        
+        # Fuzzy logic scoring approach
+        # Calculate a weighted score based on fuzzy rules
+        
+        # Define membership degrees for each metric
+        # Completion status (higher is better)
+        completion_low = max(0, 1 - (avg_completion * 2.5))
+        completion_high = min(1, avg_completion * 2.5)
+        
+        # Trial status (trying questions is important)
+        trial_low = 1 - avg_trial
+        trial_high = avg_trial
+        
+        # Compile count (lower is better - shows efficiency)
+        compile_low = 1 - norm_compile
+        compile_high = norm_compile
+        
+        # Coding time (medium is ideal - not too quick, not too slow)
+        time_low = max(0, 1 - (norm_coding_time * 2.5))
+        time_medium = 1 - abs(2 * norm_coding_time - 1)
+        time_high = max(0, (norm_coding_time * 2.5) - 1)
+        
+        # Variables (higher is better - shows complexity understanding)
+        vars_low = max(0, 1 - (avg_variables / 5.0))
+        vars_high = min(1, avg_variables / 5.0)
+        
+        # Functions (higher is better - shows higher order thinking)
+        funcs_low = max(0, 1 - (avg_functions / 3.0))
+        funcs_high = min(1, avg_functions / 3.0)
+        
+        # Calculate fuzzy rules
+        # Rule 1: If completion is high AND variables is high AND functions is high -> Create level
+        rule1 = min(completion_high, vars_high, funcs_high)
+        
+        # Rule 2: If completion is high AND variables is high -> Evaluate level 
+        rule2 = min(completion_high, vars_high)
+        
+        # Rule 3: If completion is high AND compile is low -> Analyze level
+        rule3 = min(completion_high, compile_low)
+        
+        # Rule 4: If completion is medium AND trial is high -> Apply level
+        rule4 = min(time_medium, trial_high)
+        
+        # Rule 5: If trial is high BUT completion is low -> Understand level
+        rule5 = min(trial_high, completion_low)
+        
+        # Rule 6: If trial is low OR completion is very low -> Remember level
+        rule6 = max(trial_low, completion_low * 2)
+        
+        # Calculate final fuzzy score with rule weights
+        create_weight = 0.95
+        evaluate_weight = 0.75
+        analyze_weight = 0.6
+        apply_weight = 0.45
+        understand_weight = 0.3
+        remember_weight = 0.1
+        
+        numerator = (rule1 * create_weight + 
+                     rule2 * evaluate_weight + 
+                     rule3 * analyze_weight + 
+                     rule4 * apply_weight + 
+                     rule5 * understand_weight + 
+                     rule6 * remember_weight)
+        
+        denominator = (rule1 + rule2 + rule3 + rule4 + rule5 + rule6)
+        
+        # Avoid division by zero
+        if denominator == 0:
+            fuzzy_score = 0.25  # Default to Remember level
+        else:
+            fuzzy_score = numerator / denominator
+        
+        # Ensure score is in 0-1 range
+        fuzzy_score = max(0.0, min(1.0, fuzzy_score))
+        
+        # Map to Bloom's Taxonomy based on the rule base
+        if fuzzy_score >= 0.85:
+            level = "Create"
+        elif fuzzy_score >= 0.70:
+            level = "Evaluate"
+        elif fuzzy_score >= 0.55:
+            level = "Analyze"
+        elif fuzzy_score >= 0.40:
+            level = "Apply"
+        elif fuzzy_score >= 0.25:
+            level = "Understand"
+        else:
+            level = "Remember"
+        
+        return level, float(fuzzy_score)
+        
+    except Exception as e:
+        print(f"Fuzzy logic calculation error: {str(e)}")
         return "Remember", 0.0

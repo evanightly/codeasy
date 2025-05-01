@@ -90,3 +90,5 @@ webencodings==0.5.1
 websocket-client==1.8.0
 websockets==14.2
 ipykernel==6.29.2
+scikit-fuzzy==0.5.0
+networkx==3.4.2
