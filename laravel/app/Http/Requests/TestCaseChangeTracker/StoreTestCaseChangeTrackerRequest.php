@@ -2,13 +2,11 @@
 
 namespace App\Http\Requests\TestCaseChangeTracker;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Support\Enums\IntentEnum;
+use Illuminate\Foundation\Http\FormRequest;
 
-class StoreTestCaseChangeTrackerRequest extends FormRequest
-{
-    public function rules(): array
-    {
+class StoreTestCaseChangeTrackerRequest extends FormRequest {
+    public function rules(): array {
         $rules = [
             'test_case_id' => ['required', 'integer'],
             'learning_material_question_id' => ['required', 'integer'],

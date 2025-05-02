@@ -2,21 +2,18 @@
 
 namespace Database\Factories;
 
-use App\Models\TestCaseChangeTracker;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TestCaseChangeTracker>
  */
-class TestCaseChangeTrackerFactory extends Factory
-{
+class TestCaseChangeTrackerFactory extends Factory {
     /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
-    {
+    public function definition(): array {
         return [
             'test_case_id' => $this->faker->numberBetween(1, 1000),
             'learning_material_question_id' => $this->faker->numberBetween(1, 1000),

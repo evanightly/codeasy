@@ -21,8 +21,8 @@ export const testCaseChangeTrackerServiceHook = {
                     method: 'get',
                     url: route(`${ROUTES.TEST_CASE_CHANGE_TRACKERS}.show`, params.id),
                     params: {
-                        intent: IntentEnum.TEST_CASE_CHANGE_TRACKER_SHOW_EXECUTE_NOW
-                    }
+                        intent: IntentEnum.TEST_CASE_CHANGE_TRACKER_SHOW_EXECUTE_NOW,
+                    },
                 });
             },
             invalidateQueryKeys: [

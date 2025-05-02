@@ -12,9 +12,9 @@ Schedule::command('telescope:prune')->everyTwoHours();
 Schedule::command('telescope:clear')->everyTwoHours();
 Schedule::command('backup:run --only-db --disable-notifications')->hourly();
 Schedule::command('test-cases:process')
-            ->hourly()
-            ->withoutOverlapping()
-            ->appendOutputTo(storage_path('logs/test-case-processing.log'));
+    ->hourly()
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/test-case-processing.log'));
 
 Artisan::command('sandbox:cleanup', function () {
     $path = storage_path('app/public/visualizations');

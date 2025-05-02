@@ -1,9 +1,9 @@
-import { Resource } from '@/Support/Interfaces/Resources';
 import { TestCaseChangeTracker } from '@/Support/Interfaces/Models';
-import { LearningMaterialQuestionTestCaseResource } from './LearningMaterialQuestionTestCaseResource';
-import { LearningMaterialQuestionResource } from './LearningMaterialQuestionResource';
-import { LearningMaterialResource } from './LearningMaterialResource';
+import { Resource } from '@/Support/Interfaces/Resources';
 import { CourseResource } from './CourseResource';
+import { LearningMaterialQuestionResource } from './LearningMaterialQuestionResource';
+import { LearningMaterialQuestionTestCaseResource } from './LearningMaterialQuestionTestCaseResource';
+import { LearningMaterialResource } from './LearningMaterialResource';
 
 export interface TestCaseChangeTrackerResource extends Resource, TestCaseChangeTracker {
     learning_material_question_test_case?: LearningMaterialQuestionTestCaseResource;
