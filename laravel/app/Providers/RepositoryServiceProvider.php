@@ -5,11 +5,13 @@ namespace App\Providers;
 use App\Repositories\ExecutionResultRepository;
 use App\Repositories\StudentScoreRepository;
 use App\Services\Course\CourseImportService;
+use App\Services\DashboardService;
 use App\Services\ExecutionResultService;
 use App\Services\StudentScoreService;
 use App\Support\Interfaces\Repositories\ExecutionResultRepositoryInterface;
 use App\Support\Interfaces\Repositories\StudentScoreRepositoryInterface;
 use App\Support\Interfaces\Services\Course\CourseImportServiceInterface;
+use App\Support\Interfaces\Services\DashboardServiceInterface;
 use App\Support\Interfaces\Services\ExecutionResultServiceInterface;
 use App\Support\Interfaces\Services\StudentScoreServiceInterface;
 use FilesystemIterator;
@@ -56,7 +58,7 @@ class RepositoryServiceProvider extends ServiceProvider {
 
         $this->app->bind(CourseImportServiceInterface::class, CourseImportService::class);
 
-        $this->app->bind(\App\Support\Interfaces\Services\DashboardServiceInterface::class, \App\Services\DashboardService::class);
+        $this->app->bind(DashboardServiceInterface::class, DashboardService::class);
     }
 
     /**
