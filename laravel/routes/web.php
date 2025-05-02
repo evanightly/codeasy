@@ -147,10 +147,9 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::resource('student-cognitive-classifications', App\Http\Controllers\StudentCognitiveClassificationController::class);
+    Route::resource('test-case-change-trackers', App\Http\Controllers\TestCaseChangeTrackerController::class);
 });
 
 Route::resource('schools', SchoolController::class)->only(['index']);
 
 require __DIR__ . '/auth.php';
-
-// StudentCognitiveClassification routes

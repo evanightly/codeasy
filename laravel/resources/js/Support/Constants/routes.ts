@@ -26,4 +26,5 @@ export const ROUTES = {
     STUDENT_COURSE_MATERIALS: 'student.courses.materials',
     STUDENT_COURSE_MATERIAL_QUESTIONS: 'student.courses.materials.questions',
     STUDENT_COGNITIVE_CLASSIFICATIONS: 'student-cognitive-classifications',
+    TEST_CASE_CHANGE_TRACKERS: 'test-case-change-trackers',
 } as const;

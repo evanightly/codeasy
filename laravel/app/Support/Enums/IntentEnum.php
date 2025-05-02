@@ -3,6 +3,8 @@
 namespace App\Support\Enums;
 
 enum IntentEnum: string {
+    case CUSTOM_ACTION = 'custom-action';
+
     case USER_INDEX_STUDENTS = 'user.index.students';
     case TEACHER_UPDATE_APPROVE = 'teacher.update.approve';
     case SCHOOL_UPDATE_ASSIGN_ADMIN = 'school.update.assign.admin';
