@@ -1,7 +1,7 @@
 # Codeasy  
 *(Python Data Science Autograding System)*
 
-Selamat datang di repositori ini! Proyek ini berfokus pada pengembangan **autograding** dan **klasifikasi tingkat pemahaman** siswa dalam pembelajaran **Python untuk Data Science**, menggunakan kerangka kerja **Laravel (PHP)**, **React** (Inertia), dan **FastAPI** (Python), serta didukung oleh **Docker** untuk kemudahan pengembangan dan deployment.
+Proyek ini berfokus pada pengembangan **autograding** dan **klasifikasi tingkat pemahaman** siswa dalam pembelajaran **Python untuk Data Science**, menggunakan kerangka kerja **Laravel (PHP)**, **React** (Inertia), dan **FastAPI** (Python), serta didukung oleh **Docker** untuk kemudahan pengembangan dan deployment.
 
 ## Daftar Isi
 - [Tentang Proyek](#tentang-proyek)
@@ -129,4 +129,4 @@ Langkah-langkah dasar untuk memulai pengembangan lokal:
 3. Commit perubahan Anda.
 4. Buat pull request ke branch main.
 
-Kami terbuka terhadap ide, saran, dan kontribusi dari komunitas yang ingin menyempurnakan platform ini.
+Kami terbuka terhadap ide, saran, dan kontribusi yang ingin menyempurnakan platform ini.
