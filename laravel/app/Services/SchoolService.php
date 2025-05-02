@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Models\School;
 use App\Repositories\SchoolRepository;
 use App\Support\Enums\RoleEnum;

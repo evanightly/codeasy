@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Models\SchoolRequest;
 use App\Repositories\SchoolRequestRepository;
 use App\Support\Enums\RoleEnum;
@@ -11,8 +10,8 @@ use App\Support\Interfaces\Services\RoleServiceInterface;
 use App\Support\Interfaces\Services\SchoolRequestServiceInterface;
 use App\Support\Interfaces\Services\UserServiceInterface;
 use App\Traits\Services\HandlesPageSizeAll;
-use DB;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class SchoolRequestService extends BaseCrudService implements SchoolRequestServiceInterface {
     use HandlesPageSizeAll;

@@ -1559,4 +1559,68 @@ return [
             'neural' => 'Neural Network',
         ],
     ],
+    'test_case_change_tracker' => [
+        'index' => [
+            'title' => 'Test Case Change Tracking',
+        ],
+        'sections' => [
+            'upcoming' => 'Upcoming Re-Executions',
+            'history' => 'Execution History',
+        ],
+        'tabs' => [
+            'upcoming' => 'Upcoming',
+            'history' => 'History',
+        ],
+        'columns' => [
+            'course' => 'Course',
+            'material' => 'Learning Material',
+            'question' => 'Question',
+            'change_type' => 'Change Type',
+            'affected_students' => 'Affected Students',
+            'time_remaining' => 'Time Remaining',
+            'actions' => 'Actions',
+            'status' => 'Status',
+            'scheduled_at' => 'Scheduled At',
+            'completed_at' => 'Completed At',
+        ],
+        'change_types' => [
+            'created' => 'Created',
+            'updated' => 'Updated',
+            'deleted' => 'Deleted',
+        ],
+        'status' => [
+            'pending' => 'Pending',
+            'in_progress' => 'In Progress',
+            'completed' => 'Completed',
+            'failed' => 'Failed',
+            'imminent' => 'Imminent',
+        ],
+        'buttons' => [
+            'execute_now' => 'Execute Now',
+        ],
+        'stats' => [
+            'pending' => 'Pending Re-Executions',
+            'completed' => 'Completed Re-Executions',
+            'failed' => 'Failed Re-Executions',
+            'pending_description' => 'Test case changes awaiting re-execution',
+            'completed_description' => 'Successfully completed re-executions',
+            'failed_description' => 'Re-executions that encountered errors',
+        ],
+        'labels' => [
+            'total' => 'total',
+            'passed' => 'passed',
+            'failed' => 'failed',
+        ],
+        'messages' => [
+            'pending' => [
+                'execute' => 'Executing student code validation...',
+            ],
+            'success' => [
+                'execute' => 'Execution queued successfully',
+            ],
+            'error' => [
+                'execute' => 'Failed to queue execution',
+            ],
+        ],
+    ],
 ];

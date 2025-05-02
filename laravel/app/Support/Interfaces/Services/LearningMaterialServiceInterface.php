@@ -2,8 +2,6 @@
 
 namespace App\Support\Interfaces\Services;
 
-use Adobrovolsky97\LaravelRepositoryServicePattern\Services\Contracts\BaseCrudServiceInterface;
-
 interface LearningMaterialServiceInterface extends BaseCrudServiceInterface {
     /**
      * Get user progress for a learning material

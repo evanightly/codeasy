@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Repositories\PermissionRepository;
 use App\Support\Interfaces\Repositories\PermissionRepositoryInterface;
 use App\Support\Interfaces\Services\PermissionServiceInterface;

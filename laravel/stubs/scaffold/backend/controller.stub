@@ -38,13 +38,13 @@ class {{ modelName }}Controller extends Controller implements HasMiddleware {
         return inertia('{{ modelName }}/Create');
     }
 
-    public function store(Store{{ modelName }}Request $request) {
+    public function store(Request $request, Store{{ modelName }}Request $request) {
         if ($this->ajax()) {
             return $this->{{ modelNameCamel }}Service->create($request->validated());
         }
     }
 
-    public function show({{ modelName }} ${{ modelNameCamel }}) {
+    public function show(Request $request, {{ modelName }} ${{ modelNameCamel }}) {
         $data = {{ modelName }}Resource::make(${{ modelNameCamel }});
 
         if ($this->ajax()) {
@@ -54,19 +54,19 @@ class {{ modelName }}Controller extends Controller implements HasMiddleware {
         return inertia('{{ modelName }}/Show', compact('data'));
     }
 
-    public function edit({{ modelName }} ${{ modelNameCamel }}) {
+    public function edit(Request $request, {{ modelName }} ${{ modelNameCamel }}) {
         $data = {{ modelName }}Resource::make(${{ modelNameCamel }});
 
         return inertia('{{ modelName }}/Edit', compact('data'));
     }
 
-    public function update(Update{{ modelName }}Request $request, {{ modelName }} ${{ modelNameCamel }}) {
+    public function update(Request $request, Update{{ modelName }}Request $request, {{ modelName }} ${{ modelNameCamel }}) {
         if ($this->ajax()) {
             return $this->{{ modelNameCamel }}Service->update(${{ modelNameCamel }}, $request->validated());
         }
     }
 
-    public function destroy({{ modelName }} ${{ modelNameCamel }}) {
+    public function destroy(Request $request, {{ modelName }} ${{ modelNameCamel }}) {
         if ($this->ajax()) {
             return $this->{{ modelNameCamel }}Service->delete(${{ modelNameCamel }});
         }

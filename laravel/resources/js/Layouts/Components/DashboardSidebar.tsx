@@ -11,6 +11,7 @@ import {
     Presentation,
     School,
     ShieldCheck,
+    TestTube,
     Users,
 } from 'lucide-react';
 import * as React from 'react';
@@ -141,6 +142,13 @@ const DashboardSidebar = ({ ...props }: AppSidebarProps) => {
                         url: route(`${ROUTES.STUDENT_COGNITIVE_CLASSIFICATIONS}.index`),
                         icon: Brain,
                         permissions: [PermissionEnum.STUDENT_COGNITIVE_CLASSIFICATION_READ],
+                    },
+                    {
+                        type: 'menu',
+                        title: t('components.dashboard_sidebar.academic.test_case_change_trackers'),
+                        url: route(`${ROUTES.TEST_CASE_CHANGE_TRACKERS}.index`),
+                        icon: TestTube,
+                        permissions: [PermissionEnum.TEST_CASE_CHANGE_TRACKER_READ],
                     },
                 ],
             },

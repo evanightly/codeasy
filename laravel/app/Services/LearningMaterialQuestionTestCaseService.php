@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Repositories\LearningMaterialQuestionTestCaseRepository;
 use App\Support\Interfaces\Repositories\LearningMaterialQuestionTestCaseRepositoryInterface;
 use App\Support\Interfaces\Services\LearningMaterialQuestionTestCaseServiceInterface;

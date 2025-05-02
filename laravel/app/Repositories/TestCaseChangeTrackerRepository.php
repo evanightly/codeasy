@@ -10,8 +10,7 @@ use App\Traits\Repositories\HandlesSorting;
 use App\Traits\Repositories\RelationQueryable;
 use Illuminate\Database\Eloquent\Builder;
 
-class TestCaseChangeTrackerRepository extends BaseRepository implements TestCaseChangeTrackerRepositoryInterface
-{
+class TestCaseChangeTrackerRepository extends BaseRepository implements TestCaseChangeTrackerRepositoryInterface {
     use HandlesFiltering, HandlesRelations, HandlesSorting, RelationQueryable;
 
     protected function applyFilters(array $searchParams = []): Builder {

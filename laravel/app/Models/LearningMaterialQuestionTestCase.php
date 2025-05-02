@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Observers\LearningMaterialQuestionTestCaseObserver;
 use App\Support\Enums\ProgrammingLanguageEnum;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[ObservedBy(LearningMaterialQuestionTestCaseObserver::class)]
 class LearningMaterialQuestionTestCase extends Model {
     use HasFactory;
 

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TestCaseChangeTracker\StoreTestCaseChangeTrackerRequest;
 use App\Http\Requests\TestCaseChangeTracker\UpdateTestCaseChangeTrackerRequest;
 use App\Http\Resources\TestCaseChangeTrackerResource;
+use App\Jobs\TestCaseChangeTracker\ExecuteStudentCodeWithUpdatedTestCases;
 use App\Models\TestCaseChangeTracker;
+use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\TestCaseChangeTrackerServiceInterface;
 use Illuminate\Http\Request;
@@ -31,7 +33,18 @@ class TestCaseChangeTrackerController extends Controller implements HasMiddlewar
             return $data;
         }
 
-        return inertia('TestCaseChangeTracker/Index');
+        // Get counts for dashboard
+        $pendingCount = $this->testCaseChangeTrackerService->modelClass->where(['status' => 'pending'])->count();
+        $completedCount = $this->testCaseChangeTrackerService->modelClass->where(['status' => 'completed'])->count();
+        $failedCount = $this->testCaseChangeTrackerService->modelClass->where(['status' => 'failed'])->count();
+
+        return inertia('TestCaseChangeTracker/Index', [
+            'stats' => [
+                'pending' => $pendingCount,
+                'completed' => $completedCount,
+                'failed' => $failedCount,
+            ],
+        ]);
     }
 
     public function create() {
@@ -44,10 +57,23 @@ class TestCaseChangeTrackerController extends Controller implements HasMiddlewar
         }
     }
 
-    public function show(TestCaseChangeTracker $testCaseChangeTracker) {
+    public function show(Request $request, TestCaseChangeTracker $testCaseChangeTracker) {
         $data = TestCaseChangeTrackerResource::make($testCaseChangeTracker);
 
         if ($this->ajax()) {
+            switch ($request->get('intent')) {
+                case IntentEnum::TEST_CASE_CHANGE_TRACKER_SHOW_EXECUTE_NOW->value:
+                    // Only allow execution of pending trackers
+                    if ($testCaseChangeTracker->status !== 'pending') {
+                        return response()->json(['error' => 'Only pending trackers can be executed manually'], 400);
+                    }
+
+                    // Dispatch job immediately
+                    ExecuteStudentCodeWithUpdatedTestCases::dispatch($testCaseChangeTracker)->onQueue('high');
+
+                    return response()->json(['message' => 'Execution queued successfully']);
+            }
+
             return $data;
         }
 

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Models\StudentScore;
 use App\Support\Interfaces\Repositories\ExecutionResultRepositoryInterface;
 use App\Support\Interfaces\Services\ExecutionResultServiceInterface;

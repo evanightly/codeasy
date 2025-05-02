@@ -28,40 +28,10 @@ class TestCaseChangeTrackerResource extends JsonResource {
             'learning_material_question' => new LearningMaterialQuestionResource($this->whenLoaded('learning_material_question')),
             'learning_material' => new LearningMaterialResource($this->whenLoaded('learning_material')),
             'course' => new CourseResource($this->whenLoaded('course')),
-            'affected_students_count' => $this->affected_students_count,
+            'affected_students_count' => $this->affected_student_ids ? count($this->affected_student_ids) : 0,
             'time_remaining' => $this->status === 'pending' ? now()->diffInSeconds($this->scheduled_at, false) : null,
         ];
 
         return $this->filterData($request, $dataSource);
-    }
-
-    /**
-     * Get the count of affected students, handling various possible formats.
-     */
-    private function getAffectedStudentsCount(): int {
-        // If already an array, just count it
-        if (is_array($this->affected_student_ids)) {
-            return count($this->affected_student_ids);
-        }
-
-        // If it's a string, try to decode it as JSON
-        if (is_string($this->affected_student_ids)) {
-            $decoded = json_decode($this->affected_student_ids, true);
-
-            // If we got a valid array or object back
-            if (is_array($decoded)) {
-                // Handle associative arrays (objects) by counting values
-                if (array_keys($decoded) !== range(0, count($decoded) - 1)) {
-                    // This is an associative array, just count values
-                    return count(array_values($decoded));
-                }
-
-                // Plain array, just count it
-                return count($decoded);
-            }
-        }
-
-        // Default to 0 if we couldn't parse it
-        return 0;
     }
 }

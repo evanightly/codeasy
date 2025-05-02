@@ -37,7 +37,7 @@ services:
       context: .
       dockerfile: docker/laravel.prod.Dockerfile
     container_name: laravel_queue
-    command: php artisan queue:work
+    command: php artisan queue:work --queue=high,default
     volumes:
       - ./laravel:/var/www/html
     networks:

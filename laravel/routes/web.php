@@ -16,8 +16,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SchoolRequestController;
+use App\Http\Controllers\StudentCognitiveClassificationController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentScoreController;
+use App\Http\Controllers\TestCaseChangeTrackerController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Http;
@@ -146,8 +148,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/questions/update-time', [StudentController::class, 'updateCodingTime'])->name('questions.update-time');
     });
 
-    Route::resource('student-cognitive-classifications', App\Http\Controllers\StudentCognitiveClassificationController::class);
-    Route::resource('test-case-change-trackers', App\Http\Controllers\TestCaseChangeTrackerController::class);
+    Route::resource('student-cognitive-classifications', StudentCognitiveClassificationController::class);
+    Route::resource('test-case-change-trackers', TestCaseChangeTrackerController::class);
 });
 
 Route::resource('schools', SchoolController::class)->only(['index']);

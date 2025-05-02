@@ -10,4 +10,5 @@ export interface TestCaseChangeTrackerResource extends Resource, TestCaseChangeT
     learning_material_question?: LearningMaterialQuestionResource;
     learning_material?: LearningMaterialResource;
     course?: CourseResource;
+    affected_students_count?: number;
 }

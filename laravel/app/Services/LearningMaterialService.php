@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Models\LearningMaterial;
 use App\Models\StudentScore;
 use App\Repositories\LearningMaterialRepository;

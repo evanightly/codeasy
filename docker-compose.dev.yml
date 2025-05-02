@@ -37,7 +37,7 @@ services:
       context: .
       dockerfile: docker/laravel.dev.Dockerfile
     container_name: codeasy_laravel_queue
-    command: php artisan queue:work
+    command: php artisan queue:listen --tries=2 --queue=high,default
     volumes:
       - ./laravel:/var/www/html
     networks:

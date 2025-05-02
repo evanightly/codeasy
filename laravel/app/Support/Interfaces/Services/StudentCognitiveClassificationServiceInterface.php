@@ -2,7 +2,6 @@
 
 namespace App\Support\Interfaces\Services;
 
-use Adobrovolsky97\LaravelRepositoryServicePattern\Services\Contracts\BaseCrudServiceInterface;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
