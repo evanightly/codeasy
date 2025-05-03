@@ -25,10 +25,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface EditProps {
-    data: { data: SchoolRequestResource };
+    data: SchoolRequestResource;
 }
 
-export default function Edit({ data: { data } }: EditProps) {
+export default function Edit({ data }: EditProps) {
     const { t } = useLaravelReactI18n();
     const { teachedSchools } = usePage().props.auth.user;
     const updateMutation = schoolRequestServiceHook.useUpdate();

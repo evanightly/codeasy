@@ -22,10 +22,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface Props {
-    data: { data: SchoolResource };
+    data: SchoolResource;
 }
 
-export default function Edit({ data: { data: school } }: Props) {
+export default function Edit({ data: school }: Props) {
     const { t } = useLaravelReactI18n();
 
     const formSchema = z.object({

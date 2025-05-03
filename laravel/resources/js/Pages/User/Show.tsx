@@ -10,12 +10,10 @@ import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { CalendarIcon, KeyRoundIcon, MailIcon, UserIcon } from 'lucide-react';
 
 interface Props {
-    data: {
-        data: UserResource;
-    };
+    data: UserResource;
 }
 
-export default function Show({ data: { data: user } }: Props) {
+export default function Show({ data: user }: Props) {
     const { t } = useLaravelReactI18n();
 
     if (!user) return null;

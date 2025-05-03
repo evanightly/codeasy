@@ -7,14 +7,11 @@ import { ClassRoomDetails } from './Partials/ClassRoomDetails';
 import { StudentsList } from './Partials/StudentsList';
 
 interface Props {
-    data: {
-        data: ClassRoomResource;
-    };
+    data: ClassRoomResource;
 }
 
-export default function Show({ data: { data } }: Props) {
+export default function Show({ data }: Props) {
     const { t } = useLaravelReactI18n();
-    console.log(data);
 
     if (!data) return null;
 

@@ -39,15 +39,15 @@ import {
 import { useMemo, useState } from 'react';
 
 interface Props {
-    course: { data: CourseResource };
-    learningMaterial: { data: LearningMaterialResource };
-    learningMaterialQuestion: { data: LearningMaterialQuestionResource };
+    course: CourseResource;
+    learningMaterial: LearningMaterialResource;
+    learningMaterialQuestion: LearningMaterialQuestionResource;
 }
 
 export default function Show({
-    course: { data: courseData },
-    learningMaterial: { data: learningMaterialData },
-    learningMaterialQuestion: { data: learningMaterialQuestionData },
+    course: courseData,
+    learningMaterial: learningMaterialData,
+    learningMaterialQuestion: learningMaterialQuestionData,
 }: Props) {
     const confirmAction = useConfirmation();
     const { t } = useLaravelReactI18n();

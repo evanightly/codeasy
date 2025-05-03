@@ -14,22 +14,12 @@ import { useState } from 'react';
 import { TestCases } from './Partials/TestCases';
 
 interface Props {
-    question: {
-        data: LearningMaterialQuestionResource;
-    };
-    course: {
-        data: CourseResource;
-    };
-    learningMaterial: {
-        data: LearningMaterialResource;
-    };
+    question: LearningMaterialQuestionResource;
+    course: CourseResource;
+    learningMaterial: LearningMaterialResource;
 }
 
-export default function Index({
-    question: { data: question },
-    course: { data: course },
-    learningMaterial: { data: learningMaterial },
-}: Props) {
+export default function Index({ question, course, learningMaterial }: Props) {
     const { t } = useLaravelReactI18n();
 
     const [filters, setFilters] = useState<ServiceFilterOptions>({

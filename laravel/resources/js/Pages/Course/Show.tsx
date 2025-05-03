@@ -12,12 +12,10 @@ import { LearningMaterials } from './LearningMaterial/Partials/LearningMaterials
 import { CourseDetails } from './Partials/CourseDetails';
 
 interface Props {
-    data: {
-        data: CourseResource;
-    };
+    data: CourseResource;
 }
 
-export default function Show({ data: { data } }: Props) {
+export default function Show({ data: course }: Props) {
     const { t } = useLaravelReactI18n();
 
     const [filters, setFilters] = useState<ServiceFilterOptions>({
@@ -28,19 +26,19 @@ export default function Show({ data: { data } }: Props) {
         learning_material_resource:
             'id,title,description,type,order_number,active,file,file_extension,file_url',
         column_filters: {
-            course_id: data.id,
+            course_id: course.id,
         },
     });
 
     const learningMaterialsResponse = learningMaterialServiceHook.useGetAll({ filters });
 
-    if (!data) return null;
+    if (!course) return null;
 
     return (
         <AuthenticatedLayout title={t('pages.course.show.title')}>
             <Card>
                 <CardHeader>
-                    <CardTitle>{data.name}</CardTitle>
+                    <CardTitle>{course.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue='details'>
@@ -53,14 +51,14 @@ export default function Show({ data: { data } }: Props) {
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value='details'>
-                            <CourseDetails course={data} />
+                            <CourseDetails course={course} />
                         </TabsContent>
                         <TabsContent value='materials'>
                             <LearningMaterials
                                 setFilters={setFilters}
                                 response={learningMaterialsResponse}
                                 filters={filters}
-                                courseId={data.id}
+                                courseId={course.id}
                                 baseRoute={ROUTES.COURSE_LEARNING_MATERIALS}
                                 baseKey={TANSTACK_QUERY_KEYS.COURSE_LEARNING_MATERIALS}
                             />

@@ -61,25 +61,17 @@ function TextFilePreview({ fileUrl }: { fileUrl: string }) {
 }
 
 interface Props {
-    course: {
-        data: CourseResource;
-    };
-    learningMaterial: {
-        data: LearningMaterialResource;
-    };
-    question: {
-        data: LearningMaterialQuestionResource;
-    };
-    testCase: {
-        data: LearningMaterialQuestionTestCaseResource;
-    };
+    course: CourseResource;
+    learningMaterial: LearningMaterialResource;
+    question: LearningMaterialQuestionResource;
+    testCase: LearningMaterialQuestionTestCaseResource;
 }
 
 export default function Edit({
-    course: { data: course },
-    learningMaterial: { data: learningMaterial },
-    question: { data: question },
-    testCase: { data: testCase },
+    course,
+    learningMaterial,
+    question,
+    testCase,
 }: Props) {
     const { t } = useLaravelReactI18n();
     const updateMutation = learningMaterialQuestionTestCaseServiceHook.useUpdate();

@@ -40,10 +40,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface Props {
-    course: { data: CourseResource };
+    course: CourseResource;
 }
 
-export default function Create({ course: { data: courseData } }: Props) {
+export default function Create({ course: courseData }: Props) {
     const { t } = useLaravelReactI18n();
     const createMutation = learningMaterialServiceHook.useCreate();
 

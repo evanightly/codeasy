@@ -25,10 +25,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface Props {
-    data: { data: RoleResource };
+    data: RoleResource;
 }
 
-export default function Edit({ data: { data: role } }: Props) {
+export default function Edit({ data: role }: Props) {
     const { t } = useLaravelReactI18n();
     const updateMutation = roleServiceHook.useUpdate();
     const [permissionFilters, _setPermissionFilters] = useState<ServiceFilterOptions>({

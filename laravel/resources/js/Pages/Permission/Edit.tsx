@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface Props {
-    data: { data: PermissionResource };
+    data: PermissionResource;
 }
 
 const formSchema = z.object({
@@ -37,7 +37,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function Edit({ data: { data: permission } }: Props) {
+export default function Edit({ data: permission }: Props) {
     const updateMutation = permissionServiceHook.useUpdate();
 
     const form = useForm<FormData>({

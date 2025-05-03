@@ -13,10 +13,10 @@ import { SchoolDetails } from './Partials/SchoolDetails';
 import { UsersList } from './Partials/UsersList';
 
 interface Props {
-    data: { data: SchoolResource };
+    data: SchoolResource;
 }
 
-export default function Show({ data: { data: school } }: Props) {
+export default function Show({ data: school }: Props) {
     const { t } = useLaravelReactI18n();
     const confirmAction = useConfirmation();
     const unassignAdminMutation = schoolServiceHook.useUnassignAdmin();

@@ -7,12 +7,10 @@ import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { CalendarIcon, LockIcon, ShieldCheckIcon, TagIcon } from 'lucide-react';
 
 interface Props {
-    data: {
-        data: PermissionResource;
-    };
+    data: PermissionResource;
 }
 
-export default function Show({ data: { data: permission } }: Props) {
+export default function Show({ data: permission }: Props) {
     const { t } = useLaravelReactI18n();
     console.log(permission);
 

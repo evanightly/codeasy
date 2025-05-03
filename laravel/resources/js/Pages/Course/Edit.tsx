@@ -26,10 +26,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface Props {
-    data: { data: CourseResource };
+    data: CourseResource;
 }
 
-export default function Edit({ data: { data } }: Props) {
+export default function Edit({ data }: Props) {
     const { teachedSchools } = usePage().props.auth.user;
     const { t } = useLaravelReactI18n();
     const updateMutation = courseServiceHook.useUpdate();

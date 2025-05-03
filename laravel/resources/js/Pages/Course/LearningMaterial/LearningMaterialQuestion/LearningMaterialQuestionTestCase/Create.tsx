@@ -60,22 +60,12 @@ function TextFilePreview({ fileUrl }: { fileUrl: string }) {
 }
 
 interface Props {
-    course: {
-        data: CourseResource;
-    };
-    learningMaterial: {
-        data: LearningMaterialResource;
-    };
-    question: {
-        data: LearningMaterialQuestionResource;
-    };
+    course: CourseResource;
+    learningMaterial: LearningMaterialResource;
+    question: LearningMaterialQuestionResource;
 }
 
-export default function Create({
-    question: { data: question },
-    course: { data: course },
-    learningMaterial: { data: learningMaterial },
-}: Props) {
+export default function Create({ question, course, learningMaterial }: Props) {
     const { t } = useLaravelReactI18n();
     const createMutation = learningMaterialQuestionTestCaseServiceHook.useCreate();
 

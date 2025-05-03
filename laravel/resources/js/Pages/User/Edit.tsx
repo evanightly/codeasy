@@ -26,10 +26,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface Props {
-    data: { data: UserResource };
+    data: UserResource;
 }
 
-export default function Edit({ data: { data: user } }: Props) {
+export default function Edit({ data: user }: Props) {
     const { t } = useLaravelReactI18n();
     const updateMutation = userServiceHook.useUpdate();
     const { data: roles, isLoading } = roleServiceHook.useGetAll();

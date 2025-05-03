@@ -14,14 +14,11 @@ import { Questions } from './LearningMaterialQuestion/Partials/Questions';
 import { LearningMaterialDetails } from './Partials/LearningMaterialDetails';
 
 interface Props {
-    course: { data: CourseResource };
-    learningMaterial: { data: LearningMaterialResource };
+    course: CourseResource;
+    learningMaterial: LearningMaterialResource;
 }
 
-export default function Show({
-    course: { data: course },
-    learningMaterial: { data: learningMaterial },
-}: Props) {
+export default function Show({ course, learningMaterial }: Props) {
     const { t } = useLaravelReactI18n();
 
     const [filters, setFilters] = useState<ServiceFilterOptions>({

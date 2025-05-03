@@ -7,12 +7,10 @@ import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { CalendarIcon, KeyRoundIcon, LockIcon, UserIcon } from 'lucide-react';
 
 interface Props {
-    data: {
-        data: RoleResource;
-    };
+    data: RoleResource;
 }
 
-export default function Show({ data: { data: role } }: Props) {
+export default function Show({ data: role }: Props) {
     const { t } = useLaravelReactI18n();
 
     if (!role) return null;

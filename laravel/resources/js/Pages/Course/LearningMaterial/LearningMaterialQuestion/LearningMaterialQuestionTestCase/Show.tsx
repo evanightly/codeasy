@@ -34,26 +34,13 @@ function TextFilePreview({ fileUrl }: { fileUrl: string }) {
 }
 
 interface Props {
-    testCase: {
-        data: LearningMaterialQuestionTestCaseResource;
-    };
-    course: {
-        data: CourseResource;
-    };
-    learningMaterial: {
-        data: LearningMaterialResource;
-    };
-    question: {
-        data: LearningMaterialQuestionResource;
-    };
+    testCase: LearningMaterialQuestionTestCaseResource;
+    course: CourseResource;
+    learningMaterial: LearningMaterialResource;
+    question: LearningMaterialQuestionResource;
 }
 
-export default function Show({
-    testCase: { data: testCase },
-    course: { data: course },
-    learningMaterial: { data: learningMaterial },
-    question: { data: question },
-}: Props) {
+export default function Show({ testCase, course, learningMaterial, question }: Props) {
     const { t } = useLaravelReactI18n();
 
     if (!testCase) return null;

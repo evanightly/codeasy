@@ -45,13 +45,13 @@ function TextFilePreview({ fileUrl }: { fileUrl: string }) {
 }
 
 interface Props {
-    course: { data: CourseResource };
-    learningMaterial: { data: LearningMaterialResource };
+    course: CourseResource;
+    learningMaterial: LearningMaterialResource;
 }
 
 export default function Create({
-    course: { data: courseData },
-    learningMaterial: { data: learningMaterialData },
+    course: courseData,
+    learningMaterial: learningMaterialData,
 }: Props) {
     const { t } = useLaravelReactI18n();
     const createMutation = learningMaterialQuestionServiceHook.useCreate();

@@ -34,10 +34,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface Props {
-    data: { data: ClassRoomResource };
+    data: ClassRoomResource;
 }
 
-export default function Edit({ data: { data } }: Props) {
+export default function Edit({ data }: Props) {
     const { t } = useLaravelReactI18n();
     const { roles, teachedSchools } = usePage().props.auth.user;
     const updateMutation = classRoomServiceHook.useUpdate();

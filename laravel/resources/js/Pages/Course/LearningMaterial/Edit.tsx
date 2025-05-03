@@ -40,13 +40,13 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface Props {
-    course: { data: CourseResource };
-    learningMaterial: { data: LearningMaterialResource };
+    course: CourseResource;
+    learningMaterial: LearningMaterialResource;
 }
 
 export default function Edit({
-    course: { data: courseData },
-    learningMaterial: { data: learningMaterialData },
+    course: courseData,
+    learningMaterial: learningMaterialData,
 }: Props) {
     const { t } = useLaravelReactI18n();
     const updateMutation = learningMaterialServiceHook.useUpdate();
