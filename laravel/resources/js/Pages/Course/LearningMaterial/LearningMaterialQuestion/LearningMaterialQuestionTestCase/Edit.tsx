@@ -67,12 +67,7 @@ interface Props {
     testCase: LearningMaterialQuestionTestCaseResource;
 }
 
-export default function Edit({
-    course,
-    learningMaterial,
-    question,
-    testCase,
-}: Props) {
+export default function Edit({ course, learningMaterial, question, testCase }: Props) {
     const { t } = useLaravelReactI18n();
     const updateMutation = learningMaterialQuestionTestCaseServiceHook.useUpdate();
 
