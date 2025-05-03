@@ -1,18 +1,19 @@
 {
-    "recommendations": [
-      "dbaeumer.vscode-eslint",
-      "ms-vscode.vscode-typescript-next",
-      "formulahendry.auto-rename-tag",
-      "eamodio.gitlens",
-      "editorconfig.editorconfig",
-      "laravel.vscode-laravel",
-      "bmewburn.vscode-intelephense-client",
-      "MehediDracula.php-namespace-resolver",
-      "esbenp.prettier-vscode",
-      "ms-python.python",
-      "ms-python.debugpy",
-      "bradlc.vscode-tailwindcss",
-      "open-southeners.laravel-pint",
-      "onecentlin.laravel5-snippets",
-    ]
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-next",
+    "formulahendry.auto-rename-tag",
+    "eamodio.gitlens",
+    "editorconfig.editorconfig",
+    "laravel.vscode-laravel",
+    "bmewburn.vscode-intelephense-client",
+    "MehediDracula.php-namespace-resolver",
+    "esbenp.prettier-vscode",
+    "ms-python.python",
+    "ms-python.debugpy",
+    "bradlc.vscode-tailwindcss",
+    "open-southeners.laravel-pint",
+    "onecentlin.laravel5-snippets",
+    "docker.docker"
+  ]
 }

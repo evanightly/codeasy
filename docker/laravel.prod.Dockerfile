@@ -14,6 +14,7 @@ RUN apk update && apk add --no-cache \
     sqlite-libs \
     nodejs-current \
     npm \
+    mariadb-client \
     # Add dependencies for GD extension
     freetype-dev \
     libjpeg-turbo-dev \
