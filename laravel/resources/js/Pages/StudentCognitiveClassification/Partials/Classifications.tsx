@@ -16,6 +16,7 @@ import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { MoreHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { ClassificationDetails } from './ClassificationDetails';
 
 interface ClassificationsProps {
     baseRoute: string;
@@ -120,21 +121,24 @@ export function Classifications({ baseRoute, baseKey }: ClassificationsProps) {
                 const classification = row.original;
 
                 return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant='ghost' className='h-8 w-8 p-0'>
-                                <span className='sr-only'>
-                                    {t('components.dropdown_menu.sr_open_menu')}
-                                </span>
-                                <MoreHorizontal className='h-4 w-4' />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align='end'>
-                            <DropdownMenuItem onClick={() => handleDelete(classification)}>
-                                {t('action.delete')}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className='flex items-center space-x-2'>
+                        <ClassificationDetails classificationId={row.original.id} />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant='ghost' className='h-8 w-8 p-0'>
+                                    <span className='sr-only'>
+                                        {t('components.dropdown_menu.sr_open_menu')}
+                                    </span>
+                                    <MoreHorizontal className='h-4 w-4' />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end'>
+                                <DropdownMenuItem onClick={() => handleDelete(classification)}>
+                                    {t('action.delete')}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 );
             },
         }),

@@ -9,8 +9,6 @@ import json
 import re
 import ast
 import numpy as np
-from pydantic import BaseModel
-# Add new imports for neural network and fuzzy logic
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import MinMaxScaler
 import skfuzzy as fuzz
@@ -116,12 +114,7 @@ def format_error_message(traceback_text):
     lines = clean_text.split('\n')
     
     # Format the traceback to be more readable
-    formatted_lines = []
-    for line in lines:
-        line = line.rstrip()
-        if line:
-            formatted_lines.append(line)
-    
+    formatted_lines = [line.rstrip() for line in lines if line.rstrip()]
     return '\n'.join(formatted_lines)
 
 # Function to detect input() usage in code
@@ -169,8 +162,7 @@ class JupyterKernelManager:
                                     "type": "text",
                                     "content": line.strip()
                                 })
-                
-                elif msg_type == 'display_data' or msg_type == 'execute_result':
+                elif msg_type in ['display_data', 'execute_result']:
                     if 'image/png' in content.get('data', {}):
                         image_data = content['data']['image/png']
                         # Add sandbox_ prefix for temporary files
@@ -330,34 +322,51 @@ async def classify_students(request: ClassificationRequest):
         
         # Process each student
         for student in student_data:
-            # Collect all metrics across all materials and questions
-            all_metrics = []
+            # Restructure the metrics for TOPSIS calculation - by material rather than by question
             material_metrics = {}
             
-            # Process each material
-            for material in student.materials:
+            # Get list of all materials
+            materials = student.materials
+            
+            # Create decision matrix (each row is a material, columns are metrics for each question)
+            decision_matrix = []
+            
+            for material in materials:
                 material_id = material.get('material_id')
                 material_metrics[material_id] = {}
                 
-                # Process each question in the material
+                # Prepare row for this material (will contain metrics for all questions)
+                material_row = []
+                
+                # Add all metrics for each question in this material
                 for question in material.get('questions', []):
                     question_id = question.get('question_id')
                     metrics = question.get('metrics', {})
-                    
-                    # Store metrics for this question
                     material_metrics[material_id][question_id] = metrics
-                    all_metrics.append(metrics)
+                    
+                    # Append each metric for this question to the material row in the new order
+                    material_row.append(float(metrics.get('compile_count', 0)))
+                    material_row.append(float(metrics.get('coding_time', 0)))
+                    material_row.append(float(metrics.get('completion_status', 0)))
+                    material_row.append(float(metrics.get('trial_status', 0)))
+                    material_row.append(float(metrics.get('variable_count', 0)))
+                    material_row.append(float(metrics.get('function_count', 0)))
+                
+                # Add this material's row to the decision matrix
+                decision_matrix.append(material_row)
             
-            # Determine cognitive level using selected method
+            # Get classification results
+            calculation_details = {}
             if classification_type == "topsis":
-                level, score = calculate_topsis(all_metrics)
+                level, score, calculation_details = calculate_topsis_by_material(decision_matrix, len(materials[0].get('questions', [])))
             elif classification_type == "neural":
-                level, score = calculate_neural_network(all_metrics)
+                level, score = calculate_neural_network(decision_matrix)
+                calculation_details = {"method": "neural_network"}
             elif classification_type == "fuzzy":
-                level, score = calculate_fuzzy_logic(all_metrics)
+                level, score = calculate_fuzzy_logic(decision_matrix)
+                calculation_details = {"method": "fuzzy_logic"}
             else:
-                # Default to TOPSIS
-                level, score = calculate_topsis(all_metrics)
+                level, score, calculation_details = calculate_topsis_by_material(decision_matrix, len(materials[0].get('questions', [])))
             
             # Final sanity check for JSON serialization
             if np.isnan(score) or np.isinf(score):
@@ -371,7 +380,8 @@ async def classify_students(request: ClassificationRequest):
                     score=float(score),
                     raw_data={
                         "materials": material_metrics,
-                        "method": classification_type
+                        "method": classification_type,
+                        "calculation_details": calculation_details
                     }
                 )
             )
@@ -384,89 +394,167 @@ async def classify_students(request: ClassificationRequest):
         print(f"Classification error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-def calculate_topsis(metrics_list):
+def calculate_topsis_by_material(decision_matrix, question_count):
     try:
-        if not metrics_list:
-            return "Remember", 0.0
+        if not decision_matrix or len(decision_matrix) == 0:
+            return "Remember", 0.0, {}
             
-        # Extract benefit and cost criteria
-        benefits = ['completion_status', 'variable_count', 'function_count']
-        costs = ['trial_status', 'compile_count', 'coding_time']
+        # Define criteria types for each metric (benefits and costs)
+        # Each question has 6 metrics in this new order: 
+        # compile_count, coding_time, completion_status, trial_status, variable_count, function_count
+        benefits = []
+        costs = []
         
-        # Create decision matrix
-        decision_matrix = []
-        for metrics in metrics_list:
-            row = []
-            # Add benefit criteria
-            for benefit in benefits:
-                row.append(float(metrics.get(benefit, 0)))
-            # Add cost criteria
-            for cost in costs:
-                row.append(float(metrics.get(cost, 0)))
-            decision_matrix.append(row)
+        # For each question, define which metrics are benefits and which are costs
+        for q in range(question_count):
+            # Indices for this question's metrics
+            q_start = q * 6
+            
+            # Costs: compile_count, coding_time
+            costs.extend([q_start, q_start + 1])
+            
+            # Benefits: completion_status
+            benefits.extend([q_start + 2])
+            
+            # Costs: trial_status
+            costs.extend([q_start + 3])
+            
+            # Benefits: variable_count, function_count
+            benefits.extend([q_start + 4, q_start + 5])
         
         # Convert to numpy array for calculations
-        if not decision_matrix:
-            return "Remember", 0.0
-            
         decision_matrix = np.array(decision_matrix)
         
-        # If we have only one row, we can't perform TOPSIS
-        if len(decision_matrix) == 1:
-            # Determine level based on completion status
-            completion = decision_matrix[0][0]  # First benefit is completion_status
-            if completion > 0:
-                return "Apply", 0.45
-            else:
-                return "Remember", 0.2
+        calculation_details = {
+            "criteria": {
+                "benefits": ["completion_status", "variable_count", "function_count"] * question_count,
+                "costs": ["compile_count", "coding_time", "trial_status"] * question_count
+            },
+            "decision_matrix": decision_matrix.tolist(),
+            "steps": []
+        }
         
-        # Calculate column sums for normalization
+        # Handle single row case
+        single_row_case = len(decision_matrix) == 1
+        if single_row_case:
+            row_copy = decision_matrix[0].copy()
+            small_variation = np.random.uniform(0.01, 0.05, size=row_copy.shape)
+            row_copy = np.maximum(0, row_copy - small_variation)
+            decision_matrix = np.vstack([decision_matrix, row_copy])
+            calculation_details["steps"].append({
+                "name": "Handle Single Row Case",
+                "description": "Duplicated the single row with slight variation to enable TOPSIS calculation",
+                "duplicated_matrix": decision_matrix.tolist()
+            })
+            
+        # Normalization step
         col_sums = np.sqrt(np.sum(decision_matrix**2, axis=0))
+        col_sums[col_sums == 0] = 1  # Avoid division by zero
         
-        # Handle zeros in col_sums
-        col_sums[col_sums == 0] = 1
+        calculation_details["steps"].append({
+            "name": "Calculate Column Sums",
+            "description": "Square root of sum of squares for each column",
+            "column_sums": col_sums.tolist()
+        })
         
-        # Normalize the decision matrix
         normalized_matrix = decision_matrix / col_sums
         
-        # Define weights (equal weights for simplicity)
+        calculation_details["steps"].append({
+            "name": "Normalize Decision Matrix",
+            "description": "Divide each value by its column sum",
+            "normalized_matrix": normalized_matrix.tolist()
+        })
+        
+        # Equal weights for all criteria
         num_criteria = len(benefits) + len(costs)
-        weights = np.ones(num_criteria) / num_criteria
+        weights = np.ones(normalized_matrix.shape[1]) / normalized_matrix.shape[1]
+        
+        calculation_details["steps"].append({
+            "name": "Define Weights",
+            "description": "Equal weights for all criteria",
+            "weights": weights.tolist()
+        })
         
         # Apply weights
         weighted_matrix = normalized_matrix * weights
         
-        # Determine ideal and negative-ideal solutions
-        ideal_best = np.zeros(num_criteria)
-        ideal_worst = np.zeros(num_criteria)
+        calculation_details["steps"].append({
+            "name": "Apply Weights",
+            "description": "Multiply normalized matrix by weights",
+            "weighted_matrix": weighted_matrix.tolist()
+        })
         
-        # For benefit criteria, max is best; for cost criteria, min is best
-        for i in range(len(benefits)):
-            ideal_best[i] = np.max(weighted_matrix[:, i])
-            ideal_worst[i] = np.min(weighted_matrix[:, i])
+        # Ideal solutions
+        ideal_best = np.zeros(weighted_matrix.shape[1])
+        ideal_worst = np.zeros(weighted_matrix.shape[1])
         
-        for i in range(len(costs)):
-            j = i + len(benefits)
-            ideal_best[j] = np.min(weighted_matrix[:, j])
-            ideal_worst[j] = np.max(weighted_matrix[:, j])
+        # Set ideal values for benefits (max is best)
+        for i in benefits:
+            if i < weighted_matrix.shape[1]:
+                ideal_best[i] = np.max(weighted_matrix[:, i])
+                ideal_worst[i] = np.min(weighted_matrix[:, i])
+        
+        # Set ideal values for costs (min is best)
+        for i in costs:
+            if i < weighted_matrix.shape[1]:
+                ideal_best[i] = np.min(weighted_matrix[:, i])
+                ideal_worst[i] = np.max(weighted_matrix[:, i])
+        
+        calculation_details["steps"].append({
+            "name": "Determine Ideal Solutions",
+            "description": "Best values (max for benefits, min for costs) and worst values (min for benefits, max for costs)",
+            "ideal_best": ideal_best.tolist(),
+            "ideal_worst": ideal_worst.tolist()
+        })
         
         # Calculate separation measures
         separation_best = np.sqrt(np.sum((weighted_matrix - ideal_best)**2, axis=1))
         separation_worst = np.sqrt(np.sum((weighted_matrix - ideal_worst)**2, axis=1))
         
-        # Calculate performance score - Safely handle division by zero
+        calculation_details["steps"].append({
+            "name": "Calculate Separation Measures",
+            "description": "Euclidean distance from each alternative to ideal best and ideal worst solutions",
+            "separation_best": separation_best.tolist(),
+            "separation_worst": separation_worst.tolist()
+        })
+        
+        # Calculate performance scores
         performance = np.zeros_like(separation_best)
         non_zero_indices = (separation_best + separation_worst) > 0
         performance[non_zero_indices] = separation_worst[non_zero_indices] / (separation_best[non_zero_indices] + separation_worst[non_zero_indices])
         
-        # Calculate average performance and handle NaN/Infinity values
-        avg_performance = float(np.nanmean(performance))
+        calculation_details["steps"].append({
+            "name": "Calculate Performance Score",
+            "description": "Relative closeness to the ideal solution: S- / (S+ + S-)",
+            "performance_scores": performance.tolist()
+        })
         
-        # Final check for NaN/Infinity values
+        # Handle single row case for final score
+        if single_row_case:
+            avg_performance = float(performance[0])
+            calculation_details["steps"].append({
+                "name": "Single Row Handling",
+                "description": "Using only the original row's performance score",
+                "final_score": avg_performance
+            })
+        else:
+            avg_performance = float(np.nanmean(performance))
+            calculation_details["steps"].append({
+                "name": "Calculate Average Performance",
+                "description": "Mean of all performance scores",
+                "final_score": avg_performance
+            })
+        
+        # Handle NaN or infinity
         if np.isnan(avg_performance) or np.isinf(avg_performance):
             avg_performance = 0.0
+            calculation_details["steps"].append({
+                "name": "Error Handling",
+                "description": "NaN or Infinity detected, defaulting to 0.0",
+                "final_score": 0.0
+            })
         
-        # Map to Bloom's Taxonomy based on the rule base
+        # Map to Bloom's Taxonomy level
         if avg_performance >= 0.85:
             level = "Create"
         elif avg_performance >= 0.70:
@@ -479,12 +567,189 @@ def calculate_topsis(metrics_list):
             level = "Understand"
         else:
             level = "Remember"
+            
+        calculation_details["steps"].append({
+            "name": "Map to Bloom's Taxonomy",
+            "description": "Mapping performance score to cognitive level",
+            "rules": {
+                "Create": "CC >= 0.85",
+                "Evaluate": "0.70 <= CC < 0.85",
+                "Analyze": "0.55 <= CC < 0.70",
+                "Apply": "0.40 <= CC < 0.55",
+                "Understand": "0.25 <= CC < 0.40",
+                "Remember": "CC < 0.25"
+            },
+            "final_level": level,
+            "final_score": float(avg_performance)
+        })
         
-        return level, float(avg_performance)
-        
+        return level, float(avg_performance), calculation_details
     except Exception as e:
         print(f"TOPSIS calculation error: {str(e)}")
-        return "Remember", 0.0
+        return "Remember", 0.0, {"error": str(e)}
+
+# Also update the original calculate_topsis function for backward compatibility
+def calculate_topsis(metrics_list):
+    try:
+        if not metrics_list:
+            return "Remember", 0.0, {}
+        
+        # Updated order: compile, coding_time, completion_status, trial_status, variable_count, function_count
+        costs = ['compile_count', 'coding_time']
+        benefits = ['completion_status']
+        costs.append('trial_status')
+        benefits.extend(['variable_count', 'function_count'])
+        
+        decision_matrix = []
+        for metrics in metrics_list:
+            row = []
+            # Add costs first
+            for cost in costs[:2]:  # compile_count and coding_time
+                row.append(float(metrics.get(cost, 0)))
+            # Then benefits
+            row.append(float(metrics.get('completion_status', 0)))
+            # Then costs
+            row.append(float(metrics.get('trial_status', 0)))
+            # Then remaining benefits
+            for benefit in benefits[1:]:  # variable_count and function_count
+                row.append(float(metrics.get(benefit, 0)))
+                
+            decision_matrix.append(row)
+        
+        if not decision_matrix:
+            return "Remember", 0.0, {}
+            
+        decision_matrix = np.array(decision_matrix)
+        calculation_details = {
+            "criteria": {
+                "benefits": ['completion_status', 'variable_count', 'function_count'],
+                "costs": ['compile_count', 'coding_time', 'trial_status']
+            },
+            "decision_matrix": decision_matrix.tolist(),
+            "steps": []
+        }
+        
+        # Handle single row case
+        single_row_case = len(decision_matrix) == 1
+        if single_row_case:
+            row_copy = decision_matrix[0].copy()
+            small_variation = np.random.uniform(0.01, 0.05, size=row_copy.shape)
+            row_copy = np.maximum(0, row_copy - small_variation)
+            decision_matrix = np.vstack([decision_matrix, row_copy])
+            calculation_details["steps"].append({
+                "name": "Handle Single Row Case",
+                "description": "Duplicated the single row with slight variation to enable TOPSIS calculation",
+                "duplicated_matrix": decision_matrix.tolist()
+            })
+        
+        col_sums = np.sqrt(np.sum(decision_matrix**2, axis=0))
+        col_sums[col_sums == 0] = 1
+        calculation_details["steps"].append({
+            "name": "Calculate Column Sums",
+            "description": "Square root of sum of squares for each column",
+            "column_sums": col_sums.tolist()
+        })
+        normalized_matrix = decision_matrix / col_sums
+        calculation_details["steps"].append({
+            "name": "Normalize Decision Matrix",
+            "description": "Divide each value by its column sum",
+            "normalized_matrix": normalized_matrix.tolist()
+        })
+        num_criteria = len(benefits) + len(costs)
+        weights = np.ones(num_criteria) / num_criteria
+        calculation_details["steps"].append({
+            "name": "Define Weights",
+            "description": "Equal weights for all criteria",
+            "weights": weights.tolist()
+        })
+        weighted_matrix = normalized_matrix * weights
+        calculation_details["steps"].append({
+            "name": "Apply Weights",
+            "description": "Multiply normalized matrix by weights",
+            "weighted_matrix": weighted_matrix.tolist()
+        })
+        ideal_best = np.zeros(num_criteria)
+        ideal_worst = np.zeros(num_criteria)
+        for i in range(len(benefits)):
+            ideal_best[i] = np.max(weighted_matrix[:, i])
+            ideal_worst[i] = np.min(weighted_matrix[:, i])
+        for i in range(len(costs)):
+            j = i + len(benefits)
+            ideal_best[j] = np.min(weighted_matrix[:, j])
+            ideal_worst[j] = np.max(weighted_matrix[:, j])
+        calculation_details["steps"].append({
+            "name": "Determine Ideal Solutions",
+            "description": "Best values (max for benefits, min for costs) and worst values (min for benefits, max for costs)",
+            "ideal_best": ideal_best.tolist(),
+            "ideal_worst": ideal_worst.tolist()
+        })
+        separation_best = np.sqrt(np.sum((weighted_matrix - ideal_best)**2, axis=1))
+        separation_worst = np.sqrt(np.sum((weighted_matrix - ideal_worst)**2, axis=1))
+        calculation_details["steps"].append({
+            "name": "Calculate Separation Measures",
+            "description": "Euclidean distance from each alternative to ideal best and ideal worst solutions",
+            "separation_best": separation_best.tolist(),
+            "separation_worst": separation_worst.tolist()
+        })
+        performance = np.zeros_like(separation_best)
+        non_zero_indices = (separation_best + separation_worst) > 0
+        performance[non_zero_indices] = separation_worst[non_zero_indices] / (separation_best[non_zero_indices] + separation_worst[non_zero_indices])
+        calculation_details["steps"].append({
+            "name": "Calculate Performance Score",
+            "description": "Relative closeness to the ideal solution: S- / (S+ + S-)",
+            "performance_scores": performance.tolist()
+        })
+        if single_row_case:
+            avg_performance = float(performance[0])
+            calculation_details["steps"].append({
+                "name": "Single Row Handling",
+                "description": "Using only the original row's performance score",
+                "final_score": avg_performance
+            })
+        else:
+            avg_performance = float(np.nanmean(performance))
+            calculation_details["steps"].append({
+                "name": "Calculate Average Performance",
+                "description": "Mean of all performance scores",
+                "final_score": avg_performance
+            })
+        if np.isnan(avg_performance) or np.isinf(avg_performance):
+            avg_performance = 0.0
+            calculation_details["steps"].append({
+                "name": "Error Handling",
+                "description": "NaN or Infinity detected, defaulting to 0.0",
+                "final_score": 0.0
+            })
+        if avg_performance >= 0.85:
+            level = "Create"
+        elif avg_performance >= 0.70:
+            level = "Evaluate"
+        elif avg_performance >= 0.55:
+            level = "Analyze"
+        elif avg_performance >= 0.40:
+            level = "Apply"
+        elif avg_performance >= 0.25:
+            level = "Understand"
+        else:
+            level = "Remember"
+        calculation_details["steps"].append({
+            "name": "Map to Bloom's Taxonomy",
+            "description": "Mapping performance score to cognitive level",
+            "rules": {
+                "Create": "CC >= 0.85",
+                "Evaluate": "0.70 <= CC < 0.85",
+                "Analyze": "0.55 <= CC < 0.70",
+                "Apply": "0.40 <= CC < 0.55",
+                "Understand": "0.25 <= CC < 0.40",
+                "Remember": "CC < 0.25"
+            },
+            "final_level": level,
+            "final_score": float(avg_performance)
+        })
+        return level, float(avg_performance), calculation_details
+    except Exception as e:
+        print(f"TOPSIS calculation error: {str(e)}")
+        return "Remember", 0.0, {"error": str(e)}
 
 def calculate_neural_network(metrics_list):
     try:
@@ -661,14 +926,12 @@ def calculate_fuzzy_logic(metrics_list):
         apply_weight = 0.45
         understand_weight = 0.3
         remember_weight = 0.1
-        
-        numerator = (rule1 * create_weight + 
-                     rule2 * evaluate_weight + 
-                     rule3 * analyze_weight + 
-                     rule4 * apply_weight + 
-                     rule5 * understand_weight + 
+        numerator = (rule1 * create_weight +
+                     rule2 * evaluate_weight +
+                     rule3 * analyze_weight +
+                     rule4 * apply_weight +
+                     rule5 * understand_weight +
                      rule6 * remember_weight)
-        
         denominator = (rule1 + rule2 + rule3 + rule4 + rule5 + rule6)
         
         # Avoid division by zero

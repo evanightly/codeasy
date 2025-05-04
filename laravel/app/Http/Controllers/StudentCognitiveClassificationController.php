@@ -74,6 +74,12 @@ class StudentCognitiveClassificationController extends Controller implements Has
     }
 
     public function show(StudentCognitiveClassification $studentCognitiveClassification) {
+        $intent = request()->get('intent');
+
+        if ($intent === IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_SHOW_DETAILS->value) {
+            return $this->studentCognitiveClassificationService->getClassificationDetails($studentCognitiveClassification);
+        }
+
         $data = StudentCognitiveClassificationResource::make($studentCognitiveClassification);
 
         if ($this->ajax()) {

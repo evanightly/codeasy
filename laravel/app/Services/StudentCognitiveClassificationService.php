@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\StudentCognitiveClassification;
 use App\Repositories\StudentCognitiveClassificationRepository;
 use App\Support\Interfaces\Repositories\StudentCognitiveClassificationRepositoryInterface;
 use App\Support\Interfaces\Services\CourseServiceInterface;
@@ -586,5 +587,60 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
         }
 
         return $columnLetter;
+    }
+
+    /**
+     * Get detailed classification information
+     */
+    public function getClassificationDetails(StudentCognitiveClassification $classification): array {
+        // Get the raw data from the classification which includes calculation details
+        $rawData = $classification->raw_data;
+
+        // Extract calculation details - might be nested under method
+        $calculationDetails = $rawData['calculation_details'] ?? null;
+
+        // If calculation details don't exist, return the base information
+        if (!$calculationDetails) {
+            return [
+                'id' => $classification->id,
+                'user_id' => $classification->user_id,
+                'user' => $classification->user ? [
+                    'id' => $classification->user->id,
+                    'name' => $classification->user->name,
+                ] : null,
+                'course_id' => $classification->course_id,
+                'course' => $classification->course ? [
+                    'id' => $classification->course->id,
+                    'name' => $classification->course->name,
+                ] : null,
+                'classification_type' => $classification->classification_type,
+                'classification_level' => $classification->classification_level,
+                'classification_score' => $classification->classification_score,
+                'classified_at' => $classification->classified_at,
+                'raw_data' => $classification->raw_data,
+                'message' => 'Detailed calculation information is not available for this classification.',
+            ];
+        }
+
+        // Format and return the calculation details
+        return [
+            'id' => $classification->id,
+            'user_id' => $classification->user_id,
+            'user' => $classification->user ? [
+                'id' => $classification->user->id,
+                'name' => $classification->user->name,
+            ] : null,
+            'course_id' => $classification->course_id,
+            'course' => $classification->course ? [
+                'id' => $classification->course->id,
+                'name' => $classification->course->name,
+            ] : null,
+            'classification_type' => $classification->classification_type,
+            'classification_level' => $classification->classification_level,
+            'classification_score' => $classification->classification_score,
+            'classified_at' => $classification->classified_at,
+            'raw_data' => $classification->raw_data,
+            'calculation_details' => $calculationDetails,
+        ];
     }
 }

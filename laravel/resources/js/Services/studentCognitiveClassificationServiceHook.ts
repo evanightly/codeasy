@@ -69,4 +69,23 @@ export const studentCognitiveClassificationServiceHook = {
             },
         });
     },
+
+    /**
+     * Get detailed classification information
+     */
+    useGetClassificationDetails: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number }) => {
+                return mutationApi({
+                    method: 'get',
+                    url: route(`${ROUTES.STUDENT_COGNITIVE_CLASSIFICATIONS}.show`, {
+                        id: params.id,
+                    }),
+                    params: {
+                        intent: IntentEnum.STUDENT_COGNITIVE_CLASSIFICATION_SHOW_DETAILS,
+                    },
+                });
+            },
+        });
+    },
 };
