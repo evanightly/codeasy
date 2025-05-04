@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Log;
 
 class ExecutionResultSeeder extends Seeder {
     public function run(): void {
-        if (app()->isProduction()) {
-            return;
-        }
+        // if (app()->isProduction()) {
+        //     return;
+        // }
 
         $this->info('Seeding execution results with realistic attempt history...');
 

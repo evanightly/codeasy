@@ -12,9 +12,9 @@ class StudentScoreSeeder extends Seeder {
      * Run the database seeds.
      */
     public function run(): void {
-        if (app()->isProduction()) {
-            return;
-        }
+        // if (app()->isProduction()) {
+        //     return;
+        // }
 
         $this->info('Seeding student scores with realistic data patterns...');
 
