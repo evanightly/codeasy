@@ -33,11 +33,19 @@ class StudentCognitiveClassificationController extends Controller implements Has
 
         if ($intent === IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_INDEX_EXPORT_RAW_DATA->value) {
             $courseId = $request->get('course_id');
+            $exportFormat = $request->get('export_format', 'raw');
+            $includeClassification = $request->get('include_classification', false);
+
             if (!$courseId) {
                 return response()->json(['error' => 'Course ID is required'], 422);
             }
 
-            return $this->studentCognitiveClassificationService->exportRawDataToExcel($courseId);
+            return $this->studentCognitiveClassificationService->exportRawDataToExcel(
+                $courseId,
+                null,
+                $exportFormat,
+                $includeClassification
+            );
         }
 
         $data = StudentCognitiveClassificationResource::collection($this->studentCognitiveClassificationService->getAllPaginated($request->query()));

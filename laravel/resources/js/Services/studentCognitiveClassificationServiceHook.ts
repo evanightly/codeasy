@@ -54,7 +54,11 @@ export const studentCognitiveClassificationServiceHook = {
      */
     useExportRawDataExcel: () => {
         return createMutation({
-            mutationFn: async (params: { course_id: number }) => {
+            mutationFn: async (params: {
+                course_id: number;
+                export_format?: string;
+                include_classification?: boolean;
+            }) => {
                 // Use window.open for direct download
                 const url = route(`${ROUTES.STUDENT_COGNITIVE_CLASSIFICATIONS}.index`, {
                     ...params,

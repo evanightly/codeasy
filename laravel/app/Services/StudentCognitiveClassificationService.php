@@ -295,8 +295,15 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
      *
      * @param  int  $courseId  Course to export data for
      * @param  bool  $enforceConsistentQuestionCount  Whether to enforce consistent question count
+     * @param  string  $exportFormat  Format for export ('raw' or 'ml_tool')
+     * @param  bool  $includeClassificationResults  Whether to include classification results in the export
      */
-    public function exportRawDataToExcel(int $courseId, ?bool $enforceConsistentQuestionCount = null): Response|BinaryFileResponse {
+    public function exportRawDataToExcel(
+        int $courseId,
+        ?bool $enforceConsistentQuestionCount = null,
+        string $exportFormat = 'raw',
+        bool $includeClassificationResults = false
+    ): Response|BinaryFileResponse {
         // Allow overriding default setting via parameter
         if ($enforceConsistentQuestionCount !== null) {
             $this->enforceConsistentQuestionCount = $enforceConsistentQuestionCount;
@@ -329,14 +336,19 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
             $overviewSheet->setCellValue('B3', 'Student Name');
             $overviewSheet->setCellValue('C3', 'Sheet Name');
             $overviewSheet->setCellValue('D3', 'Note: "waktu" is displayed in minutes (converted from seconds in database)');
+            $overviewSheet->setCellValue('E3', 'Export Format: ' . ($exportFormat === 'ml_tool' ? 'ML Tool (RapidMiner)' : 'Raw Data'));
+
+            if ($includeClassificationResults) {
+                $overviewSheet->setCellValue('F3', 'Classification Results: Included');
+            }
 
             // Format header
             $overviewSheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-            $overviewSheet->getStyle('A3:D3')->getFont()->setBold(true);
+            $overviewSheet->getStyle('A3:F3')->getFont()->setBold(true);
             $overviewSheet->getStyle('A3:C3')->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB('DDDDDD');
-            $overviewSheet->getStyle('D3')->getFill()
+            $overviewSheet->getStyle('D3:F3')->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB('FFEEAA');
 
@@ -388,16 +400,59 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                     $sheet->mergeCells("{$startColLetter}3:{$endColLetter}3");
                     $sheet->setCellValue("{$startColLetter}3", "Question {$questionNum}");
 
-                    // Set individual metric headers
-                    $sheet->setCellValue($this->getColumnLetter($startCol) . '4', 'compile');
-                    $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '4', 'waktu');
-                    $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '4', 'selesai');
-                    $sheet->setCellValue($this->getColumnLetter($startCol + 3) . '4', 'coba');
-                    $sheet->setCellValue($this->getColumnLetter($startCol + 4) . '4', 'variables');
-                    $sheet->setCellValue($this->getColumnLetter($startCol + 5) . '4', 'functions');
+                    // Set individual metric headers - use different format for ML tools
+                    if ($exportFormat === 'ml_tool') {
+                        // For ML tools like RapidMiner, each column should have a unique name
+                        $sheet->setCellValue($this->getColumnLetter($startCol) . '4', "compile_q{$questionNum}");
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '4', "waktu_q{$questionNum}");
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '4', "selesai_q{$questionNum}");
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 3) . '4', "coba_q{$questionNum}");
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 4) . '4', "variables_q{$questionNum}");
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 5) . '4', "functions_q{$questionNum}");
+                    } else {
+                        // Regular format
+                        $sheet->setCellValue($this->getColumnLetter($startCol) . '4', 'compile');
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '4', 'waktu');
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '4', 'selesai');
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 3) . '4', 'coba');
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 4) . '4', 'variables');
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 5) . '4', 'functions');
+                    }
 
                     // Move to next question columns
                     $startCol += $metricsCount;
+                }
+
+                // Add classification results columns if requested
+                if ($includeClassificationResults) {
+                    // Get classification results for this student
+                    $classification = $this->repository->modelClass->findWhere([
+                        'user_id' => $userId,
+                        'course_id' => $courseId,
+                    ])->first();
+
+                    // Add classification columns
+                    $sheet->setCellValue($this->getColumnLetter($startCol) . '3', 'Classification Results');
+                    $sheet->mergeCells($this->getColumnLetter($startCol) . '3:' . $this->getColumnLetter($startCol + 2) . '3');
+
+                    // Column headers
+                    $sheet->setCellValue($this->getColumnLetter($startCol) . '4', 'Level');
+                    $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '4', 'Score');
+                    $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '4', 'Method');
+
+                    // Set classification data if available
+                    if ($classification) {
+                        $sheet->setCellValue($this->getColumnLetter($startCol) . '5', $classification->classification_level);
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '5', $classification->classification_score);
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '5', $classification->classification_type);
+                    } else {
+                        $sheet->setCellValue($this->getColumnLetter($startCol) . '5', 'Not Classified');
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '5', 'N/A');
+                        $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '5', 'N/A');
+                    }
+
+                    // Extend the format region
+                    $startCol += 3;
                 }
 
                 // Format the headers
@@ -453,12 +508,14 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
             }
 
             // Auto-size overview sheet columns
-            for ($col = 'A'; $col <= 'D'; $col++) {
+            for ($col = 'A'; $col <= 'F'; $col++) {
                 $overviewSheet->getColumnDimension($col)->setAutoSize(true);
             }
 
             // Create temporary file
-            $filename = 'raw_classification_data_course_' . $courseId . '_' . date('YmdHis') . '.xlsx';
+            $format = $exportFormat === 'ml_tool' ? 'ml_format' : 'raw';
+            $classification = $includeClassificationResults ? 'with_classification' : '';
+            $filename = "raw_classification_data_course_{$courseId}_{$format}_{$classification}_" . date('YmdHis') . '.xlsx';
             $tempPath = storage_path('app/temp/' . $filename);
 
             // Ensure temp directory exists

@@ -1506,11 +1506,19 @@ return [
             'classification_score' => 'Classification Score',
             'raw_data' => 'Raw Data',
             'classified_at' => 'Classified At',
+            'export_format' => 'Export Format',
+            'include_classification' => 'Include Classification Results',
+            'include_classification_description' => 'Include cognitive classification results in the export sheet',
         ],
         'placeholders' => [
             'select_student' => 'Select a student',
             'select_course' => 'Select a course',
             'select_classification_type' => 'Select classification type',
+            'select_export_format' => 'Select export format',
+        ],
+        'export_formats' => [
+            'raw' => 'Raw Data Format',
+            'ml_tool' => 'ML Tool Format (RapidMiner)',
         ],
         'buttons' => [
             'run_classification' => 'Run Classification',

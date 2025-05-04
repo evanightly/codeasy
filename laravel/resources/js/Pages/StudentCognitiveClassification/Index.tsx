@@ -1,5 +1,6 @@
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/UI/card';
+import { Checkbox } from '@/Components/UI/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -12,6 +13,7 @@ import {
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -56,6 +58,8 @@ export default function Index() {
 
     const rawDataFormSchema = z.object({
         course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
+        export_format: z.string().default('raw'),
+        include_classification: z.boolean().default(false),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -70,6 +74,8 @@ export default function Index() {
         resolver: zodResolver(rawDataFormSchema),
         defaultValues: {
             course_id: 0,
+            export_format: 'raw',
+            include_classification: false,
         },
     });
 
@@ -325,6 +331,74 @@ export default function Index() {
                                                 </FormItem>
                                             )}
                                             name='course_id'
+                                            control={rawDataForm.control}
+                                        />
+
+                                        <FormField
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t(
+                                                            'pages.student_cognitive_classification.fields.export_format',
+                                                        )}
+                                                    </FormLabel>
+                                                    <Select
+                                                        onValueChange={field.onChange}
+                                                        defaultValue={field.value}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue
+                                                                    placeholder={t(
+                                                                        'pages.student_cognitive_classification.placeholders.select_export_format',
+                                                                    )}
+                                                                />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value='raw'>
+                                                                {t(
+                                                                    'pages.student_cognitive_classification.export_formats.raw',
+                                                                )}
+                                                            </SelectItem>
+                                                            <SelectItem value='ml_tool'>
+                                                                {t(
+                                                                    'pages.student_cognitive_classification.export_formats.ml_tool',
+                                                                )}
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                            name='export_format'
+                                            control={rawDataForm.control}
+                                        />
+
+                                        <FormField
+                                            render={({ field }) => (
+                                                <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
+                                                    <FormControl>
+                                                        <Checkbox
+                                                            onCheckedChange={field.onChange}
+                                                            checked={field.value}
+                                                        />
+                                                    </FormControl>
+                                                    <div className='space-y-1 leading-none'>
+                                                        <FormLabel>
+                                                            {t(
+                                                                'pages.student_cognitive_classification.fields.include_classification',
+                                                            )}
+                                                        </FormLabel>
+                                                        <FormDescription>
+                                                            {t(
+                                                                'pages.student_cognitive_classification.fields.include_classification_description',
+                                                            )}
+                                                        </FormDescription>
+                                                    </div>
+                                                </FormItem>
+                                            )}
+                                            name='include_classification'
                                             control={rawDataForm.control}
                                         />
 
