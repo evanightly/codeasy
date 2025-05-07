@@ -66,6 +66,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
+        with:
+          lfs: true  # Enable Git LFS during checkout
 
       - name: Login to GHCR
         uses: docker/login-action@v2
@@ -108,6 +110,7 @@ jobs:
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           CR_PAT: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
           GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Create the Docker config content
           DOCKER_CONFIG=$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)
@@ -143,14 +146,29 @@ jobs:
               exit 1
             fi
 
-            # Clone or update repository
-            if [ ! -d "codeasy/.git" ]; then
-              git clone https://github.com/evanightly/codeasy.git
+            # Install Git LFS if not already installed
+            if ! command -v git-lfs &> /dev/null; then
+              echo "Installing Git LFS..."
+              apt-get update && apt-get install -y git-lfs || \
+              (curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install -y git-lfs)
+              git lfs install
             fi
 
-            cd codeasy
-            git fetch --all
-            git reset --hard origin/main
+            # Clone or update repository with LFS support
+            if [ ! -d "codeasy/.git" ]; then
+              # Fresh clone with LFS
+              git clone https://github.com/evanightly/codeasy.git
+              cd codeasy
+              git lfs install
+              git lfs pull
+            else
+              # Update existing repo and pull LFS files
+              cd codeasy
+              git lfs install
+              git fetch --all
+              git reset --hard origin/main
+              git lfs pull
+            fi
 
             # Setup environment
             echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env

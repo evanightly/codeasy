@@ -2,6 +2,7 @@ FROM php:8.3-fpm-alpine
 
 RUN apk update && apk add --no-cache \
     git \
+    git-lfs \
     curl \
     bash \
     libzip-dev \
@@ -25,6 +26,9 @@ RUN apk update && apk add --no-cache \
 
 # Copy Composer
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+# Initialize Git LFS
+RUN git lfs install
 
 # Copy source code
 WORKDIR /var/www/html
