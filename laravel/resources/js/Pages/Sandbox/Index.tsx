@@ -156,7 +156,10 @@ export default function Index() {
     const [showIntro, setShowIntro] = useState(true);
     const [selectedExample, setSelectedExample] = useState(0);
     const [isCopied, setIsCopied] = useState(false);
-    const [layoutMode, setLayoutMode] = useLocalStorage<'stacked' | 'side-by-side'>('code-editor-view', 'stacked');
+    const [layoutMode, setLayoutMode] = useLocalStorage<'stacked' | 'side-by-side'>(
+        'code-editor-view',
+        'stacked',
+    );
 
     // Add new states for interactive input
     const [waitingForInput, setWaitingForInput] = useState(false);
@@ -585,83 +588,75 @@ export default function Index() {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className='space-y-4'>
-                                                <AnimatePresence>
-                                                    {output.map((out: any, i) => (
-                                                        <motion.div
-                                                            transition={{ delay: i * 0.05 }}
-                                                            key={i}
-                                                            initial={{ opacity: 0, y: 10 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                        >
-                                                            {out.type === 'image' ? (
-                                                                <div className='overflow-hidden rounded-lg border bg-card p-2'>
-                                                                    <img
-                                                                        src={out.content}
-                                                                        className='mx-auto h-auto max-w-full rounded'
-                                                                        alt='Visualization Output'
-                                                                    />
+                                            <AnimatePresence>
+                                                {output.map((out: any, i) => (
+                                                    <motion.div
+                                                        transition={{ delay: i * 0.05 }}
+                                                        key={i}
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                    >
+                                                        {out.type === 'image' ? (
+                                                            <img
+                                                                src={out.content}
+                                                                className='mx-auto h-auto max-w-full rounded'
+                                                                alt='Visualization Output'
+                                                            />
+                                                        ) : out.type === 'error' ? (
+                                                            <div className='rounded-lg border border-destructive/30 bg-destructive/10 p-4'>
+                                                                <div className='mb-1 flex items-center font-medium text-destructive'>
+                                                                    <AlertCircle className='mr-2 h-4 w-4' />
+                                                                    {out.error_type}:{' '}
+                                                                    {out.error_msg}
                                                                 </div>
-                                                            ) : out.type === 'error' ? (
-                                                                <div className='rounded-lg border border-destructive/30 bg-destructive/10 p-4'>
-                                                                    <div className='mb-1 flex items-center font-medium text-destructive'>
-                                                                        <AlertCircle className='mr-2 h-4 w-4' />
-                                                                        {out.error_type}:{' '}
-                                                                        {out.error_msg}
-                                                                    </div>
-                                                                    <pre className='max-h-[200px] overflow-auto whitespace-pre-wrap rounded bg-card p-2 text-sm'>
-                                                                        {out.content}
-                                                                    </pre>
-                                                                </div>
-                                                            ) : out.type === 'input' ? (
-                                                                // Show user input differently
-                                                                <div className='rounded-md border border-primary/30 bg-primary/5 p-3'>
-                                                                    <pre className='overflow-x-auto whitespace-pre-wrap text-sm'>
-                                                                        <span className='font-medium text-primary'>
-                                                                            ≫{' '}
-                                                                        </span>
-                                                                        {out.content}
-                                                                    </pre>
-                                                                </div>
-                                                            ) : (
-                                                                <div className='rounded-md border bg-card p-3'>
-                                                                    <pre className='overflow-x-auto whitespace-pre-wrap text-sm'>
-                                                                        {out.content}
-                                                                    </pre>
-                                                                </div>
-                                                            )}
-                                                        </motion.div>
-                                                    ))}
+                                                                <pre className='max-h-[200px] overflow-auto whitespace-pre-wrap rounded bg-card p-2 text-sm'>
+                                                                    {out.content}
+                                                                </pre>
+                                                            </div>
+                                                        ) : out.type === 'input' ? (
+                                                            // Show user input differently
+                                                            <div className='rounded-md border border-primary/30 bg-primary/5 p-3'>
+                                                                <pre className='overflow-x-auto whitespace-pre-wrap text-sm'>
+                                                                    <span className='font-medium text-primary'>
+                                                                        ≫{' '}
+                                                                    </span>
+                                                                    {out.content}
+                                                                </pre>
+                                                            </div>
+                                                        ) : (
+                                                            <pre className='overflow-x-auto whitespace-pre-wrap text-sm'>
+                                                                {out.content}
+                                                            </pre>
+                                                        )}
+                                                    </motion.div>
+                                                ))}
 
-                                                    {/* Interactive input form */}
-                                                    {waitingForInput && (
-                                                        <motion.div
-                                                            initial={{ opacity: 0, y: 10 }}
-                                                            className='mt-4'
-                                                            animate={{ opacity: 1, y: 0 }}
+                                                {/* Interactive input form */}
+                                                {waitingForInput && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        className='mt-4'
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                    >
+                                                        <form
+                                                            onSubmit={handleInputSubmit}
+                                                            className='flex items-center gap-2'
                                                         >
-                                                            <form
-                                                                onSubmit={handleInputSubmit}
-                                                                className='flex items-center gap-2'
-                                                            >
-                                                                <input
-                                                                    value={userInput}
-                                                                    type='text'
-                                                                    placeholder='Type your input here...'
-                                                                    onChange={(e) =>
-                                                                        setUserInput(e.target.value)
-                                                                    }
-                                                                    className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background'
-                                                                    autoFocus
-                                                                />
-                                                                <Button type='submit'>
-                                                                    Submit
-                                                                </Button>
-                                                            </form>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                            </div>
+                                                            <input
+                                                                value={userInput}
+                                                                type='text'
+                                                                placeholder='Type your input here...'
+                                                                onChange={(e) =>
+                                                                    setUserInput(e.target.value)
+                                                                }
+                                                                className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background'
+                                                                autoFocus
+                                                            />
+                                                            <Button type='submit'>Submit</Button>
+                                                        </form>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
                                         )}
                                     </div>
                                 </div>
