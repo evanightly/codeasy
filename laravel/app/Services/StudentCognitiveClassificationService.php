@@ -427,7 +427,7 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                 // Add classification results columns if requested
                 if ($includeClassificationResults) {
                     // Get classification results for this student
-                    $classification = $this->repository->modelClass->findWhere([
+                    $classification = $this->repository->modelClass->where([
                         'user_id' => $userId,
                         'course_id' => $courseId,
                     ])->first();
