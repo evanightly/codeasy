@@ -14,6 +14,6 @@
     "bradlc.vscode-tailwindcss",
     "open-southeners.laravel-pint",
     "onecentlin.laravel5-snippets",
-    "docker.docker"
+    "ms-azuretools.vscode-containers"
   ]
 }
