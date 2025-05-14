@@ -18,7 +18,7 @@ import { php } from '@codemirror/lang-php';
 import { python } from '@codemirror/lang-python';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import * as codemirrorThemes from '@uiw/codemirror-themes-all';
-import CodeMirror from '@uiw/react-codemirror';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { Check, ChevronsUpDown, Moon, Sun } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -74,6 +74,8 @@ interface CodeEditorProps {
     className?: string;
     headerClassName?: string;
     headerChildren?: React.ReactNode;
+    containerClassName?: string;
+    codeMirrorClassName?: string;
 }
 
 export default function CodeEditor({
@@ -86,6 +88,8 @@ export default function CodeEditor({
     className,
     headerClassName,
     headerChildren,
+    containerClassName,
+    codeMirrorClassName,
 }: CodeEditorProps) {
     const [themeComboboxOpen, setThemeComboboxOpen] = useState(false);
     const [selectedThemeName, setSelectedThemeName] = useLocalStorage(
@@ -143,7 +147,7 @@ export default function CodeEditor({
     return (
         <div className={ny('flex flex-col gap-3', className)}>
             {label && <label className='text-sm font-medium'>{label}</label>}
-            <div className='flex flex-col gap-3'>
+            <div className={ny('flex flex-col gap-3', containerClassName)}>
                 {showThemePicker && (
                     <div className={ny('flex gap-3', headerClassName)}>
                         <Popover open={themeComboboxOpen} onOpenChange={setThemeComboboxOpen}>
@@ -210,8 +214,8 @@ export default function CodeEditor({
                     onChange={handleCodeChange}
                     key={key} // Important: This forces re-render when language changes
                     height={height}
-                    extensions={[getLanguageExtension()]}
-                    className='w-full rounded-md border'
+                    extensions={[getLanguageExtension(), EditorView.lineWrapping]}
+                    className={ny('w-full rounded-md border', codeMirrorClassName)}
                 />
             </div>
         </div>

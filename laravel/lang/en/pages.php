@@ -1327,6 +1327,8 @@ return [
                 'description' => 'There was a problem executing your code. Please check for errors.',
             ],
             'view_material' => 'View Material',
+            'side_by_side_view' => 'Side by Side View',
+            'stacked_view' => 'Stacked View',
         ],
     ],
     'dashboard' => [

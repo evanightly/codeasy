@@ -37,6 +37,7 @@ import {
     LearningMaterialResource,
 } from '@/Support/Interfaces/Resources';
 import { Link, router } from '@inertiajs/react';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import axios from 'axios';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
@@ -45,6 +46,8 @@ import {
     ArrowLeft,
     ArrowRight,
     Check,
+    Columns2,
+    Columns3,
     FileQuestion,
     FileTextIcon,
     Loader2,
@@ -108,6 +111,10 @@ export default function Workspace({
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [lastSyncTime, setLastSyncTime] = useState(Date.now());
     const [materialDialogOpen, setMaterialDialogOpen] = useState(false);
+    const [layoutMode, setLayoutMode] = useLocalStorage<'stacked' | 'side-by-side'>(
+        'code-editor-view',
+        'stacked',
+    );
 
     // Function to format seconds into readable time
     const formatTime = (seconds: number) => {
@@ -170,6 +177,11 @@ export default function Workspace({
         } finally {
             setIsCompiling(false);
         }
+    };
+
+    // Toggle layout between stacked and side-by-side
+    const toggleLayout = () => {
+        setLayoutMode((prevMode) => (prevMode === 'stacked' ? 'side-by-side' : 'stacked'));
     };
 
     // Handle navigation to next or previous question
@@ -311,10 +323,24 @@ export default function Workspace({
                                 </span>
                             </div>
 
+                            <Button
+                                variant='outline'
+                                title={
+                                    layoutMode === 'stacked'
+                                        ? t('pages.student_questions.workspace.side_by_side_view')
+                                        : t('pages.student_questions.workspace.stacked_view')
+                                }
+                                size='sm'
+                                onClick={toggleLayout}
+                                className='hidden lg:flex'
+                            >
+                                {layoutMode === 'stacked' ? <Columns2 /> : <Columns3 />}
+                            </Button>
+
                             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                                 <SheetTrigger asChild>
                                     <Button variant='outline' size='sm' className='lg:hidden'>
-                                        <FileQuestion className='h-4 w-4' />
+                                        <FileQuestion />
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side='left'>
@@ -325,7 +351,7 @@ export default function Workspace({
                                             {question.data.order_number}
                                         </SheetDescription>
                                     </SheetHeader>
-                                    <div className='flex flex-col gap-3'>
+                                    <div className='flex flex-1 flex-col gap-3'>
                                         {material.data.file_url &&
                                             material.data.file_extension?.toLowerCase() ===
                                                 'pdf' && (
@@ -482,7 +508,9 @@ export default function Workspace({
                 {/* Main workspace content with resizable panels */}
                 <div className='flex flex-1 overflow-hidden'>
                     {/* Question description panel - desktop */}
-                    <div className='hidden w-1/3 overflow-y-auto border-r lg:block'>
+                    <div
+                        className={`hidden ${layoutMode === 'side-by-side' ? 'w-1/4' : 'w-1/3'} overflow-y-auto border-r lg:block`}
+                    >
                         <div className='flex flex-col gap-4 p-4'>
                             {/* <ReactMarkdown className='prose prose-sm dark:prose-invert max-w-none'> */}
 
@@ -580,179 +608,364 @@ export default function Workspace({
                     </div>
 
                     {/* Code editor and output panel - now with resizable layout */}
-                    <div className='flex flex-1 flex-col overflow-hidden'>
-                        <ResizablePanelGroup direction='vertical' className='flex-1'>
-                            {/* Code Editor Panel */}
-                            <ResizablePanel
-                                minSize={30}
-                                defaultSize={60}
-                                className='overflow-hidden'
-                            >
-                                <div className='flex h-full flex-col'>
-                                    <div className='border-b bg-muted/30 px-4 py-2'>
-                                        <h3 className='font-medium'>
-                                            {t('pages.student_questions.workspace.code')}
-                                        </h3>
-                                    </div>
-                                    <div className='flex-1'>
-                                        <CodeEditor
-                                            value={code}
-                                            showThemePicker={true}
-                                            onChange={handleCodeChange}
-                                            language={ProgrammingLanguageEnum.PYTHON}
-                                            height='100%'
-                                            headerClassName='pt-3 px-3'
-                                            headerChildren={
-                                                <Button
-                                                    onClick={handleRunCode}
-                                                    disabled={isCompiling}
-                                                >
-                                                    {isCompiling ? (
-                                                        <Loader2 className='animate-spin' />
-                                                    ) : (
-                                                        <Redo2 />
-                                                    )}
-                                                    {isCompiling
-                                                        ? t(
-                                                              'pages.student_questions.workspace.running',
-                                                          )
-                                                        : t(
-                                                              'pages.student_questions.workspace.run',
-                                                          )}
-                                                </Button>
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            </ResizablePanel>
-
-                            <ResizableHandle withHandle />
-
-                            {/* Output Panel */}
-                            <ResizablePanel minSize={20} defaultSize={40}>
-                                <div className='flex h-full flex-col'>
-                                    <div className='border-b bg-muted/30 px-4 py-2'>
-                                        <h3 className='font-medium'>
-                                            {t('pages.student_questions.workspace.output')}
-                                        </h3>
-                                    </div>
-                                    <div className='flex-1 overflow-auto p-4'>
-                                        {output.length === 0 && !isCompiling ? (
-                                            <div className='flex h-full items-center justify-center text-center text-muted-foreground'>
-                                                <div>
-                                                    <AlertTriangle className='mx-auto mb-2 h-8 w-8' />
-                                                    <p>
-                                                        {t(
-                                                            'pages.student_questions.workspace.no_output_yet',
+                    <div
+                        className={`flex flex-1 ${layoutMode === 'side-by-side' ? 'flex-row' : 'flex-col'} overflow-hidden`}
+                    >
+                        {layoutMode === 'stacked' ? (
+                            <ResizablePanelGroup direction='vertical' className='flex-1'>
+                                {/* Code Editor Panel */}
+                                <ResizablePanel
+                                    minSize={30}
+                                    defaultSize={60}
+                                    className='overflow-hidden'
+                                >
+                                    <div className='flex h-full flex-col'>
+                                        <div className='border-b bg-muted/30 px-4 py-2'>
+                                            <h3 className='font-medium'>
+                                                {t('pages.student_questions.workspace.code')}
+                                            </h3>
+                                        </div>
+                                        <div className='flex flex-1'>
+                                            <CodeEditor
+                                                value={code}
+                                                showThemePicker={true}
+                                                onChange={handleCodeChange}
+                                                language={ProgrammingLanguageEnum.PYTHON}
+                                                height='100%'
+                                                headerClassName='pt-3 px-3'
+                                                headerChildren={
+                                                    <Button
+                                                        onClick={handleRunCode}
+                                                        disabled={isCompiling}
+                                                    >
+                                                        {isCompiling ? (
+                                                            <Loader2 className='animate-spin' />
+                                                        ) : (
+                                                            <Redo2 />
                                                         )}
-                                                    </p>
+                                                        {isCompiling
+                                                            ? t(
+                                                                  'pages.student_questions.workspace.running',
+                                                              )
+                                                            : t(
+                                                                  'pages.student_questions.workspace.run',
+                                                              )}
+                                                    </Button>
+                                                }
+                                                className='flex-1 overflow-x-scroll'
+                                            />
+                                        </div>
+                                    </div>
+                                </ResizablePanel>
+
+                                <ResizableHandle withHandle />
+
+                                {/* Output Panel */}
+                                <ResizablePanel minSize={20} defaultSize={40}>
+                                    <div className='flex h-full flex-col'>
+                                        <div className='border-b bg-muted/30 px-4 py-2'>
+                                            <h3 className='font-medium'>
+                                                {t('pages.student_questions.workspace.output')}
+                                            </h3>
+                                        </div>
+                                        <div className='flex-1 overflow-auto p-4'>
+                                            {output.length === 0 && !isCompiling ? (
+                                                <div className='flex h-full items-center justify-center text-center text-muted-foreground'>
+                                                    <div>
+                                                        <AlertTriangle className='mx-auto mb-2 h-8 w-8' />
+                                                        <p>
+                                                            {t(
+                                                                'pages.student_questions.workspace.no_output_yet',
+                                                            )}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div className='space-y-2'>
-                                                {output.map((out, i) => {
-                                                    if (out.type === 'image') {
-                                                        return (
-                                                            <div
-                                                                key={i}
-                                                                className='rounded-md border'
-                                                            >
-                                                                <img
-                                                                    src={out.content}
-                                                                    className='mx-auto max-w-full rounded'
-                                                                    alt={`Output ${i}`}
-                                                                />
-                                                            </div>
-                                                        );
-                                                    } else if (out.type === 'error') {
-                                                        return (
-                                                            <Alert variant='destructive' key={i}>
-                                                                <AlertCircle className='h-4 w-4' />
-                                                                <AlertTitle>
-                                                                    {t(
-                                                                        'pages.student_questions.workspace.error.title',
-                                                                    )}
-                                                                </AlertTitle>
-                                                                <AlertDescription>
+                                            ) : (
+                                                <div className='space-y-2'>
+                                                    {output.map((out, i) => {
+                                                        if (out.type === 'image') {
+                                                            return (
+                                                                <div
+                                                                    key={i}
+                                                                    className='rounded-md border'
+                                                                >
+                                                                    <img
+                                                                        src={out.content}
+                                                                        className='mx-auto max-w-full rounded'
+                                                                        alt={`Output ${i}`}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        } else if (out.type === 'error') {
+                                                            return (
+                                                                <Alert
+                                                                    variant='destructive'
+                                                                    key={i}
+                                                                >
+                                                                    <AlertCircle className='h-4 w-4' />
+                                                                    <AlertTitle>
+                                                                        {t(
+                                                                            'pages.student_questions.workspace.error.title',
+                                                                        )}
+                                                                    </AlertTitle>
+                                                                    <AlertDescription>
+                                                                        <pre className='whitespace-pre-wrap text-xs'>
+                                                                            {out.content}
+                                                                        </pre>
+                                                                    </AlertDescription>
+                                                                </Alert>
+                                                            );
+                                                        } else if (out.type === 'test_stats') {
+                                                            return (
+                                                                <Card key={i}>
+                                                                    <CardContent className='p-4'>
+                                                                        <div className='mb-2 flex items-center justify-between'>
+                                                                            <h4 className='font-medium'>
+                                                                                {t(
+                                                                                    'pages.student_questions.workspace.test_results',
+                                                                                )}
+                                                                            </h4>
+                                                                            <Badge
+                                                                                variant={getTestResultBadgeVariant(
+                                                                                    out.success,
+                                                                                    out.total_tests,
+                                                                                )}
+                                                                            >
+                                                                                {out.success}/
+                                                                                {out.total_tests}
+                                                                                {t(
+                                                                                    'pages.student_questions.workspace.passed',
+                                                                                )}
+                                                                            </Badge>
+                                                                        </div>
+                                                                        <Progress
+                                                                            value={
+                                                                                out.success
+                                                                                    ? (out.success /
+                                                                                          out.total_tests) *
+                                                                                      100
+                                                                                    : 0
+                                                                            }
+                                                                            className='h-2'
+                                                                        />
+                                                                    </CardContent>
+                                                                </Card>
+                                                            );
+                                                        } else if (out.type === 'test_result') {
+                                                            return (
+                                                                <div
+                                                                    key={i}
+                                                                    className='rounded-md bg-muted p-3 text-sm'
+                                                                >
                                                                     <pre className='whitespace-pre-wrap text-xs'>
                                                                         {out.content}
                                                                     </pre>
-                                                                </AlertDescription>
-                                                            </Alert>
-                                                        );
-                                                    } else if (out.type === 'test_stats') {
-                                                        return (
-                                                            <Card key={i}>
-                                                                <CardContent className='p-4'>
-                                                                    <div className='mb-2 flex items-center justify-between'>
-                                                                        <h4 className='font-medium'>
-                                                                            {t(
-                                                                                'pages.student_questions.workspace.test_results',
-                                                                            )}
-                                                                        </h4>
-                                                                        <Badge
-                                                                            variant={getTestResultBadgeVariant(
-                                                                                out.success,
-                                                                                out.total_tests,
-                                                                            )}
-                                                                        >
-                                                                            {out.success}/
-                                                                            {out.total_tests}
-                                                                            {t(
-                                                                                'pages.student_questions.workspace.passed',
-                                                                            )}
-                                                                        </Badge>
-                                                                    </div>
-                                                                    <Progress
-                                                                        value={
-                                                                            out.success
-                                                                                ? (out.success /
-                                                                                      out.total_tests) *
-                                                                                  100
-                                                                                : 0
-                                                                        }
-                                                                        className='h-2'
-                                                                    />
-                                                                </CardContent>
-                                                            </Card>
-                                                        );
-                                                    } else if (out.type === 'test_result') {
-                                                        return (
-                                                            <div
-                                                                key={i}
-                                                                className='rounded-md bg-muted p-3 text-sm'
-                                                            >
-                                                                <pre className='whitespace-pre-wrap text-xs'>
+                                                                </div>
+                                                            );
+                                                        } else {
+                                                            return (
+                                                                <div
+                                                                    key={i}
+                                                                    className='rounded-md bg-muted p-3 text-sm'
+                                                                >
                                                                     {out.content}
-                                                                </pre>
-                                                            </div>
-                                                        );
-                                                    } else {
-                                                        return (
-                                                            <div
-                                                                key={i}
-                                                                className='rounded-md bg-muted p-3 text-sm'
-                                                            >
-                                                                {out.content}
-                                                            </div>
-                                                        );
-                                                    }
-                                                })}
-                                                {isCompiling && (
-                                                    <div className='flex items-center justify-center p-4 text-muted-foreground'>
-                                                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                                                        {t(
-                                                            'pages.student_questions.workspace.running',
-                                                        )}
-                                                        ...
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
+                                                                </div>
+                                                            );
+                                                        }
+                                                    })}
+                                                    {isCompiling && (
+                                                        <div className='flex items-center justify-center p-4 text-muted-foreground'>
+                                                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                                            {t(
+                                                                'pages.student_questions.workspace.running',
+                                                            )}
+                                                            ...
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            </ResizablePanel>
-                        </ResizablePanelGroup>
+                                </ResizablePanel>
+                            </ResizablePanelGroup>
+                        ) : (
+                            // Side-by-side layout with horizontal resizable panels
+                            <ResizablePanelGroup direction='horizontal' className='flex-1'>
+                                {/* Code Editor Panel */}
+                                <ResizablePanel
+                                    minSize={40}
+                                    defaultSize={60}
+                                    className='overflow-hidden'
+                                >
+                                    <div className='flex h-full flex-col'>
+                                        <div className='border-b bg-muted/30 px-4 py-2'>
+                                            <h3 className='font-medium'>
+                                                {t('pages.student_questions.workspace.code')}
+                                            </h3>
+                                        </div>
+                                        <div className='flex-1'>
+                                            <CodeEditor
+                                                value={code}
+                                                showThemePicker={true}
+                                                onChange={handleCodeChange}
+                                                language={ProgrammingLanguageEnum.PYTHON}
+                                                height='100%'
+                                                headerClassName='pt-3 px-3'
+                                                headerChildren={
+                                                    <Button
+                                                        onClick={handleRunCode}
+                                                        disabled={isCompiling}
+                                                    >
+                                                        {isCompiling ? (
+                                                            <Loader2 className='animate-spin' />
+                                                        ) : (
+                                                            <Redo2 />
+                                                        )}
+                                                        {isCompiling
+                                                            ? t(
+                                                                  'pages.student_questions.workspace.running',
+                                                              )
+                                                            : t(
+                                                                  'pages.student_questions.workspace.run',
+                                                              )}
+                                                    </Button>
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                </ResizablePanel>
+
+                                <ResizableHandle withHandle />
+
+                                {/* Output Panel */}
+                                <ResizablePanel minSize={20} defaultSize={40}>
+                                    <div className='flex h-full flex-col'>
+                                        <div className='border-b bg-muted/30 px-4 py-2'>
+                                            <h3 className='font-medium'>
+                                                {t('pages.student_questions.workspace.output')}
+                                            </h3>
+                                        </div>
+                                        <div className='flex-1 overflow-auto p-4'>
+                                            {output.length === 0 && !isCompiling ? (
+                                                <div className='flex h-full items-center justify-center text-center text-muted-foreground'>
+                                                    <div>
+                                                        <AlertTriangle className='mx-auto mb-2 h-8 w-8' />
+                                                        <p>
+                                                            {t(
+                                                                'pages.student_questions.workspace.no_output_yet',
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className='space-y-2'>
+                                                    {output.map((out, i) => {
+                                                        if (out.type === 'image') {
+                                                            return (
+                                                                <div
+                                                                    key={i}
+                                                                    className='rounded-md border'
+                                                                >
+                                                                    <img
+                                                                        src={out.content}
+                                                                        className='mx-auto max-w-full rounded'
+                                                                        alt={`Output ${i}`}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        } else if (out.type === 'error') {
+                                                            return (
+                                                                <Alert
+                                                                    variant='destructive'
+                                                                    key={i}
+                                                                >
+                                                                    <AlertCircle className='h-4 w-4' />
+                                                                    <AlertTitle>
+                                                                        {t(
+                                                                            'pages.student_questions.workspace.error.title',
+                                                                        )}
+                                                                    </AlertTitle>
+                                                                    <AlertDescription>
+                                                                        <pre className='whitespace-pre-wrap text-xs'>
+                                                                            {out.content}
+                                                                        </pre>
+                                                                    </AlertDescription>
+                                                                </Alert>
+                                                            );
+                                                        } else if (out.type === 'test_stats') {
+                                                            return (
+                                                                <Card key={i}>
+                                                                    <CardContent className='p-4'>
+                                                                        <div className='mb-2 flex items-center justify-between'>
+                                                                            <h4 className='font-medium'>
+                                                                                {t(
+                                                                                    'pages.student_questions.workspace.test_results',
+                                                                                )}
+                                                                            </h4>
+                                                                            <Badge
+                                                                                variant={getTestResultBadgeVariant(
+                                                                                    out.success,
+                                                                                    out.total_tests,
+                                                                                )}
+                                                                            >
+                                                                                {out.success}/
+                                                                                {out.total_tests}
+                                                                                {t(
+                                                                                    'pages.student_questions.workspace.passed',
+                                                                                )}
+                                                                            </Badge>
+                                                                        </div>
+                                                                        <Progress
+                                                                            value={
+                                                                                out.success
+                                                                                    ? (out.success /
+                                                                                          out.total_tests) *
+                                                                                      100
+                                                                                    : 0
+                                                                            }
+                                                                            className='h-2'
+                                                                        />
+                                                                    </CardContent>
+                                                                </Card>
+                                                            );
+                                                        } else if (out.type === 'test_result') {
+                                                            return (
+                                                                <div
+                                                                    key={i}
+                                                                    className='rounded-md bg-muted p-3 text-sm'
+                                                                >
+                                                                    <pre className='whitespace-pre-wrap text-xs'>
+                                                                        {out.content}
+                                                                    </pre>
+                                                                </div>
+                                                            );
+                                                        } else {
+                                                            return (
+                                                                <div
+                                                                    key={i}
+                                                                    className='rounded-md bg-muted p-3 text-sm'
+                                                                >
+                                                                    {out.content}
+                                                                </div>
+                                                            );
+                                                        }
+                                                    })}
+                                                    {isCompiling && (
+                                                        <div className='flex items-center justify-center p-4 text-muted-foreground'>
+                                                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                                            {t(
+                                                                'pages.student_questions.workspace.running',
+                                                            )}
+                                                            ...
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </ResizablePanel>
+                            </ResizablePanelGroup>
+                        )}
 
                         {/* Run Button Footer - Fixed at bottom */}
                         {/* <div className='flex items-center justify-between border-t bg-background p-4'>

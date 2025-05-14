@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Comp
 import { useDarkMode } from '@/Contexts/ThemeContext';
 import { ProgrammingLanguageEnum } from '@/Support/Enums/programmingLanguageEnum';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
     AlertCircle,
@@ -15,6 +16,8 @@ import {
     Brain,
     ChevronRight,
     Code2,
+    Columns2,
+    Columns3,
     Ellipsis,
     FlaskConical,
     Github,
@@ -153,6 +156,7 @@ export default function Index() {
     const [showIntro, setShowIntro] = useState(true);
     const [selectedExample, setSelectedExample] = useState(0);
     const [isCopied, setIsCopied] = useState(false);
+    const [layoutMode, setLayoutMode] = useLocalStorage<'stacked' | 'side-by-side'>('code-editor-view', 'stacked');
 
     // Add new states for interactive input
     const [waitingForInput, setWaitingForInput] = useState(false);
@@ -289,6 +293,11 @@ export default function Index() {
         setSelectedExample(0);
     };
 
+    // Toggle layout between stacked and side-by-side
+    const toggleLayout = () => {
+        setLayoutMode((prevMode) => (prevMode === 'stacked' ? 'side-by-side' : 'stacked'));
+    };
+
     return (
         <>
             <Head title='Python Sandbox - Interactive Code Editor' />
@@ -399,6 +408,21 @@ export default function Index() {
                                     <Share2 className='h-5 w-5' />
                                     <span>{isCopied ? 'Copied!' : 'Copy Code'}</span>
                                 </button>
+                                <button
+                                    onClick={toggleLayout}
+                                    className='flex w-full items-center space-x-2 rounded-md px-3 py-2 text-sm hover:bg-muted'
+                                >
+                                    {layoutMode === 'stacked' ? (
+                                        <Columns2 className='h-5 w-5' />
+                                    ) : (
+                                        <Columns3 className='h-5 w-5' />
+                                    )}
+                                    <span>
+                                        {layoutMode === 'stacked'
+                                            ? 'Side-by-Side View'
+                                            : 'Stacked View'}
+                                    </span>
+                                </button>
                             </div>
                         </div>
 
@@ -429,11 +453,15 @@ export default function Index() {
                     </div>
 
                     {/* Main content area */}
-                    <div className='flex flex-1 flex-col'>
-                        <div className='flex h-full flex-col p-4'>
+                    <div className='flex flex-1 flex-col overflow-x-scroll'>
+                        <div className='flex h-full w-full flex-1 flex-col p-4'>
                             {/* Code editor section */}
-                            <div className='flex flex-1 flex-col gap-4'>
-                                <div className='relative flex-1 overflow-hidden rounded-lg border bg-card shadow-sm'>
+                            <div
+                                className={`flex flex-1 ${layoutMode === 'side-by-side' ? 'flex-row' : 'flex-col'} gap-4`}
+                            >
+                                <div
+                                    className={`relative ${layoutMode === 'side-by-side' ? 'w-1/2' : 'flex-1'} overflow-hidden rounded-lg border bg-card shadow-sm`}
+                                >
                                     {/* Floating elements for visual appeal */}
                                     <FloatingCodeHighlight className='absolute -right-40 -top-40 opacity-10' />
                                     <FloatingCodeHighlight className='absolute -bottom-40 -left-40 opacity-10' />
@@ -483,34 +511,37 @@ export default function Index() {
                                         showThemePicker={true}
                                         onChange={handleCodeChange}
                                         language={ProgrammingLanguageEnum.PYTHON}
-                                        height='500px'
+                                        height={layoutMode === 'side-by-side' ? '100%' : '500px'}
                                         headerClassName='ml-3 mt-3'
+                                        headerChildren={
+                                            <div className='flex justify-end'>
+                                                <Button
+                                                    onClick={(e) => handleSubmit(e)}
+                                                    disabled={isCompiling || waitingForInput}
+                                                    className='bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700'
+                                                >
+                                                    {isCompiling ? (
+                                                        <>
+                                                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                                            Running...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Play className='mr-2 h-4 w-4' />
+                                                            Run Code (Ctrl + Enter)
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        }
                                         className='relative'
                                     />
                                 </div>
 
-                                <div className='flex justify-end'>
-                                    <Button
-                                        onClick={(e) => handleSubmit(e)}
-                                        disabled={isCompiling || waitingForInput}
-                                        className='bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700'
-                                    >
-                                        {isCompiling ? (
-                                            <>
-                                                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                                                Running...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Play className='mr-2 h-4 w-4' />
-                                                Run Code (Ctrl + Enter)
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
-
                                 {/* Output section */}
-                                <div className='mt-2'>
+                                <div
+                                    className={`${layoutMode === 'side-by-side' ? 'w-1/2' : 'mt-2'}`}
+                                >
                                     <div className='mb-2 flex items-center justify-between'>
                                         <h2 className='flex items-center text-lg font-semibold'>
                                             <Code2 className='mr-2 h-5 w-5' /> Output
