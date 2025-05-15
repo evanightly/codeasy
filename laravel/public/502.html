@@ -5,10 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Temporary Server Issue</title>
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-darker: #1d4ed8;
+            --primary-light: #93c5fd;
+            --chart-1: 215, 70%, 60%;
+            --chart-2: 280, 70%, 60%;
+            --chart-3: 340, 70%, 60%;
+            --chart-4: 180, 70%, 60%;
+            --chart-5: 50, 70%, 60%;
+            --color-2: 310, 70%, 60%;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: #111;
+            color: #fff;
             line-height: 1.6;
             display: flex;
             align-items: center;
@@ -16,67 +27,408 @@
             height: 100vh;
             margin: 0;
             padding: 20px;
+            overflow: hidden;
         }
         .container {
             max-width: 600px;
-            background-color: white;
+            background-color: #1a1a1a;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
             padding: 30px;
             text-align: center;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+        }
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                hsl(var(--chart-1)),
+                hsl(var(--chart-2)),
+                hsl(var(--chart-3)),
+                hsl(var(--chart-4)),
+                hsl(var(--chart-5)),
+                hsl(var(--color-2)));
+            z-index: 20;
         }
         h1 {
-            color: #2563eb;
+            color: #fff;
             margin-top: 0;
+            position: relative;
+            display: inline-block;
+        }
+        h1::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            bottom: -8px;
+            left: 0;
+            background-color: var(--primary);
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            animation: underline 1.5s ease-out forwards;
+        }
+        @keyframes underline {
+            to { transform: scaleX(1); transform-origin: bottom left; }
         }
         p {
             margin: 16px 0;
+            color: #e2e2e2;
         }
         .btn {
             display: inline-block;
-            background-color: #2563eb;
+            background-color: var(--primary);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 4px;
             text-decoration: none;
             font-weight: 500;
             margin-top: 20px;
-            transition: background-color 0.2s;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
         }
         .btn:hover {
-            background-color: #1d4ed8;
+            background-color: var(--primary-darker);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 100%
+            );
+            transform: rotate(45deg);
+            z-index: 1;
+            transition: transform 0.6s;
+        }
+        .btn:hover::before {
+            transform: rotate(45deg) translate(50%, 50%);
         }
         .status {
             display: inline-block;
-            background-color: #f3f4f6;
+            background-color: #2a2a2a;
             border-radius: 20px;
             padding: 6px 12px;
             font-size: 14px;
-            color: #6b7280;
+            color: #a3a3a3;
             margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .status::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            100% { left: 100%; }
         }
         .tips {
-            background-color: #f3f4f6;
+            background-color: #2a2a2a;
             border-radius: 6px;
             padding: 15px;
             margin-top: 20px;
             text-align: left;
+            position: relative;
+            overflow: hidden;
         }
         .tips h3 {
             margin-top: 0;
             font-size: 16px;
+            color: #e2e2e2;
         }
         .tips ul {
             margin-bottom: 0;
             padding-left: 20px;
+            color: #c7c7c7;
+        }
+        .tips li {
+            margin: 8px 0;
+            transition: transform 0.3s;
+            position: relative;
+        }
+        .tips li:hover {
+            transform: translateX(5px);
+            color: #fff;
+        }
+        .tips li::before {
+            content: "";
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            left: -14px;
+            top: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tips li:hover::before {
+            opacity: 1;
+        }
+
+        /* Sparkle animation */
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Bloom's Taxonomy Pyramid */
+        .pyramid-container {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            right: -70px;
+            bottom: -70px;
+            opacity: 0.3;
+            z-index: 1;
+            transform: rotate(-15deg);
+            transition: opacity 0.3s;
+        }
+        .container:hover .pyramid-container {
+            opacity: 0.6;
+        }
+        .pyramid-level {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.7);
+            transition: transform 0.3s, opacity 0.3s;
+            cursor: pointer;
+        }
+        .pyramid-level:hover {
+            transform: translateX(-50%) translateY(-5px);
+            opacity: 1;
+        }
+        .level-remember {
+            bottom: 0;
+            width: 100%;
+            background-color: hsl(var(--chart-1));
+            z-index: 6;
+        }
+        .level-understand {
+            bottom: 33px;
+            width: 85%;
+            background-color: hsl(var(--chart-2));
+            z-index: 5;
+        }
+        .level-apply {
+            bottom: 66px;
+            width: 70%;
+            background-color: hsl(var(--chart-3));
+            z-index: 4;
+        }
+        .level-analyze {
+            bottom: 99px;
+            width: 55%;
+            background-color: hsl(var(--chart-4));
+            z-index: 3;
+        }
+        .level-evaluate {
+            bottom: 132px;
+            width: 40%;
+            background-color: hsl(var(--chart-5));
+            z-index: 2;
+        }
+        .level-create {
+            bottom: 165px;
+            width: 25%;
+            background-color: hsl(var(--color-2));
+            z-index: 1;
+        }
+
+        /* Background grid */
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+
+        /* Loading progress bar */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background-color: #2a2a2a;
+            border-radius: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg,
+                hsl(var(--chart-1)),
+                hsl(var(--chart-2)),
+                hsl(var(--chart-3)));
+            animation: loading 4.5s ease-in-out forwards;
+        }
+        @keyframes loading {
+            0% { width: 0; }
+            80% { width: 90%; }
+            100% { width: 100%; }
+        }
+
+        /* Data points animation */
+        .data-point {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: hsl(var(--chart-2));
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        /* Code snippet */
+        .code-container {
+            position: absolute;
+            left: -60px;
+            top: 30px;
+            width: 160px;
+            height: 120px;
+            opacity: 0.15;
+            font-size: 8px;
+            color: hsl(var(--chart-1));
+            text-align: left;
+            font-family: monospace;
+            overflow: hidden;
+            transform: rotate(-10deg);
+            user-select: none;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .code-line {
+            white-space: nowrap;
+            animation: typingCode 20s linear infinite;
+        }
+        @keyframes typingCode {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .highlight {
+            color: hsl(var(--chart-3));
+            font-weight: bold;
+        }
+        .keyword {
+            color: hsl(var(--chart-2));
+        }
+
+        /* Floating keywords */
+        .floating-keywords {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .keyword-bubble {
+            position: absolute;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            opacity: 0.1;
+            pointer-events: none;
+            animation: float 15s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(100%) rotate(0deg); opacity: 0.1; }
+            50% { opacity: 0.2; }
+            100% { transform: translateY(-100%) rotate(360deg); opacity: 0.1; }
+        }
+
+        /* Chart visualization */
+        .chart-container {
+            position: absolute;
+            top: -30px;
+            left: -30px;
+            width: 160px;
+            height: 100px;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            border-radius: 4px 4px 0 0;
+            width: 12px;
+            animation: chartGrow 4s infinite alternate ease-in-out;
+        }
+        @keyframes chartGrow {
+            0% { height: 20%; }
+            100% { height: 80%; }
         }
     </style>
 </head>
 <body>
+    <div class="background-grid" id="backgroundGrid"></div>
+
+    <div class="floating-keywords" id="floatingKeywords"></div>
+
     <div class="container">
+        <div class="chart-container">
+            <div class="chart-bar" style="left: 10px; background-color: hsl(var(--chart-1)); animation-delay: 0s"></div>
+            <div class="chart-bar" style="left: 30px; background-color: hsl(var(--chart-2)); animation-delay: 0.2s"></div>
+            <div class="chart-bar" style="left: 50px; background-color: hsl(var(--chart-3)); animation-delay: 0.4s"></div>
+            <div class="chart-bar" style="left: 70px; background-color: hsl(var(--chart-4)); animation-delay: 0.6s"></div>
+            <div class="chart-bar" style="left: 90px; background-color: hsl(var(--chart-5)); animation-delay: 0.8s"></div>
+            <div class="chart-bar" style="left: 110px; background-color: hsl(var(--color-2)); animation-delay: 1s"></div>
+        </div>
+
+        <div class="code-container" id="codeContainer">
+            <div class="code-line"><span class="keyword">def</span> <span class="highlight">analyze_data</span>(data):</div>
+            <div class="code-line">    <span class="keyword">import</span> pandas <span class="keyword">as</span> pd</div>
+            <div class="code-line">    <span class="keyword">import</span> numpy <span class="keyword">as</span> np</div>
+            <div class="code-line">    df = pd.DataFrame(data)</div>
+            <div class="code-line">    results = []</div>
+            <div class="code-line">    <span class="keyword">for</span> col <span class="keyword">in</span> df.columns:</div>
+            <div class="code-line">        stats = df[col].describe()</div>
+            <div class="code-line">        results.append(stats)</div>
+            <div class="code-line">    <span class="keyword">return</span> pd.concat(results, axis=1)</div>
+        </div>
+
         <span class="status">502 Bad Gateway</span>
         <h1>We're just catching our breath</h1>
-        <p>The application is temporarily unavailable. This usually happens during a hard reload or when processing a resource-intensive request.</p>
+        <p>The application is temporarily unavailable. This usually happens during a hard reload or when processing a resource-intensive data request.</p>
 
         <div class="tips">
             <h3>What you can try:</h3>
@@ -87,14 +439,393 @@
             </ul>
         </div>
 
-        <a href="/" class="btn" onclick="window.location.reload(); return false;">Refresh Page</a>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <p class="progress-info">Auto-refreshing in <span id="countdown">5</span> seconds...</p>
+
+        <a href="/" class="btn" onclick="window.location.reload(); return false;" id="refreshButton">Refresh Page</a>
+
+        <!-- Interactive Bloom's Taxonomy Pyramid -->
+        <div class="pyramid-container" id="pyramidContainer">
+            <div class="pyramid-level level-remember" data-level="remember">Remember</div>
+            <div class="pyramid-level level-understand" data-level="understand">Understand</div>
+            <div class="pyramid-level level-apply" data-level="apply">Apply</div>
+            <div class="pyramid-level level-analyze" data-level="analyze">Analyze</div>
+            <div class="pyramid-level level-evaluate" data-level="evaluate">Evaluate</div>
+            <div class="pyramid-level level-create" data-level="create">Create</div>
+        </div>
     </div>
 
     <script>
-        // Auto-refresh after 5 seconds
-        setTimeout(function() {
-            window.location.reload();
-        }, 5000);
+        // Data science and educational keywords for floating elements
+        const keywords = [
+            { text: "Data Science", color: "hsl(var(--chart-1))" },
+            { text: "Python", color: "hsl(var(--chart-2))" },
+            { text: "Analysis", color: "hsl(var(--chart-3))" },
+            { text: "Machine Learning", color: "hsl(var(--chart-4))" },
+            { text: "Statistics", color: "hsl(var(--chart-5))" },
+            { text: "Visualization", color: "hsl(var(--color-2))" },
+            { text: "Classification", color: "hsl(var(--chart-1))" },
+            { text: "Regression", color: "hsl(var(--chart-2))" },
+            { text: "Clustering", color: "hsl(var(--chart-3))" },
+            { text: "Neural Networks", color: "hsl(var(--chart-4))" },
+            { text: "Deep Learning", color: "hsl(var(--chart-5))" },
+            { text: "Pandas", color: "hsl(var(--chart-1))" },
+            { text: "NumPy", color: "hsl(var(--chart-2))" },
+            { text: "Scikit-learn", color: "hsl(var(--chart-3))" },
+            { text: "TensorFlow", color: "hsl(var(--chart-4))" },
+            { text: "PyTorch", color: "hsl(var(--chart-5))" },
+            { text: "Bloom's Taxonomy", color: "hsl(var(--color-2))" },
+            { text: "Education", color: "hsl(var(--chart-1))" },
+            { text: "Assessment", color: "hsl(var(--chart-2))" },
+            { text: "Learning", color: "hsl(var(--chart-3))" }
+        ];
+
+        // Create background grid
+        function createBackgroundGrid() {
+            const grid = document.getElementById('backgroundGrid');
+            const columns = 20;
+            const rows = 20;
+
+            for (let i = 0; i < columns; i++) {
+                const col = document.createElement('div');
+                col.style.position = 'absolute';
+                col.style.left = `${(i / columns) * 100}%`;
+                col.style.width = '1px';
+                col.style.height = '100%';
+                col.style.backgroundColor = '#333';
+                grid.appendChild(col);
+            }
+
+            for (let i = 0; i < rows; i++) {
+                const row = document.createElement('div');
+                row.style.position = 'absolute';
+                row.style.top = `${(i / rows) * 100}%`;
+                row.style.width = '100%';
+                row.style.height = '1px';
+                row.style.backgroundColor = '#333';
+                grid.appendChild(row);
+            }
+        }
+
+        // Create floating keywords
+        function createFloatingKeywords() {
+            const container = document.getElementById('floatingKeywords');
+
+            keywords.forEach((keyword, index) => {
+                const element = document.createElement('div');
+                element.className = 'keyword-bubble';
+                element.textContent = keyword.text;
+                element.style.backgroundColor = `${keyword.color}10`;
+                element.style.color = keyword.color;
+                element.style.left = `${Math.random() * 80 + 10}%`;
+
+                // Randomize animation duration and delay
+                const duration = Math.random() * 10 + 15;
+                const delay = Math.random() * 10;
+                element.style.animationDuration = `${duration}s`;
+                element.style.animationDelay = `${delay}s`;
+
+                container.appendChild(element);
+            });
+        }
+
+        // Create sparkle
+        function createSparkle() {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+
+            const size = Math.random() * 8 + 4;
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+
+            sparkle.style.width = `${size}px`;
+            sparkle.style.height = `${size}px`;
+            sparkle.style.left = `${x}px`;
+            sparkle.style.top = `${y}px`;
+
+            // Randomly select a color from our chart colors
+            const colors = [
+                'hsl(var(--chart-1))',
+                'hsl(var(--chart-2))',
+                'hsl(var(--chart-3))',
+                'hsl(var(--chart-4))',
+                'hsl(var(--chart-5))',
+                'hsl(var(--color-2))'
+            ];
+            sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+            // Animate opacity
+            sparkle.style.animation = `sparkle ${Math.random() * 2 + 1}s ease-in-out infinite`;
+
+            // Add keyframes for this specific sparkle
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes sparkle {
+                    0% { transform: scale(0); opacity: 0; }
+                    50% { transform: scale(1); opacity: 0.8; }
+                    100% { transform: scale(0); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(sparkle);
+
+            // Remove after animation
+            setTimeout(() => {
+                sparkle.remove();
+                style.remove();
+            }, 3000);
+        }
+
+        // Create data points (small dots moving around)
+        function createDataPoint() {
+            const point = document.createElement('div');
+            point.className = 'data-point';
+
+            // Random starting position
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+
+            point.style.left = `${x}px`;
+            point.style.top = `${y}px`;
+
+            // Set random movement
+            const style = document.createElement('style');
+            const duration = Math.random() * 8 + 4;
+            const targetX = Math.random() * window.innerWidth;
+            const targetY = Math.random() * window.innerHeight;
+            const uniqueName = `dataPoint-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+            style.textContent = `
+                @keyframes ${uniqueName} {
+                    0% { transform: translate(0, 0); }
+                    100% { transform: translate(${targetX - x}px, ${targetY - y}px); }
+                }
+            `;
+            document.head.appendChild(style);
+
+            point.style.animation = `${uniqueName} ${duration}s linear infinite alternate`;
+
+            document.body.appendChild(point);
+
+            // Remove after some time
+            setTimeout(() => {
+                point.remove();
+                style.remove();
+            }, duration * 2 * 1000);
+        }
+
+        // Make bloom's taxonomy pyramid interactive
+        function setupBloomsPyramid() {
+            const levels = document.querySelectorAll('.pyramid-level');
+            const bloomInfo = {
+                remember: {
+                    title: 'Remember',
+                    description: 'Recall facts and basic concepts',
+                    keywords: ['Define', 'List', 'Memorize', 'Recall', 'Repeat', 'Identify']
+                },
+                understand: {
+                    title: 'Understand',
+                    description: 'Explain ideas or concepts',
+                    keywords: ['Classify', 'Describe', 'Discuss', 'Explain', 'Recognize']
+                },
+                apply: {
+                    title: 'Apply',
+                    description: 'Use information in new situations',
+                    keywords: ['Execute', 'Implement', 'Solve', 'Use', 'Demonstrate']
+                },
+                analyze: {
+                    title: 'Analyze',
+                    description: 'Draw connections among ideas',
+                    keywords: ['Differentiate', 'Organize', 'Relate', 'Compare', 'Contrast']
+                },
+                evaluate: {
+                    title: 'Evaluate',
+                    description: 'Justify a position or decision',
+                    keywords: ['Appraise', 'Argue', 'Judge', 'Defend', 'Select']
+                },
+                create: {
+                    title: 'Create',
+                    description: 'Produce new or original work',
+                    keywords: ['Design', 'Develop', 'Formulate', 'Construct', 'Invent']
+                }
+            };
+
+            levels.forEach(level => {
+                level.addEventListener('click', function() {
+                    const levelType = this.getAttribute('data-level');
+                    if (levelType && bloomInfo[levelType]) {
+                        const info = bloomInfo[levelType];
+
+                        // Create tooltip with level information
+                        let tooltip = document.getElementById('bloom-tooltip');
+                        if (!tooltip) {
+                            tooltip = document.createElement('div');
+                            tooltip.id = 'bloom-tooltip';
+                            tooltip.style.position = 'absolute';
+                            tooltip.style.padding = '10px';
+                            tooltip.style.backgroundColor = '#2a2a2a';
+                            tooltip.style.borderRadius = '6px';
+                            tooltip.style.maxWidth = '200px';
+                            tooltip.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+                            tooltip.style.zIndex = '100';
+                            tooltip.style.textAlign = 'left';
+                            tooltip.style.fontSize = '12px';
+                            tooltip.style.transition = 'opacity 0.3s';
+                            document.body.appendChild(tooltip);
+                        }
+
+                        const color = getComputedStyle(this).backgroundColor;
+
+                        tooltip.innerHTML = `
+                            <h3 style="margin-top: 0; margin-bottom: 6px; color: ${color};">${info.title}</h3>
+                            <p style="margin: 0 0 6px 0;">${info.description}</p>
+                        `;
+
+                        // Position tooltip near the cursor
+                        const rect = this.getBoundingClientRect();
+                        tooltip.style.left = `${rect.right + 10}px`;
+                        tooltip.style.top = `${rect.top}px`;
+                        tooltip.style.opacity = '1';
+
+                        // Hide tooltip after 3 seconds
+                        setTimeout(() => {
+                            tooltip.style.opacity = '0';
+                        }, 3000);
+                    }
+                });
+            });
+        }
+
+        // Button hover effect to create sparkles
+        function setupButtonSparkles() {
+            const btn = document.getElementById('refreshButton');
+
+            btn.addEventListener('mouseenter', function() {
+                // Create multiple sparkles
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const sparkle = document.createElement('div');
+                        sparkle.className = 'sparkle';
+
+                        const btnRect = btn.getBoundingClientRect();
+                        const size = Math.random() * 6 + 4;
+
+                        // Position sparkle near the button
+                        const x = btnRect.left + Math.random() * btnRect.width;
+                        const y = btnRect.top + Math.random() * btnRect.height;
+
+                        sparkle.style.width = `${size}px`;
+                        sparkle.style.height = `${size}px`;
+                        sparkle.style.left = `${x}px`;
+                        sparkle.style.top = `${y}px`;
+
+                        // Select a color
+                        const colors = [
+                            'hsl(var(--chart-1))',
+                            'hsl(var(--chart-2))',
+                            'hsl(var(--chart-3))',
+                            'hsl(var(--chart-4))',
+                            'hsl(var(--chart-5))',
+                            'hsl(var(--color-2))'
+                        ];
+                        sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+                        document.body.appendChild(sparkle);
+
+                        // Animate and remove
+                        sparkle.animate(
+                            [
+                                { transform: 'scale(0)', opacity: 0 },
+                                { transform: 'scale(1)', opacity: 0.8 },
+                                { transform: 'scale(0)', opacity: 0 }
+                            ],
+                            {
+                                duration: 1000,
+                                easing: 'ease-in-out'
+                            }
+                        );
+
+                        setTimeout(() => {
+                            sparkle.remove();
+                        }, 1000);
+                    }, i * 100);
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createBackgroundGrid();
+            createFloatingKeywords();
+
+            // Create sparkles periodically
+            setInterval(createSparkle, 300);
+
+            // Create data points
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => createDataPoint(), i * 200);
+            }
+
+            // Setup interactive elements
+            setupBloomsPyramid();
+            setupButtonSparkles();
+
+            // Countdown timer
+            const countdownElement = document.getElementById('countdown');
+            let seconds = 5;
+
+            const countdownInterval = setInterval(function() {
+                seconds--;
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                }
+                countdownElement.textContent = seconds;
+            }, 1000);
+
+            // Auto-refresh after 5 seconds
+            setTimeout(function() {
+                window.location.reload();
+            }, 5000);
+
+            // Make pyramid levels gently move
+            const pyramidLevels = document.querySelectorAll('.pyramid-level');
+            pyramidLevels.forEach((level, index) => {
+                level.style.animation = `float ${1 + index * 0.2}s ease-in-out infinite alternate`;
+
+                const style = document.createElement('style');
+                const delay = index * 0.1;
+                style.textContent = `
+                    @keyframes float {
+                        0% { transform: translateX(-50%) translateY(0); }
+                        100% { transform: translateX(-50%) translateY(-3px); }
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+
+            // Animate code typing effect
+            const codeContainer = document.getElementById('codeContainer');
+            let currentOpacity = 0.15;
+
+            // Periodically increase opacity to draw attention
+            setInterval(() => {
+                currentOpacity = 0.15;
+                codeContainer.style.opacity = currentOpacity;
+
+                setTimeout(() => {
+                    currentOpacity = 0.25;
+                    codeContainer.style.opacity = currentOpacity;
+
+                    setTimeout(() => {
+                        currentOpacity = 0.15;
+                        codeContainer.style.opacity = currentOpacity;
+                    }, 500);
+                }, 100);
+            }, 5000);
+        });
     </script>
 </body>
 </html>
