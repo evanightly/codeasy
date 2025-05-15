@@ -301,7 +301,7 @@ Steps:
         ```
         
     2. Component that applying process business, e.g. Edit/Create/Index.tsx
-    3. Don't forget to implement frontend localization in [pages.php](../../laravel/lang/en/pages.php)
+    3. Don't forget to implement frontend localization in [pages.php](laravel/lang/en/pages.php)
     4. Note for tanstack query is already has helper for loading state, you dont need to create loading state manually, heres the example
 
     ```ts
@@ -311,7 +311,7 @@ Steps:
 
     the code above is using isPending as the loading state.
 
-    5. Note: when using the api for data transfer, like "post" and "update" data do not forget to use ```toast.promise``` to make the UX value greater, see the example of [Register Page](../../laravel/resources/js/Pages/Auth/Register.tsx)
+    5. Note: when using the api for data transfer, like "post" and "update" data do not forget to use ```toast.promise``` to make the UX value greater, see the example of [Register Page](laravel/resources/js/Pages/Auth/Register.tsx)
 
     6. Maintain consistency, for example when creating context menu, if one of the menu item has an icon, then the other must have, otherwise all menu item must not have icon
 
@@ -344,5 +344,5 @@ Special Notes
 ```sh
 docker compose -f docker-compose.dev.yml --env-file laravel/.env exec -it laravel bash
 ```
-- to run artisan, composer, npm command, please refer to [dc.sh](../../dc.sh)
+- to run artisan, composer, npm command, please refer to [dc.sh](dc.sh)
 - Don't delete commented code, todos.
