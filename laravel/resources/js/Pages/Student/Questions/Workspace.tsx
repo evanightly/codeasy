@@ -650,6 +650,7 @@ export default function Workspace({
                                                             : t(
                                                                   'pages.student_questions.workspace.run',
                                                               )}
+                                                              {' (CTRL + Enter)'}
                                                     </Button>
                                                 }
                                                 className='flex-1 overflow-x-scroll'
@@ -828,6 +829,7 @@ export default function Workspace({
                                                             : t(
                                                                   'pages.student_questions.workspace.run',
                                                               )}
+                                                        {' (CTRL + Enter)'}
                                                     </Button>
                                                 }
                                             />
