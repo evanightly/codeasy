@@ -864,7 +864,6 @@ export default function Workspace({
                                                             return (
                                                                 <div
                                                                     key={i}
-                                                                    className='rounded-md border'
                                                                 >
                                                                     <img
                                                                         src={out.content}
@@ -943,7 +942,6 @@ export default function Workspace({
                                                             return (
                                                                 <div
                                                                     key={i}
-                                                                    className='rounded-md bg-muted p-3 text-sm'
                                                                 >
                                                                     {out.content}
                                                                 </div>
