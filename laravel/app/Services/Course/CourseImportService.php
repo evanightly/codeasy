@@ -758,7 +758,7 @@ class CourseImportService implements CourseImportServiceInterface {
         $testCases = [];
 
         // Look for "Pertanyaan Modul" section
-        if (preg_match('/Pertanyaan Modul\s*(.*?)(?:\n\s*$|\Z)/s', $pdfText, $questionsSection)) {
+        if (preg_match('/Pertanyaan\s*(.*?)(?:\n\s*$|\Z)/s', $pdfText, $questionsSection)) {
             $questionsSectionText = $questionsSection[1];
 
             // Extract individual questions
