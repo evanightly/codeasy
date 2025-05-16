@@ -650,7 +650,7 @@ export default function Workspace({
                                                             : t(
                                                                   'pages.student_questions.workspace.run',
                                                               )}
-                                                              {' (CTRL + Enter)'}
+                                                        {' (CTRL + Enter)'}
                                                     </Button>
                                                 }
                                                 className='flex-1 overflow-x-scroll'
@@ -864,9 +864,7 @@ export default function Workspace({
                                                     {output.map((out, i) => {
                                                         if (out.type === 'image') {
                                                             return (
-                                                                <div
-                                                                    key={i}
-                                                                >
+                                                                <div key={i}>
                                                                     <img
                                                                         src={out.content}
                                                                         className='mx-auto max-w-full rounded'
@@ -941,13 +939,7 @@ export default function Workspace({
                                                                 </div>
                                                             );
                                                         } else {
-                                                            return (
-                                                                <div
-                                                                    key={i}
-                                                                >
-                                                                    {out.content}
-                                                                </div>
-                                                            );
+                                                            return <div key={i}>{out.content}</div>;
                                                         }
                                                     })}
                                                     {isCompiling && (
