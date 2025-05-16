@@ -23,3 +23,4 @@ export * from './ExecutionResult';
 export * from './StudentCognitiveClassification';
 export * from './StudentScore';
 export * from './TestCaseChangeTracker';
+export * from './StudentCourseCognitiveClassification';

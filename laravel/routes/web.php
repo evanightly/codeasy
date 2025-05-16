@@ -155,3 +155,6 @@ Route::middleware('auth')->group(function () {
 Route::resource('schools', SchoolController::class)->only(['index']);
 
 require __DIR__ . '/auth.php';
+
+// StudentCourseCognitiveClassification routes
+Route::resource('student-course-cognitive-classifications', App\Http\Controllers\StudentCourseCognitiveClassificationController::class);
