@@ -15,14 +15,16 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             // $table->bigInteger('course_id');
             $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
-            $table->string('classification_type');
+            $table->foreignId('learning_material_id')->nullable()->constrained()->onDelete('cascade');
+            $table->string('classification_type')->default('topsis');
             $table->string('classification_level');
             $table->decimal('classification_score');
-            $table->json('raw_data');
+            $table->json('raw_data')->nullable();
+            $table->boolean('is_course_level')->default(false); // Whether this is a course-level or material-level classification
             $table->timestamp('classified_at');
             $table->timestamps();
 
-            $table->unique(['user_id', 'course_id', 'classification_type'], 'unique_student_classification');
+            $table->unique(['user_id', 'course_id', 'learning_material_id', 'classification_type', 'is_course_level'], 'unique_student_classification');
         });
     }
 

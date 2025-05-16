@@ -48,6 +48,46 @@ class StudentCognitiveClassificationController extends Controller implements Has
             );
         }
 
+        if ($intent === IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_INDEX_GET_MATERIAL_CLASSIFICATIONS->value) {
+            $userId = $request->get('user_id');
+            $courseId = $request->get('course_id');
+            $classificationType = $request->get('classification_type', 'topsis');
+
+            if (!$userId || !$courseId) {
+                return response()->json(['error' => 'User ID and Course ID are required'], 422);
+            }
+
+            $classifications = $this->studentCognitiveClassificationService->getMaterialClassificationsForStudent(
+                $userId,
+                $courseId,
+                $classificationType
+            );
+
+            return StudentCognitiveClassificationResource::collection($classifications);
+        }
+
+        if ($intent === IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_INDEX_GET_COURSE_CLASSIFICATION->value) {
+            $userId = $request->get('user_id');
+            $courseId = $request->get('course_id');
+            $classificationType = $request->get('classification_type', 'topsis');
+
+            if (!$userId || !$courseId) {
+                return response()->json(['error' => 'User ID and Course ID are required'], 422);
+            }
+
+            $classification = $this->studentCognitiveClassificationService->getCourseClassificationForStudent(
+                $userId,
+                $courseId,
+                $classificationType
+            );
+
+            if (!$classification) {
+                return response()->json(['error' => 'No course-level classification found'], 404);
+            }
+
+            return new StudentCognitiveClassificationResource($classification);
+        }
+
         $data = StudentCognitiveClassificationResource::collection($this->studentCognitiveClassificationService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {

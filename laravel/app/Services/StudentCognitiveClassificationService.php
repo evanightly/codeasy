@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -68,6 +69,11 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
             // 3. Save classification results
             $savedResults = $this->saveClassificationResults($apiResult, $courseId, $classificationType);
 
+            // 4. Calculate and save the overall course-level classification
+            if (!empty($savedResults)) {
+                $this->calculateAndSaveCourseClassification($savedResults, $courseId, $classificationType);
+            }
+
             return [
                 'status' => 'success',
                 'message' => 'Classification completed successfully',
@@ -90,6 +96,8 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
 
     /**
      * Gather student data for classification
+     *
+     * MODIFIED IN REVISION 1: Now focuses on gathering data per material with its questions
      *
      * @param  int  $courseId  Course ID to gather data for
      * @param  int|null  $studentId  Optional student ID to filter by
@@ -120,13 +128,14 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
 
         $studentData = [];
 
-        // For each student, get their scores for each question in each material
+        // For each student, get their scores for each material
         foreach ($students as $student) {
             $userData = [
                 'user_id' => $student->id,
                 'materials' => [],
             ];
 
+            // Process each material separately in line with Revision 1
             foreach ($learningMaterials as $material) {
                 $materialData = [
                     'material_id' => $material->id,
@@ -134,33 +143,48 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                     'questions' => [],
                 ];
 
-                foreach ($material->learning_material_questions as $question) {
+                // Get all questions for this material
+                $questions = $material->learning_material_questions;
+
+                // For each question, create a row in the decision matrix
+                foreach ($questions as $question) {
                     // Get the student's score for this question
                     $studentScore = $question->student_scores()
                         ->where('user_id', $student->id)
                         ->first();
 
                     // Get the execution result that completed this score
-                    $executionResult = $studentScore ? $studentScore->completed_execution_result : null;
+                    $executionResult = $studentScore && $studentScore->completed_execution_result_id
+                        ? $studentScore->completed_execution_result
+                        : null;
 
                     // Convert coding_time from seconds to minutes for classification
                     $codingTimeInMinutes = $studentScore && $studentScore->coding_time ? round($studentScore->coding_time / 60, 2) : 0;
 
+                    // Build metrics array with all required parameters
+                    $metrics = [
+                        'compile_count' => $studentScore ? $studentScore->compile_count : 0, // cost
+                        'coding_time' => $codingTimeInMinutes, // cost - now in minutes instead of seconds
+                        'completion_status' => $studentScore ? (int) $studentScore->completion_status : 0, // benefit
+                        'trial_status' => $studentScore ? (int) $studentScore->trial_status : 0, // cost
+                        'variable_count' => $executionResult ? $executionResult->variable_count : 0, // benefit
+                        'function_count' => $executionResult ? $executionResult->function_count : 0, // benefit
+                    ];
+
                     $questionData = [
                         'question_id' => $question->id,
                         'question_name' => $question->title,
-                        'metrics' => [
-                            'completion_status' => $studentScore ? (int) $studentScore->completion_status : 0,
-                            'trial_status' => $studentScore ? (int) $studentScore->trial_status : 0,
-                            'compile_count' => $studentScore ? $studentScore->compile_count : 0,
-                            'coding_time' => $codingTimeInMinutes, // Now in minutes instead of seconds
-                            'variable_count' => $executionResult ? $executionResult->variable_count : 0,
-                            'function_count' => $executionResult ? $executionResult->function_count : 0,
-                        ],
+                        'order_number' => $question->order_number,
+                        'metrics' => $metrics,
                     ];
 
                     $materialData['questions'][] = $questionData;
                 }
+
+                // Sort questions by order_number
+                usort($materialData['questions'], function ($a, $b) {
+                    return $a['order_number'] <=> $b['order_number'];
+                });
 
                 $userData['materials'][] = $materialData;
             }
@@ -173,6 +197,8 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
 
     /**
      * Perform classification using FastAPI
+     *
+     * MODIFIED IN REVISION 1: Updated to reflect per-material classification
      */
     private function performClassification(array $studentData, string $classificationType): array {
         // Call the FastAPI server to perform classification
@@ -195,27 +221,53 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
 
     /**
      * Save classification results to database
+     *
+     * MODIFIED IN REVISION 1: Now saves material-level classifications
      */
     private function saveClassificationResults(array $apiResult, int $courseId, string $classificationType): array {
         $now = Carbon::now();
         $savedResults = [];
 
+        // Each classification now has material_id specified
         foreach ($apiResult['classifications'] as $classification) {
+            $userId = $classification['user_id'];
+            $materialId = $classification['material_id'] ?? null;
+
+            if (!$materialId) {
+                Log::warning('Missing material_id in classification result', [
+                    'user_id' => $userId,
+                    'classification' => $classification,
+                ]);
+
+                continue;
+            }
+
+            // Generate recommendations based on raw data
+            $recommendations = $this->generateRecommendations($classification['raw_data']);
+
+            // Add recommendations to raw data
+            $rawData = $classification['raw_data'];
+            $rawData['recommendations'] = $recommendations;
+
             $userData = [
-                'user_id' => $classification['user_id'],
+                'user_id' => $userId,
                 'course_id' => $courseId,
+                'learning_material_id' => $materialId,
                 'classification_type' => $classificationType,
                 'classification_level' => $classification['level'],
                 'classification_score' => $classification['score'],
-                'raw_data' => $classification['raw_data'],
+                'raw_data' => $rawData,
                 'classified_at' => $now,
+                'is_course_level' => false, // This is a material-level classification
             ];
 
             // Create or update the classification record
             $result = $this->repository->updateOrCreate([
-                'user_id' => $classification['user_id'],
+                'user_id' => $userId,
                 'course_id' => $courseId,
+                'learning_material_id' => $materialId,
                 'classification_type' => $classificationType,
+                'is_course_level' => false,
             ], $userData);
 
             $savedResults[] = $result;
@@ -225,9 +277,221 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
     }
 
     /**
-     * Export classifications to Excel
+     * Calculate and save the overall course-level classification
      *
-     * @return Response
+     * NEW IN REVISION 1: Calculates and saves a course-level classification based on material results
+     */
+    private function calculateAndSaveCourseClassification(array $materialClassifications, int $courseId, string $classificationType): void {
+        if (empty($materialClassifications)) {
+            return;
+        }
+
+        // Group classifications by user
+        $userClassifications = [];
+        foreach ($materialClassifications as $classification) {
+            $userId = $classification->user_id;
+            if (!isset($userClassifications[$userId])) {
+                $userClassifications[$userId] = [];
+            }
+            $userClassifications[$userId][] = $classification;
+        }
+
+        $now = Carbon::now();
+
+        // Process each user's classifications
+        foreach ($userClassifications as $userId => $classifications) {
+            // Calculate average score across all materials
+            $totalScore = 0;
+            $recommendationsByLevel = [];
+
+            foreach ($classifications as $classification) {
+                $totalScore += $classification->classification_score;
+
+                // Collect recommendations from material-level classifications
+                if (isset($classification->raw_data['recommendations'])) {
+                    $level = $classification->classification_level;
+                    if (!isset($recommendationsByLevel[$level])) {
+                        $recommendationsByLevel[$level] = [];
+                    }
+                    $recommendationsByLevel[$level] = array_merge(
+                        $recommendationsByLevel[$level],
+                        $classification->raw_data['recommendations']
+                    );
+                }
+            }
+
+            $avgScore = $totalScore / count($classifications);
+
+            // Determine classification level based on the rule base
+            $level = $this->determineClassificationLevel($avgScore);
+
+            // Prepare recommendations for course level
+            $recommendations = $this->prepareCourseLevelRecommendations($recommendationsByLevel, $level);
+
+            // Create or update the course-level classification
+            $this->repository->updateOrCreate(
+                [
+                    'user_id' => $userId,
+                    'course_id' => $courseId,
+                    'classification_type' => $classificationType,
+                    'is_course_level' => true,
+                ],
+                [
+                    'user_id' => $userId,
+                    'course_id' => $courseId,
+                    'learning_material_id' => null, // No specific material for course-level classification
+                    'classification_type' => $classificationType,
+                    'classification_level' => $level,
+                    'classification_score' => $avgScore,
+                    'raw_data' => [
+                        'material_classifications' => array_map(function ($c) {
+                            return [
+                                'id' => $c->id,
+                                'material_id' => $c->learning_material_id,
+                                'level' => $c->classification_level,
+                                'score' => $c->classification_score,
+                            ];
+                        }, $classifications),
+                        'recommendations' => $recommendations,
+                    ],
+                    'classified_at' => $now,
+                    'is_course_level' => true,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Generate recommendations based on classification results
+     *
+     * NEW IN REVISION 1: Generates specific recommendations for improving performance
+     */
+    private function generateRecommendations(array $rawData): array {
+        $recommendations = [];
+
+        // Extract metrics and analyze underperforming areas
+        if (isset($rawData['question_metrics'])) {
+            foreach ($rawData['question_metrics'] as $questionIndex => $metrics) {
+                $questionNum = $questionIndex + 1;
+                $recommendations[] = $this->analyzeMetricsForRecommendations($metrics, $questionNum);
+            }
+        }
+
+        // If no specific metrics found, provide general recommendations
+        if (empty($recommendations) && isset($rawData['weak_areas'])) {
+            foreach ($rawData['weak_areas'] as $area) {
+                $recommendations[] = "Focus on improving your {$area} skills.";
+            }
+        }
+
+        // If still no recommendations, provide a default based on the classification level
+        if (empty($recommendations) && isset($rawData['classification_level'])) {
+            $level = $rawData['classification_level'];
+            $recommendations[] = "Your current cognitive level is '{$level}'. Continue practicing to improve.";
+        }
+
+        return array_filter($recommendations); // Remove any empty values
+    }
+
+    /**
+     * Analyze metrics for a specific question to generate recommendations
+     */
+    private function analyzeMetricsForRecommendations(array $metrics, int $questionNum): string {
+        // Define thresholds for different metrics
+        $thresholds = [
+            'variable_count' => ['low' => 2, 'high' => 10],
+            'function_count' => ['low' => 1, 'high' => 5],
+            'compile_count' => ['low' => 3, 'high' => 10],
+            'coding_time' => ['low' => 5, 'high' => 30], // in minutes
+        ];
+
+        // Check each metric against thresholds
+        if (isset($metrics['variable_count']) && $metrics['variable_count'] < $thresholds['variable_count']['low']) {
+            return "Question {$questionNum}: Try to use more variables to better organize your code.";
+        }
+
+        if (isset($metrics['function_count']) && $metrics['function_count'] < $thresholds['function_count']['low']) {
+            return "Question {$questionNum}: Consider breaking down your solution into more functions for better modularity.";
+        }
+
+        if (isset($metrics['compile_count']) && $metrics['compile_count'] > $thresholds['compile_count']['high']) {
+            return "Question {$questionNum}: You compiled your code {$metrics['compile_count']} times. Try to review your code more carefully before compiling to reduce the number of attempts.";
+        }
+
+        if (isset($metrics['coding_time']) && $metrics['coding_time'] > $thresholds['coding_time']['high']) {
+            return "Question {$questionNum}: You spent {$metrics['coding_time']} minutes on this question. Try to improve your problem-solving speed with more practice.";
+        }
+
+        if (isset($metrics['completion_status']) && $metrics['completion_status'] == 0) {
+            return "Question {$questionNum}: Complete this question to improve your overall score.";
+        }
+
+        return '';
+    }
+
+    /**
+     * Prepare course-level recommendations based on material-level recommendations
+     */
+    private function prepareCourseLevelRecommendations(array $recommendationsByLevel, string $currentLevel): array {
+        $finalRecommendations = [];
+
+        // Add general recommendation based on current level
+        $finalRecommendations[] = "Your current cognitive level is '{$currentLevel}'. Focus on the following to improve:";
+
+        // Determine next level to target
+        $levels = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
+        $currentLevelIndex = array_search($currentLevel, $levels);
+
+        if ($currentLevelIndex !== false && $currentLevelIndex < count($levels) - 1) {
+            $nextLevel = $levels[$currentLevelIndex + 1];
+            $finalRecommendations[] = "To reach the '{$nextLevel}' level:";
+
+            // Add the recommendations from the next level if available
+            if (isset($recommendationsByLevel[$nextLevel])) {
+                // Limit to 3 recommendations for clarity
+                $nextLevelRecs = array_slice($recommendationsByLevel[$nextLevel], 0, 3);
+                foreach ($nextLevelRecs as $rec) {
+                    $finalRecommendations[] = '- ' . $rec;
+                }
+            }
+        }
+
+        // Add some of the recommendations from the current level
+        if (isset($recommendationsByLevel[$currentLevel])) {
+            $finalRecommendations[] = "To improve within the '{$currentLevel}' level:";
+            // Limit to 3 recommendations for clarity
+            $currentLevelRecs = array_slice($recommendationsByLevel[$currentLevel], 0, 3);
+            foreach ($currentLevelRecs as $rec) {
+                $finalRecommendations[] = '- ' . $rec;
+            }
+        }
+
+        return $finalRecommendations;
+    }
+
+    /**
+     * Determine classification level based on score using the rule base
+     */
+    private function determineClassificationLevel(float $score): string {
+        // Apply the rule base as defined in requirements
+        if ($score >= 0.85) {
+            return 'Create';
+        } elseif ($score >= 0.70) {
+            return 'Evaluate';
+        } elseif ($score >= 0.55) {
+            return 'Analyze';
+        } elseif ($score >= 0.40) {
+            return 'Apply';
+        } elseif ($score >= 0.25) {
+            return 'Understand';
+        }
+
+        return 'Remember';
+
+    }
+
+    /**
+     * Export classifications to Excel
      */
     public function exportToExcel(array $filters = []): Response|BinaryFileResponse {
         // Create a new Spreadsheet
@@ -238,10 +502,12 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
         $sheet->setCellValue('A1', 'ID');
         $sheet->setCellValue('B1', 'Student Name');
         $sheet->setCellValue('C1', 'Course Name');
-        $sheet->setCellValue('D1', 'Classification Type');
-        $sheet->setCellValue('E1', 'Classification Level');
-        $sheet->setCellValue('F1', 'Classification Score');
-        $sheet->setCellValue('G1', 'Classified At');
+        $sheet->setCellValue('D1', 'Material Name');
+        $sheet->setCellValue('E1', 'Classification Type');
+        $sheet->setCellValue('F1', 'Classification Level');
+        $sheet->setCellValue('G1', 'Classification Score');
+        $sheet->setCellValue('H1', 'Course Level');
+        $sheet->setCellValue('I1', 'Classified At');
 
         // Get the classifications with related data
         $classifications = $this->repository->getAllWithRelationsQuery([
@@ -251,24 +517,28 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
             'course' => function ($query) {
                 $query->select('id', 'name');
             },
-        ])
-            ->get();
+            'learning_material' => function ($query) {
+                $query->select('id', 'title');
+            },
+        ])->get();
 
         // Fill data rows
         $row = 2;
         foreach ($classifications as $classification) {
             $sheet->setCellValue('A' . $row, $classification->id);
-            $sheet->setCellValue('B' . $row, $classification->user->name);
-            $sheet->setCellValue('C' . $row, $classification->course->name);
-            $sheet->setCellValue('D' . $row, $classification->classification_type);
-            $sheet->setCellValue('E' . $row, $classification->classification_level);
-            $sheet->setCellValue('F' . $row, $classification->classification_score);
-            $sheet->setCellValue('G' . $row, $classification->classified_at->format('Y-m-d H:i:s'));
+            $sheet->setCellValue('B' . $row, $classification->user->name ?? 'Unknown User');
+            $sheet->setCellValue('C' . $row, $classification->course->name ?? 'Unknown Course');
+            $sheet->setCellValue('D' . $row, $classification->learning_material->title ?? 'Course Level');
+            $sheet->setCellValue('E' . $row, $classification->classification_type);
+            $sheet->setCellValue('F' . $row, $classification->classification_level);
+            $sheet->setCellValue('G' . $row, $classification->classification_score);
+            $sheet->setCellValue('H' . $row, $classification->is_course_level ? 'Yes' : 'No');
+            $sheet->setCellValue('I' . $row, $classification->classified_at ? $classification->classified_at->format('Y-m-d H:i:s') : '');
             $row++;
         }
 
         // Auto-size columns
-        foreach (range('A', 'G') as $column) {
+        foreach (range('A', 'I') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
@@ -295,7 +565,7 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
      * Export raw student data used for classifications to Excel
      *
      * @param  int  $courseId  Course to export data for
-     * @param  bool  $enforceConsistentQuestionCount  Whether to enforce consistent question count
+     * @param  bool|null  $enforceConsistentQuestionCount  Whether to enforce consistent question count
      * @param  string  $exportFormat  Format for export ('raw' or 'ml_tool')
      * @param  bool  $includeClassificationResults  Whether to include classification results in the export
      */
@@ -305,288 +575,254 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
         string $exportFormat = 'raw',
         bool $includeClassificationResults = false
     ): Response|BinaryFileResponse {
-        // Allow overriding default setting via parameter
-        if ($enforceConsistentQuestionCount !== null) {
-            $this->enforceConsistentQuestionCount = $enforceConsistentQuestionCount;
+        // Get the raw student data for the course
+        $studentData = $this->gatherStudentData($courseId);
+
+        // Create a new spreadsheet
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Headers will depend on the export format
+        if ($exportFormat === 'ml_tool') {
+            // ML Tool format (one row per student, columns for each metric-question combination)
+            $this->exportMlToolFormat($sheet, $studentData, $includeClassificationResults);
+        } else {
+            // Raw format (one row per student-question combination)
+            $this->exportRawFormat($sheet, $studentData, $includeClassificationResults);
         }
 
-        try {
-            // Gather the raw student data
-            $studentData = $this->gatherStudentData($courseId);
+        // Create temporary file
+        $filename = 'cognitive_raw_data_' . date('YmdHis') . '.xlsx';
+        $tempPath = storage_path('app/temp/' . $filename);
 
-            if (empty($studentData)) {
-                throw new Exception('No student data found for this course');
-            }
+        // Ensure temp directory exists
+        if (!file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
 
-            // Get the first student to determine structure
+        // Save file
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempPath);
+
+        // Return download response
+        return response()->download($tempPath, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend();
+    }
+
+    /**
+     * Export data in ML Tool format (wide format, one row per student)
+     */
+    private function exportMlToolFormat(
+        $sheet,
+        array $studentData,
+        bool $includeClassificationResults
+    ): void {
+        // Column headers
+        $col = 'A';
+        $sheet->setCellValue($col++ . '1', 'Student ID');
+        $sheet->setCellValue($col++ . '1', 'Student Name');
+
+        // Determine column headers from the first student's data
+        $metricColumns = [];
+        if (!empty($studentData)) {
             $firstStudent = $studentData[0];
-
-            // Check for consistent question count across materials if enforcement is enabled
-            if ($this->enforceConsistentQuestionCount) {
-                $this->validateConsistentQuestionCount($firstStudent['materials']);
-            }
-
-            // Create a new Spreadsheet
-            $spreadsheet = new Spreadsheet;
-
-            // Create an overview sheet first
-            $overviewSheet = $spreadsheet->getActiveSheet();
-            $overviewSheet->setTitle('Overview');
-            $overviewSheet->setCellValue('A1', 'Raw Classification Data - Course ID: ' . $courseId);
-            $overviewSheet->setCellValue('A3', 'Student ID');
-            $overviewSheet->setCellValue('B3', 'Student Name');
-            $overviewSheet->setCellValue('C3', 'Sheet Name');
-            $overviewSheet->setCellValue('D3', 'Note: "waktu" is displayed in minutes (converted from seconds in database)');
-            $overviewSheet->setCellValue('E3', 'Export Format: ' . ($exportFormat === 'ml_tool' ? 'ML Tool (RapidMiner)' : 'Raw Data'));
-
-            if ($includeClassificationResults) {
-                $overviewSheet->setCellValue('F3', 'Classification Results: Included');
-            }
-
-            // Format header
-            $overviewSheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-            $overviewSheet->getStyle('A3:F3')->getFont()->setBold(true);
-            $overviewSheet->getStyle('A3:C3')->getFill()
-                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                ->getStartColor()->setRGB('DDDDDD');
-            $overviewSheet->getStyle('D3:F3')->getFill()
-                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                ->getStartColor()->setRGB('FFEEAA');
-
-            // Create a sheet for each student
-            $row = 4;
-            foreach ($studentData as $index => $student) {
-                $userId = $student['user_id'];
-                $user = \App\Models\User::find($userId);
-                $studentName = $user ? $user->name : "Student {$userId}";
-
-                // Create a valid sheet name - Excel limits sheet names to 31 chars
-                // Use student name but ensure it's within limits and valid
-                $sheetName = mb_substr(preg_replace('/[\[\]\*\/\\\?:]/', '', $studentName), 0, 25) . "_{$userId}";
-
-                // Add to overview sheet
-                $overviewSheet->setCellValue("A{$row}", $userId);
-                $overviewSheet->setCellValue("B{$row}", $studentName);
-                $overviewSheet->setCellValue("C{$row}", $sheetName);
-                $row++;
-
-                // Create a new sheet for this student
-                $sheet = $spreadsheet->createSheet();
-                $sheet->setTitle($sheetName);
-
-                // Add student info at the top
-                $sheet->setCellValue('A1', "Student: {$studentName} (ID: {$userId})");
-                $sheet->setCellValue('A2', "Note: 'waktu' column values are in minutes");
-                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(12);
-                $sheet->getStyle('A2')->getFont()->setItalic(true)->getColor()->setRGB('AA5500');
-
-                // Start from row 3 for the headers
-                $sheet->setCellValue('A3', 'Material');
-
-                // Get materials and determine question count
-                $materials = $student['materials'];
-                $questionCount = count($materials[0]['questions'] ?? []);
-
-                // Track column positions
-                $startCol = 1; // Starting from column B
-
-                // Set up the question number headers instead of question names
-                for ($questionNum = 1; $questionNum <= $questionCount; $questionNum++) {
-                    // Metrics columns - each question has 6 metric columns
-                    $metricsCount = 6; // compile, waktu, selesai, coba, variables, functions columns per question
-
-                    // Merge cells for the question header (spanning multiple metrics)
-                    $startColLetter = $this->getColumnLetter($startCol);
-                    $endColLetter = $this->getColumnLetter($startCol + $metricsCount - 1);
-                    $sheet->mergeCells("{$startColLetter}3:{$endColLetter}3");
-                    $sheet->setCellValue("{$startColLetter}3", "Question {$questionNum}");
-
-                    // Set individual metric headers - use different format for ML tools
-                    if ($exportFormat === 'ml_tool') {
-                        // For ML tools like RapidMiner, each column should have a unique name
-                        $sheet->setCellValue($this->getColumnLetter($startCol) . '4', "compile_q{$questionNum}");
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '4', "waktu_q{$questionNum}");
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '4', "selesai_q{$questionNum}");
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 3) . '4', "coba_q{$questionNum}");
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 4) . '4', "variables_q{$questionNum}");
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 5) . '4', "functions_q{$questionNum}");
-                    } else {
-                        // Regular format
-                        $sheet->setCellValue($this->getColumnLetter($startCol) . '4', 'compile');
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '4', 'waktu');
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '4', 'selesai');
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 3) . '4', 'coba');
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 4) . '4', 'variables');
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 5) . '4', 'functions');
+            foreach ($firstStudent['materials'] as $mIdx => $material) {
+                $materialPrefix = 'Material ' . ($mIdx + 1) . ' ';
+                foreach ($material['questions'] as $qIdx => $question) {
+                    $questionPrefix = 'Q' . ($qIdx + 1) . ' ';
+                    foreach ($question['metrics'] as $metric => $value) {
+                        $columnName = $materialPrefix . $questionPrefix . $metric;
+                        $metricColumns[] = [
+                            'material_idx' => $mIdx,
+                            'question_idx' => $qIdx,
+                            'metric' => $metric,
+                            'column_name' => $columnName,
+                        ];
+                        $sheet->setCellValue($col++ . '1', $columnName);
                     }
-
-                    // Move to next question columns
-                    $startCol += $metricsCount;
                 }
 
-                // Add classification results columns if requested
+                // Add classification columns if requested
                 if ($includeClassificationResults) {
-                    // Get classification results for this student
-                    $classification = $this->repository->modelClass->where([
-                        'user_id' => $userId,
-                        'course_id' => $courseId,
-                    ])->first();
+                    $sheet->setCellValue($col++ . '1', $materialPrefix . 'Classification Level');
+                    $sheet->setCellValue($col++ . '1', $materialPrefix . 'Classification Score');
+                }
+            }
 
-                    // Add classification columns
-                    $sheet->setCellValue($this->getColumnLetter($startCol) . '3', 'Classification Results');
-                    $sheet->mergeCells($this->getColumnLetter($startCol) . '3:' . $this->getColumnLetter($startCol + 2) . '3');
+            // Add course-level classification if requested
+            if ($includeClassificationResults) {
+                $sheet->setCellValue($col++ . '1', 'Course Classification Level');
+                $sheet->setCellValue($col++ . '1', 'Course Classification Score');
+            }
+        }
 
-                    // Column headers
-                    $sheet->setCellValue($this->getColumnLetter($startCol) . '4', 'Level');
-                    $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '4', 'Score');
-                    $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '4', 'Method');
+        // Fill data rows
+        $row = 2;
+        foreach ($studentData as $student) {
+            $col = 'A';
+            $userId = $student['user_id'];
 
-                    // Set classification data if available
-                    if ($classification) {
-                        $sheet->setCellValue($this->getColumnLetter($startCol) . '5', $classification->classification_level);
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '5', $classification->classification_score);
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '5', $classification->classification_type);
-                    } else {
-                        $sheet->setCellValue($this->getColumnLetter($startCol) . '5', 'Not Classified');
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 1) . '5', 'N/A');
-                        $sheet->setCellValue($this->getColumnLetter($startCol + 2) . '5', 'N/A');
-                    }
+            // Get user information
+            $user = \App\Models\User::find($userId);
+            $sheet->setCellValue($col++ . $row, $userId);
+            $sheet->setCellValue($col++ . $row, $user ? $user->name : 'Unknown User');
 
-                    // Extend the format region
-                    $startCol += 3;
+            // Fill metric values
+            foreach ($metricColumns as $metricInfo) {
+                $materialIdx = $metricInfo['material_idx'];
+                $questionIdx = $metricInfo['question_idx'];
+                $metric = $metricInfo['metric'];
+
+                $value = 0;
+                if (isset($student['materials'][$materialIdx]['questions'][$questionIdx]['metrics'][$metric])) {
+                    $value = $student['materials'][$materialIdx]['questions'][$questionIdx]['metrics'][$metric];
                 }
 
-                // Format the headers
-                $lastCol = $this->getColumnLetter($startCol - 1);
-                $sheet->getStyle("A3:{$lastCol}4")->getFont()->setBold(true);
-                $sheet->getStyle("A3:{$lastCol}3")->getFill()
-                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                    ->getStartColor()->setRGB('DDDDDD');
-                $sheet->getStyle("A4:{$lastCol}4")->getFill()
-                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                    ->getStartColor()->setRGB('EEEEEE');
+                $sheet->setCellValue($col++ . $row, $value);
+            }
 
-                // Fill in material data (rows)
-                $row = 5;
-                foreach ($materials as $materialIndex => $material) {
-                    $materialName = $material['material_name'];
-                    $materialNumber = $materialIndex + 1;
+            // Add classification data if requested
+            if ($includeClassificationResults) {
+                foreach ($student['materials'] as $mIdx => $material) {
+                    $materialId = $material['material_id'];
 
-                    // Set material name in first column
-                    $sheet->setCellValue("A{$row}", "{$materialNumber} {$materialName}");
+                    // Get material-level classification
+                    $classification = $this->repository->getMaterialClassificationsForStudent(
+                        $userId,
+                        request()->get('course_id'),
+                        'topsis'
+                    )->where('learning_material_id', $materialId)->first();
 
-                    // Reset column position for data
-                    $col = 1; // Start from column B
+                    if ($classification) {
+                        $sheet->setCellValue($col++ . $row, $classification->classification_level);
+                        $sheet->setCellValue($col++ . $row, $classification->classification_score);
+                    } else {
+                        $col += 2; // Skip these columns if no classification exists
+                    }
+                }
 
-                    // Fill in question data (columns) for this material
-                    foreach ($material['questions'] as $question) {
-                        $metrics = $question['metrics'];
+                // Add course-level classification
+                $courseClassification = $this->repository->getCourseClassificationForStudent(
+                    $userId,
+                    request()->get('course_id'),
+                    'topsis'
+                );
 
-                        // Fill in the metrics in corresponding columns
-                        // Using 0 as the default value for all metrics if not available
-                        $sheet->setCellValue($this->getColumnLetter($col) . $row, $metrics['compile_count'] ?? 0);
-                        $sheet->setCellValue($this->getColumnLetter($col + 1) . $row, $metrics['coding_time'] ?? 0); // Already in minutes from gatherStudentData
-                        $sheet->setCellValue($this->getColumnLetter($col + 2) . $row, $metrics['completion_status'] ?? 0);
-                        $sheet->setCellValue($this->getColumnLetter($col + 3) . $row, $metrics['trial_status'] ?? 0);
-                        $sheet->setCellValue($this->getColumnLetter($col + 4) . $row, $metrics['variable_count'] ?? 0);
-                        $sheet->setCellValue($this->getColumnLetter($col + 5) . $row, $metrics['function_count'] ?? 0);
+                if ($courseClassification) {
+                    $sheet->setCellValue($col++ . $row, $courseClassification->classification_level);
+                    $sheet->setCellValue($col++ . $row, $courseClassification->classification_score);
+                }
+            }
 
-                        // Move to next question columns
-                        $col += 6;
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', $col) as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+    }
+
+    /**
+     * Export data in raw format (long format, one row per student-question combination)
+     */
+    private function exportRawFormat(
+        $sheet,
+        array $studentData,
+        bool $includeClassificationResults
+    ): void {
+        // Set headers
+        $sheet->setCellValue('A1', 'Student ID');
+        $sheet->setCellValue('B1', 'Student Name');
+        $sheet->setCellValue('C1', 'Material ID');
+        $sheet->setCellValue('D1', 'Material Name');
+        $sheet->setCellValue('E1', 'Question ID');
+        $sheet->setCellValue('F1', 'Question Name');
+        $sheet->setCellValue('G1', 'Question Order');
+        $sheet->setCellValue('H1', 'Compile Count');
+        $sheet->setCellValue('I1', 'Coding Time (min)');
+        $sheet->setCellValue('J1', 'Completion Status');
+        $sheet->setCellValue('K1', 'Trial Status');
+        $sheet->setCellValue('L1', 'Variable Count');
+        $sheet->setCellValue('M1', 'Function Count');
+
+        $lastCol = 'M';
+        if ($includeClassificationResults) {
+            $sheet->setCellValue('N1', 'Material Classification Level');
+            $sheet->setCellValue('O1', 'Material Classification Score');
+            $sheet->setCellValue('P1', 'Course Classification Level');
+            $sheet->setCellValue('Q1', 'Course Classification Score');
+            $lastCol = 'Q';
+        }
+
+        // Fill data rows
+        $row = 2;
+        foreach ($studentData as $student) {
+            $userId = $student['user_id'];
+            $user = \App\Models\User::find($userId);
+            $userName = $user ? $user->name : 'Unknown User';
+
+            // Get the course-level classification if needed
+            $courseClassification = null;
+            if ($includeClassificationResults) {
+                $courseClassification = $this->repository->getCourseClassificationForStudent(
+                    $userId,
+                    request()->get('course_id'),
+                    'topsis'
+                );
+            }
+
+            foreach ($student['materials'] as $material) {
+                $materialId = $material['material_id'];
+                $materialName = $material['material_name'];
+
+                // Get material-level classification if needed
+                $materialClassification = null;
+                if ($includeClassificationResults) {
+                    $materialClassification = $this->repository->getMaterialClassificationsForStudent(
+                        $userId,
+                        request()->get('course_id'),
+                        'topsis'
+                    )->where('learning_material_id', $materialId)->first();
+                }
+
+                foreach ($material['questions'] as $question) {
+                    $questionId = $question['question_id'];
+                    $questionName = $question['question_name'];
+                    $orderNumber = $question['order_number'];
+                    $metrics = $question['metrics'];
+
+                    $sheet->setCellValue('A' . $row, $userId);
+                    $sheet->setCellValue('B' . $row, $userName);
+                    $sheet->setCellValue('C' . $row, $materialId);
+                    $sheet->setCellValue('D' . $row, $materialName);
+                    $sheet->setCellValue('E' . $row, $questionId);
+                    $sheet->setCellValue('F' . $row, $questionName);
+                    $sheet->setCellValue('G' . $row, $orderNumber);
+                    $sheet->setCellValue('H' . $row, $metrics['compile_count'] ?? 0);
+                    $sheet->setCellValue('I' . $row, $metrics['coding_time'] ?? 0);
+                    $sheet->setCellValue('J' . $row, $metrics['completion_status'] ?? 0);
+                    $sheet->setCellValue('K' . $row, $metrics['trial_status'] ?? 0);
+                    $sheet->setCellValue('L' . $row, $metrics['variable_count'] ?? 0);
+                    $sheet->setCellValue('M' . $row, $metrics['function_count'] ?? 0);
+
+                    if ($includeClassificationResults) {
+                        $sheet->setCellValue('N' . $row, $materialClassification ? $materialClassification->classification_level : '');
+                        $sheet->setCellValue('O' . $row, $materialClassification ? $materialClassification->classification_score : '');
+                        $sheet->setCellValue('P' . $row, $courseClassification ? $courseClassification->classification_level : '');
+                        $sheet->setCellValue('Q' . $row, $courseClassification ? $courseClassification->classification_score : '');
                     }
 
                     $row++;
                 }
-
-                // Auto-size columns and other formatting
-                $sheet->getColumnDimension('A')->setWidth(30); // Material column width
-                for ($col = 1; $col < $startCol; $col++) {
-                    $sheet->getColumnDimension($this->getColumnLetter($col))->setAutoSize(true);
-                }
-
-                // Freeze panes to keep headers visible while scrolling
-                $sheet->freezePane('B5');
             }
-
-            // Auto-size overview sheet columns
-            for ($col = 'A'; $col <= 'F'; $col++) {
-                $overviewSheet->getColumnDimension($col)->setAutoSize(true);
-            }
-
-            // Create temporary file
-            $format = $exportFormat === 'ml_tool' ? 'ml_format' : 'raw';
-            $classification = $includeClassificationResults ? 'with_classification' : '';
-            $filename = "raw_classification_data_course_{$courseId}_{$format}_{$classification}_" . date('YmdHis') . '.xlsx';
-            $tempPath = storage_path('app/temp/' . $filename);
-
-            // Ensure temp directory exists
-            if (!file_exists(storage_path('app/temp'))) {
-                mkdir(storage_path('app/temp'), 0755, true);
-            }
-
-            // Save file
-            $writer = new Xlsx($spreadsheet);
-            $writer->save($tempPath);
-
-            // Return download response
-            return response()->download($tempPath, $filename, [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            ])->deleteFileAfterSend();
-
-        } catch (Exception $e) {
-            Log::error('Error exporting raw classification data', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'course_id' => $courseId,
-            ]);
-
-            throw $e;
-        }
-    }
-
-    /**
-     * Validate that all materials have the same number of questions
-     *
-     * @param  array  $materials  Materials data array
-     *
-     * @throws Exception If materials have inconsistent question counts
-     */
-    private function validateConsistentQuestionCount(array $materials): void {
-        $questionCounts = [];
-
-        foreach ($materials as $index => $material) {
-            $materialNumber = $index + 1;
-            $materialName = $material['material_name'];
-            $questionCount = count($material['questions'] ?? []);
-
-            $questionCounts["Material {$materialNumber} ({$materialName})"] = $questionCount;
         }
 
-        $uniqueCounts = array_unique($questionCounts);
-
-        if (count($uniqueCounts) > 1) {
-            $errorDetails = 'Inconsistent question counts detected: ';
-            foreach ($questionCounts as $material => $count) {
-                $errorDetails .= "{$material}: {$count} questions, ";
-            }
-            $errorDetails = rtrim($errorDetails, ', ');
-
-            throw new Exception("Materials must have the same number of questions for consistent classification. {$errorDetails}");
+        // Auto-size columns
+        foreach (range('A', $lastCol) as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
         }
-    }
-
-    /**
-     * Convert a numeric column index to letter (A, B, C, ... AA, AB, etc.)
-     */
-    private function getColumnLetter(int $columnIndex): string {
-        $columnLetter = '';
-
-        while ($columnIndex >= 0) {
-            $columnLetter = chr(65 + ($columnIndex % 26)) . $columnLetter;
-            $columnIndex = floor($columnIndex / 26) - 1;
-        }
-
-        return $columnLetter;
     }
 
     /**
@@ -598,6 +834,7 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
 
         // Extract calculation details - might be nested under method
         $calculationDetails = $rawData['calculation_details'] ?? null;
+        $recommendations = $rawData['recommendations'] ?? [];
 
         // If calculation details don't exist, return the base information
         if (!$calculationDetails) {
@@ -613,11 +850,17 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                     'id' => $classification->course->id,
                     'name' => $classification->course->name,
                 ] : null,
+                'learning_material_id' => $classification->learning_material_id,
+                'learning_material' => $classification->learning_material ? [
+                    'id' => $classification->learning_material->id,
+                    'title' => $classification->learning_material->title,
+                ] : null,
+                'is_course_level' => $classification->is_course_level,
                 'classification_type' => $classification->classification_type,
                 'classification_level' => $classification->classification_level,
                 'classification_score' => $classification->classification_score,
                 'classified_at' => $classification->classified_at,
-                'raw_data' => $classification->raw_data,
+                'recommendations' => $recommendations,
                 'message' => 'Detailed calculation information is not available for this classification.',
             ];
         }
@@ -635,12 +878,50 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                 'id' => $classification->course->id,
                 'name' => $classification->course->name,
             ] : null,
+            'learning_material_id' => $classification->learning_material_id,
+            'learning_material' => $classification->learning_material ? [
+                'id' => $classification->learning_material->id,
+                'title' => $classification->learning_material->title,
+            ] : null,
+            'is_course_level' => $classification->is_course_level,
             'classification_type' => $classification->classification_type,
             'classification_level' => $classification->classification_level,
             'classification_score' => $classification->classification_score,
             'classified_at' => $classification->classified_at,
-            'raw_data' => $classification->raw_data,
+            'recommendations' => $recommendations,
             'calculation_details' => $calculationDetails,
         ];
+    }
+
+    /**
+     * Get material-level classifications for a student in a course
+     *
+     * @param  int  $userId  The user ID
+     * @param  int  $courseId  The course ID
+     * @param  string  $classificationType  The classification algorithm type
+     * @return \Illuminate\Support\Collection Collection of material-level classifications
+     */
+    public function getMaterialClassificationsForStudent(
+        int $userId,
+        int $courseId,
+        string $classificationType = 'topsis'
+    ): Collection {
+        return $this->repository->getMaterialClassificationsForStudent($userId, $courseId, $classificationType);
+    }
+
+    /**
+     * Get course-level classification for a student
+     *
+     * @param  int  $userId  The user ID
+     * @param  int  $courseId  The course ID
+     * @param  string  $classificationType  The classification algorithm type
+     * @return StudentCognitiveClassification|null The course-level classification or null if not found
+     */
+    public function getCourseClassificationForStudent(
+        int $userId,
+        int $courseId,
+        string $classificationType = 'topsis'
+    ): ?StudentCognitiveClassification {
+        return $this->repository->getCourseClassificationForStudent($userId, $courseId, $classificationType);
     }
 }

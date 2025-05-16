@@ -14,7 +14,9 @@ class StudentCognitiveClassification extends Model {
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id', 'course_id', 'classification_type', 'classification_level', 'classification_score', 'raw_data', 'classified_at',
+        'user_id', 'course_id', 'learning_material_id', 'classification_type',
+        'classification_level', 'classification_score', 'raw_data',
+        'classified_at', 'is_course_level',
     ];
 
     /**
@@ -23,10 +25,10 @@ class StudentCognitiveClassification extends Model {
      * @var array<string, string>
      */
     protected $casts = [
-        // TODO: possibly cause issues with the database
-        // 'classification_score' => 'decimal',
+        'classification_score' => 'float',
         'raw_data' => 'array',
         'classified_at' => 'datetime',
+        'is_course_level' => 'boolean',
     ];
 
     /**
@@ -41,5 +43,23 @@ class StudentCognitiveClassification extends Model {
      */
     public function course() {
         return $this->belongsTo(Course::class);
+    }
+
+    /**
+     * belongsTo relationship with LearningMaterial.
+     */
+    public function learning_material() {
+        return $this->belongsTo(LearningMaterial::class);
+    }
+
+    /**
+     * Get recommendations for improving cognitive level
+     */
+    public function getRecommendationsAttribute(): array {
+        if (!isset($this->raw_data['recommendations'])) {
+            return [];
+        }
+
+        return $this->raw_data['recommendations'];
     }
 }

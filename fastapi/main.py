@@ -22,6 +22,17 @@ class CodeInput(BaseModel):
     type: Optional[str] = None
     question_id: Optional[int] = None
 
+class QuestionData(BaseModel):
+    question_id: int
+    question_name: str
+    order_number: int
+    metrics: Dict[str, Any]
+
+class MaterialData(BaseModel):
+    material_id: int
+    material_name: str
+    questions: List[Dict[str, Any]]
+
 class StudentData(BaseModel):
     user_id: int
     materials: List[Dict[str, Any]]
@@ -32,6 +43,7 @@ class ClassificationRequest(BaseModel):
 
 class ClassificationResult(BaseModel):
     user_id: int
+    material_id: Optional[int] = None
     level: str
     score: float
     raw_data: Dict[str, Any]
@@ -322,69 +334,99 @@ async def classify_students(request: ClassificationRequest):
         
         # Process each student
         for student in student_data:
-            # Restructure the metrics for TOPSIS calculation - by material rather than by question
-            material_metrics = {}
-            
-            # Get list of all materials
+            user_id = student.user_id
             materials = student.materials
             
-            # Create decision matrix (each row is a material, columns are metrics for each question)
-            decision_matrix = []
-            
+            # Process each material separately (Revision 1)
             for material in materials:
                 material_id = material.get('material_id')
-                material_metrics[material_id] = {}
+                material_name = material.get('material_name')
+                questions = material.get('questions', [])
                 
-                # Prepare row for this material (will contain metrics for all questions)
-                material_row = []
+                # Create a matrix with rows for each question in this material
+                decision_matrix = []
+                raw_metrics = []
                 
-                # Add all metrics for each question in this material
-                for question in material.get('questions', []):
+                for question in questions:
                     question_id = question.get('question_id')
+                    question_name = question.get('question_name', f"Question {question.get('order_number', 0)}")
                     metrics = question.get('metrics', {})
-                    material_metrics[material_id][question_id] = metrics
                     
-                    # Append each metric for this question to the material row in the new order
-                    material_row.append(float(metrics.get('compile_count', 0)))
-                    material_row.append(float(metrics.get('coding_time', 0)))
-                    material_row.append(float(metrics.get('completion_status', 0)))
-                    material_row.append(float(metrics.get('trial_status', 0)))
-                    material_row.append(float(metrics.get('variable_count', 0)))
-                    material_row.append(float(metrics.get('function_count', 0)))
+                    # Add a row for this question with all its metrics
+                    row = [
+                        float(metrics.get('compile_count', 0)),
+                        float(metrics.get('coding_time', 0)),
+                        float(metrics.get('completion_status', 0)),
+                        float(metrics.get('trial_status', 0)),
+                        float(metrics.get('variable_count', 0)),
+                        float(metrics.get('function_count', 0))
+                    ]
+                    
+                    decision_matrix.append(row)
+                    raw_metrics.append({
+                        'question_id': question_id,
+                        'question_name': question_name,
+                        'order_number': question.get('order_number', 0),
+                        'compile_count': metrics.get('compile_count', 0),
+                        'coding_time': metrics.get('coding_time', 0),
+                        'completion_status': metrics.get('completion_status', 0),
+                        'trial_status': metrics.get('trial_status', 0),
+                        'variable_count': metrics.get('variable_count', 0),
+                        'function_count': metrics.get('function_count', 0)
+                    })
                 
-                # Add this material's row to the decision matrix
-                decision_matrix.append(material_row)
-            
-            # Get classification results
-            calculation_details = {}
-            if classification_type == "topsis":
-                level, score, calculation_details = calculate_topsis_by_material(decision_matrix, len(materials[0].get('questions', [])))
-            elif classification_type == "neural":
-                level, score = calculate_neural_network(decision_matrix)
-                calculation_details = {"method": "neural_network"}
-            elif classification_type == "fuzzy":
-                level, score = calculate_fuzzy_logic(decision_matrix)
-                calculation_details = {"method": "fuzzy_logic"}
-            else:
-                level, score, calculation_details = calculate_topsis_by_material(decision_matrix, len(materials[0].get('questions', [])))
-            
-            # Final sanity check for JSON serialization
-            if np.isnan(score) or np.isinf(score):
-                score = 0.0
-            
-            # Create classification result
-            classifications.append(
-                ClassificationResult(
-                    user_id=student.user_id,
-                    level=level,
-                    score=float(score),
-                    raw_data={
-                        "materials": material_metrics,
-                        "method": classification_type,
-                        "calculation_details": calculation_details
-                    }
+                # Skip empty materials
+                if not decision_matrix:
+                    continue
+                
+                # Get classification results for this material
+                calculation_details = {}
+                if classification_type == "topsis":
+                    # Note: Here we pass 1 as the question_count since we've restructured the data
+                    # Each row is a question, not a material, so we don't need to multiply by question count
+                    level, score, calculation_details = calculate_topsis_by_material(decision_matrix, 1)
+                elif classification_type == "neural":
+                    level, score = calculate_neural_network(decision_matrix)
+                    calculation_details = {"method": "neural_network"}
+                elif classification_type == "fuzzy":
+                    level, score = calculate_fuzzy_logic(decision_matrix)
+                    calculation_details = {"method": "fuzzy_logic"}
+                else:
+                    level, score, calculation_details = calculate_topsis_by_material(decision_matrix, 1)
+                
+                # Final sanity check for JSON serialization
+                if np.isnan(score) or np.isinf(score):
+                    score = 0.0
+                
+                # Generate recommendations based on metrics
+                recommendations = generate_recommendations(raw_metrics, level, score)
+                
+                # Identify weak areas for targeted improvement
+                weak_areas = identify_weak_areas(raw_metrics)
+                
+                # Create raw data with question-level metrics for generating recommendations
+                raw_data = {
+                    "material_id": material_id,
+                    "material_name": material_name,
+                    "question_metrics": raw_metrics,
+                    "method": classification_type,
+                    "classification_level": level,
+                    "classification_score": float(score),
+                    "calculation_details": calculation_details,
+                    "recommendations": recommendations,
+                    "weak_areas": weak_areas
+                }
+                
+                # Create classification result for this material
+                classifications.append(
+                    ClassificationResult(
+                        user_id=user_id,
+                        material_id=material_id,  # New field for material ID
+                        level=level,
+                        score=float(score),
+                        raw_data=raw_data
+                    )
                 )
-            )
         
         return ClassificationResponse(
             classifications=classifications
@@ -394,41 +436,112 @@ async def classify_students(request: ClassificationRequest):
         print(f"Classification error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Function to generate recommendations based on metrics
+def generate_recommendations(raw_metrics, level, score):
+    recommendations = []
+    
+    # Define thresholds for different metrics
+    thresholds = {
+        'variable_count': {'low': 2, 'high': 5},
+        'function_count': {'low': 1, 'high': 3},
+        'compile_count': {'low': 2, 'high': 8},
+        'coding_time': {'low': 5, 'high': 30}, # in minutes
+    }
+    
+    # Analyze each question's metrics and provide targeted recommendations
+    for i, metrics in enumerate(raw_metrics):
+        question_num = metrics.get('order_number', i + 1)
+        question_name = metrics.get('question_name', f"Question {question_num}")
+        
+        # Check completion status first
+        if metrics['completion_status'] == 0:
+            recommendations.append(f"Complete '{question_name}' to improve your overall score.")
+            continue
+            
+        # Check variable usage
+        if metrics['variable_count'] < thresholds['variable_count']['low']:
+            recommendations.append(f"In '{question_name}', try to use more variables to better organize your code.")
+        
+        # Check function usage
+        if metrics['function_count'] < thresholds['function_count']['low']:
+            recommendations.append(f"Consider breaking down your solution for '{question_name}' into more functions for better modularity.")
+        
+        # Check compile count
+        if metrics['compile_count'] > thresholds['compile_count']['high']:
+            recommendations.append(f"You compiled your code {metrics['compile_count']} times for '{question_name}'. Try to review your code more carefully before compiling.")
+        
+        # Check coding time
+        if metrics['coding_time'] > thresholds['coding_time']['high']:
+            recommendations.append(f"You spent {metrics['coding_time']} minutes on '{question_name}'. Try to improve your problem-solving speed with more practice.")
+    
+    # Add general recommendation based on the cognitive level
+    if level == "Remember":
+        recommendations.append("Focus on understanding basic concepts before proceeding to more complex tasks.")
+    elif level == "Understand":
+        recommendations.append("Try to not just memorize, but understand the underlying principles of the code you write.")
+    elif level == "Apply":
+        recommendations.append("Practice applying your knowledge in different contexts to strengthen your skills.")
+    elif level == "Analyze":
+        recommendations.append("Work on breaking down complex problems into smaller, manageable parts.")
+    elif level == "Evaluate":
+        recommendations.append("Challenge yourself by evaluating different approaches to the same problem.")
+    elif level == "Create":
+        recommendations.append("Excellent work! Continue developing your creative problem-solving skills.")
+    
+    # Limit to 5 most important recommendations to avoid overwhelming the student
+    if len(recommendations) > 5:
+        recommendations = recommendations[:5]
+    
+    return recommendations
+
+# Function to identify weak areas based on metrics
+def identify_weak_areas(raw_metrics):
+    weak_areas = []
+    
+    # Calculate averages for each metric
+    avg_completion = sum(q['completion_status'] for q in raw_metrics) / max(1, len(raw_metrics))
+    avg_variables = sum(q['variable_count'] for q in raw_metrics) / max(1, len(raw_metrics))
+    avg_functions = sum(q['function_count'] for q in raw_metrics) / max(1, len(raw_metrics))
+    avg_compile = sum(q['compile_count'] for q in raw_metrics) / max(1, len(raw_metrics))
+    avg_time = sum(q['coding_time'] for q in raw_metrics) / max(1, len(raw_metrics))
+    
+    # Check for weak areas
+    if avg_completion < 0.7:
+        weak_areas.append("task completion")
+    
+    if avg_variables < 3:
+        weak_areas.append("variable usage")
+    
+    if avg_functions < 1.5:
+        weak_areas.append("function usage")
+    
+    if avg_compile > 10:
+        weak_areas.append("code efficiency")
+    
+    if avg_time > 25:
+        weak_areas.append("problem-solving speed")
+    
+    return weak_areas
+
 def calculate_topsis_by_material(decision_matrix, question_count):
     try:
         if not decision_matrix or len(decision_matrix) == 0:
             return "Remember", 0.0, {}
-            
-        # Define criteria types for each metric (benefits and costs)
-        # Each question has 6 metrics in this new order: 
-        # compile_count, coding_time, completion_status, trial_status, variable_count, function_count
-        benefits = []
-        costs = []
         
-        # For each question, define which metrics are benefits and which are costs
-        for q in range(question_count):
-            # Indices for this question's metrics
-            q_start = q * 6
-            
-            # Costs: compile_count, coding_time
-            costs.extend([q_start, q_start + 1])
-            
-            # Benefits: completion_status
-            benefits.extend([q_start + 2])
-            
-            # Costs: trial_status
-            costs.extend([q_start + 3])
-            
-            # Benefits: variable_count, function_count
-            benefits.extend([q_start + 4, q_start + 5])
+        # Define criteria types for each metric (benefits and costs)
+        # Each row is a question with metrics in this order: 
+        # compile_count(cost), coding_time(cost), completion_status(benefit), 
+        # trial_status(cost), variable_count(benefit), function_count(benefit)
+        benefits = [2, 4, 5]  # completion_status, variable_count, function_count
+        costs = [0, 1, 3]     # compile_count, coding_time, trial_status
         
         # Convert to numpy array for calculations
         decision_matrix = np.array(decision_matrix)
         
         calculation_details = {
             "criteria": {
-                "benefits": ["completion_status", "variable_count", "function_count"] * question_count,
-                "costs": ["compile_count", "coding_time", "trial_status"] * question_count
+                "benefits": ["completion_status", "variable_count", "function_count"],
+                "costs": ["compile_count", "coding_time", "trial_status"]
             },
             "decision_matrix": decision_matrix.tolist(),
             "steps": []
