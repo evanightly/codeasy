@@ -6,6 +6,7 @@ use App\Http\Requests\StudentCourseCognitiveClassification\StoreStudentCourseCog
 use App\Http\Requests\StudentCourseCognitiveClassification\UpdateStudentCourseCognitiveClassificationRequest;
 use App\Http\Resources\StudentCourseCognitiveClassificationResource;
 use App\Models\StudentCourseCognitiveClassification;
+use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\StudentCourseCognitiveClassificationServiceInterface;
 use Illuminate\Http\Request;
@@ -24,8 +25,49 @@ class StudentCourseCognitiveClassificationController extends Controller implemen
     }
 
     public function index(Request $request) {
+        $intent = $request->get('intent');
+
+        // Get course cognitive classification for a student
+        if ($intent === IntentEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_INDEX_GET_BY_USER_AND_COURSE->value) {
+            $userId = $request->get('user_id');
+            $courseId = $request->get('course_id');
+            $classificationType = $request->get('classification_type', 'topsis');
+
+            if (!$userId || !$courseId) {
+                return response()->json(['error' => 'User ID and Course ID are required'], 422);
+            }
+
+            $classification = $this->studentCourseCognitiveClassificationService->getOrCreateCourseClassification(
+                $userId,
+                $courseId,
+                $classificationType
+            );
+
+            return new StudentCourseCognitiveClassificationResource($classification);
+        }
+
+        // Get cognitive report for a course
+        if ($intent === IntentEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_INDEX_GET_COURSE_REPORT->value) {
+            $courseId = $request->get('course_id');
+            $classificationType = $request->get('classification_type', 'topsis');
+
+            if (!$courseId) {
+                return response()->json(['error' => 'Course ID is required'], 422);
+            }
+
+            $report = $this->studentCourseCognitiveClassificationService->getCourseCognitiveReport(
+                $courseId,
+                $classificationType
+            );
+
+            return response()->json($report);
+        }
+
+        // Regular index page with pagination
         $perPage = $request->get('perPage', 10);
-        $data = StudentCourseCognitiveClassificationResource::collection($this->studentCourseCognitiveClassificationService->getAllPaginated($request->query(), $perPage));
+        $data = StudentCourseCognitiveClassificationResource::collection(
+            $this->studentCourseCognitiveClassificationService->getAllPaginated($request->query(), $perPage)
+        );
 
         if ($this->ajax()) {
             return $data;
@@ -44,8 +86,17 @@ class StudentCourseCognitiveClassificationController extends Controller implemen
         }
     }
 
-    public function show(StudentCourseCognitiveClassification $studentCourseCognitiveClassification) {
-        $data = StudentCourseCognitiveClassificationResource::make($studentCourseCognitiveClassification);
+    public function show(StudentCourseCognitiveClassification $studentCourseClassification) {
+        $intent = request()->get('intent');
+
+        // Get detailed classification information with material breakdowns
+        if ($intent === IntentEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_SHOW_DETAILS->value) {
+            $details = $this->studentCourseCognitiveClassificationService->getDetailedClassification($studentCourseClassification);
+
+            return response()->json($details);
+        }
+
+        $data = StudentCourseCognitiveClassificationResource::make($studentCourseClassification->load(['course', 'user']));
 
         if ($this->ajax()) {
             return $data;
@@ -54,21 +105,21 @@ class StudentCourseCognitiveClassificationController extends Controller implemen
         return inertia('StudentCourseCognitiveClassification/Show', compact('data'));
     }
 
-    public function edit(StudentCourseCognitiveClassification $studentCourseCognitiveClassification) {
-        $data = StudentCourseCognitiveClassificationResource::make($studentCourseCognitiveClassification);
+    public function edit(StudentCourseCognitiveClassification $studentCourseClassification) {
+        $data = StudentCourseCognitiveClassificationResource::make($studentCourseClassification);
 
         return inertia('StudentCourseCognitiveClassification/Edit', compact('data'));
     }
 
-    public function update(UpdateStudentCourseCognitiveClassificationRequest $request, StudentCourseCognitiveClassification $studentCourseCognitiveClassification) {
+    public function update(UpdateStudentCourseCognitiveClassificationRequest $request, StudentCourseCognitiveClassification $studentCourseClassification) {
         if ($this->ajax()) {
-            return $this->studentCourseCognitiveClassificationService->update($studentCourseCognitiveClassification, $request->validated());
+            return $this->studentCourseCognitiveClassificationService->update($studentCourseClassification, $request->validated());
         }
     }
 
-    public function destroy(StudentCourseCognitiveClassification $studentCourseCognitiveClassification) {
+    public function destroy(StudentCourseCognitiveClassification $studentCourseClassification) {
         if ($this->ajax()) {
-            return $this->studentCourseCognitiveClassificationService->delete($studentCourseCognitiveClassification);
+            return $this->studentCourseCognitiveClassificationService->delete($studentCourseClassification);
         }
     }
 }

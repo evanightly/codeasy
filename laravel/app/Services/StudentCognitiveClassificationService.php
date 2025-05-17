@@ -7,6 +7,7 @@ use App\Repositories\StudentCognitiveClassificationRepository;
 use App\Support\Interfaces\Repositories\StudentCognitiveClassificationRepositoryInterface;
 use App\Support\Interfaces\Services\CourseServiceInterface;
 use App\Support\Interfaces\Services\StudentCognitiveClassificationServiceInterface;
+use App\Support\Interfaces\Services\StudentCourseCognitiveClassificationServiceInterface;
 use App\Traits\Services\HandlesPageSizeAll;
 use Carbon\Carbon;
 use Exception;
@@ -26,7 +27,7 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
      * Whether to enforce that all materials have the same number of questions
      * If true, will throw an exception if question counts differ between materials
      */
-    protected bool $enforceConsistentQuestionCount = true;
+    protected bool $enforceConsistentQuestionCount = false; // Disabled because of Revision 1 .github/prompts/student-cognitive-classification.prompt.md
 
     public function getAllPaginated(array $search = [], int $pageSize = 15): LengthAwarePaginator {
         $this->handlePageSizeAll();
@@ -328,36 +329,37 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
             // Prepare recommendations for course level
             $recommendations = $this->prepareCourseLevelRecommendations($recommendationsByLevel, $level);
 
-            // Create or update the course-level classification
-            $this->repository->updateOrCreate(
-                [
-                    'user_id' => $userId,
-                    'course_id' => $courseId,
-                    'classification_type' => $classificationType,
-                    'is_course_level' => true,
+            // Instead of creating a duplicate course-level classification in this table,
+            // create it in the StudentCourseCognitiveClassification table
+
+            // First prepare the raw data for the course classification
+            $rawData = [
+                'material_classifications' => array_map(function ($c) {
+                    return [
+                        'id' => $c->id,
+                        'material_id' => $c->learning_material_id,
+                        'level' => $c->classification_level,
+                        'score' => $c->classification_score,
+                    ];
+                }, $classifications),
+                'recommendations' => $recommendations,
+                'calculation_details' => [
+                    'material_count' => count($classifications),
+                    'average_score' => $avgScore,
                 ],
-                [
-                    'user_id' => $userId,
-                    'course_id' => $courseId,
-                    'learning_material_id' => null, // No specific material for course-level classification
-                    'classification_type' => $classificationType,
-                    'classification_level' => $level,
-                    'classification_score' => $avgScore,
-                    'raw_data' => [
-                        'material_classifications' => array_map(function ($c) {
-                            return [
-                                'id' => $c->id,
-                                'material_id' => $c->learning_material_id,
-                                'level' => $c->classification_level,
-                                'score' => $c->classification_score,
-                            ];
-                        }, $classifications),
-                        'recommendations' => $recommendations,
-                    ],
-                    'classified_at' => $now,
-                    'is_course_level' => true,
-                ]
-            );
+            ];
+
+            // Create or update the course-level classification in the StudentCourseCognitiveClassification table
+            app(StudentCourseCognitiveClassificationServiceInterface::class)
+                ->getOrCreateCourseClassificationsFromRawData(
+                    $userId,
+                    $courseId,
+                    $classificationType,
+                    $level,
+                    $avgScore,
+                    $rawData,
+                    $now
+                );
         }
     }
 

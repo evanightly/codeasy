@@ -1,0 +1,238 @@
+import { Button } from '@/Components/UI/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/UI/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/Components/UI/dialog';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/Components/UI/form';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/Components/UI/select';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { courseServiceHook } from '@/Services/courseServiceHook';
+import { ROUTES } from '@/Support/Constants/routes';
+import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { BarChart2, FileSpreadsheet } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { CourseClassifications } from './Partials/CourseClassifications';
+import { CourseReport } from './Partials/CourseReport';
+
+export default function Index() {
+    const { t } = useLaravelReactI18n();
+    const [reportDialogOpen, setReportDialogOpen] = useState(false);
+    const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+    const { data: courses, isLoading } = courseServiceHook.useGetAll();
+
+    // Form schema for report generation
+    const reportFormSchema = z.object({
+        course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
+        classification_type: z.string().default('topsis'),
+    });
+
+    const reportForm = useForm<z.infer<typeof reportFormSchema>>({
+        resolver: zodResolver(reportFormSchema),
+        defaultValues: {
+            course_id: 0,
+            classification_type: 'topsis',
+        },
+    });
+
+    const handleGenerateReport = async (values: z.infer<typeof reportFormSchema>) => {
+        setSelectedCourseId(values.course_id);
+        setReportDialogOpen(true);
+    };
+
+    return (
+        <AuthenticatedLayout title='Student Course Cognitive Classifications'>
+            <div className='container space-y-6 py-6'>
+                <div className='flex items-center justify-between'>
+                    <h1 className='text-2xl font-bold tracking-tight'>
+                        {t('pages.student_course_cognitive_classification.index.title')}
+                    </h1>
+                    <div className='flex flex-wrap gap-2'>
+                        <Button variant='outline'>
+                            <FileSpreadsheet className='mr-2 h-4 w-4' />
+                            {t(
+                                'pages.student_course_cognitive_classification.buttons.export_excel',
+                            )}
+                        </Button>
+
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button>
+                                    <BarChart2 className='mr-2 h-4 w-4' />
+                                    {t(
+                                        'pages.student_course_cognitive_classification.buttons.view_report',
+                                    )}
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        {t(
+                                            'pages.student_course_cognitive_classification.dialogs.report.title',
+                                        )}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        {t(
+                                            'pages.student_course_cognitive_classification.dialogs.report.description',
+                                        )}
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <Form {...reportForm}>
+                                    <form
+                                        onSubmit={reportForm.handleSubmit(handleGenerateReport)}
+                                        className='space-y-4'
+                                    >
+                                        <FormField
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t(
+                                                            'pages.student_course_cognitive_classification.fields.course',
+                                                        )}
+                                                    </FormLabel>
+                                                    <Select
+                                                        onValueChange={(value) =>
+                                                            field.onChange(parseInt(value))
+                                                        }
+                                                        defaultValue={field.value?.toString()}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue
+                                                                    placeholder={t(
+                                                                        'pages.student_course_cognitive_classification.placeholders.select_course',
+                                                                    )}
+                                                                />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {isLoading ? (
+                                                                <SelectItem value='0' disabled>
+                                                                    {t('action.loading')}
+                                                                </SelectItem>
+                                                            ) : (
+                                                                courses?.data?.map((course) => (
+                                                                    <SelectItem
+                                                                        value={course.id.toString()}
+                                                                        key={course.id}
+                                                                    >
+                                                                        {course.name}
+                                                                    </SelectItem>
+                                                                ))
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                            name='course_id'
+                                            control={reportForm.control}
+                                        />
+                                        <FormField
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t(
+                                                            'pages.student_course_cognitive_classification.fields.classification_type',
+                                                        )}
+                                                    </FormLabel>
+                                                    <Select
+                                                        onValueChange={field.onChange}
+                                                        defaultValue={field.value}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue
+                                                                    placeholder={t(
+                                                                        'pages.student_course_cognitive_classification.placeholders.select_classification_type',
+                                                                    )}
+                                                                />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value='topsis'>
+                                                                TOPSIS
+                                                            </SelectItem>
+                                                            <SelectItem value='fuzzy'>
+                                                                Fuzzy
+                                                            </SelectItem>
+                                                            <SelectItem value='neural'>
+                                                                Neural Network
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                            name='classification_type'
+                                            control={reportForm.control}
+                                        />
+
+                                        <DialogFooter>
+                                            <Button type='submit'>
+                                                {t(
+                                                    'pages.student_course_cognitive_classification.buttons.generate_report',
+                                                )}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>
+                            {t(
+                                'pages.student_course_cognitive_classification.sections.classifications',
+                            )}
+                        </CardTitle>
+                        <CardDescription>
+                            {t(
+                                'pages.student_course_cognitive_classification.descriptions.classifications',
+                            )}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <CourseClassifications
+                            baseRoute={ROUTES.STUDENT_COURSE_COGNITIVE_CLASSIFICATIONS}
+                            baseKey={TANSTACK_QUERY_KEYS.STUDENT_COURSE_COGNITIVE_CLASSIFICATIONS}
+                        />
+                    </CardContent>
+                </Card>
+
+                {selectedCourseId && reportDialogOpen && (
+                    <CourseReport
+                        courseId={selectedCourseId}
+                        classificationType={reportForm.getValues('classification_type')}
+                    />
+                )}
+            </div>
+        </AuthenticatedLayout>
+    );
+}

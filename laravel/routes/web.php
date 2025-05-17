@@ -18,6 +18,7 @@ use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SchoolRequestController;
 use App\Http\Controllers\StudentCognitiveClassificationController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\StudentCourseCognitiveClassificationController;
 use App\Http\Controllers\StudentScoreController;
 use App\Http\Controllers\TestCaseChangeTrackerController;
 use App\Http\Controllers\UserController;
@@ -149,12 +150,10 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::resource('student-cognitive-classifications', StudentCognitiveClassificationController::class);
+    Route::resource('student-course-cognitive-classifications', StudentCourseCognitiveClassificationController::class)->parameter('student-course-cognitive-classifications', 'student-course-classification');
     Route::resource('test-case-change-trackers', TestCaseChangeTrackerController::class);
 });
 
 Route::resource('schools', SchoolController::class)->only(['index']);
 
 require __DIR__ . '/auth.php';
-
-// StudentCourseCognitiveClassification routes
-Route::resource('student-course-cognitive-classifications', App\Http\Controllers\StudentCourseCognitiveClassificationController::class);

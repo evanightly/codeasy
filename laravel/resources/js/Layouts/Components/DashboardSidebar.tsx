@@ -4,6 +4,7 @@ import {
     AudioWaveform,
     Book,
     Brain,
+    BrainCog,
     FileCheck,
     GalleryVerticalEnd,
     Lock,
@@ -142,6 +143,15 @@ const DashboardSidebar = ({ ...props }: AppSidebarProps) => {
                         url: route(`${ROUTES.STUDENT_COGNITIVE_CLASSIFICATIONS}.index`),
                         icon: Brain,
                         permissions: [PermissionEnum.STUDENT_COGNITIVE_CLASSIFICATION_READ],
+                    },
+                    {
+                        type: 'menu',
+                        title: t(
+                            'components.dashboard_sidebar.academic.student_course_cognitive_classifications',
+                        ),
+                        url: route(`${ROUTES.STUDENT_COURSE_COGNITIVE_CLASSIFICATIONS}.index`),
+                        icon: BrainCog,
+                        permissions: [PermissionEnum.STUDENT_COURSE_COGNITIVE_CLASSIFICATION_READ],
                     },
                     {
                         type: 'menu',

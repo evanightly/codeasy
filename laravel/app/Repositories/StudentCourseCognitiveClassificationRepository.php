@@ -9,9 +9,9 @@ use App\Traits\Repositories\HandlesRelations;
 use App\Traits\Repositories\HandlesSorting;
 use App\Traits\Repositories\RelationQueryable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
-class StudentCourseCognitiveClassificationRepository extends BaseRepository implements StudentCourseCognitiveClassificationRepositoryInterface
-{
+class StudentCourseCognitiveClassificationRepository extends BaseRepository implements StudentCourseCognitiveClassificationRepositoryInterface {
     use HandlesFiltering, HandlesRelations, HandlesSorting, RelationQueryable;
 
     protected function applyFilters(array $searchParams = []): Builder {
@@ -26,6 +26,29 @@ class StudentCourseCognitiveClassificationRepository extends BaseRepository impl
         $query = $this->applySorting($query, $searchParams);
 
         return $query;
+    }
+
+    /**
+     * Get all student course cognitive classifications for a specific course
+     */
+    public function getByCourseId(int $courseId, string $classificationType = 'topsis'): Collection {
+        return $this->getQuery()
+            ->where('course_id', $courseId)
+            ->where('classification_type', $classificationType)
+            ->with(['user', 'course'])
+            ->get();
+    }
+
+    /**
+     * Get student course cognitive classification for a specific student and course
+     */
+    public function getByUserAndCourseId(int $userId, int $courseId, string $classificationType = 'topsis'): ?object {
+        return $this->getQuery()
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->where('classification_type', $classificationType)
+            ->with(['user', 'course'])
+            ->first();
     }
 
     protected function getModelClass(): string {

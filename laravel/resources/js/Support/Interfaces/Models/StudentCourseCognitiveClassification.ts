@@ -5,7 +5,7 @@ import { Model } from './Model';
  */
 export interface StudentCourseCognitiveClassification extends Model {
     course_id: number;
-    user_id: string;
+    user_id: number;
     classification_type: string;
     classification_level: string;
     classification_score: number;
