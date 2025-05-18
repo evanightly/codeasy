@@ -70,12 +70,92 @@ export default function Index() {
                         {t('pages.student_course_cognitive_classification.index.title')}
                     </h1>
                     <div className='flex flex-wrap gap-2'>
-                        <Button variant='outline'>
-                            <FileSpreadsheet className='mr-2 h-4 w-4' />
-                            {t(
-                                'pages.student_course_cognitive_classification.buttons.export_excel',
-                            )}
-                        </Button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant='outline'>
+                                    <FileSpreadsheet className='mr-2 h-4 w-4' />
+                                    {t(
+                                        'pages.student_course_cognitive_classification.buttons.export_excel',
+                                    )}
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        {t(
+                                            'pages.student_course_cognitive_classification.dialogs.export.title',
+                                        )}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        {t(
+                                            'pages.student_course_cognitive_classification.dialogs.export.description',
+                                        )}
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <Form {...reportForm}>
+                                    <form
+                                        onSubmit={reportForm.handleSubmit(handleGenerateReport)}
+                                        className='space-y-4'
+                                    >
+                                        <FormField
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t(
+                                                            'pages.student_course_cognitive_classification.fields.course',
+                                                        )}
+                                                    </FormLabel>
+                                                    <Select
+                                                        onValueChange={(value) =>
+                                                            field.onChange(parseInt(value))
+                                                        }
+                                                        defaultValue={field.value?.toString()}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue
+                                                                    placeholder={t(
+                                                                        'pages.student_course_cognitive_classification.placeholders.select_course',
+                                                                    )}
+                                                                />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {isLoading ? (
+                                                                <SelectItem value='0' disabled>
+                                                                    {t('action.loading')}
+                                                                </SelectItem>
+                                                            ) : (
+                                                                courses?.data?.map((course) => (
+                                                                    <SelectItem
+                                                                        value={course.id.toString()}
+                                                                        key={course.id}
+                                                                    >
+                                                                        {course.name}
+                                                                    </SelectItem>
+                                                                ))
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                            name='course_id'
+                                            control={reportForm.control}
+                                        />
+
+                                        <DialogFooter>
+                                            <Button type='submit'>
+                                                {t(
+                                                    'pages.student_course_cognitive_classification.buttons.generate',
+                                                )}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
 
                         <Dialog>
                             <DialogTrigger asChild>
@@ -226,12 +306,30 @@ export default function Index() {
                     </CardContent>
                 </Card>
 
-                {selectedCourseId && reportDialogOpen && (
-                    <CourseReport
-                        courseId={selectedCourseId}
-                        classificationType={reportForm.getValues('classification_type')}
-                    />
-                )}
+                <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+                    <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
+                        <DialogHeader>
+                            <DialogTitle>
+                                {t(
+                                    'pages.student_course_cognitive_classification.dialogs.report.title',
+                                )}
+                            </DialogTitle>
+                            <DialogDescription>
+                                {courses?.data?.find((course) => course.id === selectedCourseId)
+                                    ?.name ||
+                                    t(
+                                        'pages.student_course_cognitive_classification.dialogs.report.description',
+                                    )}
+                            </DialogDescription>
+                        </DialogHeader>
+                        {selectedCourseId && (
+                            <CourseReport
+                                courseId={selectedCourseId}
+                                classificationType={reportForm.getValues('classification_type')}
+                            />
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
         </AuthenticatedLayout>
     );

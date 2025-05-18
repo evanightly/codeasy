@@ -1,5 +1,4 @@
 import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
-import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
     Dialog,
@@ -9,10 +8,10 @@ import {
     DialogTrigger,
 } from '@/Components/UI/dialog';
 import { Skeleton } from '@/Components/UI/skeleton';
+import { courseServiceHook } from '@/Services/courseServiceHook';
 import { studentCourseCognitiveClassificationServiceHook } from '@/Services/studentCourseCognitiveClassificationServiceHook';
-import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { BarChart2 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { CourseReportExport } from './CourseReportExport';
 
 interface CourseReportProps {
     courseId: number;
@@ -41,7 +40,9 @@ export function CourseReport({
     classificationType = 'topsis',
     triggerButton,
 }: CourseReportProps) {
-    const { t } = useLaravelReactI18n();
+    // Create a ref for the report content div (for PDF export)
+    const reportRef = useRef<HTMLDivElement>(null);
+
     const {
         data: report,
         isLoading,
@@ -51,6 +52,11 @@ export function CourseReport({
         courseId,
         classificationType,
     );
+
+    // Fetch course details to show course name in the report
+    const { data: courseData } = courseServiceHook.useGet({
+        id: courseId,
+    });
 
     const chartColors = useMemo(
         () => ({
@@ -88,12 +94,14 @@ export function CourseReport({
                 {Object.entries(report.level_distribution || {}).map(([level, count]) => (
                     <div key={level} className='flex flex-col items-center'>
                         <div
+                            title={`${level}: ${count} student${count !== 1 ? 's' : ''} (${levelPercentages[level] || 0}%)`}
                             style={{
                                 backgroundColor:
                                     chartColors[level as keyof typeof chartColors] || 'gray',
                                 height: `${Math.max(levelPercentages[level] || 5, 5)}%`,
+                                transition: 'height 0.5s ease-in-out',
                             }}
-                            className='flex w-16 items-center justify-center rounded-t-md font-medium text-white'
+                            className='flex w-16 cursor-pointer items-center justify-center rounded-t-md font-medium text-white hover:brightness-110'
                         >
                             {String(count)}
                         </div>
@@ -190,56 +198,71 @@ export function CourseReport({
             );
         }
 
+        const courseName = courseData?.name || `Course #${courseId}`;
+
         return (
             <div className='space-y-6'>
-                <div className='space-y-2 text-center'>
-                    <h2 className='text-2xl font-bold'>Cognitive Classification Report</h2>
-                    <p className='text-muted-foreground'>
-                        {report.total_students} student{report.total_students !== 1 ? 's' : ''}{' '}
-                        classified
-                    </p>
+                <div className='flex flex-wrap items-center justify-between gap-4'>
+                    <div className='space-y-2'>
+                        <h2 className='text-2xl font-bold'>Cognitive Classification Report</h2>
+                        <p className='text-muted-foreground'>Course: {courseName}</p>
+                        <p className='text-muted-foreground'>
+                            {report.total_students} student{report.total_students !== 1 ? 's' : ''}{' '}
+                            classified using {classificationType.toUpperCase()} method
+                        </p>
+                    </div>
+
+                    {/* Export buttons */}
+                    <CourseReportExport
+                        reportRef={reportRef}
+                        reportData={report}
+                        courseName={courseName}
+                        classificationType={classificationType}
+                    />
                 </div>
 
-                {renderBarChart()}
+                <div ref={reportRef} className='space-y-6'>
+                    {renderBarChart()}
 
-                <div className='flex flex-wrap justify-center gap-4'>
-                    {Object.entries(levelPercentages).map(([level, percentage]) => (
-                        <div key={level} className='text-center'>
-                            <div
-                                style={{
-                                    backgroundColor:
-                                        chartColors[level as keyof typeof chartColors] || 'gray',
-                                }}
-                                className='mr-1 inline-block h-4 w-4 rounded-full'
-                            ></div>
-                            <span className='text-sm font-medium'>
-                                {level}: {percentage}%
-                            </span>
-                        </div>
-                    ))}
+                    <div className='flex flex-wrap justify-center gap-4'>
+                        {Object.entries(levelPercentages).map(([level, percentage]) => (
+                            <div key={level} className='text-center'>
+                                <div
+                                    style={{
+                                        backgroundColor:
+                                            chartColors[level as keyof typeof chartColors] ||
+                                            'gray',
+                                    }}
+                                    className='mr-1 inline-block h-4 w-4 rounded-full'
+                                ></div>
+                                <span className='text-sm font-medium'>
+                                    {level}: {percentage}%
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {renderStudentList()}
                 </div>
-
-                {renderStudentList()}
             </div>
         );
     };
 
-    return (
-        <Dialog>
-            <DialogTrigger asChild>
-                {triggerButton || (
-                    <Button>
-                        <BarChart2 className='mr-2 h-4 w-4' />
-                        {t('pages.student_course_cognitive_classification.buttons.view_report')}
-                    </Button>
-                )}
-            </DialogTrigger>
-            <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
-                <DialogHeader>
-                    <DialogTitle>Cognitive Classification Report</DialogTitle>
-                </DialogHeader>
-                {content()}
-            </DialogContent>
-        </Dialog>
-    );
+    // If triggerButton is provided, render the Dialog wrapper
+    if (triggerButton) {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>{triggerButton}</DialogTrigger>
+                <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
+                    <DialogHeader>
+                        <DialogTitle>Cognitive Classification Report</DialogTitle>
+                    </DialogHeader>
+                    {content()}
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
+    // Otherwise, just return the content for direct embedding
+    return content();
 }
