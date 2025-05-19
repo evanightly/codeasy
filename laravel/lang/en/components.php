@@ -45,6 +45,7 @@ return [
             'class_rooms' => 'Classrooms',
             'courses' => 'Courses',
             'student_cognitive_classifications' => 'Student Cognitive Classifications',
+            'student_course_cognitive_classifications' => 'Student Course Cognitive Classifications',
             'test_case_change_trackers' => 'Test Case Change Trackers',
         ],
         'student' => [

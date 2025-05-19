@@ -263,3 +263,5 @@ The intent system routes specific business logic through generic CRUD endpoints:
 16. CRUCIAL!: In every prompt i have tested and modified the generated code to match the expected result, so please do not modify the code that i have tested and modified, just add the new code below the existing codem
 17. You have to use the docker command defined in [dc.sh](../dc.sh) to utilize the docker container, and you have to use the docker-compose command to utilize the docker-compose container, otherwise we got EACESS error
 18. If you wanna add frontend code, please learn from the existing code, and please use the same pattern as the existing code, so it will not break the existing code and maintain the consistency
+19. Do not run laravel test because it will reset existing database
+20. Do not run anything that will resulting code generation stuck like doing ./dc.sh shell laravel

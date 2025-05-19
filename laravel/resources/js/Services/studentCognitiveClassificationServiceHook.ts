@@ -3,6 +3,7 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { IntentEnum } from '@/Support/Enums/intentEnum';
 import { StudentCognitiveClassificationResource } from '@/Support/Interfaces/Resources';
+import { useQuery } from '@tanstack/react-query';
 import { serviceHooksFactory } from './serviceHooksFactory';
 
 export const studentCognitiveClassificationServiceHook = {
@@ -86,6 +87,74 @@ export const studentCognitiveClassificationServiceHook = {
                     },
                 });
             },
+        });
+    },
+
+    /**
+     * Get material-level classifications for a student in a course
+     */
+    useGetMaterialClassifications: (
+        userId: number,
+        courseId: number,
+        classificationType: string = 'topsis',
+    ) => {
+        return useQuery<StudentCognitiveClassificationResource[]>({
+            queryKey: [
+                TANSTACK_QUERY_KEYS.STUDENT_COGNITIVE_CLASSIFICATIONS,
+                'materials',
+                userId,
+                courseId,
+                classificationType,
+            ],
+            queryFn: async () => {
+                const response = await window.axios.get(
+                    route(`${ROUTES.STUDENT_COGNITIVE_CLASSIFICATIONS}.index`),
+                    {
+                        params: {
+                            intent: IntentEnum.STUDENT_COGNITIVE_CLASSIFICATION_INDEX_GET_MATERIAL_CLASSIFICATIONS,
+                            user_id: userId,
+                            course_id: courseId,
+                            classification_type: classificationType,
+                        },
+                    },
+                );
+                return response.data;
+            },
+            enabled: !!userId && !!courseId,
+        });
+    },
+
+    /**
+     * Get course-level classification for a student
+     */
+    useGetCourseClassification: (
+        userId: number,
+        courseId: number,
+        classificationType: string = 'topsis',
+    ) => {
+        return useQuery<StudentCognitiveClassificationResource>({
+            queryKey: [
+                TANSTACK_QUERY_KEYS.STUDENT_COGNITIVE_CLASSIFICATIONS,
+                'course',
+                userId,
+                courseId,
+                classificationType,
+            ],
+            queryFn: async () => {
+                const response = await window.axios.get(
+                    route(`${ROUTES.STUDENT_COGNITIVE_CLASSIFICATIONS}.index`),
+                    {
+                        params: {
+                            intent: IntentEnum.STUDENT_COGNITIVE_CLASSIFICATION_INDEX_GET_COURSE_CLASSIFICATION,
+                            user_id: userId,
+                            course_id: courseId,
+                            classification_type: classificationType,
+                        },
+                    },
+                );
+                return response.data;
+            },
+            enabled: !!userId && !!courseId,
         });
     },
 };

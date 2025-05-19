@@ -30,6 +30,8 @@ class DatabaseSeeder extends Seeder {
             LearningMaterialSeeder::class,
             LearningMaterialQuestionSeeder::class,
             LearningMaterialQuestionTestCaseSeeder::class,
+            // TestCourseSeeder::class,
+            // StudentCourseCognitiveClassificationSeeder::class,
         ]);
     }
 }

@@ -23,3 +23,4 @@ export * from './ExecutionResultResource';
 export * from './StudentCognitiveClassificationResource';
 export * from './StudentScoreResource';
 export * from './TestCaseChangeTrackerResource';
+export * from './StudentCourseCognitiveClassificationResource';

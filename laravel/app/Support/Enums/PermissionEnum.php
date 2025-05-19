@@ -121,4 +121,9 @@ enum PermissionEnum: string {
     case TEST_CASE_CHANGE_TRACKER_READ = 'test-case-change-tracker-read';
     case TEST_CASE_CHANGE_TRACKER_UPDATE = 'test-case-change-tracker-update';
     case TEST_CASE_CHANGE_TRACKER_DELETE = 'test-case-change-tracker-delete';
+
+    case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_CREATE = 'student-course-cognitive-classification-create';
+    case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_READ = 'student-course-cognitive-classification-read';
+    case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_UPDATE = 'student-course-cognitive-classification-update';
+    case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_DELETE = 'student-course-cognitive-classification-delete';
 }

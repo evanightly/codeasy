@@ -27,6 +27,15 @@ RUN apk update && apk add --no-cache \
 # Copy Composer
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
+# Configure PHP for large file uploads (up to 1GB)
+RUN { \
+    echo 'upload_max_filesize = 1024M'; \
+    echo 'post_max_size = 1024M'; \
+    echo 'memory_limit = 1536M'; \
+    echo 'max_execution_time = 600'; \
+    echo 'max_input_time = 600'; \
+    } > /usr/local/etc/php/conf.d/uploads.ini
+
 # Initialize Git LFS
 RUN git lfs install
 

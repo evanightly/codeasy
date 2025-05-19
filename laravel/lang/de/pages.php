@@ -113,4 +113,69 @@ return [
             ],
         ],
     ],
+    'student_course_cognitive_classification' => [
+        'index' => [
+            'title' => 'Kognitive Kursklassifikationen der Studenten',
+        ],
+        'show' => [
+            'title' => 'Kognitive Klassifikationsdetails',
+        ],
+        'sections' => [
+            'classifications' => 'Kognitive Kursklassifikationen',
+            'classification_info' => 'Klassifikationsinformationen',
+            'material_classifications' => 'Materialklassifikationen',
+            'details' => 'Klassifikationsdetails',
+        ],
+        'descriptions' => [
+            'classifications' => 'Kognitive Klassifikationen der Studenten nach Kursen anzeigen und verwalten',
+            'classification_info' => 'Grundlegende Informationen zur Klassifikation',
+            'material_classifications' => 'Klassifikationsergebnisse für einzelne Lernmaterialien',
+        ],
+        'fields' => [
+            'student' => 'Student',
+            'course' => 'Kurs',
+            'classification_type' => 'Klassifikationsmethode',
+            'classification_level' => 'Kognitive Stufe',
+            'classification_score' => 'Punktzahl',
+            'classified_at' => 'Klassifikationsdatum',
+            'recommendations' => 'Empfehlungen',
+        ],
+        'columns' => [
+            'student' => 'Student',
+            'course' => 'Kurs',
+            'classification_type' => 'Methode',
+            'classification_level' => 'Stufe',
+            'classification_score' => 'Punktzahl',
+            'classified_at' => 'Datum',
+            'material' => 'Material',
+            'actions' => 'Aktionen',
+        ],
+        'buttons' => [
+            'export_excel' => 'Nach Excel exportieren',
+            'view_report' => 'Bericht anzeigen',
+            'generate_report' => 'Bericht generieren',
+            'back' => 'Zurück zur Liste',
+        ],
+        'placeholders' => [
+            'select_course' => 'Kurs auswählen',
+            'select_classification_type' => 'Klassifikationsmethode auswählen',
+        ],
+        'dialogs' => [
+            'report' => [
+                'title' => 'Kursbericht generieren',
+                'description' => 'Wählen Sie einen Kurs aus, um den Bericht zur kognitiven Klassifikation anzuzeigen',
+            ],
+            'delete' => [
+                'title' => 'Klassifikation löschen',
+                'description' => 'Sind Sie sicher, dass Sie diese Klassifikation löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+            ],
+        ],
+        'messages' => [
+            'no_material_classifications' => 'Keine Materialklassifikationen für diesen Kurs gefunden',
+            'no_course_classifications' => 'Keine Kursklassifikationen gefunden',
+            'deleting' => 'Klassifikation wird gelöscht...',
+            'delete_success' => 'Klassifikation erfolgreich gelöscht',
+            'delete_error' => 'Fehler beim Löschen der Klassifikation',
+        ],
+    ],
 ];

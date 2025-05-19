@@ -564,6 +564,71 @@ return [
             ],
         ],
     ],
+    'student_course_cognitive_classification' => [
+        'index' => [
+            'title' => 'Student Course Cognitive Classifications',
+        ],
+        'show' => [
+            'title' => 'Cognitive Classification Details',
+        ],
+        'sections' => [
+            'classifications' => 'Course Cognitive Classifications',
+            'classification_info' => 'Classification Information',
+            'material_classifications' => 'Material Classifications',
+            'details' => 'Classification Details',
+        ],
+        'descriptions' => [
+            'classifications' => 'View and manage student cognitive classifications by course',
+            'classification_info' => 'Basic information about the classification',
+            'material_classifications' => 'Classification results for individual learning materials',
+        ],
+        'fields' => [
+            'student' => 'Student',
+            'course' => 'Course',
+            'classification_type' => 'Classification Method',
+            'classification_level' => 'Cognitive Level',
+            'classification_score' => 'Score',
+            'classified_at' => 'Classification Date',
+            'recommendations' => 'Recommendations',
+        ],
+        'columns' => [
+            'student' => 'Student',
+            'course' => 'Course',
+            'classification_type' => 'Method',
+            'classification_level' => 'Level',
+            'classification_score' => 'Score',
+            'classified_at' => 'Date',
+            'material' => 'Material',
+            'actions' => 'Actions',
+        ],
+        'buttons' => [
+            'export_excel' => 'Export to Excel',
+            'view_report' => 'View Report',
+            'generate_report' => 'Generate Report',
+            'back' => 'Back to List',
+        ],
+        'placeholders' => [
+            'select_course' => 'Select a course',
+            'select_classification_type' => 'Select classification method',
+        ],
+        'dialogs' => [
+            'report' => [
+                'title' => 'Generate Course Report',
+                'description' => 'Select a course to view cognitive classification report',
+            ],
+            'delete' => [
+                'title' => 'Delete Classification',
+                'description' => 'Are you sure you want to delete this classification? This action cannot be undone.',
+            ],
+        ],
+        'messages' => [
+            'no_material_classifications' => 'No material classifications found for this course',
+            'no_course_classifications' => 'No course classifications found',
+            'deleting' => 'Deleting classification...',
+            'delete_success' => 'Classification deleted successfully',
+            'delete_error' => 'Failed to delete classification',
+        ],
+    ],
     'classroom' => [
         'common' => [
             'fields' => [

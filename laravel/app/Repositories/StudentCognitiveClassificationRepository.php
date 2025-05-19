@@ -9,6 +9,7 @@ use App\Traits\Repositories\HandlesRelations;
 use App\Traits\Repositories\HandlesSorting;
 use App\Traits\Repositories\RelationQueryable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class StudentCognitiveClassificationRepository extends BaseRepository implements StudentCognitiveClassificationRepositoryInterface {
     use HandlesFiltering, HandlesRelations, HandlesSorting, RelationQueryable;
@@ -16,12 +17,20 @@ class StudentCognitiveClassificationRepository extends BaseRepository implements
     protected function applyFilters(array $searchParams = []): Builder {
         $query = $this->getQuery();
 
-        $query = $this->applySearchFilters($query, $searchParams, ['user_id', 'course_id', 'classification_type', 'classification_level', 'classification_score', 'raw_data', 'classified_at']);
+        $query = $this->applySearchFilters($query, $searchParams, [
+            'user_id', 'course_id', 'learning_material_id', 'classification_type',
+            'classification_level', 'classification_score', 'raw_data',
+            'classified_at', 'is_course_level',
+        ]);
 
         $query = $this->applyResolvedRelations($query, $searchParams);
 
         // TODO: implement relation filters, e.g. student name
-        $query = $this->applyColumnFilters($query, $searchParams, ['id', 'user_id', 'course_id', 'classification_type', 'classification_level', 'classification_score', 'raw_data', 'classified_at', 'created_at', 'updated_at']);
+        $query = $this->applyColumnFilters($query, $searchParams, [
+            'id', 'user_id', 'course_id', 'learning_material_id', 'classification_type',
+            'classification_level', 'classification_score', 'raw_data',
+            'classified_at', 'is_course_level', 'created_at', 'updated_at',
+        ]);
 
         $query = $this->applySorting($query, $searchParams);
 
@@ -49,5 +58,32 @@ class StudentCognitiveClassificationRepository extends BaseRepository implements
         }
 
         return $query;
+    }
+
+    /**
+     * Get material-level classifications for a student in a course
+     */
+    public function getMaterialClassificationsForStudent(int $userId, int $courseId, string $classificationType = 'topsis'): Collection {
+        return $this->getQuery()
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->where('classification_type', $classificationType)
+            ->where('is_course_level', false)
+            ->whereNotNull('learning_material_id')
+            ->with('learning_material')
+            ->orderBy('learning_material_id')
+            ->get();
+    }
+
+    /**
+     * Get course-level classification for a student
+     */
+    public function getCourseClassificationForStudent(int $userId, int $courseId, string $classificationType = 'topsis'): ?object {
+        return $this->getQuery()
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->where('classification_type', $classificationType)
+            ->where('is_course_level', true)
+            ->first();
     }
 }

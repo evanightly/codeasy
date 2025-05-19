@@ -113,4 +113,69 @@ return [
             ],
         ],
     ],
+    'student_course_cognitive_classification' => [
+        'index' => [
+            'title' => 'Klasifikasi Kognitif Siswa per Kursus',
+        ],
+        'show' => [
+            'title' => 'Detail Klasifikasi Kognitif',
+        ],
+        'sections' => [
+            'classifications' => 'Klasifikasi Kognitif Kursus',
+            'classification_info' => 'Informasi Klasifikasi',
+            'material_classifications' => 'Klasifikasi Materi',
+            'details' => 'Detail Klasifikasi',
+        ],
+        'descriptions' => [
+            'classifications' => 'Lihat dan kelola klasifikasi kognitif siswa berdasarkan kursus',
+            'classification_info' => 'Informasi dasar tentang klasifikasi',
+            'material_classifications' => 'Hasil klasifikasi untuk materi pembelajaran individual',
+        ],
+        'fields' => [
+            'student' => 'Siswa',
+            'course' => 'Kursus',
+            'classification_type' => 'Metode Klasifikasi',
+            'classification_level' => 'Tingkat Kognitif',
+            'classification_score' => 'Skor',
+            'classified_at' => 'Tanggal Klasifikasi',
+            'recommendations' => 'Rekomendasi',
+        ],
+        'columns' => [
+            'student' => 'Siswa',
+            'course' => 'Kursus',
+            'classification_type' => 'Metode',
+            'classification_level' => 'Tingkat',
+            'classification_score' => 'Skor',
+            'classified_at' => 'Tanggal',
+            'material' => 'Materi',
+            'actions' => 'Aksi',
+        ],
+        'buttons' => [
+            'export_excel' => 'Ekspor ke Excel',
+            'view_report' => 'Lihat Laporan',
+            'generate_report' => 'Buat Laporan',
+            'back' => 'Kembali ke Daftar',
+        ],
+        'placeholders' => [
+            'select_course' => 'Pilih kursus',
+            'select_classification_type' => 'Pilih metode klasifikasi',
+        ],
+        'dialogs' => [
+            'report' => [
+                'title' => 'Buat Laporan Kursus',
+                'description' => 'Pilih kursus untuk melihat laporan klasifikasi kognitif',
+            ],
+            'delete' => [
+                'title' => 'Hapus Klasifikasi',
+                'description' => 'Apakah Anda yakin ingin menghapus klasifikasi ini? Tindakan ini tidak dapat dibatalkan.',
+            ],
+        ],
+        'messages' => [
+            'no_material_classifications' => 'Tidak ada klasifikasi materi yang ditemukan untuk kursus ini',
+            'no_course_classifications' => 'Tidak ada klasifikasi kursus yang ditemukan',
+            'deleting' => 'Menghapus klasifikasi...',
+            'delete_success' => 'Klasifikasi berhasil dihapus',
+            'delete_error' => 'Gagal menghapus klasifikasi',
+        ],
+    ],
 ];

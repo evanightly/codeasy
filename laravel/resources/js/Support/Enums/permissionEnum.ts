@@ -83,6 +83,10 @@ const permissions = {
     TEST_CASE_CHANGE_TRACKER_READ: 'test-case-change-tracker-read',
     TEST_CASE_CHANGE_TRACKER_UPDATE: 'test-case-change-tracker-update',
     TEST_CASE_CHANGE_TRACKER_DELETE: 'test-case-change-tracker-delete',
+    STUDENT_COURSE_COGNITIVE_CLASSIFICATION_CREATE: 'student-course-cognitive-classification-create',
+    STUDENT_COURSE_COGNITIVE_CLASSIFICATION_READ: 'student-course-cognitive-classification-read',
+    STUDENT_COURSE_COGNITIVE_CLASSIFICATION_UPDATE: 'student-course-cognitive-classification-update',
+    STUDENT_COURSE_COGNITIVE_CLASSIFICATION_DELETE: 'student-course-cognitive-classification-delete',
 };
 
 export const PermissionEnum = permissions;
