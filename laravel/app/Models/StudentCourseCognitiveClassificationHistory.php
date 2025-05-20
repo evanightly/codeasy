@@ -23,7 +23,7 @@ class StudentCourseCognitiveClassificationHistory extends Model {
      * @var array<string, string>
      */
     protected $casts = [
-        'classification_score' => 'decimal',
+        'classification_score' => 'decimal:2',
         'raw_data' => 'array',
         'classified_at' => 'datetime',
     ];

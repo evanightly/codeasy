@@ -359,7 +359,8 @@ async def classify_students(request: ClassificationRequest):
                         float(metrics.get('completion_status', 0)),
                         float(metrics.get('trial_status', 0)),
                         float(metrics.get('variable_count', 0)),
-                        float(metrics.get('function_count', 0))
+                        float(metrics.get('function_count', 0)),
+                        float(metrics.get('test_case_completion_rate', 0))
                     ]
                     
                     decision_matrix.append(row)
@@ -372,7 +373,10 @@ async def classify_students(request: ClassificationRequest):
                         'completion_status': metrics.get('completion_status', 0),
                         'trial_status': metrics.get('trial_status', 0),
                         'variable_count': metrics.get('variable_count', 0),
-                        'function_count': metrics.get('function_count', 0)
+                        'function_count': metrics.get('function_count', 0),
+                        'test_case_complete_count': metrics.get('test_case_complete_count', 0),
+                        'test_case_total_count': metrics.get('test_case_total_count', 0),
+                        'test_case_completion_rate': metrics.get('test_case_completion_rate', 0)
                     })
                 
                 # Skip empty materials
@@ -446,6 +450,7 @@ def generate_recommendations(raw_metrics, level, score):
         'function_count': {'low': 1, 'high': 3},
         'compile_count': {'low': 2, 'high': 8},
         'coding_time': {'low': 5, 'high': 30}, # in minutes
+        'test_case_completion_rate': {'low': 0.6, 'high': 0.9} # 60% to 90% completion rate
     }
     
     # Analyze each question's metrics and provide targeted recommendations
@@ -473,6 +478,13 @@ def generate_recommendations(raw_metrics, level, score):
         # Check coding time
         if metrics['coding_time'] > thresholds['coding_time']['high']:
             recommendations.append(f"You spent {metrics['coding_time']} minutes on '{question_name}'. Try to improve your problem-solving speed with more practice.")
+        
+        # Check test case completion rate
+        if 'test_case_completion_rate' in metrics and metrics['test_case_completion_rate'] < thresholds['test_case_completion_rate']['low']:
+            test_complete = metrics.get('test_case_complete_count', 0)
+            test_total = metrics.get('test_case_total_count', 0)
+            if test_total > 0:
+                recommendations.append(f"Your test case passing rate for '{question_name}' is only {test_complete}/{test_total}. Focus on improving your solution to pass more test cases.")
     
     # Add general recommendation based on the cognitive level
     if level == "Remember":
@@ -505,6 +517,10 @@ def identify_weak_areas(raw_metrics):
     avg_compile = sum(q['compile_count'] for q in raw_metrics) / max(1, len(raw_metrics))
     avg_time = sum(q['coding_time'] for q in raw_metrics) / max(1, len(raw_metrics))
     
+    # Calculate average test case completion rate, only if available
+    test_case_metrics = [q for q in raw_metrics if 'test_case_completion_rate' in q and q['test_case_completion_rate'] > 0]
+    avg_test_case_rate = sum(q['test_case_completion_rate'] for q in test_case_metrics) / max(1, len(test_case_metrics)) if test_case_metrics else 0
+    
     # Check for weak areas
     if avg_completion < 0.7:
         weak_areas.append("task completion")
@@ -521,6 +537,9 @@ def identify_weak_areas(raw_metrics):
     if avg_time > 25:
         weak_areas.append("problem-solving speed")
     
+    if avg_test_case_rate < 0.6:
+        weak_areas.append("test case success rate")
+    
     return weak_areas
 
 def calculate_topsis_by_material(decision_matrix, question_count):
@@ -531,8 +550,9 @@ def calculate_topsis_by_material(decision_matrix, question_count):
         # Define criteria types for each metric (benefits and costs)
         # Each row is a question with metrics in this order: 
         # compile_count(cost), coding_time(cost), completion_status(benefit), 
-        # trial_status(cost), variable_count(benefit), function_count(benefit)
-        benefits = [2, 4, 5]  # completion_status, variable_count, function_count
+        # trial_status(cost), variable_count(benefit), function_count(benefit),
+        # test_case_completion_rate(benefit)
+        benefits = [2, 4, 5, 6]  # completion_status, variable_count, function_count, test_case_completion_rate
         costs = [0, 1, 3]     # compile_count, coding_time, trial_status
         
         # Convert to numpy array for calculations
@@ -540,7 +560,7 @@ def calculate_topsis_by_material(decision_matrix, question_count):
         
         calculation_details = {
             "criteria": {
-                "benefits": ["completion_status", "variable_count", "function_count"],
+                "benefits": ["completion_status", "variable_count", "function_count", "test_case_completion_rate"],
                 "costs": ["compile_count", "coding_time", "trial_status"]
             },
             "decision_matrix": decision_matrix.tolist(),

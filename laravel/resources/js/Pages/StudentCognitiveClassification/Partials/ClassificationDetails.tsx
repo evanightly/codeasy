@@ -117,6 +117,7 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
         'trial_status',
         'variable_count',
         'function_count',
+        'test_case_completion_rate',
     ];
 
     // Display names for metrics in table headers
@@ -127,6 +128,7 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
         trial_status: 'coba',
         variable_count: 'variables',
         function_count: 'functions',
+        test_case_completion_rate: 'test case completion rate',
     };
 
     // Render decision matrix directly from materials object

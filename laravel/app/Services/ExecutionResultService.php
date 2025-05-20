@@ -111,7 +111,37 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
                 }
             }
 
-            // Create execution result
+            // Extract test case metrics
+            $testCaseSuccess = 0;
+            $testCaseTotal = 0;
+
+            if ($testStats && isset($testStats['success'], $testStats['total_tests'])) {
+                $testCaseSuccess = $testStats['success'];
+                $testCaseTotal = $testStats['total_tests'];
+            }
+
+            // Check if the student score is already completed
+            if ($studentScore->completion_status) {
+                // If already completed, log the execution without creating a new record or updating the score
+                Log::info('Code execution for completed student score - skipping ExecutionResult creation', [
+                    'student_score_id' => $studentScore->id,
+                    'test_success' => $testCaseSuccess,
+                    'test_total' => $testCaseTotal,
+                    'using_existing_execution_result' => $studentScore->completed_execution_result_id,
+                ]);
+
+                // Return the execution output without creating a new record
+                return [
+                    'output' => $output,
+                    'success' => true,
+                    'compile_count' => $compileCount,
+                    'variable_count' => $variableCount,
+                    'function_count' => $functionCount,
+                    'is_completed' => true,
+                ];
+            }
+
+            // Only create a new execution result if the student score is not already completed
             $result = $this->create([
                 'student_score_id' => $studentScoreId,
                 'code' => $code,
@@ -120,6 +150,8 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
                 'output_image' => $imageUrl,
                 'variable_count' => $variableCount,
                 'function_count' => $functionCount,
+                'test_case_complete_count' => $testCaseSuccess,
+                'test_case_total_count' => $testCaseTotal,
             ]);
 
             // Update score if there are test results
@@ -129,11 +161,15 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
                     ? round(($testStats['success'] / $testStats['total_tests']) * 100)
                     : 0;
 
-                // Update student score
+                // Update student score with test case counts for Revision 2
                 $this->studentScoreService->update($studentScore, [
                     'score' => $scoreValue,
                     // Mark as completed if all tests pass
                     'completion_status' => $testStats['success'] === $testStats['total_tests'] && $testStats['total_tests'] > 0,
+                    'completed_execution_result_id' => $testStats['success'] === $testStats['total_tests'] ? $result->id : null,
+                    // Add test case counts for cognitive classification
+                    'test_case_complete_count' => $testCaseSuccess,
+                    'test_case_total_count' => $testCaseTotal,
                 ]);
             }
 
@@ -148,19 +184,25 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
         } catch (\Exception $e) {
             Log::error('Code execution error: ' . $e->getMessage());
 
-            // Store failed execution attempt
-            $this->create([
-                'student_score_id' => $studentScoreId,
-                'code' => $code,
-                'compile_count' => $compileCount,
-                'compile_status' => false,
-                'variable_count' => 0,
-                'function_count' => 0,
-            ]);
+            // Store failed execution attempt only if the student score is not already completed
+            if (!$studentScore->completion_status) {
+                $this->create([
+                    'student_score_id' => $studentScoreId,
+                    'code' => $code,
+                    'compile_count' => $compileCount,
+                    'compile_status' => false,
+                    'output' => $e->getMessage(),
+                ]);
+            } else {
+                // Log the error without creating a record
+                Log::info('Failed code execution for completed student score - skipping ExecutionResult creation', [
+                    'student_score_id' => $studentScore->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return [
-                'error' => 'An error occurred while executing the code',
-                'message' => $e->getMessage(),
+                'error' => 'Code execution error: ' . $e->getMessage(),
                 'success' => false,
             ];
         }

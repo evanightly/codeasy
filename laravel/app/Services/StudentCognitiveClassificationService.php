@@ -170,6 +170,11 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                         'trial_status' => $studentScore ? (int) $studentScore->trial_status : 0, // cost
                         'variable_count' => $executionResult ? $executionResult->variable_count : 0, // benefit
                         'function_count' => $executionResult ? $executionResult->function_count : 0, // benefit
+                        'test_case_complete_count' => $studentScore ? $studentScore->test_case_complete_count : 0, // benefit
+                        'test_case_total_count' => $studentScore ? $studentScore->test_case_total_count : 0, // for completion rate calculation
+                        'test_case_completion_rate' => $studentScore && $studentScore->test_case_total_count > 0
+                            ? round($studentScore->test_case_complete_count / $studentScore->test_case_total_count, 2)
+                            : 0, // benefit - derived metric
                     ];
 
                     $questionData = [

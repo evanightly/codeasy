@@ -18,7 +18,7 @@ class StudentCourseCognitiveClassificationHistoryController extends Controller i
         return [
             self::createPermissionMiddleware([PermissionEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_CREATE->value], ['create', 'store']),
             self::createPermissionMiddleware([PermissionEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_UPDATE->value], ['edit', 'update']),
-            self::createPermissionMiddleware([PermissionEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_READ->value], ['index', 'show']),
+            // self::createPermissionMiddleware([PermissionEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_READ->value], ['index', 'show']),
             self::createPermissionMiddleware([PermissionEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_DELETE->value], ['destroy']),
         ];
     }
@@ -44,8 +44,8 @@ class StudentCourseCognitiveClassificationHistoryController extends Controller i
         }
     }
 
-    public function show(StudentCourseCognitiveClassificationHistory $studentCourseClassificationHistory) {
-        $data = StudentCourseCognitiveClassificationHistoryResource::make($studentCourseClassificationHistory);
+    public function show(StudentCourseCognitiveClassificationHistory $sccHistory) {
+        $data = StudentCourseCognitiveClassificationHistoryResource::make($sccHistory);
 
         if ($this->ajax()) {
             return $data;
@@ -54,21 +54,21 @@ class StudentCourseCognitiveClassificationHistoryController extends Controller i
         return inertia('StudentCourseCognitiveClassificationHistory/Show', compact('data'));
     }
 
-    public function edit(StudentCourseCognitiveClassificationHistory $studentCourseClassificationHistory) {
-        $data = StudentCourseCognitiveClassificationHistoryResource::make($studentCourseClassificationHistory);
+    public function edit(StudentCourseCognitiveClassificationHistory $sccHistory) {
+        $data = StudentCourseCognitiveClassificationHistoryResource::make($sccHistory);
 
         return inertia('StudentCourseCognitiveClassificationHistory/Edit', compact('data'));
     }
 
-    public function update(UpdateStudentCourseCognitiveClassificationHistoryRequest $request, StudentCourseCognitiveClassificationHistory $studentCourseClassificationHistory) {
+    public function update(UpdateStudentCourseCognitiveClassificationHistoryRequest $request, StudentCourseCognitiveClassificationHistory $sccHistory) {
         if ($this->ajax()) {
-            return $this->studentCourseCognitiveClassificationHistoryService->update($studentCourseClassificationHistory, $request->validated());
+            return $this->studentCourseCognitiveClassificationHistoryService->update($sccHistory, $request->validated());
         }
     }
 
-    public function destroy(StudentCourseCognitiveClassificationHistory $studentCourseClassificationHistory) {
+    public function destroy(StudentCourseCognitiveClassificationHistory $sccHistory) {
         if ($this->ajax()) {
-            return $this->studentCourseCognitiveClassificationHistoryService->delete($studentCourseClassificationHistory);
+            return $this->studentCourseCognitiveClassificationHistoryService->delete($sccHistory);
         }
     }
 }

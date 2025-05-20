@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import { studentCourseCognitiveClassificationServiceHook } from '@/Services/studentCourseCognitiveClassificationServiceHook';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
+import { StudentCourseCognitiveClassificationHistoryViewer } from './StudentCourseCognitiveClassificationHistoryViewer';
 
 // Define the expected structure of the material classification data in raw_data
 interface MaterialClassification {
@@ -194,7 +195,7 @@ export function StudentCourseCognitiveClassificationDetails({
 
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
-                    <DialogHeader>
+                    <DialogHeader className='mb-4'>
                         <DialogTitle>Course Classification Details</DialogTitle>
                         <DialogDescription>
                             Detailed information about the course cognitive classification
@@ -326,6 +327,11 @@ export function StudentCourseCognitiveClassificationDetails({
                                     </Table>
                                 </CardContent>
                             </Card>
+
+                            <StudentCourseCognitiveClassificationHistoryViewer
+                                userId={details.user_id}
+                                courseId={details.course_id}
+                            />
 
                             <Tabs defaultValue='materials'>
                                 <TabsList className='grid w-full grid-cols-3'>

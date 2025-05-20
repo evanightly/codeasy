@@ -153,7 +153,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('student-cognitive-classifications', StudentCognitiveClassificationController::class);
     Route::resource('student-course-cognitive-classifications', StudentCourseCognitiveClassificationController::class)->parameter('student-course-cognitive-classifications', 'student-course-classification');
     Route::resource('test-case-change-trackers', TestCaseChangeTrackerController::class);
-    Route::resource('student-course-cognitive-classification-histories', StudentCourseCognitiveClassificationHistoryController::class)->parameter('student-course-cognitive-classification-histories', 'student-course-classification-history');
+    Route::resource('student-course-cognitive-classification-histories', StudentCourseCognitiveClassificationHistoryController::class)->parameter('student-course-cognitive-classification-histories', 'scc-history');
 });
 
 Route::resource('schools', SchoolController::class)->only(['index']);
