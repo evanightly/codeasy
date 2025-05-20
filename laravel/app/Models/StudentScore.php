@@ -19,6 +19,8 @@ class StudentScore extends Model {
         'trial_status',
         'compile_count',
         'completed_execution_result_id',
+        'test_case_complete_count',
+        'test_case_total_count',
     ];
 
     /**
@@ -30,6 +32,8 @@ class StudentScore extends Model {
         'completion_status' => 'boolean',
         'trial_status' => 'boolean',
         'compile_count' => 'integer',
+        'test_case_complete_count' => 'integer',
+        'test_case_total_count' => 'integer',
     ];
 
     /**

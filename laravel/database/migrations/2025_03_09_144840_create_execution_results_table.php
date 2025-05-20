@@ -17,6 +17,8 @@ return new class extends Migration {
             $table->string('output_image')->nullable();
             $table->integer('variable_count')->default(0); // Count of declared variables
             $table->integer('function_count')->default(0); // Count of declared functions
+            $table->integer('test_case_complete_count')->default(0); // Number of test cases completed
+            $table->integer('test_case_total_count')->default(0); // Total number of test cases
             $table->timestamps();
         });
     }

@@ -28,4 +28,5 @@ export const ROUTES = {
     STUDENT_COGNITIVE_CLASSIFICATIONS: 'student-cognitive-classifications',
     STUDENT_COURSE_COGNITIVE_CLASSIFICATIONS: 'student-course-cognitive-classifications',
     TEST_CASE_CHANGE_TRACKERS: 'test-case-change-trackers',
+    STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORYS: 'student-course-cognitive-classification-historys',
 } as const;

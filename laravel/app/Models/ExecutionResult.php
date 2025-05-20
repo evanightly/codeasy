@@ -17,6 +17,8 @@ class ExecutionResult extends Model {
         'output_image',
         'variable_count',
         'function_count',
+        'test_case_complete_count',
+        'test_case_total_count',
     ];
 
     /**
@@ -28,6 +30,8 @@ class ExecutionResult extends Model {
         'compile_status' => 'boolean',
         'variable_count' => 'integer',
         'function_count' => 'integer',
+        'test_case_complete_count' => 'integer',
+        'test_case_total_count' => 'integer',
     ];
 
     /**

@@ -105,3 +105,12 @@ Represent material questions
     - If the student have "less" completed question in specific material, the recommendation will be "You need to complete more questions in this material"
     - If the student spent "more" time in specific question of the material, the recommendation will be "You could spend less time in this question to improve your score"
     - If the student have "more" compile_count in specific question of the material, the recommendation will be "You could improve your score by reducing the compile count in this question"
+
+## Revision 2
+1. Add more properties in the [StudentScore](laravel/app/Models/StudentScore.php):
+    - test_case_complete_count to hold the completed test case count
+    - test_case_total_count to hold the total test case count
+
+    Note: since this is breaking changes, you need to adjust the affected service files, like student code compilation and student cognitive calculation, you have to work on the [ExecutionResultService](laravel/app/Services/ExecutionResultService.php) or related services process such as classification calculation in [StudentCognitiveClassificationService](laravel/app/Services/StudentCognitiveClassificationService.php) 
+2. Add history table to hold the classification result [student_course_cognitive_classification_histories](laravel/database/migrations/2025_05_20_134237_create_student_course_cognitive_classification_histories_table.php)
+    This table will hold the history of the classification result, so you can track the changes over time, you may adjust it if the mechanism is not suitable for your needs
