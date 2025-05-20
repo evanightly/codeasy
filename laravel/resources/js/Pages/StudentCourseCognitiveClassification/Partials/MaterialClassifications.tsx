@@ -1,3 +1,5 @@
+// TODO: unfinished question_metrics formatting
+
 import { Card, CardContent } from '@/Components/UI/card';
 import { Separator } from '@/Components/UI/separator';
 import { Skeleton } from '@/Components/UI/skeleton';
@@ -12,7 +14,7 @@ import {
 import { studentCognitiveClassificationServiceHook } from '@/Services/studentCognitiveClassificationServiceHook';
 import { StudentCognitiveClassificationResource } from '@/Support/Interfaces/Resources';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { StudentCognitiveClassificationDetails } from './StudentCognitiveClassificationDetails';
+import { MaterialClassificationDetails } from './MaterialClassificationDetails';
 
 interface MaterialClassificationsProps {
     userId: number | string;
@@ -91,7 +93,7 @@ export function MaterialClassifications({ userId, courseId }: MaterialClassifica
                                 <TableCell>
                                     <div className='flex items-center space-x-2'>
                                         {classification.id && (
-                                            <StudentCognitiveClassificationDetails
+                                            <MaterialClassificationDetails
                                                 classificationId={classification.id}
                                             />
                                         )}
@@ -130,9 +132,7 @@ export function MaterialClassifications({ userId, courseId }: MaterialClassifica
                             {parseFloat(classification.classification_score.toString()).toFixed(2)}
                         </p>
                         {classification.id && (
-                            <StudentCognitiveClassificationDetails
-                                classificationId={classification.id}
-                            />
+                            <MaterialClassificationDetails classificationId={classification.id} />
                         )}
                     </Card>
                 ))}

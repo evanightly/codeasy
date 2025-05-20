@@ -856,6 +856,7 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                 'learning_material' => $classification->learning_material ? [
                     'id' => $classification->learning_material->id,
                     'title' => $classification->learning_material->title,
+                    'file_url' => $classification->learning_material->file_url,
                 ] : null,
                 'is_course_level' => $classification->is_course_level,
                 'classification_type' => $classification->classification_type,
@@ -863,6 +864,7 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                 'classification_score' => $classification->classification_score,
                 'classified_at' => $classification->classified_at,
                 'recommendations' => $recommendations,
+                'raw_data' => $rawData,
                 'message' => 'Detailed calculation information is not available for this classification.',
             ];
         }
@@ -884,6 +886,7 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
             'learning_material' => $classification->learning_material ? [
                 'id' => $classification->learning_material->id,
                 'title' => $classification->learning_material->title,
+                'file_url' => $classification->learning_material->file_url,
             ] : null,
             'is_course_level' => $classification->is_course_level,
             'classification_type' => $classification->classification_type,
@@ -891,6 +894,7 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
             'classification_score' => $classification->classification_score,
             'classified_at' => $classification->classified_at,
             'recommendations' => $recommendations,
+            'raw_data' => $rawData, // Add raw_data here so it's always included
             'calculation_details' => $calculationDetails,
         ];
     }
