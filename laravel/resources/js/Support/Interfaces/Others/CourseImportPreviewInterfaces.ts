@@ -9,6 +9,8 @@ export interface CourseImportPreview {
             questions: {
                 title: string;
                 description: string;
+                pre_code?: string | null;
+                example_code?: string | null;
                 order_number: number;
             }[];
             testCases: {
