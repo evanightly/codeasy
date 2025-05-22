@@ -1032,6 +1032,8 @@ return [
                 'type' => 'Question Type',
                 'order' => 'Order',
                 'clue' => 'Hint/Clue',
+                'pre_code' => 'Pre-defined Code',
+                'example_code' => 'Example Solution Code',
                 'file' => 'Question File',
                 'file_extension' => 'File Extension',
                 'status' => 'Status',
@@ -1041,9 +1043,13 @@ return [
                 'title' => 'Enter question title',
                 'description' => 'Enter question description or instructions',
                 'clue' => 'Enter hint or clue for students',
+                'pre_code' => 'Enter starter code for students',
+                'example_code' => 'Enter example solution code',
             ],
             'help' => [
                 'clue' => 'Provide a hint that students can view if they are stuck',
+                'pre_code' => 'Provide starter code that will be preloaded for students to begin with',
+                'example_code' => 'Provide an example solution that can be used for reference',
                 'question_file' => 'Upload a PDF or image file containing the question details or visual elements',
                 'starter_code' => null, // Remove this line or comment it out
             ],
@@ -1141,12 +1147,15 @@ return [
             'fields' => [
                 'description' => 'Test Description',
                 'input' => 'Input',
+                'output' => 'Output',
                 'expected_output' => 'Expected Output',
                 'output_type' => 'Output Type',
                 'hidden' => 'Hidden Test',
                 'active' => 'Active Status',
+                'explanation' => 'Explanation',
                 'status' => 'Status',
                 'language' => 'Programming Language',
+                'visibility' => 'Visibility',
             ],
             'help' => [
                 'description' => 'Describe what this test case is checking for',
@@ -1164,27 +1173,80 @@ return [
                 'active' => 'Active',
                 'inactive' => 'Inactive',
             ],
+            'visibility' => [
+                'hidden' => 'Hidden',
+                'visible' => 'Visible',
+            ],
             'messages' => [
                 'not_found' => 'Test case not found',
                 'pending' => [
                     'create' => 'Creating test case...',
                     'update' => 'Updating test case...',
                     'delete' => 'Deleting test case...',
+                    'toggle' => 'Updating test case visibility...',
                 ],
                 'success' => [
                     'create' => 'Test case created successfully',
                     'update' => 'Test case updated successfully',
                     'delete' => 'Test case deleted successfully',
+                    'toggle' => 'Test case visibility updated successfully',
                 ],
                 'error' => [
                     'create' => 'Error creating test case',
                     'update' => 'Error updating test case',
                     'delete' => 'Error deleting test case',
+                    'toggle' => 'Error updating test case visibility',
                 ],
             ],
             'placeholders' => [
                 'language' => 'Select a language',
+                'input' => 'Enter test case input',
+                'expected_output' => 'Enter expected output',
+                'description' => 'Enter test case description',
             ],
+            'confirmations' => [
+                'toggle_visibility' => [
+                    'title' => 'Confirm Visibility Change',
+                    'message' => 'Are you sure you want to change the visibility of this test case?',
+                    'show' => 'now',
+                    'hide' => 'no longer',
+                    'confirm' => 'Yes, change visibility',
+                    'cancel' => 'Cancel',
+                ],
+                'delete' => [
+                    'title' => 'Confirm Deletion',
+                    'message' => 'Are you sure you want to delete this test case? This action cannot be undone.',
+                    'confirm' => 'Yes, delete',
+                    'cancel' => 'Cancel',
+                ],
+            ],
+            'confirmation' => [
+                'toggle' => [
+                    'title' => 'Confirm Visibility Change',
+                    'message' => 'Are you sure you want to change the visibility of this test case?',
+                ],
+            ],
+            'help' => [
+                'input' => 'Input values that will be passed to the student\'s code',
+                'expected_output' => 'Expected output that the student\'s code should produce',
+                'hidden' => 'When hidden, students won\'t see this test case in their workspace',
+            ],
+            'sections' => [
+                'details' => 'Test Case Details',
+            ],
+        ],
+        'actions' => [
+            'create' => 'Create Test Case',
+            'edit' => 'Edit Test Case',
+            'delete' => 'Delete Test Case',
+            'make_visible' => 'Make Visible',
+            'make_hidden' => 'Make Hidden',
+            'toggle_status' => 'Toggle Status',
+        ],
+        'no_test_cases' => [
+            'title' => 'No Test Cases Found',
+            'message' => 'There are no test cases for this learning material question yet. Create a test case to get started.',
+            'add_button' => 'Add Test Case',
         ],
         'index' => [
             'title' => 'Test Cases',

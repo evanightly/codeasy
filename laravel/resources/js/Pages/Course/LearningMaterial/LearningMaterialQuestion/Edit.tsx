@@ -1,3 +1,4 @@
+import CodeEditor from '@/Components/CodeEditor';
 import { FilePondUploader } from '@/Components/FilePondUploader';
 import { PDFViewer } from '@/Components/PDFViewer';
 import { Button, buttonVariants } from '@/Components/UI/button';
@@ -17,6 +18,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { learningMaterialQuestionServiceHook } from '@/Services/learningMaterialQuestionServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { LearningMaterialTypeEnum } from '@/Support/Enums/learningMaterialTypeEnum';
+import { ProgrammingLanguageEnum } from '@/Support/Enums/programmingLanguageEnum';
 import {
     CourseResource,
     LearningMaterialQuestionResource,
@@ -74,6 +76,8 @@ export default function Edit({
             .min(1, t('pages.learning_material_question.common.validations.description.required')),
         type: z.nativeEnum(LearningMaterialTypeEnum),
         clue: z.string().optional(),
+        pre_code: z.string().optional(),
+        example_code: z.string().optional(),
         active: z.boolean().default(true),
         file: z.any().optional(),
         _method: z.string().default('PUT'),
@@ -87,6 +91,8 @@ export default function Edit({
             description: questionData.description,
             type: questionData.type as LearningMaterialTypeEnum,
             clue: questionData.clue || '',
+            pre_code: questionData.pre_code || '',
+            example_code: questionData.example_code || '',
             active: questionData.active,
             file: undefined,
             _method: 'PUT',
@@ -256,7 +262,67 @@ export default function Edit({
                                     />
 
                                     <FormField
-                                        render={({ field: { onChange, value, ...rest } }) => (
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    {t(
+                                                        'pages.learning_material_question.common.fields.pre_code',
+                                                    ) || 'Pre Code'}
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <CodeEditor
+                                                        value={field.value || ''}
+                                                        showThemePicker={false}
+                                                        onChange={field.onChange}
+                                                        language={ProgrammingLanguageEnum.PYTHON}
+                                                        height='200px'
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                                <p className='text-sm text-muted-foreground'>
+                                                    {t(
+                                                        'pages.learning_material_question.common.help.pre_code',
+                                                    ) ||
+                                                        'Code that will be provided to students before they start coding.'}
+                                                </p>
+                                            </FormItem>
+                                        )}
+                                        name='pre_code'
+                                        control={form.control}
+                                    />
+
+                                    <FormField
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    {t(
+                                                        'pages.learning_material_question.common.fields.example_code',
+                                                    ) || 'Example Code'}
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <CodeEditor
+                                                        value={field.value || ''}
+                                                        showThemePicker={false}
+                                                        onChange={field.onChange}
+                                                        language={ProgrammingLanguageEnum.PYTHON}
+                                                        height='200px'
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                                <p className='text-sm text-muted-foreground'>
+                                                    {t(
+                                                        'pages.learning_material_question.common.help.example_code',
+                                                    ) ||
+                                                        'Example solution code that will be used for reference.'}
+                                                </p>
+                                            </FormItem>
+                                        )}
+                                        name='example_code'
+                                        control={form.control}
+                                    />
+
+                                    <FormField
+                                        render={({ field: { value, ..._rest } }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     {t(

@@ -18,7 +18,7 @@ import { php } from '@codemirror/lang-php';
 import { python } from '@codemirror/lang-python';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import * as codemirrorThemes from '@uiw/codemirror-themes-all';
-import CodeMirror, { EditorView } from '@uiw/react-codemirror';
+import CodeMirror, { EditorState, EditorView } from '@uiw/react-codemirror';
 import { Check, ChevronsUpDown, Moon, Sun } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -69,6 +69,8 @@ interface CodeEditorProps {
     onChange: (value: string) => void;
     height?: string;
     showThemePicker?: boolean;
+    compact?: boolean;
+    readOnly?: boolean;
     language?: ProgrammingLanguageEnum;
     label?: string;
     className?: string;
@@ -83,6 +85,8 @@ export default function CodeEditor({
     onChange,
     height = '300px',
     showThemePicker = true,
+    compact = false,
+    readOnly = false,
     language = ProgrammingLanguageEnum.PYTHON,
     label,
     className,
@@ -148,7 +152,7 @@ export default function CodeEditor({
         <div className={ny('flex flex-col gap-3', className)}>
             {label && <label className='text-sm font-medium'>{label}</label>}
             <div className={ny('flex flex-col gap-3', containerClassName)}>
-                {showThemePicker && (
+                {showThemePicker && !compact && (
                     <div className={ny('flex gap-3', headerClassName)}>
                         <Popover open={themeComboboxOpen} onOpenChange={setThemeComboboxOpen}>
                             <PopoverTrigger asChild>
@@ -214,7 +218,11 @@ export default function CodeEditor({
                     onChange={handleCodeChange}
                     key={key} // Important: This forces re-render when language changes
                     height={height}
-                    extensions={[getLanguageExtension(), EditorView.lineWrapping]}
+                    extensions={[
+                        getLanguageExtension(),
+                        EditorView.lineWrapping,
+                        ...(readOnly ? [EditorState.readOnly.of(true)] : []),
+                    ]}
                     className={ny('w-full rounded-md border', codeMirrorClassName)}
                 />
             </div>

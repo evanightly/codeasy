@@ -20,6 +20,8 @@ class LearningMaterialQuestionResource extends JsonResource {
             'type' => $this->type,
             'order_number' => $this->order_number,
             'clue' => $this->clue,
+            'pre_code' => $this->pre_code,
+            'example_code' => $this->example_code,
             'active' => $this->active,
             'learning_material' => LearningMaterialResource::make($this->whenLoaded('learning_material')),
             'learning_material_question_test_cases' => LearningMaterialQuestionTestCaseResource::collection($this->whenLoaded('learning_material_question_test_cases')),
