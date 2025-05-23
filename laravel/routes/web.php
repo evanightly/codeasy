@@ -93,6 +93,23 @@ Route::post('/sandbox', function (\Illuminate\Http\Request $request) {
     }
 })->name('sandbox.store');
 
+// Add a new route for test case debugging
+Route::post('/api/debug-test-case', function (\Illuminate\Http\Request $request) {
+    $payload = $request->all();
+
+    try {
+        $response = Http::post('http://fastapi:8001/debug-test-case', $payload);
+
+        if ($response->successful()) {
+            return response()->json($response->json());
+        }
+
+        return response()->json(['message' => 'Failed to call FastAPI', 'response' => $response], 500);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+})->name('api.debug-test-case');
+
 Route::middleware('auth')->group(function () {
     Route::resource('dashboard', DashboardController::class);
     Route::resource('permissions', PermissionController::class);

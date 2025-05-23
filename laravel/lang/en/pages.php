@@ -1226,22 +1226,25 @@ return [
                     'message' => 'Are you sure you want to change the visibility of this test case?',
                 ],
             ],
-            'help' => [
-                'input' => 'Input values that will be passed to the student\'s code',
-                'expected_output' => 'Expected output that the student\'s code should produce',
-                'hidden' => 'When hidden, students won\'t see this test case in their workspace',
-            ],
             'sections' => [
                 'details' => 'Test Case Details',
             ],
-        ],
-        'actions' => [
-            'create' => 'Create Test Case',
-            'edit' => 'Edit Test Case',
-            'delete' => 'Delete Test Case',
-            'make_visible' => 'Make Visible',
-            'make_hidden' => 'Make Hidden',
-            'toggle_status' => 'Toggle Status',
+            'debug_section' => [
+                'title' => 'Test Case Debugging',
+                'description' => 'Debug your test case by running it against example code. Use "student_code" in your test case to refer to the code being tested.',
+            ],
+            'debug_dialog' => [
+                'title' => 'Debug Test Case',
+            ],
+            'actions' => [
+                'create' => 'Create Test Case',
+                'edit' => 'Edit Test Case',
+                'delete' => 'Delete Test Case',
+                'make_visible' => 'Make Visible',
+                'make_hidden' => 'Make Hidden',
+                'toggle_status' => 'Toggle Status',
+                'debug' => 'Debug Test Case',
+            ],
         ],
         'no_test_cases' => [
             'title' => 'No Test Cases Found',

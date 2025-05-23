@@ -1,10 +1,12 @@
 import CodeEditor from '@/Components/CodeEditor';
 import { PDFViewer } from '@/Components/PDFViewer';
+import { TestCaseDebugger } from '@/Components/TestCaseDebugger';
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { DataTable } from '@/Components/UI/data-table';
 import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/Components/UI/dialog';
 import { useConfirmation } from '@/Contexts/ConfirmationDialogContext';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { learningMaterialQuestionTestCaseServiceHook } from '@/Services/learningMaterialQuestionTestCaseServiceHook';
@@ -122,6 +124,16 @@ export default function Show({
 
     // Create column helper for DataTable
     const columnHelper = createColumnHelper<LearningMaterialQuestionTestCaseResource>();
+
+    const [selectedTestCase, setSelectedTestCase] =
+        useState<LearningMaterialQuestionTestCaseResource | null>(null);
+    const [debugDialogOpen, setDebugDialogOpen] = useState(false);
+
+    // Function to open test case debug dialog - Moved before it's used in columns dependencies
+    const handleDebugTestCase = (testCase: LearningMaterialQuestionTestCaseResource) => {
+        setSelectedTestCase(testCase);
+        setDebugDialogOpen(true);
+    };
 
     // Define columns for DataTable
     const columns = useMemo<ColumnDef<LearningMaterialQuestionTestCaseResource, any>[]>(
@@ -250,6 +262,17 @@ export default function Show({
                         </Button>
                         <Button
                             variant='outline'
+                            title={t(
+                                'pages.learning_material_question_test_case.common.actions.debug',
+                                { defaultValue: 'Debug Test Case' },
+                            )}
+                            size='icon'
+                            onClick={() => handleDebugTestCase(row.original)}
+                        >
+                            <CodeIcon />
+                        </Button>
+                        <Button
+                            variant='outline'
                             title={t('action.delete')}
                             size='icon'
                             onClick={() => handleDeleteTestCase(row.original.id)}
@@ -268,6 +291,7 @@ export default function Show({
             learningMaterialQuestionData.id,
             handleDeleteTestCase,
             handleToggleHidden,
+            handleDebugTestCase,
         ],
     );
 
@@ -546,6 +570,53 @@ export default function Show({
                         </Card>
                     )}
                 </div>
+
+                {/* Test Case Debug Dialog */}
+                <Dialog open={debugDialogOpen} onOpenChange={setDebugDialogOpen}>
+                    <DialogContent className='max-w-4xl'>
+                        <DialogHeader>
+                            <DialogTitle>
+                                {t(
+                                    'pages.learning_material_question_test_case.common.debug_dialog.title',
+                                    { defaultValue: 'Debug Test Case' },
+                                )}
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        {selectedTestCase && (
+                            <div className='space-y-4'>
+                                <div className='rounded-md border bg-muted/20 p-4'>
+                                    <h3 className='mb-1 font-medium'>
+                                        {t(
+                                            'pages.learning_material_question_test_case.common.fields.description',
+                                        )}
+                                    </h3>
+                                    <p>{selectedTestCase.description}</p>
+                                </div>
+
+                                <div className='rounded-md border bg-muted/20 p-4'>
+                                    <h3 className='mb-1 font-medium'>
+                                        {t(
+                                            'pages.learning_material_question_test_case.common.fields.input',
+                                        )}
+                                    </h3>
+                                    <pre className='overflow-auto rounded bg-background p-2 text-sm'>
+                                        {selectedTestCase.input}
+                                    </pre>
+                                </div>
+
+                                <TestCaseDebugger
+                                    testCaseInput={selectedTestCase.input || ''}
+                                    language={
+                                        (selectedTestCase.language as ProgrammingLanguageEnum) ||
+                                        ProgrammingLanguageEnum.PYTHON
+                                    }
+                                    initialCode={learningMaterialQuestionData.example_code || ''}
+                                />
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
         </AuthenticatedLayout>
     );

@@ -277,6 +277,11 @@ async def test_code(input: CodeInput):
             for i, tc in enumerate(input.testcases):
                 test_method = f"""
                 def test_{i}(self):
+                    # Execute student code in the test method scope
+                    # This makes all functions and variables available for testing
+                    exec(student_code, globals(), locals())
+                    
+                    # Now run the test case with access to the student's functions
                     {tc}
                 TestUserCode.test_{i} = test_{i}
                 """
@@ -1095,3 +1100,88 @@ def calculate_fuzzy_logic(metrics_list):
     except Exception as e:
         print(f"Fuzzy logic calculation error: {str(e)}")
         return "Remember", 0.0
+
+class TestCaseDebugInput(BaseModel):
+    student_code: str
+    test_case_code: str
+    language: str = "python"
+
+@app.post("/debug-test-case")
+async def debug_test_case(input: TestCaseDebugInput):
+    try:
+        # Properly indent all test case lines for method scope
+        test_case_lines = input.test_case_code.strip().split('\n')
+        # Filter out empty lines and properly indent each line
+        indented_lines = []
+        for line in test_case_lines:
+            if line.strip():  # Only process non-empty lines
+                # Add proper indentation for method scope (8 spaces)
+                indented_lines.append('        ' + line.strip())
+        indented_test_case = '\n'.join(indented_lines)
+        
+        # Format the test code with unittest structure
+        test_code = f"""
+import unittest
+import io
+import sys
+
+# Store the student code as a string for test assertions
+student_code = '''
+{input.student_code}
+'''
+
+# Execute student code in global scope first
+exec(student_code)
+
+# Create test case class
+class TestUserCode(unittest.TestCase):
+    def setUp(self):
+        # Make student_code available as instance variable
+        self.student_code = student_code
+    
+    def test_case(self):
+        # The student code is already executed in global scope
+        # so all functions and variables are available here
+        # Make student_code available in local scope for convenience
+        student_code = self.student_code
+{indented_test_case}
+
+# Run the test using a test runner instead of unittest.main()
+stream = io.StringIO()
+runner = unittest.TextTestRunner(stream=stream)
+result = runner.run(unittest.makeSuite(TestUserCode))
+
+# Print the results in a format we can parse
+print("TEST_RESULT:", "SUCCESS" if result.wasSuccessful() else "FAILURE")
+print("TEST_OUTPUT:", stream.getvalue())
+"""
+        
+        # Execute the test code
+        outputs = kernel_mgr.execute_code(test_code)
+        
+        # Process the test results
+        test_results = []
+        success = False
+        
+        for output in outputs:
+            if output['type'] == 'text' and 'TEST_RESULT: SUCCESS' in output['content']:
+                success = True
+                
+            # Add all outputs to results
+            test_results.append(output)
+                
+        return {
+            "results": test_results,
+            "success": success
+        }
+        
+    except Exception as e:
+        return {
+            "results": [{
+                "type": "error",
+                "content": str(e),
+                "error_type": type(e).__name__,
+                "error_msg": str(e)
+            }],
+            "success": False
+        }
