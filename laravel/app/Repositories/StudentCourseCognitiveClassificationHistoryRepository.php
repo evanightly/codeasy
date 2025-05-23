@@ -10,8 +10,7 @@ use App\Traits\Repositories\HandlesSorting;
 use App\Traits\Repositories\RelationQueryable;
 use Illuminate\Database\Eloquent\Builder;
 
-class StudentCourseCognitiveClassificationHistoryRepository extends BaseRepository implements StudentCourseCognitiveClassificationHistoryRepositoryInterface
-{
+class StudentCourseCognitiveClassificationHistoryRepository extends BaseRepository implements StudentCourseCognitiveClassificationHistoryRepositoryInterface {
     use HandlesFiltering, HandlesRelations, HandlesSorting, RelationQueryable;
 
     protected function applyFilters(array $searchParams = []): Builder {

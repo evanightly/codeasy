@@ -9,8 +9,7 @@ use App\Support\Interfaces\Services\StudentCourseCognitiveClassificationHistoryS
 use App\Traits\Services\HandlesPageSizeAll;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class StudentCourseCognitiveClassificationHistoryService extends BaseCrudService implements StudentCourseCognitiveClassificationHistoryServiceInterface
-{
+class StudentCourseCognitiveClassificationHistoryService extends BaseCrudService implements StudentCourseCognitiveClassificationHistoryServiceInterface {
     use HandlesPageSizeAll;
 
     public function getAllPaginated(array $search = [], int $pageSize = 15): LengthAwarePaginator {

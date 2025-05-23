@@ -22,6 +22,6 @@ export * from './LearningMaterialQuestionTestCase';
 export * from './ExecutionResult';
 export * from './StudentCognitiveClassification';
 export * from './StudentCourseCognitiveClassification';
+export * from './StudentCourseCognitiveClassificationHistory';
 export * from './StudentScore';
 export * from './TestCaseChangeTracker';
-export * from './StudentCourseCognitiveClassificationHistory';

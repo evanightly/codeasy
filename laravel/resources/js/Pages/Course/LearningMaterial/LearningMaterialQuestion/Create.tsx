@@ -1,6 +1,6 @@
+import CodeEditor from '@/Components/CodeEditor';
 import { FilePondUploader } from '@/Components/FilePondUploader';
 import { PDFViewer } from '@/Components/PDFViewer';
-import CodeEditor from '@/Components/CodeEditor';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
@@ -247,7 +247,7 @@ export default function Create({
                                                         value={field.value || ''}
                                                         onChange={field.onChange}
                                                         language={ProgrammingLanguageEnum.PYTHON}
-                                                        height="200px"
+                                                        height='200px'
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -276,7 +276,7 @@ export default function Create({
                                                         value={field.value || ''}
                                                         onChange={field.onChange}
                                                         language={ProgrammingLanguageEnum.PYTHON}
-                                                        height="200px"
+                                                        height='200px'
                                                     />
                                                 </FormControl>
                                                 <FormMessage />

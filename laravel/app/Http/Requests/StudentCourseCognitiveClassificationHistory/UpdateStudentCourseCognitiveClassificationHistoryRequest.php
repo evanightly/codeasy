@@ -2,13 +2,11 @@
 
 namespace App\Http\Requests\StudentCourseCognitiveClassificationHistory;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Support\Enums\IntentEnum;
+use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateStudentCourseCognitiveClassificationHistoryRequest extends FormRequest
-{
-    public function rules(): array
-    {
+class UpdateStudentCourseCognitiveClassificationHistoryRequest extends FormRequest {
+    public function rules(): array {
         $rules = [
             'course_id' => ['required', 'integer'],
             'user_id' => ['required', 'integer'],

@@ -21,7 +21,7 @@ export * from './LearningMaterialQuestionTestCaseResource';
 
 export * from './ExecutionResultResource';
 export * from './StudentCognitiveClassificationResource';
+export * from './StudentCourseCognitiveClassificationHistoryResource';
 export * from './StudentCourseCognitiveClassificationResource';
 export * from './StudentScoreResource';
 export * from './TestCaseChangeTrackerResource';
-export * from './StudentCourseCognitiveClassificationHistoryResource';
