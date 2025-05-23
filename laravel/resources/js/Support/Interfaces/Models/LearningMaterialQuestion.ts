@@ -9,5 +9,7 @@ export interface LearningMaterialQuestion extends Model {
     type?: LearningMaterialTypeEnum;
     order_number?: number;
     clue?: string;
+    pre_code?: string;
+    example_code?: string;
     active?: boolean;
 }

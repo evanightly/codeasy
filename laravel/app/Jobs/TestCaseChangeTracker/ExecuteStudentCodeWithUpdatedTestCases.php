@@ -103,27 +103,51 @@ class ExecuteStudentCodeWithUpdatedTestCases implements ShouldQueue {
                     continue;
                 }
 
-                // Re-execute the code with new test cases
+                // Check if the student score is already completed
+                if ($studentScore->completion_status) {
+                    // If the student score is already completed, log the execution without updating anything
+                    Log::info('Student score already completed in job - skipping execution', [
+                        'student_score_id' => $studentScore->id,
+                        'student_id' => $studentId,
+                        'question_id' => $question->id,
+                        'completed_execution_result_id' => $studentScore->completed_execution_result_id,
+                    ]);
+
+                    // Count as successful execution but don't run code or update the score
+                    $executionDetails['success']++;
+                    $executionDetails['processed']++;
+
+                    continue;
+                }
+
+                // Re-execute the code with new test cases only for non-completed student scores
                 $result = $this->executeCode($executionResult->code, $testCaseInputs, $question->id);
                 $executionDetails['processed']++;
 
                 // Update student score based on results
-                // Changed from checking if all tests pass to checking if at least one test passes
+                // Extract test case metrics
                 $somePassed = false;
+                $testCaseSuccess = 0;
+                $testCaseTotal = 0;
+
                 foreach ($result as $item) {
                     if (isset($item['type']) && $item['type'] === 'test_stats') {
-                        dump($item);
-                        $somePassed = $item['success'] > 0; // Changed from checking equality to checking > 0
+                        $testCaseSuccess = $item['success'] ?? 0;
+                        $testCaseTotal = $item['total_tests'] ?? 0;
+                        $somePassed = $testCaseSuccess > 0; // Check if at least one test passes
                         break;
                     }
                 }
 
+                // Update the student score based on the results
                 if ($somePassed) {
                     // Update student score to mark as complete if at least one test passes
                     $studentScore->update([
                         'completion_status' => true,
                         'score' => 100,
-                        'completed_execution_result_id' => $executionResult->id,
+                        'completed_execution_result_id' => $executionResult->id, // Use the existing execution result
+                        'test_case_complete_count' => $testCaseSuccess,
+                        'test_case_total_count' => $testCaseTotal,
                     ]);
                     $executionDetails['success']++;
                 } else {
@@ -131,6 +155,8 @@ class ExecuteStudentCodeWithUpdatedTestCases implements ShouldQueue {
                     $studentScore->update([
                         'completion_status' => false,
                         'score' => 0,
+                        'test_case_complete_count' => $testCaseSuccess,
+                        'test_case_total_count' => $testCaseTotal,
                     ]);
                     $executionDetails['failed']++;
                 }

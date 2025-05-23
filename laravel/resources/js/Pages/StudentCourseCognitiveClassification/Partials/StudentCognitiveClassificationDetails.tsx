@@ -19,6 +19,7 @@ import {
 import { studentCognitiveClassificationServiceHook } from '@/Services/studentCognitiveClassificationServiceHook';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
+import { TestCaseMetricsDisplay } from './TestCaseMetricsDisplay';
 
 // Type for material classification raw_data
 interface MaterialClassificationRawData {
@@ -237,7 +238,13 @@ export function StudentCognitiveClassificationDetails({
                                             <p>{rawData?.material_name || 'Not specified'}</p>
                                         </div>
                                         {Object.entries(rawData || {})
-                                            .filter(([key]) => key !== 'material_name')
+                                            .filter(
+                                                ([key]) =>
+                                                    ![
+                                                        'material_name',
+                                                        'test_case_metrics',
+                                                    ].includes(key),
+                                            )
                                             .map(([key, value]) => (
                                                 <div key={key}>
                                                     <p className='font-medium'>{key}:</p>
@@ -249,6 +256,15 @@ export function StudentCognitiveClassificationDetails({
                                                 </div>
                                             ))}
                                     </div>
+
+                                    {/* Display test case metrics if available */}
+                                    {rawData?.test_case_metrics && (
+                                        <div className='mt-6'>
+                                            <TestCaseMetricsDisplay
+                                                metrics={rawData.test_case_metrics}
+                                            />
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>

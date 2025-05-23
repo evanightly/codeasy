@@ -19,6 +19,7 @@ use App\Http\Controllers\SchoolRequestController;
 use App\Http\Controllers\StudentCognitiveClassificationController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentCourseCognitiveClassificationController;
+use App\Http\Controllers\StudentCourseCognitiveClassificationHistoryController;
 use App\Http\Controllers\StudentScoreController;
 use App\Http\Controllers\TestCaseChangeTrackerController;
 use App\Http\Controllers\UserController;
@@ -92,6 +93,23 @@ Route::post('/sandbox', function (\Illuminate\Http\Request $request) {
     }
 })->name('sandbox.store');
 
+// Add a new route for test case debugging
+Route::post('/api/debug-test-case', function (\Illuminate\Http\Request $request) {
+    $payload = $request->all();
+
+    try {
+        $response = Http::post('http://fastapi:8001/debug-test-case', $payload);
+
+        if ($response->successful()) {
+            return response()->json($response->json());
+        }
+
+        return response()->json(['message' => 'Failed to call FastAPI', 'response' => $response], 500);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+})->name('api.debug-test-case');
+
 Route::middleware('auth')->group(function () {
     Route::resource('dashboard', DashboardController::class);
     Route::resource('permissions', PermissionController::class);
@@ -152,6 +170,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('student-cognitive-classifications', StudentCognitiveClassificationController::class);
     Route::resource('student-course-cognitive-classifications', StudentCourseCognitiveClassificationController::class)->parameter('student-course-cognitive-classifications', 'student-course-classification');
     Route::resource('test-case-change-trackers', TestCaseChangeTrackerController::class);
+    Route::resource('student-course-cognitive-classification-histories', StudentCourseCognitiveClassificationHistoryController::class)->parameter('student-course-cognitive-classification-histories', 'scc-history');
 });
 
 Route::resource('schools', SchoolController::class)->only(['index']);

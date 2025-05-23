@@ -15,6 +15,8 @@ class UpdateLearningMaterialQuestionRequest extends FormRequest {
             'type' => ['nullable', 'string', 'in:' . implode(',', LearningMaterialTypeEnum::toArray())],
             // 'order_number' => ['nullable', 'integer'],
             'clue' => ['nullable', 'string'],
+            'pre_code' => ['nullable', 'string'],
+            'example_code' => ['nullable', 'string'],
             'active' => ['boolean'],
         ];
     }

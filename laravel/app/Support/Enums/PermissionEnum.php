@@ -126,4 +126,9 @@ enum PermissionEnum: string {
     case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_READ = 'student-course-cognitive-classification-read';
     case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_UPDATE = 'student-course-cognitive-classification-update';
     case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_DELETE = 'student-course-cognitive-classification-delete';
+
+    case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_UPDATE = 'student-course-cognitive-classification-history-update';
+    case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_CREATE = 'student-course-cognitive-classification-history-create';
+    case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_READ = 'student-course-cognitive-classification-history-read';
+    case STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_DELETE = 'student-course-cognitive-classification-history-delete';
 }

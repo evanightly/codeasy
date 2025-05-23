@@ -22,6 +22,8 @@ return new class extends Migration {
             $table->enum('type', LearningMaterialTypeEnum::toArray());
             $table->integer('order_number');
             $table->text('clue')->nullable();
+            $table->text('pre_code')->nullable();
+            $table->text('example_code')->nullable();
             $table->boolean('active')->default(true);
             $table->timestamps();
         });

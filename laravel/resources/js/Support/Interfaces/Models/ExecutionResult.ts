@@ -8,4 +8,6 @@ export interface ExecutionResult extends Model {
     output_image: string;
     variable_count: number;
     function_count: number;
+    test_case_complete_count: number;
+    test_case_total_count: number;
 }

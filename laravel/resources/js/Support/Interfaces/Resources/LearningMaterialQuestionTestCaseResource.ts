@@ -6,4 +6,7 @@ export interface LearningMaterialQuestionTestCaseResource
         LearningMaterialQuestionTestCase {
     learning_material_question?: LearningMaterialQuestionTestCaseResource;
     expected_output_file_url?: string;
+    title?: string; // Title displayed in the UI
+    output?: string; // Expected output content
+    explanation?: string; // Explanation for the test case
 }

@@ -25,6 +25,8 @@ class LearningMaterialQuestion extends Model {
         'type',
         'order_number',
         'clue',
+        'pre_code',
+        'example_code',
         'active',
     ];
 

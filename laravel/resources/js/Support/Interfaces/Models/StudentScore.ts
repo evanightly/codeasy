@@ -6,4 +6,8 @@ export interface StudentScore extends Model {
     score: number;
     completion_status: string;
     trial_status: string;
+    compile_count: number;
+    completed_execution_result_id: number;
+    test_case_complete_count: number;
+    test_case_total_count: number;
 }

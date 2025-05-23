@@ -11,10 +11,12 @@ class StoreLearningMaterialQuestionRequest extends FormRequest {
             'learning_material_id' => ['required', 'exists:learning_materials,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'file' => ['required', 'file'],
+            // 'file' => ['required', 'file'],
             'type' => ['required', 'string', 'in:' . implode(',', LearningMaterialTypeEnum::toArray())],
             // 'order_number' => ['required', 'integer'],
             'clue' => ['nullable', 'string'],
+            'pre_code' => ['nullable', 'string'],
+            'example_code' => ['nullable', 'string'],
             'active' => ['boolean'],
         ];
     }

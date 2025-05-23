@@ -7,6 +7,7 @@ use App\Models\StudentCourseCognitiveClassification;
 use App\Repositories\StudentCourseCognitiveClassificationRepository;
 use App\Support\Interfaces\Repositories\StudentCourseCognitiveClassificationRepositoryInterface;
 use App\Support\Interfaces\Services\StudentCognitiveClassificationServiceInterface;
+use App\Support\Interfaces\Services\StudentCourseCognitiveClassificationHistoryServiceInterface;
 use App\Support\Interfaces\Services\StudentCourseCognitiveClassificationServiceInterface;
 use App\Traits\Services\HandlesPageSizeAll;
 use Carbon\Carbon;
@@ -20,7 +21,8 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
     protected $repository;
 
     public function __construct(
-        protected StudentCognitiveClassificationServiceInterface $studentCognitiveClassificationService
+        protected StudentCognitiveClassificationServiceInterface $studentCognitiveClassificationService,
+        protected StudentCourseCognitiveClassificationHistoryServiceInterface $historyService
     ) {
         parent::__construct();
     }
@@ -219,6 +221,9 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
             ]
         );
 
+        // Create a history record of this classification
+        $this->createClassificationHistory($courseClassification);
+
         return $courseClassification;
     }
 
@@ -228,7 +233,7 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
     private function createFromCourseClassification(
         StudentCognitiveClassification $courseClassification
     ): StudentCourseCognitiveClassification {
-        return $this->repository->create([
+        $classification = $this->repository->create([
             'user_id' => $courseClassification->user_id,
             'course_id' => $courseClassification->course_id,
             'classification_type' => $courseClassification->classification_type,
@@ -237,6 +242,11 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
             'raw_data' => $courseClassification->raw_data,
             'classified_at' => $courseClassification->classified_at,
         ]);
+
+        // Create a history record of this classification
+        $this->createClassificationHistory($classification);
+
+        return $classification;
     }
 
     /**
@@ -247,7 +257,7 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
         int $courseId,
         string $classificationType
     ): StudentCourseCognitiveClassification {
-        return $this->repository->updateOrCreate(
+        $classification = $this->repository->updateOrCreate(
             [
                 'user_id' => $userId,
                 'course_id' => $courseId,
@@ -266,6 +276,11 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
                 'classified_at' => Carbon::now(),
             ]
         );
+
+        // Create a history record for this empty classification
+        $this->createClassificationHistory($classification);
+
+        return $classification;
     }
 
     /**
@@ -300,7 +315,7 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
         array $rawData,
         $classifiedAt = null
     ): StudentCourseCognitiveClassification {
-        return $this->repository->updateOrCreate(
+        $classification = $this->repository->updateOrCreate(
             [
                 'user_id' => $userId,
                 'course_id' => $courseId,
@@ -316,9 +331,32 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
                 'classified_at' => $classifiedAt ?? \Carbon\Carbon::now(),
             ]
         );
+
+        // Create a history record
+        $this->createClassificationHistory($classification);
+
+        return $classification;
     }
 
     protected function getRepositoryClass(): string {
         return StudentCourseCognitiveClassificationRepositoryInterface::class;
+    }
+
+    /**
+     * Create a history record of a classification
+     *
+     * @param  StudentCourseCognitiveClassification  $classification  The classification to create history for
+     */
+    private function createClassificationHistory(StudentCourseCognitiveClassification $classification): void {
+        $this->historyService->create([
+            'user_id' => $classification->user_id,
+            'course_id' => $classification->course_id,
+            'student_course_cognitive_classification_id' => $classification->id,
+            'classification_type' => $classification->classification_type,
+            'classification_level' => $classification->classification_level,
+            'classification_score' => $classification->classification_score,
+            'raw_data' => $classification->raw_data,
+            'classified_at' => $classification->classified_at ?? Carbon::now(),
+        ]);
     }
 }

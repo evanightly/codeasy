@@ -272,6 +272,36 @@ export const ImportPreviewDialog = ({
                                                                             {question.description}
                                                                         </div>
 
+                                                                        {question.pre_code && (
+                                                                            <div className='mt-2'>
+                                                                                <div className='text-xs font-medium'>
+                                                                                    Pre-code:
+                                                                                </div>
+                                                                                <pre className='mt-1 overflow-x-auto rounded border border-border bg-background p-1.5 text-xs'>
+                                                                                    <code>
+                                                                                        {
+                                                                                            question.pre_code
+                                                                                        }
+                                                                                    </code>
+                                                                                </pre>
+                                                                            </div>
+                                                                        )}
+
+                                                                        {question.example_code && (
+                                                                            <div className='mt-2'>
+                                                                                <div className='text-xs font-medium'>
+                                                                                    Contoh Kode:
+                                                                                </div>
+                                                                                <pre className='mt-1 overflow-x-auto rounded border border-border bg-background p-1.5 text-xs'>
+                                                                                    <code>
+                                                                                        {
+                                                                                            question.example_code
+                                                                                        }
+                                                                                    </code>
+                                                                                </pre>
+                                                                            </div>
+                                                                        )}
+
                                                                         {/* Show test cases for this question */}
                                                                         {questionTestCases.length >
                                                                             0 && (

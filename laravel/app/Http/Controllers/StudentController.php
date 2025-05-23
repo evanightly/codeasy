@@ -15,6 +15,7 @@ use App\Support\Interfaces\Services\StudentScoreServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -302,13 +303,17 @@ class StudentController extends Controller {
             $studentScore->save();
         }
 
-        // Record the execution attempt
+        // Record the execution attempt - we'll create an ExecutionResult regardless of completion status
+        // This allows students to keep experimenting with code even after completing the question
         $executionResult = $this->executionResultService->create([
             'student_score_id' => $studentScoreId,
             'code' => $code,
             'compile_status' => true, // We'll assume success initially
             'variable_count' => 0, // Initial value, will be updated with actual count
-            'function_count' => 0, // Initial value, will be updated with actual count
+            'function_count' => 0, // Initial value, will be updated with actual count,
+            // Add test case metrics to the initial creation (they'll be updated later if needed)
+            'test_case_complete_count' => 0,
+            'test_case_total_count' => $testCases->count(),
         ]);
 
         // Prepare test cases for FastAPI
@@ -356,25 +361,49 @@ class StudentController extends Controller {
 
                 // Check if at least one test case passed
                 $somePassed = false;
+                $testCaseSuccess = 0;
+                $testCaseTotal = 0;
+
+                // Extract test statistics
                 foreach ($results as $result) {
                     if (isset($result['type']) && $result['type'] === 'test_stats') {
-                        $somePassed = $result['success'] > 0;
+                        $testCaseSuccess = $result['success'] ?? 0;
+                        $testCaseTotal = $result['total_tests'] ?? 0;
+                        $somePassed = $testCaseSuccess > 0;
                         break;
                     }
                 }
 
-                // Update the execution result with the code metrics
-                $this->executionResultService->update($executionResult->id, [
-                    'variable_count' => $variableCount,
-                    'function_count' => $functionCount,
-                ]);
+                // Only update execution result if the student score is not already completed
+                if (!$studentScore->completion_status) {
+                    // Update the execution result with the code metrics and test case counts
+                    $this->executionResultService->update($executionResult->id, [
+                        'variable_count' => $variableCount,
+                        'function_count' => $functionCount,
+                        'test_case_complete_count' => $testCaseSuccess,
+                        'test_case_total_count' => $testCaseTotal,
+                    ]);
 
-                // Only update the student score if not already completed
-                if ($somePassed && !$studentScore->completion_status) {
-                    $this->studentScoreService->update($studentScore->id, [
-                        'completion_status' => true,
-                        'score' => 100,
-                        'completed_execution_result_id' => $executionResult->id, // Store reference to the execution result that completed the question
+                    // Update student score with test case metrics
+                    $updateData = [
+                        'test_case_complete_count' => $testCaseSuccess,
+                        'test_case_total_count' => $testCaseTotal,
+                    ];
+
+                    // Update completion status if tests passed
+                    if ($somePassed) {
+                        $updateData['completion_status'] = true;
+                        $updateData['score'] = 100;
+                        $updateData['completed_execution_result_id'] = $executionResult->id; // Store reference to the execution result that completed the question
+                    }
+
+                    $this->studentScoreService->update($studentScore->id, $updateData);
+                } else {
+                    // If already completed, just log the execution without updating anything
+                    Log::info('Code execution for completed student score - no updates made', [
+                        'student_score_id' => $studentScore->id,
+                        'test_success' => $testCaseSuccess,
+                        'test_total' => $testCaseTotal,
                     ]);
                 }
 
@@ -406,10 +435,19 @@ class StudentController extends Controller {
             ], 500);
 
         } catch (\Exception $e) {
-            // Update execution status to failed
-            $this->executionResultService->update($executionResult->id, [
-                'compile_status' => false,
-            ]);
+            // Only update execution status if this is a new execution result (not a completed student score)
+            if (!$studentScore->completion_status) {
+                // Update execution status to failed
+                $this->executionResultService->update($executionResult->id, [
+                    'compile_status' => false,
+                ]);
+            } else {
+                // Just log the error for completed student scores
+                Log::info('Error executing code for completed student score - no updates made', [
+                    'student_score_id' => $studentScore->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return response()->json([
                 'error' => 'Error executing code',

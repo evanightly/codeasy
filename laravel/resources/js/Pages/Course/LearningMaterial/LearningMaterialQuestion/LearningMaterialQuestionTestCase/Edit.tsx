@@ -1,6 +1,9 @@
 import CodeEditor from '@/Components/CodeEditor';
 import { FilePondUploader } from '@/Components/FilePondUploader';
 import { PDFViewer } from '@/Components/PDFViewer';
+import { TestCaseDebugger } from '@/Components/TestCaseDebugger';
+import { TestCaseExamples } from '@/Components/TestCaseExamples';
+import { TestCaseInfoTooltip } from '@/Components/TestCaseInfoTooltip';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
@@ -19,6 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/Components/UI/select';
+import { Separator } from '@/Components/UI/separator';
 import { Switch } from '@/Components/UI/switch';
 import { Textarea } from '@/Components/UI/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -36,6 +40,7 @@ import {
 } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -220,6 +225,11 @@ export default function Edit({ course, learningMaterial, question, testCase }: P
     if (!testCase) return null;
 
     const selectedLanguage = form.watch('language');
+    const testCaseInput = form.watch('input') || ''; // Added default empty string
+
+    const handleExampleClick = (exampleCode: string) => {
+        form.setValue('input', exampleCode);
+    };
 
     return (
         <AuthenticatedLayout title={t('pages.learning_material_question_test_case.edit.title')}>
@@ -310,40 +320,115 @@ export default function Edit({ course, learningMaterial, question, testCase }: P
                                 control={form.control}
                             />
 
-                            <FormField
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            {t(
-                                                'pages.learning_material_question_test_case.common.fields.input',
-                                            )}
-                                        </FormLabel>
-                                        <FormControl>
-                                            <CodeEditor
-                                                value={field.value || ''}
-                                                onChange={field.onChange}
-                                                language={selectedLanguage}
-                                                height='200px'
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>
+                                        {t(
+                                            'pages.learning_material_question_test_case.common.fields.input',
+                                        )}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <TestCaseInfoTooltip />
+
+                                    <div className='relative flex flex-col gap-4 md:flex-row'>
+                                        <motion.div
+                                            transition={{
+                                                type: 'spring',
+                                                stiffness: 300,
+                                                damping: 30,
+                                            }}
+                                            layout
+                                            className='flex-1'
+                                        >
+                                            <FormField
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className='text-lg font-medium'>
+                                                            {t(
+                                                                'pages.learning_material_question_test_case.common.fields.input',
+                                                            )}
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <CodeEditor
+                                                                value={field.value || ''}
+                                                                onChange={field.onChange}
+                                                                language={selectedLanguage}
+                                                                height='200px'
+                                                                headerChildren={
+                                                                    <TestCaseExamples
+                                                                        onExampleClick={
+                                                                            handleExampleClick
+                                                                        }
+                                                                    />
+                                                                }
+                                                            />
+                                                        </FormControl>
+                                                        <FormDescription>
+                                                            {t(
+                                                                'pages.learning_material_question_test_case.common.help.input',
+                                                                {
+                                                                    defaultValue:
+                                                                        'Enter code or sample input for testing the question',
+                                                                },
+                                                            )}
+                                                        </FormDescription>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                                name='input'
+                                                control={form.control}
                                             />
-                                        </FormControl>
-                                        <FormDescription>
-                                            {t(
-                                                'pages.learning_material_question_test_case.common.help.input',
-                                                {
-                                                    defaultValue:
-                                                        'Enter code or sample input for testing the question',
-                                                },
+                                        </motion.div>
+
+                                        {testCaseInput.trim() && (
+                                            <Separator
+                                                orientation='vertical'
+                                                className='hidden md:block'
+                                            />
+                                        )}
+
+                                        <AnimatePresence>
+                                            {testCaseInput.trim() && (
+                                                <motion.div
+                                                    transition={{
+                                                        duration: 0.3,
+                                                        ease: 'easeInOut',
+                                                    }}
+                                                    initial={{ opacity: 0, width: 0 }}
+                                                    exit={{ opacity: 0, width: 0 }}
+                                                    className='flex-1'
+                                                    animate={{ opacity: 1, width: 'auto' }}
+                                                >
+                                                    <div className='space-y-2'>
+                                                        <h3 className='text-lg font-medium'>
+                                                            {t(
+                                                                'pages.learning_material_question_test_case.common.debug_section.title',
+                                                                {
+                                                                    defaultValue:
+                                                                        'Test Case Debugging',
+                                                                },
+                                                            )}
+                                                        </h3>
+
+                                                        <TestCaseDebugger
+                                                            testCaseInput={testCaseInput}
+                                                            language={selectedLanguage}
+                                                            initialCode={
+                                                                question.example_code || ''
+                                                            }
+                                                            hideTitle
+                                                        />
+                                                    </div>
+                                                </motion.div>
                                             )}
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                                name='input'
-                                control={form.control}
-                            />
+                                        </AnimatePresence>
+                                    </div>
+                                </CardContent>
+                            </Card>
 
                             <FormField
-                                render={({ field: { onChange, value, ...rest } }) => (
+                                render={({ field: { onChange: _onChange, value } }) => (
                                     <FormItem>
                                         <FormLabel>
                                             {t(

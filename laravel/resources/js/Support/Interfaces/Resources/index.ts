@@ -24,3 +24,4 @@ export * from './StudentCognitiveClassificationResource';
 export * from './StudentCourseCognitiveClassificationResource';
 export * from './StudentScoreResource';
 export * from './TestCaseChangeTrackerResource';
+export * from './StudentCourseCognitiveClassificationHistoryResource';

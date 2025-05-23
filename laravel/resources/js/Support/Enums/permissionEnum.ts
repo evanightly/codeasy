@@ -87,6 +87,10 @@ const permissions = {
     STUDENT_COURSE_COGNITIVE_CLASSIFICATION_READ: 'student-course-cognitive-classification-read',
     STUDENT_COURSE_COGNITIVE_CLASSIFICATION_UPDATE: 'student-course-cognitive-classification-update',
     STUDENT_COURSE_COGNITIVE_CLASSIFICATION_DELETE: 'student-course-cognitive-classification-delete',
+    STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_UPDATE: 'student-course-cognitive-classification-history-update',
+    STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_CREATE: 'student-course-cognitive-classification-history-create',
+    STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_READ: 'student-course-cognitive-classification-history-read',
+    STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_DELETE: 'student-course-cognitive-classification-history-delete',
 };
 
 export const PermissionEnum = permissions;
