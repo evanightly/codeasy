@@ -279,7 +279,12 @@ async def test_code(input: CodeInput):
                 def test_{i}(self):
                     # Execute student code in the test method scope
                     # This makes all functions and variables available for testing
-                    exec(student_code, globals(), locals())
+                    try:
+                        exec(student_code, globals(), locals())
+                    except Exception as e:
+                        # If student code has errors, we still want to continue with tests
+                        # Any variables/functions defined before the error will still be available
+                        print(f"Student code execution error: {{e}}")
                     
                     # Now run the test case with access to the student's functions
                     {tc}
