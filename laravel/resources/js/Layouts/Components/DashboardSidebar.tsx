@@ -37,7 +37,10 @@ interface AppSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const DashboardSidebar = ({ ...props }: AppSidebarProps) => {
     const { t, currentLocale } = useLaravelReactI18n();
-    const { url } = usePage();
+    const {
+        url,
+        props: { auth },
+    } = usePage();
 
     const data = {
         teams: [
@@ -162,23 +165,27 @@ const DashboardSidebar = ({ ...props }: AppSidebarProps) => {
                     },
                 ],
             },
-            {
-                type: 'group',
-                title: t('pages.student_courses.index.title'),
-                items: [
-                    {
-                        type: 'menu',
-                        title: t('pages.student_courses.index.title'),
-                        url: route('student.courses.index'),
-                        icon: School,
-                        isActive:
-                            url.startsWith('/student/courses') ||
-                            url.startsWith('/student/materials') ||
-                            url.startsWith('/student/questions'),
-                    },
-                ],
-                permission: null, // No special permission needed, shown to all students
-            },
+            ...(auth.user?.roles?.includes('student')
+                ? [
+                      {
+                          type: 'group' as const,
+                          title: t('pages.student_courses.index.title'),
+                          items: [
+                              {
+                                  type: 'menu' as const,
+                                  title: t('pages.student_courses.index.title'),
+                                  url: route('student.courses.index'),
+                                  icon: School,
+                                  isActive:
+                                      url.startsWith('/student/courses') ||
+                                      url.startsWith('/student/materials') ||
+                                      url.startsWith('/student/questions'),
+                              },
+                          ],
+                          permission: null, // No special permission needed, shown to all students
+                      },
+                  ]
+                : []),
         ],
         [currentLocale, url],
     );
