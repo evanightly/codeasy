@@ -26,6 +26,7 @@ class StoreCourseRequest extends FormRequest {
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'active' => 'required|boolean',
+            'workspace_lock_timeout_days' => 'nullable|numeric|min:0',
         ];
     }
 }

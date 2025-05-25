@@ -20,6 +20,12 @@ return new class extends Migration {
             $table->integer('compile_count')->default(0); // Number of times the student has compiled the code
             $table->integer('test_case_complete_count')->default(0); // Number of test cases completed
             $table->integer('test_case_total_count')->default(0); // Total number of test cases
+
+            $table->boolean('is_workspace_locked')->default(false)->comment('Whether workspace is locked after completing all questions');
+            $table->timestamp('workspace_locked_at')->nullable()->comment('When workspace was locked');
+            $table->timestamp('workspace_unlock_at')->nullable()->comment('When workspace will auto-unlock');
+            $table->boolean('can_reattempt')->default(true)->comment('Whether student can re-attempt (false when locked)');
+
             $table->timestamps();
 
             // Unique constraint to ensure one score per user per question

@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\StudentScore;
 
+use App\Support\Enums\IntentEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateStudentScoreRequest extends FormRequest {
     public function rules(): array {
-        return [
+        $intent = $this->get('intent');
+
+        $rules = [
             // 'user_id' => 'nullable|exists:users,id',
             // 'learning_material_question_id' => 'nullable|exists:learning_material_questions,id',
             'coding_time' => ['nullable', 'integer', 'min:0'],
@@ -15,5 +18,12 @@ class UpdateStudentScoreRequest extends FormRequest {
             'completion_status' => ['nullable', 'boolean'],
             'trial_status' => ['nullable', 'boolean'],
         ];
+
+        if ($intent === IntentEnum::STUDENT_SCORE_UPDATE_UNLOCK_WORKSPACE->value) {
+            // For workspace unlock, no additional fields are required beyond the route model
+            $rules = [];
+        }
+
+        return $rules;
     }
 }

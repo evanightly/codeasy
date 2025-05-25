@@ -27,6 +27,7 @@ import {
     SheetTrigger,
 } from '@/Components/UI/sheet';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { studentScoreServiceHook } from '@/Services/studentScoreServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { ProgrammingLanguageEnum } from '@/Support/Enums/programmingLanguageEnum';
 import { FastApiOutput } from '@/Support/Interfaces/Others';
@@ -46,12 +47,15 @@ import {
     ArrowLeft,
     ArrowRight,
     Check,
+    Clock,
     Columns2,
     Columns3,
     FileQuestion,
     FileTextIcon,
     Loader2,
+    Lock,
     Redo2,
+    RotateCcw,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -63,6 +67,11 @@ interface TrackingInfo {
     completion_status: boolean;
     trial_status: boolean;
     started_at: number;
+    // Workspace locking fields
+    is_workspace_locked?: boolean;
+    workspace_locked_at?: string | null;
+    workspace_unlock_at?: string | null;
+    can_reattempt?: boolean;
 }
 
 interface NavigationInfo {
@@ -109,12 +118,24 @@ export default function Workspace({
     const [navigation, setNavigation] = useState(initialNavigation);
     const [timeSpent, setTimeSpent] = useState(initialTracking.current_time);
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [lastSyncTime, setLastSyncTime] = useState(Date.now());
+    const [_lastSyncTime, setLastSyncTime] = useState(Date.now());
     const [materialDialogOpen, setMaterialDialogOpen] = useState(false);
     const [layoutMode, setLayoutMode] = useLocalStorage<'stacked' | 'side-by-side'>(
         'code-editor-view',
         'stacked',
     );
+
+    // Workspace locking state
+    const [isWorkspaceLocked, setIsWorkspaceLocked] = useState(
+        tracking.is_workspace_locked || false,
+    );
+    const [workspaceUnlockAt, setWorkspaceUnlockAt] = useState<string | null>(
+        tracking.workspace_unlock_at || null,
+    );
+    const [canReattempt, setCanReattempt] = useState(tracking.can_reattempt || false);
+
+    // Service hooks for workspace locking
+    const reattemptMutation = studentScoreServiceHook.useReattempt();
 
     // Function to format seconds into readable time
     const formatTime = (seconds: number) => {
@@ -125,6 +146,56 @@ export default function Workspace({
         return `${hrs.toString().padStart(2, '0')}:${(mins % 60).toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // Function to calculate time remaining until unlock
+    const getTimeUntilUnlock = () => {
+        if (!workspaceUnlockAt) return null;
+
+        const unlockTime = new Date(workspaceUnlockAt).getTime();
+        const currentTime = Date.now();
+        const diff = unlockTime - currentTime;
+
+        if (diff <= 0) return null;
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        return `${minutes}m`;
+    };
+
+    // Handle re-attempt functionality
+    const handleReattempt = () => {
+        reattemptMutation.mutate(
+            {
+                student_score_id: tracking.score_id,
+            },
+            {
+                onSuccess: () => {
+                    toast.success(t('pages.student_questions.workspace.reattempt.success'));
+                    // Reset local state
+                    setIsWorkspaceLocked(false);
+                    setWorkspaceUnlockAt(null);
+                    setCanReattempt(false);
+                    setCode('');
+                    setOutput([]);
+                    setTracking((prev) => ({
+                        ...prev,
+                        completion_status: false,
+                        is_workspace_locked: false,
+                        workspace_locked_at: null,
+                        workspace_unlock_at: null,
+                        can_reattempt: false,
+                    }));
+                },
+                onError: () => {
+                    toast.error(t('pages.student_questions.workspace.reattempt.error'));
+                },
+            },
+        );
+    };
+
     // Handle code changes
     const handleCodeChange = (value: string) => {
         setCode(value);
@@ -133,6 +204,12 @@ export default function Workspace({
     // Handle code execution/compilation
     const handleRunCode = async () => {
         if (isCompiling) return;
+
+        // Check if workspace is locked
+        if (isWorkspaceLocked && !canReattempt) {
+            toast.error(t('pages.student_questions.workspace.locked.cannot_run'));
+            return;
+        }
 
         setIsCompiling(true);
         try {
@@ -152,6 +229,18 @@ export default function Workspace({
                     completion_status: true,
                 }));
 
+                // Check if this completion causes workspace to be locked
+                if (response.data.workspace_locked) {
+                    setIsWorkspaceLocked(true);
+                    setWorkspaceUnlockAt(response.data.workspace_unlock_at);
+                    setCanReattempt(false);
+
+                    toast.success(t('pages.student_questions.workspace.success.description'));
+                    toast.info(t('pages.student_questions.workspace.locked.notification'));
+                } else {
+                    toast.success(t('pages.student_questions.workspace.success.description'));
+                }
+
                 // Enable the next button
                 if (navigation.next) {
                     setNavigation((prev) => ({
@@ -167,8 +256,6 @@ export default function Workspace({
                         next: { id: nextMaterial.id, title: nextMaterial.title, can_proceed: true },
                     }));
                 }
-
-                toast.success(t('pages.student_questions.workspace.success.description'));
             }
         } catch (error) {
             console.error('Error executing code:', error);
@@ -238,6 +325,11 @@ export default function Workspace({
         // Handle keyboard shortcuts
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.ctrlKey && e.key === 'Enter') {
+                // Prevent running code if workspace is locked and can't reattempt
+                if (isWorkspaceLocked && !canReattempt) {
+                    e.preventDefault();
+                    return;
+                }
                 handleRunCode();
             }
         };
@@ -265,6 +357,24 @@ export default function Workspace({
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, [timeSpent]);
+
+    // Real-time countdown update for workspace unlock
+    useEffect(() => {
+        if (!isWorkspaceLocked || !workspaceUnlockAt) return;
+
+        const countdownTimer = setInterval(() => {
+            const timeLeft = getTimeUntilUnlock();
+            if (!timeLeft) {
+                // Unlock time has passed, update state
+                setIsWorkspaceLocked(false);
+                setWorkspaceUnlockAt(null);
+                setCanReattempt(false);
+                clearInterval(countdownTimer);
+            }
+        }, 1000);
+
+        return () => clearInterval(countdownTimer);
+    }, [isWorkspaceLocked, workspaceUnlockAt]);
 
     return (
         <AuthenticatedLayout title={question.data.title} padding={false}>
@@ -505,6 +615,60 @@ export default function Workspace({
                     </div>
                 </div>
 
+                {/* Workspace Locked Alert */}
+                {isWorkspaceLocked && (
+                    <div className='border-b bg-destructive/10 p-4'>
+                        <Alert variant='destructive'>
+                            <Lock className='h-4 w-4' />
+                            <AlertTitle>
+                                {t('pages.student_questions.workspace.locked.title')}
+                            </AlertTitle>
+                            <AlertDescription className='mt-2'>
+                                <p className='mb-2'>
+                                    {t('pages.student_questions.workspace.locked.description')}
+                                </p>
+                                {workspaceUnlockAt && (
+                                    <div className='mb-3 flex items-center gap-2 text-sm'>
+                                        <Clock className='h-4 w-4' />
+                                        <span>
+                                            {t(
+                                                'pages.student_questions.workspace.locked.unlock_in',
+                                            )}
+                                            :{' '}
+                                            <strong>
+                                                {getTimeUntilUnlock() ||
+                                                    t(
+                                                        'pages.student_questions.workspace.locked.unlock_now',
+                                                    )}
+                                            </strong>
+                                        </span>
+                                    </div>
+                                )}
+                                {canReattempt && (
+                                    <div className='flex gap-2'>
+                                        <Button
+                                            variant='outline'
+                                            size='sm'
+                                            onClick={handleReattempt}
+                                            disabled={reattemptMutation.isPending}
+                                            className='border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground'
+                                        >
+                                            {reattemptMutation.isPending ? (
+                                                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                            ) : (
+                                                <RotateCcw className='mr-2 h-4 w-4' />
+                                            )}
+                                            {t(
+                                                'pages.student_questions.workspace.locked.reattempt',
+                                            )}
+                                        </Button>
+                                    </div>
+                                )}
+                            </AlertDescription>
+                        </Alert>
+                    </div>
+                )}
+
                 {/* Main workspace content with resizable panels */}
                 <div className='flex flex-1 overflow-hidden'>
                     {/* Question description panel - desktop */}
@@ -635,11 +799,23 @@ export default function Workspace({
                                                 headerClassName='pt-3 px-3'
                                                 headerChildren={
                                                     <Button
+                                                        title={
+                                                            isWorkspaceLocked && !canReattempt
+                                                                ? t(
+                                                                      'pages.student_questions.workspace.locked.cannot_run',
+                                                                  )
+                                                                : undefined
+                                                        }
                                                         onClick={handleRunCode}
-                                                        disabled={isCompiling}
+                                                        disabled={
+                                                            isCompiling ||
+                                                            (isWorkspaceLocked && !canReattempt)
+                                                        }
                                                     >
                                                         {isCompiling ? (
                                                             <Loader2 className='animate-spin' />
+                                                        ) : isWorkspaceLocked && !canReattempt ? (
+                                                            <Lock />
                                                         ) : (
                                                             <Redo2 />
                                                         )}
@@ -647,10 +823,15 @@ export default function Workspace({
                                                             ? t(
                                                                   'pages.student_questions.workspace.running',
                                                               )
-                                                            : t(
-                                                                  'pages.student_questions.workspace.run',
-                                                              )}
-                                                        {' (CTRL + Enter)'}
+                                                            : isWorkspaceLocked && !canReattempt
+                                                              ? t(
+                                                                    'pages.student_questions.workspace.locked.button',
+                                                                )
+                                                              : t(
+                                                                    'pages.student_questions.workspace.run',
+                                                                )}
+                                                        {(!isWorkspaceLocked || canReattempt) &&
+                                                            ' (CTRL + Enter)'}
                                                     </Button>
                                                 }
                                                 className='flex-1 overflow-x-scroll'
@@ -814,11 +995,23 @@ export default function Workspace({
                                                 headerClassName='pt-3 px-3'
                                                 headerChildren={
                                                     <Button
+                                                        title={
+                                                            isWorkspaceLocked && !canReattempt
+                                                                ? t(
+                                                                      'pages.student_questions.workspace.locked.cannot_run',
+                                                                  )
+                                                                : undefined
+                                                        }
                                                         onClick={handleRunCode}
-                                                        disabled={isCompiling}
+                                                        disabled={
+                                                            isCompiling ||
+                                                            (isWorkspaceLocked && !canReattempt)
+                                                        }
                                                     >
                                                         {isCompiling ? (
                                                             <Loader2 className='animate-spin' />
+                                                        ) : isWorkspaceLocked && !canReattempt ? (
+                                                            <Lock />
                                                         ) : (
                                                             <Redo2 />
                                                         )}
@@ -826,10 +1019,15 @@ export default function Workspace({
                                                             ? t(
                                                                   'pages.student_questions.workspace.running',
                                                               )
-                                                            : t(
-                                                                  'pages.student_questions.workspace.run',
-                                                              )}
-                                                        {' (CTRL + Enter)'}
+                                                            : isWorkspaceLocked && !canReattempt
+                                                              ? t(
+                                                                    'pages.student_questions.workspace.locked.button',
+                                                                )
+                                                              : t(
+                                                                    'pages.student_questions.workspace.run',
+                                                                )}
+                                                        {(!isWorkspaceLocked || canReattempt) &&
+                                                            ' (CTRL + Enter)'}
                                                     </Button>
                                                 }
                                             />

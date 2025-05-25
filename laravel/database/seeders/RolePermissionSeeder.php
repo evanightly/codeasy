@@ -68,6 +68,7 @@ class RolePermissionSeeder extends Seeder {
                     'learning-material',
                     'learning-material-question',
                     'learning-material-question-test-case',
+                    'student-score',
                 ])
                 ->get();
 

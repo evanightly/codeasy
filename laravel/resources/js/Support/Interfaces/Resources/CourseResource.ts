@@ -13,4 +13,6 @@ export interface CourseResource extends Resource, Course {
      * Added by backend for progress indicator in student course list.
      */
     progress_percentage?: number;
+
+    workspace_lock_timeout_days?: number;
 }

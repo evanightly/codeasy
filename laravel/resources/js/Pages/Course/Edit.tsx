@@ -11,6 +11,7 @@ import {
 } from '@/Components/UI/form';
 import { Input } from '@/Components/UI/input';
 import { Switch } from '@/Components/UI/switch';
+import WorkspaceLockTimeoutField from '@/Components/WorkspaceLockTimeoutField';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { classRoomServiceHook } from '@/Services/classRoomServiceHook';
 import { courseServiceHook } from '@/Services/courseServiceHook';
@@ -42,6 +43,7 @@ export default function Edit({ data }: Props) {
         name: z.string().min(1, t('pages.course.common.validations.name.required')),
         description: z.string().optional(),
         active: z.boolean().default(true),
+        workspace_lock_timeout_days: z.number().min(0).default(7),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -52,6 +54,7 @@ export default function Edit({ data }: Props) {
             class_room_id: data?.class_room_id?.toString() || '',
             teacher_id: data?.teacher_id?.toString() || '',
             active: data?.active ?? true,
+            workspace_lock_timeout_days: data?.workspace_lock_timeout_days ?? 7,
         },
     });
 
@@ -63,6 +66,7 @@ export default function Edit({ data }: Props) {
                 class_room_id: data?.class_room_id?.toString(),
                 teacher_id: data?.teacher_id?.toString(),
                 active: data?.active ?? true,
+                workspace_lock_timeout_days: data?.workspace_lock_timeout_days ?? 7,
             });
         }
     }, [data]);
@@ -173,6 +177,18 @@ export default function Edit({ data }: Props) {
                                     </FormItem>
                                 )}
                                 name='description'
+                                control={form.control}
+                            />
+
+                            {/* Workspace Lock Timeout field */}
+                            <FormField
+                                render={({ field }) => (
+                                    <WorkspaceLockTimeoutField
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
+                                )}
+                                name='workspace_lock_timeout_days'
                                 control={form.control}
                             />
 

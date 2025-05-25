@@ -1,11 +1,78 @@
+import { createMutation, mutationApi } from '@/Helpers';
 import { serviceHooksFactory } from '@/Services/serviceHooksFactory';
 import { ROUTES } from '@/Support/Constants/routes';
+import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
+import { IntentEnum } from '@/Support/Enums/intentEnum';
 import { StudentScoreResource } from '@/Support/Interfaces/Resources';
+import { useQuery } from '@tanstack/react-query';
+
+const baseKey = TANSTACK_QUERY_KEYS.STUDENT_SCORES;
 
 export const studentScoreServiceHook = {
     ...serviceHooksFactory<StudentScoreResource>({
         baseRoute: ROUTES.STUDENT_SCORES,
+        baseKey,
     }),
+
+    /**
+     * Reset student score for re-attempt (when workspace is unlocked)
+     */
+    useReattempt: () => {
+        return createMutation({
+            mutationFn: async (params: {
+                user_id: number;
+                learning_material_question_id: number;
+            }) => {
+                return mutationApi({
+                    method: 'post',
+                    url: route(`${ROUTES.STUDENT_SCORES}.store`),
+                    data: params,
+                    params: { intent: IntentEnum.STUDENT_SCORE_STORE_REATTEMPT },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
+        });
+    },
+
+    /**
+     * Unlock workspace for a student (teacher override)
+     */
+    useUnlockWorkspace: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number }) => {
+                return mutationApi({
+                    method: 'put',
+                    url: route(`${ROUTES.STUDENT_SCORES}.update`, params.id),
+                    params: { intent: IntentEnum.STUDENT_SCORE_UPDATE_UNLOCK_WORKSPACE },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
+        });
+    },
+
+    /**
+     * Get locked students for a course/material
+     */
+    useGetLockedStudents: (filters?: {
+        course_id?: number;
+        learning_material_id?: number;
+        user_id?: number;
+    }) => {
+        return useQuery({
+            queryKey: [baseKey, 'locked-students', filters],
+            queryFn: async () => {
+                const response = await window.axios.get(route(`${ROUTES.STUDENT_SCORES}.index`), {
+                    params: {
+                        intent: IntentEnum.STUDENT_SCORE_INDEX_LOCKED_STUDENTS,
+                        ...filters,
+                    },
+                });
+                return response.data;
+            },
+            enabled: !!filters,
+        });
+    },
+
     customFunctionExample: async () => {
         console.log('custom function');
     },

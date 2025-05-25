@@ -45,7 +45,7 @@ class StudentScoreRepository extends BaseRepository implements StudentScoreRepos
      */
     public function getCompletedQuestionsByMaterial(int $userId, int $learningMaterialId) {
         return StudentScore::where('user_id', $userId)
-            ->whereHas('question', function ($query) use ($learningMaterialId) {
+            ->whereHas('learning_material_question', function ($query) use ($learningMaterialId) {
                 $query->where('learning_material_id', $learningMaterialId);
             })
             ->where('completion_status', true)

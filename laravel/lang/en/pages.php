@@ -760,12 +760,23 @@ return [
                 'teacher' => 'Teacher',
                 'active' => 'Active Status',
                 'status' => 'Status',
+                'workspace_lock_timeout' => 'Workspace Lock Timeout',
             ],
             'placeholders' => [
                 'name' => 'Enter course name',
                 'description' => 'Enter course description',
                 'classroom' => 'Select a classroom',
                 'teacher' => 'Select a teacher',
+                'timeout_value' => 'Enter timeout value',
+            ],
+            'time_units' => [
+                'minutes' => 'Minutes',
+                'hours' => 'Hours',
+                'days' => 'Days',
+                'months' => 'Months',
+            ],
+            'help' => [
+                'workspace_lock_timeout' => 'How long students must wait before they can re-attempt after completing all questions in a material. Set to 0 to allow immediate re-attempts.',
             ],
             'validations' => [
                 'name' => [
@@ -832,6 +843,30 @@ return [
             'sections' => [
                 'information' => 'Information',
                 'learning_materials' => 'Learning Materials',
+                'locked_students' => 'Locked Students',
+            ],
+            'locked_students' => [
+                'title' => 'Locked Students Management',
+                'description' => 'Manage students whose workspaces are locked due to completing all questions in materials.',
+                'loading' => 'Loading locked students...',
+                'no_locked_students' => 'No Locked Students',
+                'no_locked_students_description' => 'There are currently no students with locked workspaces in this course.',
+                'columns' => [
+                    'student' => 'Student',
+                    'material' => 'Material',
+                    'locked_at' => 'Locked At',
+                    'unlock_at' => 'Unlock At',
+                    'status' => 'Status',
+                    'actions' => 'Actions',
+                ],
+                'status' => [
+                    'locked' => 'Locked',
+                    'can_reattempt' => 'Can Re-attempt',
+                ],
+                'actions' => [
+                    'unlock' => 'Unlock Workspace',
+                ],
+                'unlock_now' => 'Available Now',
             ],
         ],
         'import' => [
@@ -1459,6 +1494,16 @@ return [
             'view_material' => 'View Material',
             'side_by_side_view' => 'Side by Side View',
             'stacked_view' => 'Stacked View',
+            'locked' => [
+                'title' => 'Workspace Locked',
+                'description' => 'Your workspace has been locked because you completed all questions in this material. You can re-attempt after the unlock period or wait for teacher approval.',
+                'cannot_run' => 'Cannot run code while workspace is locked',
+                'button' => 'Locked',
+                'notification' => 'Workspace has been locked due to completion of all questions',
+                'unlock_in' => 'Unlocks in',
+                'unlock_now' => 'Available for unlock',
+                'reattempt' => 'Re-attempt',
+            ],
         ],
     ],
     'dashboard' => [

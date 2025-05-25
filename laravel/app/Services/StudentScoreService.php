@@ -2,13 +2,18 @@
 
 namespace App\Services;
 
+use App\Http\Resources\StudentScoreResource;
+use App\Models\LearningMaterial;
 use App\Models\LearningMaterialQuestion;
+use App\Models\StudentScore;
+use App\Repositories\StudentScoreRepository;
 use App\Support\Interfaces\Repositories\StudentScoreRepositoryInterface;
 use App\Support\Interfaces\Services\StudentScoreServiceInterface;
 use App\Traits\Services\HandlesPageSizeAll;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 
 class StudentScoreService extends BaseCrudService implements StudentScoreServiceInterface {
     use HandlesPageSizeAll;
@@ -76,7 +81,14 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
             $data['score'] = $score;
         }
 
-        return $this->update($studentScore, $data);
+        $updatedScore = $this->update($studentScore, $data);
+
+        // Check if all questions in this material are completed and lock workspace if so
+        if ($completionStatus && $updatedScore) {
+            $this->checkAndLockWorkspaceIfCompleted($userId, $questionId);
+        }
+
+        return $updatedScore;
     }
 
     /**
@@ -148,7 +160,7 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
     }
 
     /**
-     * Override update method to prevent updating completed scores
+     * Override update method to prevent updating completed scores and locked workspaces
      * TODO: review later for array_diff_key usage
      */
     public function update($keyOrModel, array $data): ?Model {
@@ -173,5 +185,173 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
         }
 
         return parent::update($keyOrModel, $data);
+    }
+
+    /**
+     * Check if all questions in a material are completed by a user
+     */
+    public function areAllQuestionsCompleted(int $userId, int $learningMaterialId): bool {
+        // Get all active questions for the learning material
+        $questions = LearningMaterialQuestion::where('learning_material_id', $learningMaterialId)
+            ->where('active', true)
+            ->get();
+
+        if ($questions->isEmpty()) {
+            return false;
+        }
+
+        // Check if all questions are completed
+        $completedCount = $this->repository->getCompletedQuestionsByMaterial($userId, $learningMaterialId);
+
+        return count($completedCount) === $questions->count();
+    }
+
+    /**
+     * Lock workspace for a user in a material
+     */
+    public function lockWorkspaceForMaterial(int $userId, int $learningMaterialId): bool {
+        // Get course to determine timeout
+        $material = LearningMaterial::with('course')->find($learningMaterialId);
+        if (!$material) {
+            return false;
+        }
+
+        $timeoutDays = $material->course->workspace_lock_timeout_days ?? 7;
+
+        // Get all student scores for this user and material
+        $studentScores = StudentScore::where('user_id', $userId)
+            ->whereHas('learning_material_question', function ($query) use ($learningMaterialId) {
+                $query->where('learning_material_id', $learningMaterialId);
+            })
+            ->get();
+
+        // Lock all scores for this material
+        foreach ($studentScores as $score) {
+            $score->lockWorkspace($timeoutDays);
+        }
+
+        return true;
+    }
+
+    /**
+     * Unlock workspace for a user in a material (teacher override)
+     */
+    public function unlockWorkspaceForMaterial(int $userId, int $learningMaterialId): bool {
+        // Get all student scores for this user and material
+        $studentScores = StudentScore::where('user_id', $userId)
+            ->whereHas('learning_material_question', function ($query) use ($learningMaterialId) {
+                $query->where('learning_material_id', $learningMaterialId);
+            })
+            ->get();
+
+        // Unlock all scores for this material
+        foreach ($studentScores as $score) {
+            $score->unlockWorkspace();
+        }
+
+        return true;
+    }
+
+    /**
+     * Get locked students for a course/material
+     */
+    public function getLockedStudents(array $filters = []): array {
+        Log::info('StudentScoreService@getLockedStudents called', [
+            'filters' => $filters,
+        ]);
+
+        $query = StudentScore::with([
+            'user',
+            'learning_material_question.learning_material.course',
+        ])
+            ->where('is_workspace_locked', true);
+
+        // Apply filters
+        if (isset($filters['course_id'])) {
+            $query->whereHas('learning_material_question.learning_material.course', function ($q) use ($filters) {
+                $q->where('id', $filters['course_id']);
+            });
+        }
+
+        if (isset($filters['learning_material_id'])) {
+            $query->whereHas('learning_material_question', function ($q) use ($filters) {
+                $q->where('learning_material_id', $filters['learning_material_id']);
+            });
+        }
+
+        if (isset($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        $lockedScores = $query->get();
+
+        Log::info('StudentScoreService@getLockedStudents found records', [
+            'count' => $lockedScores->count(),
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+        ]);
+
+        // Group by user + material to avoid duplicates
+        $groupedResults = [];
+
+        foreach ($lockedScores as $score) {
+            $userId = $score->user_id;
+            $materialId = $score->learning_material_question->learning_material_id;
+            $groupKey = "{$userId}_{$materialId}";
+
+            // Only use the first occurrence for each user+material combination
+            if (!isset($groupedResults[$groupKey])) {
+                $groupedResults[$groupKey] = $score;
+            }
+        }
+
+        // Return as StudentScoreResource collection
+        $result = StudentScoreResource::collection(array_values($groupedResults))->resolve();
+
+        Log::info('StudentScoreService@getLockedStudents result', [
+            'result_count' => count($result),
+            'grouped_from' => $lockedScores->count(),
+            'first_item' => $result[0] ?? null,
+        ]);
+
+        return $result;
+    }
+
+    /**
+     * Reset student score for re-attempt
+     */
+    public function resetForReattempt(int $userId, int $questionId): bool {
+        $studentScore = $this->repository->findByUserAndQuestion($userId, $questionId);
+
+        if (!$studentScore) {
+            return false;
+        }
+
+        // Check if re-attempt is allowed
+        if ($studentScore->isWorkspaceLocked()) {
+            throw new \Exception('Cannot reset: workspace is locked');
+        }
+
+        $studentScore->resetForReattempt();
+
+        return true;
+    }
+
+    /**
+     * Check workspace lock and automatically lock if all questions completed
+     */
+    public function checkAndLockWorkspaceIfCompleted(int $userId, int $questionId): void {
+        // Get the question and material
+        $question = LearningMaterialQuestion::find($questionId);
+        if (!$question) {
+            return;
+        }
+
+        $materialId = $question->learning_material_id;
+
+        // Check if all questions in this material are now completed
+        if ($this->areAllQuestionsCompleted($userId, $materialId)) {
+            $this->lockWorkspaceForMaterial($userId, $materialId);
+        }
     }
 }

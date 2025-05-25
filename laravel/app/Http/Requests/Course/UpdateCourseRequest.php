@@ -12,6 +12,7 @@ class UpdateCourseRequest extends FormRequest {
             'name' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'active' => 'nullable|boolean',
+            'workspace_lock_timeout_days' => 'nullable|numeric|min:0.001|max:365',
         ];
     }
 }

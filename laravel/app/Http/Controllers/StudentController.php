@@ -395,7 +395,16 @@ class StudentController extends Controller {
                         $updateData['completion_status'] = true;
                         $updateData['score'] = 100;
                         $updateData['completed_execution_result_id'] = $executionResult->id; // Store reference to the execution result that completed the question
+
+                        // Use the service's completeQuestion method to trigger workspace locking checks
+                        $this->studentScoreService->completeQuestion(
+                            $user->id,
+                            $question->id,
+                            true,
+                            100
+                        );
                     }
+                    // Just update test case metrics without completion
 
                     $this->studentScoreService->update($studentScore->id, $updateData);
                 } else {
@@ -406,6 +415,9 @@ class StudentController extends Controller {
                         'test_total' => $testCaseTotal,
                     ]);
                 }
+
+                // Refresh the student score to get latest workspace locking status
+                $studentScore->refresh();
 
                 // Process image URLs if needed
                 $processedResults = array_map(function ($item) {
@@ -425,6 +437,11 @@ class StudentController extends Controller {
                         'variable_count' => $variableCount,
                         'function_count' => $functionCount,
                     ],
+                    'workspace_locked' => $studentScore->is_workspace_locked,
+                    'workspace_locked_at' => $studentScore->workspace_locked_at?->toDateTimeString(),
+                    'workspace_unlock_at' => $studentScore->workspace_unlock_at?->toDateTimeString(),
+                    'can_reattempt' => $studentScore->can_reattempt,
+                    'completion_status' => $studentScore->completion_status,
                 ]);
             }
 

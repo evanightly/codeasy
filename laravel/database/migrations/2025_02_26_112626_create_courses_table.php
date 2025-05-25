@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('name');
             $table->text('description')->nullable();
             $table->boolean('active')->default(true);
+            $table->integer('workspace_lock_timeout_days')->default(7)->comment('Days after completion before workspace auto-unlocks');
             $table->timestamps();
         });
     }

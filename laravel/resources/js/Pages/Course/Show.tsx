@@ -10,6 +10,7 @@ import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useState } from 'react';
 import { LearningMaterials } from './LearningMaterial/Partials/LearningMaterials';
 import { CourseDetails } from './Partials/CourseDetails';
+import { LockedStudents } from './Partials/LockedStudents';
 
 interface Props {
     data: CourseResource;
@@ -49,6 +50,9 @@ export default function Show({ data: course }: Props) {
                             <TabsTrigger value='materials'>
                                 {t('pages.course.show.sections.learning_materials')}
                             </TabsTrigger>
+                            <TabsTrigger value='locked_students'>
+                                {t('pages.course.show.sections.locked_students')}
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value='details'>
                             <CourseDetails course={course} />
@@ -62,6 +66,9 @@ export default function Show({ data: course }: Props) {
                                 baseRoute={ROUTES.COURSE_LEARNING_MATERIALS}
                                 baseKey={TANSTACK_QUERY_KEYS.COURSE_LEARNING_MATERIALS}
                             />
+                        </TabsContent>
+                        <TabsContent value='locked_students'>
+                            <LockedStudents courseId={course.id} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>

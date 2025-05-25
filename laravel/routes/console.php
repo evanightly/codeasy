@@ -16,6 +16,11 @@ Schedule::command('test-cases:process')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/test-case-processing.log'));
 
+Schedule::command('workspace:unlock-expired')
+    ->hourly()
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/workspace-unlock.log'));
+
 Artisan::command('sandbox:cleanup', function () {
     $path = storage_path('app/public/visualizations');
     $files = glob($path . '/sandbox_*.png');
