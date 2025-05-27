@@ -54,4 +54,14 @@ interface StudentScoreServiceInterface extends BaseCrudServiceInterface {
      * Check workspace lock and automatically lock if all questions completed
      */
     public function checkAndLockWorkspaceIfCompleted(int $userId, int $questionId): void;
+
+    /**
+     * Mark answer as done (completed)
+     */
+    public function markAsDone(int $userId, int $questionId): bool;
+
+    /**
+     * Allow re-attempt by marking question as not completed
+     */
+    public function allowReAttempt(int $userId, int $questionId): bool;
 }

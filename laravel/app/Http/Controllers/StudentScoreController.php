@@ -96,21 +96,57 @@ class StudentScoreController extends Controller implements HasMiddleware {
     public function update(UpdateStudentScoreRequest $request, StudentScore $studentScore) {
         $intent = $request->get('intent');
 
-        if ($intent === IntentEnum::STUDENT_SCORE_UPDATE_UNLOCK_WORKSPACE->value) {
-            $userId = $studentScore->user_id;
-            $materialId = $studentScore->learning_material_question->learning_material_id;
+        switch ($intent) {
+            case IntentEnum::STUDENT_SCORE_UPDATE_UNLOCK_WORKSPACE->value:
+                $userId = $studentScore->user_id;
+                $materialId = $studentScore->learning_material_question->learning_material_id;
 
-            try {
-                $result = $this->studentScoreService->unlockWorkspaceForMaterial($userId, $materialId);
+                try {
+                    $result = $this->studentScoreService->unlockWorkspaceForMaterial($userId, $materialId);
 
-                if ($this->ajax()) {
-                    return ['success' => $result, 'message' => 'Workspace unlocked successfully'];
+                    if ($this->ajax()) {
+                        return ['success' => $result, 'message' => 'Workspace unlocked successfully'];
+                    }
+                } catch (\Exception $e) {
+                    if ($this->ajax()) {
+                        return response()->json(['error' => $e->getMessage()], 400);
+                    }
                 }
-            } catch (\Exception $e) {
-                if ($this->ajax()) {
-                    return response()->json(['error' => $e->getMessage()], 400);
+                break;
+
+            case IntentEnum::STUDENT_SCORE_UPDATE_MARK_AS_DONE->value:
+                $userId = $studentScore->user_id;
+                $questionId = $studentScore->learning_material_question_id;
+
+                try {
+                    $result = $this->studentScoreService->markAsDone($userId, $questionId);
+
+                    if ($this->ajax()) {
+                        return ['success' => $result, 'message' => 'Answer marked as done successfully'];
+                    }
+                } catch (\Exception $e) {
+                    if ($this->ajax()) {
+                        return response()->json(['error' => $e->getMessage()], 400);
+                    }
                 }
-            }
+                break;
+
+            case IntentEnum::STUDENT_SCORE_UPDATE_ALLOW_REATTEMPT->value:
+                $userId = $studentScore->user_id;
+                $questionId = $studentScore->learning_material_question_id;
+
+                try {
+                    $result = $this->studentScoreService->allowReAttempt($userId, $questionId);
+
+                    if ($this->ajax()) {
+                        return ['success' => $result, 'message' => 'Re-attempt allowed successfully'];
+                    }
+                } catch (\Exception $e) {
+                    if ($this->ajax()) {
+                        return response()->json(['error' => $e->getMessage()], 400);
+                    }
+                }
+                break;
         }
 
         if ($this->ajax()) {

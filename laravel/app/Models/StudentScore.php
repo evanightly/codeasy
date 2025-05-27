@@ -75,8 +75,7 @@ class StudentScore extends Model {
     /**
      * Check if workspace is currently locked and not expired
      */
-    public function isWorkspaceLocked(): bool
-    {
+    public function isWorkspaceLocked(): bool {
         if (!$this->is_workspace_locked) {
             return false;
         }
@@ -92,8 +91,7 @@ class StudentScore extends Model {
     /**
      * Lock the workspace for this student score
      */
-    public function lockWorkspace(int $timeoutDays = 7): void
-    {
+    public function lockWorkspace(int $timeoutDays = 7): void {
         $this->update([
             'is_workspace_locked' => true,
             'workspace_locked_at' => now(),
@@ -105,8 +103,7 @@ class StudentScore extends Model {
     /**
      * Unlock the workspace (teacher override or timeout reached)
      */
-    public function unlockWorkspace(): void
-    {
+    public function unlockWorkspace(): void {
         $this->update([
             'is_workspace_locked' => false,
             'workspace_locked_at' => null,
@@ -118,8 +115,7 @@ class StudentScore extends Model {
     /**
      * Reset for re-attempt (when unlocked)
      */
-    public function resetForReattempt(): void
-    {
+    public function resetForReattempt(): void {
         if ($this->isWorkspaceLocked()) {
             throw new \Exception('Cannot reset while workspace is locked');
         }
@@ -138,5 +134,27 @@ class StudentScore extends Model {
         // TODO: make conditional
         // Delete all execution results for this score
         $this->execution_results()->delete();
+    }
+
+    /**
+     * Mark the question as done (completed).
+     *
+     * @return bool
+     */
+    public function markAsDone(): bool
+    {
+        $this->completion_status = true;
+        return $this->save();
+    }
+
+    /**
+     * Mark the question for re-attempt (not completed).
+     *
+     * @return bool
+     */
+    public function markForReAttempt(): bool
+    {
+        $this->completion_status = false;
+        return $this->save();
     }
 }

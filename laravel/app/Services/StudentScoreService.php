@@ -166,6 +166,25 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
     public function update($keyOrModel, array $data): ?Model {
         $studentScore = $this->repository->find($keyOrModel);
 
+        // If the answer is completed (marked as done), don't allow any updates to tracking metrics
+        if ($studentScore && $studentScore->completion_status) {
+            // Filter out all tracking metrics when answer is completed
+            $data = array_diff_key($data, array_flip([
+                'coding_time',
+                'score',
+                'completion_status',
+                'trial_status',
+                'compile_count',
+                'test_case_complete_count',
+                'test_case_total_count',
+            ]));
+
+            // If there's nothing left to update, return the current model
+            if (empty($data)) {
+                return $studentScore;
+            }
+        }
+
         // If the score is already completed, don't update tracking metrics
         if ($studentScore && $studentScore->completion_status) {
             // Still allow updates for non-tracking fields if needed
@@ -353,5 +372,53 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
         if ($this->areAllQuestionsCompleted($userId, $materialId)) {
             $this->lockWorkspaceForMaterial($userId, $materialId);
         }
+    }
+
+    /**
+     * Mark answer as done (completed)
+     */
+    public function markAsDone(int $userId, int $questionId): bool {
+        $studentScore = $this->repository->findByUserAndQuestion($userId, $questionId);
+
+        if (!$studentScore) {
+            return false;
+        }
+
+        // Check if workspace is locked
+        if ($studentScore->isWorkspaceLocked()) {
+            throw new \Exception('Cannot mark as done: workspace is locked');
+        }
+
+        // Mark as done and set score to 100 if some tests passed
+        $result = $studentScore->markAsDone();
+
+        // If student has some test cases passing, set score to 100
+        if ($result && $studentScore->test_case_complete_count > 0) {
+            $studentScore->score = 100;
+            $studentScore->save();
+
+            // Check if all questions in this material are completed and lock workspace if so
+            $this->checkAndLockWorkspaceIfCompleted($userId, $questionId);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Allow re-attempt by marking question as not completed
+     */
+    public function allowReAttempt(int $userId, int $questionId): bool {
+        $studentScore = $this->repository->findByUserAndQuestion($userId, $questionId);
+
+        if (!$studentScore) {
+            return false;
+        }
+
+        // Check if workspace is locked
+        if ($studentScore->isWorkspaceLocked()) {
+            throw new \Exception('Cannot allow re-attempt: workspace is locked by teacher');
+        }
+
+        return $studentScore->markForReAttempt();
     }
 }

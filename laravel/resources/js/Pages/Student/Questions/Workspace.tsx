@@ -134,8 +134,17 @@ export default function Workspace({
     );
     const [canReattempt, setCanReattempt] = useState(tracking.can_reattempt || false);
 
+    // Answer completion state (using completion_status)
+    const [isAnswerCompleted, setIsAnswerCompleted] = useState(tracking.completion_status || false);
+    const [markAsDoneDialogOpen, setMarkAsDoneDialogOpen] = useState(false);
+    const [showMarkAsDoneButton, setShowMarkAsDoneButton] = useState(false);
+
     // Service hooks for workspace locking
     const reattemptMutation = studentScoreServiceHook.useReattempt();
+
+    // Service hooks for answer completion
+    const markAsDoneMutation = studentScoreServiceHook.useMarkAsDone();
+    const allowReAttemptMutation = studentScoreServiceHook.useAllowReAttempt();
 
     // Function to format seconds into readable time
     const formatTime = (seconds: number) => {
@@ -205,6 +214,12 @@ export default function Workspace({
     const handleRunCode = async () => {
         if (isCompiling) return;
 
+        // Check if answer is marked as done (completed)
+        if (isAnswerCompleted) {
+            toast.error(t('pages.student_questions.workspace.locked.answer_locked'));
+            return;
+        }
+
         // Check if workspace is locked
         if (isWorkspaceLocked && !canReattempt) {
             toast.error(t('pages.student_questions.workspace.locked.cannot_run'));
@@ -221,27 +236,19 @@ export default function Workspace({
 
             setOutput(response.data.output || []);
 
-            // Check for completion status
+            // Don't automatically set completion status - let student decide
+            // Just update the tracking info for test results
+            setTracking((prev) => ({
+                ...prev,
+                trial_status: true, // Mark that student has tried running code
+            }));
+
+            // Check if some tests passed to show mark as done button
             if (response.data.success) {
-                // Update the local tracking state to reflect completion
-                setTracking((prev) => ({
-                    ...prev,
-                    completion_status: true,
-                }));
+                // Show mark as done button after successful compilation (some/all tests passed)
+                setShowMarkAsDoneButton(true);
 
-                // Check if this completion causes workspace to be locked
-                if (response.data.workspace_locked) {
-                    setIsWorkspaceLocked(true);
-                    setWorkspaceUnlockAt(response.data.workspace_unlock_at);
-                    setCanReattempt(false);
-
-                    toast.success(t('pages.student_questions.workspace.success.description'));
-                    toast.info(t('pages.student_questions.workspace.locked.notification'));
-                } else {
-                    toast.success(t('pages.student_questions.workspace.success.description'));
-                }
-
-                // Enable the next button
+                // Enable the next button since they've successfully run code
                 if (navigation.next) {
                     setNavigation((prev) => ({
                         ...prev,
@@ -256,14 +263,85 @@ export default function Workspace({
                         next: { id: nextMaterial.id, title: nextMaterial.title, can_proceed: true },
                     }));
                 }
+
+                toast.success(t('pages.student_questions.workspace.success.description'));
             }
-        } catch (error) {
+
+            // Check if workspace is locked by teacher/system
+            if (response.data.workspace_locked) {
+                setIsWorkspaceLocked(true);
+                setWorkspaceUnlockAt(response.data.workspace_unlock_at);
+                setCanReattempt(false);
+                toast.info(t('pages.student_questions.workspace.locked.notification'));
+            }
+        } catch (error: any) {
             console.error('Error executing code:', error);
-            toast.error(t('pages.student_questions.workspace.error.description'));
-            setOutput([{ type: 'error', content: 'Failed to execute code' }]);
+            if (error.response?.status === 403 && error.response?.data?.completion_status) {
+                setIsAnswerCompleted(true);
+                toast.error(t('pages.student_questions.workspace.locked.answer_locked'));
+            } else {
+                toast.error(t('pages.student_questions.workspace.error.description'));
+                setOutput([{ type: 'error', content: 'Failed to execute code' }]);
+            }
         } finally {
             setIsCompiling(false);
         }
+    };
+
+    // Handle mark as done
+    const handleMarkAsDone = () => {
+        markAsDoneMutation.mutate(
+            { id: tracking.score_id },
+            {
+                onSuccess: () => {
+                    toast.success(t('pages.student_questions.workspace.mark_as_done.success'));
+                    setIsAnswerCompleted(true);
+                    setMarkAsDoneDialogOpen(false);
+                    setShowMarkAsDoneButton(false);
+                },
+                onError: () => {
+                    toast.error(t('pages.student_questions.workspace.mark_as_done.error'));
+                },
+            },
+        );
+    };
+
+    // Handle allow re-attempt
+    const handleAllowReAttempt = () => {
+        allowReAttemptMutation.mutate(
+            { id: tracking.score_id },
+            {
+                onSuccess: () => {
+                    toast.success(t('pages.student_questions.workspace.allow_reattempt.success'));
+                    // Reload the page to reset the question state
+                    window.location.reload();
+                },
+                onError: (res: any) => {
+                    toast.error(res.response?.data?.error);
+                },
+            },
+        );
+    };
+
+    // Handle navigation with mark as done dialog
+    const handleNavigationWithLockCheck = (questionId: number) => {
+        if (showMarkAsDoneButton && !isAnswerCompleted) {
+            setMarkAsDoneDialogOpen(true);
+            // Store the target question ID for after mark as done dialog
+            (window as any).pendingNavigationQuestionId = questionId;
+        } else {
+            handleNavigation(questionId);
+        }
+    };
+
+    // Proceed with navigation after mark as done dialog
+    const proceedWithNavigation = () => {
+        const targetQuestionId = (window as any).pendingNavigationQuestionId;
+        if (targetQuestionId) {
+            delete (window as any).pendingNavigationQuestionId;
+            handleNavigation(targetQuestionId);
+        }
+        setMarkAsDoneDialogOpen(false);
     };
 
     // Toggle layout between stacked and side-by-side
@@ -347,8 +425,15 @@ export default function Workspace({
 
     // Save progress when user leaves page
     useEffect(() => {
-        const handleBeforeUnload = () => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             syncTime();
+            // Show mark as done dialog if user has unlocked answer but hasn't marked it as done yet
+            if (showMarkAsDoneButton && !isAnswerCompleted) {
+                e.preventDefault();
+                e.returnValue = ''; // Required for Chrome
+                setMarkAsDoneDialogOpen(true);
+                return '';
+            }
         };
 
         window.addEventListener('beforeunload', handleBeforeUnload);
@@ -356,7 +441,7 @@ export default function Workspace({
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [timeSpent]);
+    }, [timeSpent, showMarkAsDoneButton, isAnswerCompleted]);
 
     // Real-time countdown update for workspace unlock
     useEffect(() => {
@@ -553,7 +638,9 @@ export default function Workspace({
                                     <Button
                                         variant='outline'
                                         size='sm'
-                                        onClick={() => handleNavigation(navigation.previous!.id)}
+                                        onClick={() =>
+                                            handleNavigationWithLockCheck(navigation.previous!.id)
+                                        }
                                     >
                                         <ArrowLeft className='h-4 w-4' />
                                         <span className='ml-1 hidden md:inline'>
@@ -573,7 +660,9 @@ export default function Workspace({
                                                 : undefined
                                         }
                                         size='sm'
-                                        onClick={() => handleNavigation(navigation.next!.id)}
+                                        onClick={() =>
+                                            handleNavigationWithLockCheck(navigation.next!.id)
+                                        }
                                         disabled={!navigation.next.can_proceed}
                                     >
                                         <span className='mr-1 hidden md:inline'>
@@ -798,41 +887,109 @@ export default function Workspace({
                                                 height='100%'
                                                 headerClassName='pt-3 px-3'
                                                 headerChildren={
-                                                    <Button
-                                                        title={
-                                                            isWorkspaceLocked && !canReattempt
+                                                    <div className='flex items-center gap-2'>
+                                                        <Button
+                                                            title={
+                                                                isAnswerCompleted
+                                                                    ? t(
+                                                                          'pages.student_questions.workspace.locked.answer_locked',
+                                                                      )
+                                                                    : isWorkspaceLocked &&
+                                                                        !canReattempt
+                                                                      ? t(
+                                                                            'pages.student_questions.workspace.locked.cannot_run',
+                                                                        )
+                                                                      : undefined
+                                                            }
+                                                            onClick={handleRunCode}
+                                                            disabled={
+                                                                isCompiling ||
+                                                                isAnswerCompleted ||
+                                                                (isWorkspaceLocked && !canReattempt)
+                                                            }
+                                                        >
+                                                            {isCompiling ? (
+                                                                <Loader2 className='animate-spin' />
+                                                            ) : isAnswerCompleted ? (
+                                                                <Lock />
+                                                            ) : isWorkspaceLocked &&
+                                                              !canReattempt ? (
+                                                                <Lock />
+                                                            ) : (
+                                                                <Redo2 />
+                                                            )}
+                                                            {isCompiling
                                                                 ? t(
-                                                                      'pages.student_questions.workspace.locked.cannot_run',
+                                                                      'pages.student_questions.workspace.running',
                                                                   )
-                                                                : undefined
-                                                        }
-                                                        onClick={handleRunCode}
-                                                        disabled={
-                                                            isCompiling ||
-                                                            (isWorkspaceLocked && !canReattempt)
-                                                        }
-                                                    >
-                                                        {isCompiling ? (
-                                                            <Loader2 className='animate-spin' />
-                                                        ) : isWorkspaceLocked && !canReattempt ? (
-                                                            <Lock />
-                                                        ) : (
-                                                            <Redo2 />
-                                                        )}
-                                                        {isCompiling
-                                                            ? t(
-                                                                  'pages.student_questions.workspace.running',
-                                                              )
-                                                            : isWorkspaceLocked && !canReattempt
-                                                              ? t(
-                                                                    'pages.student_questions.workspace.locked.button',
-                                                                )
-                                                              : t(
-                                                                    'pages.student_questions.workspace.run',
+                                                                : isAnswerCompleted
+                                                                  ? t(
+                                                                        'pages.student_questions.workspace.locked.answer_locked_button',
+                                                                    )
+                                                                  : isWorkspaceLocked &&
+                                                                      !canReattempt
+                                                                    ? t(
+                                                                          'pages.student_questions.workspace.locked.button',
+                                                                      )
+                                                                    : t(
+                                                                          'pages.student_questions.workspace.run',
+                                                                      )}
+                                                            {(!isWorkspaceLocked || canReattempt) &&
+                                                                !isAnswerCompleted &&
+                                                                ' (CTRL + Enter)'}
+                                                        </Button>
+
+                                                        {/* Mark as Done Button */}
+                                                        {showMarkAsDoneButton &&
+                                                            !isAnswerCompleted && (
+                                                                <Button
+                                                                    variant='outline'
+                                                                    onClick={() =>
+                                                                        setMarkAsDoneDialogOpen(
+                                                                            true,
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        markAsDoneMutation.isPending
+                                                                    }
+                                                                    className='border-green-500 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950'
+                                                                >
+                                                                    {markAsDoneMutation.isPending ? (
+                                                                        <Loader2 className='h-4 w-4 animate-spin' />
+                                                                    ) : (
+                                                                        <Check className='h-4 w-4' />
+                                                                    )}
+                                                                    <span className='ml-1 hidden md:inline'>
+                                                                        {t(
+                                                                            'pages.student_questions.workspace.mark_as_done.button',
+                                                                        )}
+                                                                    </span>
+                                                                </Button>
+                                                            )}
+
+                                                        {/* Allow Re-attempt Button */}
+                                                        {isAnswerCompleted && (
+                                                            <Button
+                                                                variant='outline'
+                                                                onClick={handleAllowReAttempt}
+                                                                disabled={
+                                                                    allowReAttemptMutation.isPending
+                                                                }
+                                                                className='border-blue-500 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950'
+                                                            >
+                                                                {allowReAttemptMutation.isPending ? (
+                                                                    <Loader2 className='h-4 w-4 animate-spin' />
+                                                                ) : (
+                                                                    <RotateCcw className='h-4 w-4' />
                                                                 )}
-                                                        {(!isWorkspaceLocked || canReattempt) &&
-                                                            ' (CTRL + Enter)'}
-                                                    </Button>
+                                                                <span className='ml-1 hidden md:inline'>
+                                                                    {t(
+                                                                        'pages.student_questions.workspace.allow_reattempt.button',
+                                                                    )}
+                                                                </span>
+                                                            </Button>
+                                                        )}
+                                                    </div>
                                                 }
                                                 className='flex-1 overflow-x-scroll'
                                             />
@@ -994,41 +1151,111 @@ export default function Workspace({
                                                 height='100%'
                                                 headerClassName='pt-3 px-3'
                                                 headerChildren={
-                                                    <Button
-                                                        title={
-                                                            isWorkspaceLocked && !canReattempt
+                                                    <div className='flex items-center gap-2'>
+                                                        <Button
+                                                            title={
+                                                                isAnswerCompleted
+                                                                    ? t(
+                                                                          'pages.student_questions.workspace.locked.answer_locked',
+                                                                      )
+                                                                    : isWorkspaceLocked &&
+                                                                        !canReattempt
+                                                                      ? t(
+                                                                            'pages.student_questions.workspace.locked.cannot_run',
+                                                                        )
+                                                                      : undefined
+                                                            }
+                                                            onClick={handleRunCode}
+                                                            disabled={
+                                                                isCompiling ||
+                                                                isAnswerCompleted ||
+                                                                (isWorkspaceLocked && !canReattempt)
+                                                            }
+                                                        >
+                                                            {isCompiling ? (
+                                                                <Loader2 className='animate-spin' />
+                                                            ) : isAnswerCompleted ? (
+                                                                <Lock />
+                                                            ) : isWorkspaceLocked &&
+                                                              !canReattempt ? (
+                                                                <Lock />
+                                                            ) : (
+                                                                <Redo2 />
+                                                            )}
+                                                            {isCompiling
                                                                 ? t(
-                                                                      'pages.student_questions.workspace.locked.cannot_run',
+                                                                      'pages.student_questions.workspace.running',
                                                                   )
-                                                                : undefined
-                                                        }
-                                                        onClick={handleRunCode}
-                                                        disabled={
-                                                            isCompiling ||
-                                                            (isWorkspaceLocked && !canReattempt)
-                                                        }
-                                                    >
-                                                        {isCompiling ? (
-                                                            <Loader2 className='animate-spin' />
-                                                        ) : isWorkspaceLocked && !canReattempt ? (
-                                                            <Lock />
-                                                        ) : (
-                                                            <Redo2 />
-                                                        )}
-                                                        {isCompiling
-                                                            ? t(
-                                                                  'pages.student_questions.workspace.running',
-                                                              )
-                                                            : isWorkspaceLocked && !canReattempt
-                                                              ? t(
-                                                                    'pages.student_questions.workspace.locked.button',
-                                                                )
-                                                              : t(
-                                                                    'pages.student_questions.workspace.run',
+                                                                : isAnswerCompleted
+                                                                  ? t(
+                                                                        'pages.student_questions.workspace.locked.answer_locked_button',
+                                                                    )
+                                                                  : isWorkspaceLocked &&
+                                                                      !canReattempt
+                                                                    ? t(
+                                                                          'pages.student_questions.workspace.locked.button',
+                                                                      )
+                                                                    : t(
+                                                                          'pages.student_questions.workspace.run',
+                                                                      )}
+                                                            {(!isWorkspaceLocked || canReattempt) &&
+                                                                !isAnswerCompleted &&
+                                                                ' (CTRL + Enter)'}
+                                                        </Button>
+
+                                                        {/* Mark as Done Button */}
+                                                        {showMarkAsDoneButton &&
+                                                            !isAnswerCompleted && (
+                                                                <Button
+                                                                    variant='outline'
+                                                                    size='sm'
+                                                                    onClick={() =>
+                                                                        setMarkAsDoneDialogOpen(
+                                                                            true,
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        markAsDoneMutation.isPending
+                                                                    }
+                                                                    className='border-green-500 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950'
+                                                                >
+                                                                    {markAsDoneMutation.isPending ? (
+                                                                        <Loader2 className='h-4 w-4 animate-spin' />
+                                                                    ) : (
+                                                                        <Check className='h-4 w-4' />
+                                                                    )}
+                                                                    <span className='ml-1 hidden md:inline'>
+                                                                        {t(
+                                                                            'pages.student_questions.workspace.mark_as_done.button',
+                                                                        )}
+                                                                    </span>
+                                                                </Button>
+                                                            )}
+
+                                                        {/* Allow Re-attempt Button */}
+                                                        {isAnswerCompleted && (
+                                                            <Button
+                                                                variant='outline'
+                                                                size='sm'
+                                                                onClick={handleAllowReAttempt}
+                                                                disabled={
+                                                                    allowReAttemptMutation.isPending
+                                                                }
+                                                                className='border-blue-500 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950'
+                                                            >
+                                                                {allowReAttemptMutation.isPending ? (
+                                                                    <Loader2 className='h-4 w-4 animate-spin' />
+                                                                ) : (
+                                                                    <RotateCcw className='h-4 w-4' />
                                                                 )}
-                                                        {(!isWorkspaceLocked || canReattempt) &&
-                                                            ' (CTRL + Enter)'}
-                                                    </Button>
+                                                                <span className='ml-1 hidden md:inline'>
+                                                                    {t(
+                                                                        'pages.student_questions.workspace.allow_reattempt.button',
+                                                                    )}
+                                                                </span>
+                                                            </Button>
+                                                        )}
+                                                    </div>
                                                 }
                                             />
                                         </div>
@@ -1167,6 +1394,73 @@ export default function Workspace({
                     </div>
                 </div>
             </div>
+
+            {/* Mark as Done Dialog */}
+            <Dialog open={markAsDoneDialogOpen} onOpenChange={setMarkAsDoneDialogOpen}>
+                <DialogContent className='sm:max-w-md'>
+                    <DialogHeader>
+                        <DialogTitle className='flex items-center gap-2'>
+                            <Check className='h-5 w-5 text-green-600' />
+                            {t('pages.student_questions.workspace.mark_as_done.dialog.title')}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {t('pages.student_questions.workspace.mark_as_done.dialog.description')}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className='space-y-4 mt-3'>
+                        <Alert>
+                            <AlertCircle  />
+                            <AlertTitle>
+                                {t(
+                                    'pages.student_questions.workspace.mark_as_done.dialog.warning_title',
+                                )}
+                            </AlertTitle>
+                            <AlertDescription>
+                                {t(
+                                    'pages.student_questions.workspace.mark_as_done.dialog.warning_description',
+                                )}
+                            </AlertDescription>
+                        </Alert>
+                        <div className='flex justify-end gap-3'>
+                            <Button
+                                variant='outline'
+                                onClick={() => {
+                                    setMarkAsDoneDialogOpen(false);
+                                    // Clear pending navigation if exists
+                                    delete (window as any).pendingNavigationQuestionId;
+                                }}
+                                disabled={markAsDoneMutation.isPending}
+                            >
+                                {t('pages.student_questions.workspace.mark_as_done.dialog.cancel')}
+                            </Button>
+                            <Button
+                                variant='outline'
+                                onClick={proceedWithNavigation}
+                                disabled={markAsDoneMutation.isPending}
+                                className='border-blue-500 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950'
+                            >
+                                {t(
+                                    'pages.student_questions.workspace.mark_as_done.dialog.continue',
+                                )}
+                            </Button>
+                            <Button
+                                onClick={handleMarkAsDone}
+                                disabled={markAsDoneMutation.isPending}
+                                className='bg-green-600 hover:bg-green-700'
+                            >
+                                {markAsDoneMutation.isPending ? (
+                                    <Loader2 className='mr-2 animate-spin' />
+                                ) : (
+                                    <Check className='mr-2' />
+                                )}
+                                {t(
+                                    'pages.student_questions.workspace.mark_as_done.dialog.mark_done',
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AuthenticatedLayout>
     );
 }

@@ -69,7 +69,39 @@ export const studentScoreServiceHook = {
                 });
                 return response.data;
             },
-            enabled: !!filters,
+            enabled: !!filters?.course_id,
+        });
+    },
+
+    /**
+     * Mark answer as done (completed)
+     */
+    useMarkAsDone: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number }) => {
+                return mutationApi({
+                    method: 'put',
+                    url: route(`${ROUTES.STUDENT_SCORES}.update`, params.id),
+                    params: { intent: IntentEnum.STUDENT_SCORE_UPDATE_MARK_AS_DONE },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
+        });
+    },
+
+    /**
+     * Allow re-attempt by marking question as not completed
+     */
+    useAllowReAttempt: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number }) => {
+                return mutationApi({
+                    method: 'put',
+                    url: route(`${ROUTES.STUDENT_SCORES}.update`, params.id),
+                    params: { intent: IntentEnum.STUDENT_SCORE_UPDATE_ALLOW_REATTEMPT },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
         });
     },
 

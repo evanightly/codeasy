@@ -86,7 +86,7 @@ class RolePermissionSeeder extends Seeder {
         if ($role) {
             // Student permissions
             $permissions = Permission::query()
-                ->whereIn('group', ['subject', 'exam', 'result'])
+                ->whereIn('group', ['subject', 'exam', 'result', 'student-score'])
                 ->get();
 
             $this->assignPermissionsToRole($role, $permissions);

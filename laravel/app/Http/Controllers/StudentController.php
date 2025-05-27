@@ -296,12 +296,17 @@ class StudentController extends Controller {
 
         $testCases = $question->learning_material_question_test_cases()->where('active', true)->get();
 
-        // If question is already completed, just execute the code without updating tracking data
-        if (!$studentScore->completion_status) {
-            // Increment compile count only if not completed
-            $studentScore->compile_count = (int) ($studentScore->compile_count ?? 0) + 1;
-            $studentScore->save();
+        // If question is already completed and marked as done, don't allow further compilation
+        if ($studentScore->completion_status) {
+            return response()->json([
+                'error' => 'Question is already completed and marked as done',
+                'already_completed' => true,
+            ], 403);
         }
+
+        // Increment compile count
+        $studentScore->compile_count = (int) ($studentScore->compile_count ?? 0) + 1;
+        $studentScore->save();
 
         // Record the execution attempt - we'll create an ExecutionResult regardless of completion status
         // This allows students to keep experimenting with code even after completing the question
@@ -384,27 +389,17 @@ class StudentController extends Controller {
                         'test_case_total_count' => $testCaseTotal,
                     ]);
 
-                    // Update student score with test case metrics
+                    // Update student score with test case metrics only (no automatic completion)
                     $updateData = [
                         'test_case_complete_count' => $testCaseSuccess,
                         'test_case_total_count' => $testCaseTotal,
                     ];
 
-                    // Update completion status if tests passed
+                    // If some tests passed, also store the completed execution result reference
+                    // but don't automatically mark as completed - let student decide
                     if ($somePassed) {
-                        $updateData['completion_status'] = true;
-                        $updateData['score'] = 100;
-                        $updateData['completed_execution_result_id'] = $executionResult->id; // Store reference to the execution result that completed the question
-
-                        // Use the service's completeQuestion method to trigger workspace locking checks
-                        $this->studentScoreService->completeQuestion(
-                            $user->id,
-                            $question->id,
-                            true,
-                            100
-                        );
+                        $updateData['completed_execution_result_id'] = $executionResult->id;
                     }
-                    // Just update test case metrics without completion
 
                     $this->studentScoreService->update($studentScore->id, $updateData);
                 } else {
