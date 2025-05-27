@@ -105,6 +105,23 @@ export const studentScoreServiceHook = {
         });
     },
 
+    /**
+     * Allow re-attempt for all questions in a material
+     */
+    useAllowReAttemptAll: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number; material_id: number }) => {
+                return mutationApi({
+                    method: 'put',
+                    url: route(`${ROUTES.STUDENT_SCORES}.update`, params.id),
+                    data: { material_id: params.material_id },
+                    params: { intent: IntentEnum.STUDENT_SCORE_UPDATE_ALLOW_REATTEMPT_ALL },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
+        });
+    },
+
     customFunctionExample: async () => {
         console.log('custom function');
     },

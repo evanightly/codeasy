@@ -265,6 +265,7 @@ The intent system routes specific business logic through generic CRUD endpoints:
 18. If you wanna add frontend code, please learn from the existing code, and please use the same pattern as the existing code, so it will not break the existing code and maintain the consistency
 19. Do not run laravel test because it will reset existing database
 20. Do not run anything that will resulting code generation stuck like doing ./dc.sh shell laravel
+21. Do not run build, because those process will stuck
 
 ## Crucial Notes
 Warning: above all circumstances, do not remove the old code, your job is to implement a feature, not modify the entire codebase, **this is always happening at all times.**

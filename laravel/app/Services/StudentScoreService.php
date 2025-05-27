@@ -421,4 +421,38 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
 
         return $studentScore->markForReAttempt();
     }
+
+    /**
+     * Allow re-attempt for all questions in a material
+     * TODO: do we need to delete all student scores for this material?
+     */
+    public function allowReAttemptAllQuestions(int $userId, int $materialId): bool {
+        // Get all student scores for this user and material
+        $studentScores = StudentScore::where('user_id', $userId)
+            ->whereHas('learning_material_question', function ($query) use ($materialId) {
+                $query->where('learning_material_id', $materialId);
+            })
+            ->get();
+
+        if ($studentScores->isEmpty()) {
+            return false;
+        }
+
+        // Check if any workspace is locked
+        foreach ($studentScores as $score) {
+            if ($score->isWorkspaceLocked()) {
+                throw new \Exception('Cannot allow re-attempt: workspace is locked by teacher');
+            }
+        }
+
+        // Mark all questions for re-attempt
+        $successCount = 0;
+        foreach ($studentScores as $score) {
+            if ($score->markForReAttempt()) {
+                $successCount++;
+            }
+        }
+
+        return $successCount > 0;
+    }
 }

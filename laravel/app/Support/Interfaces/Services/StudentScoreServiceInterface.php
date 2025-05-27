@@ -64,4 +64,9 @@ interface StudentScoreServiceInterface extends BaseCrudServiceInterface {
      * Allow re-attempt by marking question as not completed
      */
     public function allowReAttempt(int $userId, int $questionId): bool;
+
+    /**
+     * Allow re-attempt for all questions in a material
+     */
+    public function allowReAttemptAllQuestions(int $userId, int $materialId): bool;
 }

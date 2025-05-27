@@ -19,9 +19,22 @@ class UpdateStudentScoreRequest extends FormRequest {
             'trial_status' => ['nullable', 'boolean'],
         ];
 
-        if ($intent === IntentEnum::STUDENT_SCORE_UPDATE_UNLOCK_WORKSPACE->value) {
-            // For workspace unlock, no additional fields are required beyond the route model
-            $rules = [];
+        switch ($intent) {
+            case IntentEnum::STUDENT_SCORE_UPDATE_UNLOCK_WORKSPACE->value:
+                // For workspace unlock, no additional fields are required beyond the route model
+                $rules = [];
+                break;
+
+            case IntentEnum::STUDENT_SCORE_UPDATE_ALLOW_REATTEMPT_ALL->value:
+                // For bulk re-attempt, we need the material_id
+                $rules = [
+                    'material_id' => ['required', 'exists:learning_materials,id'],
+                ];
+                break;
+
+            default:
+                // code...
+                break;
         }
 
         return $rules;

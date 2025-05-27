@@ -1529,6 +1529,19 @@ return [
                 'success' => 'Re-attempt allowed successfully! The page will refresh.',
                 'error' => 'Failed to allow re-attempt. Please try again.',
             ],
+            'allow_reattempt_all' => [
+                'button' => 'Re-attempt All Questions',
+                'success' => 'Re-attempt allowed for all questions successfully! The page will refresh.',
+                'error' => 'Failed to allow re-attempt for all questions. Please try again.',
+                'dialog' => [
+                    'title' => 'Re-attempt All Questions',
+                    'description' => 'Are you sure you want to reset all questions in this material for re-attempt? This will mark all completed questions as not done.',
+                    'warning_title' => 'Important Notice',
+                    'warning_description' => 'This action will reset the completion status of all questions in this material.',
+                    'cancel' => 'Cancel',
+                    'confirm' => 'Re-attempt All',
+                ],
+            ],
         ],
     ],
     'dashboard' => [

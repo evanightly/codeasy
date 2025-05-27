@@ -1,3 +1,4 @@
+import ReAttemptAllDialog from '@/Components/Student/Materials/ReAttemptAllDialog';
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
@@ -137,9 +138,17 @@ export default function Show({ course, material, progress, nextMaterial }: Props
 
                     {/* Questions list */}
                     <div className='space-y-4'>
-                        <h2 className='text-xl font-semibold'>
-                            {t('pages.student_materials.show.questions')}
-                        </h2>
+                        <div className='flex items-center justify-between'>
+                            <h2 className='text-xl font-semibold'>
+                                {t('pages.student_materials.show.questions')}
+                            </h2>
+
+                            <ReAttemptAllDialog
+                                material={material.data}
+                                hasCompletedQuestions={progress.questions.some((q) => q.completed)}
+                                firstQuestionId={progress.questions[0]?.id}
+                            />
+                        </div>
 
                         {progress.questions.map((question) => (
                             <div

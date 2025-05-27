@@ -147,6 +147,23 @@ class StudentScoreController extends Controller implements HasMiddleware {
                     }
                 }
                 break;
+
+            case IntentEnum::STUDENT_SCORE_UPDATE_ALLOW_REATTEMPT_ALL->value:
+                $userId = $studentScore->user_id;
+                $materialId = $request->validated()['material_id'];
+
+                try {
+                    $result = $this->studentScoreService->allowReAttemptAllQuestions($userId, $materialId);
+
+                    if ($this->ajax()) {
+                        return ['success' => $result, 'message' => 'Re-attempt allowed for all questions successfully'];
+                    }
+                } catch (\Exception $e) {
+                    if ($this->ajax()) {
+                        return response()->json(['error' => $e->getMessage()], 400);
+                    }
+                }
+                break;
         }
 
         if ($this->ajax()) {

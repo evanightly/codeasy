@@ -243,6 +243,19 @@ return [
                 'success' => 'Percobaan ulang berhasil diizinkan! Halaman akan di-refresh.',
                 'error' => 'Gagal mengizinkan percobaan ulang. Silakan coba lagi.',
             ],
+            'allow_reattempt_all' => [
+                'button' => 'Coba Lagi Semua Soal',
+                'success' => 'Percobaan ulang untuk semua soal berhasil diizinkan! Halaman akan di-refresh.',
+                'error' => 'Gagal mengizinkan percobaan ulang untuk semua soal. Silakan coba lagi.',
+                'dialog' => [
+                    'title' => 'Coba Lagi Semua Soal',
+                    'description' => 'Apakah Anda yakin ingin mereset semua soal dalam materi ini untuk dicoba lagi? Ini akan menandai semua soal yang telah selesai menjadi belum selesai.',
+                    'warning_title' => 'Pemberitahuan Penting',
+                    'warning_description' => 'Tindakan ini akan mereset status penyelesaian semua soal dalam materi ini.',
+                    'cancel' => 'Batal',
+                    'confirm' => 'Coba Lagi Semua',
+                ],
+            ],
         ],
     ],
 ];
