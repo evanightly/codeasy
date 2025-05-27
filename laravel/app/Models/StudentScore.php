@@ -138,23 +138,19 @@ class StudentScore extends Model {
 
     /**
      * Mark the question as done (completed).
-     *
-     * @return bool
      */
-    public function markAsDone(): bool
-    {
+    public function markAsDone(): bool {
         $this->completion_status = true;
+
         return $this->save();
     }
 
     /**
      * Mark the question for re-attempt (not completed).
-     *
-     * @return bool
      */
-    public function markForReAttempt(): bool
-    {
+    public function markForReAttempt(): bool {
         $this->completion_status = false;
+
         return $this->save();
     }
 }

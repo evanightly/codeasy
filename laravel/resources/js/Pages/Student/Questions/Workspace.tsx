@@ -1407,9 +1407,9 @@ export default function Workspace({
                             {t('pages.student_questions.workspace.mark_as_done.dialog.description')}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className='space-y-4 mt-3'>
+                    <div className='mt-3 space-y-4'>
                         <Alert>
-                            <AlertCircle  />
+                            <AlertCircle />
                             <AlertTitle>
                                 {t(
                                     'pages.student_questions.workspace.mark_as_done.dialog.warning_title',

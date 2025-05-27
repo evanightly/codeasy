@@ -23,7 +23,7 @@ export function LockedStudents({ courseId }: Props) {
 
     // Service hooks
     const getLockedStudentsQuery = studentScoreServiceHook.useGetLockedStudents({
-        course_id: courseId
+        course_id: courseId,
     });
     const unlockWorkspaceMutation = studentScoreServiceHook.useUnlockWorkspace();
 
