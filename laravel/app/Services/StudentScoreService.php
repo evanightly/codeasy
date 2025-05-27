@@ -18,6 +18,13 @@ use Illuminate\Support\Facades\Log;
 class StudentScoreService extends BaseCrudService implements StudentScoreServiceInterface {
     use HandlesPageSizeAll;
 
+    /**
+     * Configuration: Whether to delete student scores completely during bulk re-attempt
+     * Set to true to delete all scores (complete reset)
+     * Set to false to mark questions for re-attempt (preserve attempt history)
+     */
+    public static bool $deleteScoresOnBulkReAttempt = false;
+
     public function getAllPaginated(array $search = [], int $pageSize = 15): LengthAwarePaginator {
         $this->handlePageSizeAll();
 
@@ -424,7 +431,9 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
 
     /**
      * Allow re-attempt for all questions in a material
-     * TODO: do we need to delete all student scores for this material?
+     * Behavior controlled by static::$deleteScoresOnBulkReAttempt:
+     * - true: Delete all student scores completely (full reset)
+     * - false: Mark questions for re-attempt (preserve attempt history)
      */
     public function allowReAttemptAllQuestions(int $userId, int $materialId): bool {
         // Get all student scores for this user and material
@@ -445,7 +454,18 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
             }
         }
 
-        // Mark all questions for re-attempt
+        if (static::$deleteScoresOnBulkReAttempt) {
+            // Option 1: Delete all student scores completely (full reset)
+            $deletedCount = 0;
+            foreach ($studentScores as $score) {
+                if ($score->delete()) {
+                    $deletedCount++;
+                }
+            }
+
+            return $deletedCount > 0;
+        }
+        // Option 2: Mark all questions for re-attempt (preserve attempt history)
         $successCount = 0;
         foreach ($studentScores as $score) {
             if ($score->markForReAttempt()) {
