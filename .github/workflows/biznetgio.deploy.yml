@@ -123,13 +123,6 @@ jobs:
               }
             }' > ~/.docker/config.json
             chmod 600 ~/.docker/config.json
-            # Verify Docker auth and config
-            echo "Testing Docker configuration..."
-            if ! cat ~/.docker/config.json | jq . > /dev/null 2>&1; then
-              echo "Error: Invalid JSON in config file"
-              cat ~/.docker/config.json
-              exit 1
-            fi
             # Test Docker pull
             if ! docker pull ghcr.io/$GITHUB_ACTOR/codeasy-prod-laravel-image:latest; then
               echo "Error: Failed to pull image"
