@@ -64,7 +64,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.BIZNETGIO_CODEASY_PROD_LARAVEL_IMAGE_PAT }}
+          password: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
       - name: Test GHCR Access
         run: |
           echo "Testing GHCR authentication..."
@@ -93,7 +93,7 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.BIZNETGIO_SSH_HOST }}
           SSH_USERNAME: ${{ secrets.BIZNETGIO_SSH_USERNAME }}
-          CR_PAT: ${{ secrets.BIZNETGIO_CODEASY_PROD_LARAVEL_IMAGE_PAT }}
+          CR_PAT: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
