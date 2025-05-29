@@ -132,8 +132,8 @@ jobs:
             # Install Git LFS if not already installed
             if ! command -v git-lfs &> /dev/null; then
               echo "Installing Git LFS..."
-              apt-get update && apt-get install -y git-lfs || \
-              (curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install -y git-lfs)
+              sudo apt-get update && sudo apt-get install -y git-lfs || \
+              (curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get install -y git-lfs)
               git lfs install
             fi
             # Clone or update repository with LFS support
