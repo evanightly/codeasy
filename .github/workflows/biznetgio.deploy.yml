@@ -118,7 +118,7 @@ jobs:
             echo '{
               "auths": {
                 "ghcr.io": {
-                  "auth": "'${DOCKER_CONFIG}'"
+                  "auth": "${DOCKER_CONFIG}"
                 }
               }
             }' > ~/.docker/config.json
