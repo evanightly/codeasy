@@ -1,5 +1,7 @@
-name: Deploy to Production
+# Hostinger deploy workflow (DISABLED)
+# This workflow is now disabled. Use biznetgio.deploy.yml for production deploys.
 
+name: Deploy to Production (Hostinger - DISABLED)
 # on:
 #   push:
 #     branches: [main]
@@ -11,39 +13,30 @@ jobs:
     defaults:
       run:
         working-directory: ./laravel
-
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-
       - name: Install PHP dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
       - name: Run Pint Fix
         run: ./vendor/bin/pint
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: './laravel/package-lock.json'
-
       - name: Install Node.js dependencies
         run: npm install -D
-
       - name: Run NPM Lint
         run: npm run lint
-
       - name: Run Prettier
         run: npm run prettier
-
       - name: Check for changes
         working-directory: .
         run: |
@@ -58,7 +51,6 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   build-and-push:
     name: Build & Push Docker Image
     needs: codefixing
@@ -67,28 +59,23 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
         with:
-          lfs: true  # Enable Git LFS during checkout
-
+          lfs: true
       - name: Login to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
-
       - name: Test GHCR Access
         run: |
           echo "Testing GHCR authentication..."
           docker pull ghcr.io/${{ github.repository_owner }}/codeasy-prod-laravel-image:latest || true
-
       - name: Build & Push Docker Image
         run: |
           docker build \
             -t ghcr.io/${{ github.repository_owner }}/codeasy-prod-laravel-image:latest \
             -f docker/laravel.prod.Dockerfile .
-
           docker push ghcr.io/${{ github.repository_owner }}/codeasy-prod-laravel-image:latest
-
   deploy:
     name: Deploy to VPS
     needs: build-and-push
@@ -98,12 +85,10 @@ jobs:
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: Add SSH Known Hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
       - name: Deploy to VPS
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -114,23 +99,19 @@ jobs:
         run: |
           # Create the Docker config content
           DOCKER_CONFIG=$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)
-          
           # Deploy using SSH with heredoc (remove quotes from ENDSSH to allow variable expansion)
           ssh $SSH_USERNAME@$SSH_HOST bash -s << ENDSSH
             set -ex
-            
             # Setup Docker authentication
             mkdir -p ~/.docker
             echo '{
               "auths": {
                 "ghcr.io": {
-                  "auth": "${DOCKER_CONFIG}"
+                  "auth": "'${DOCKER_CONFIG}'"
                 }
               }
             }' > ~/.docker/config.json
-            
             chmod 600 ~/.docker/config.json
-
             # Verify Docker auth and config
             echo "Testing Docker configuration..."
             if ! cat ~/.docker/config.json | jq . > /dev/null 2>&1; then
@@ -138,14 +119,12 @@ jobs:
               cat ~/.docker/config.json
               exit 1
             fi
-
             # Test Docker pull
             if ! docker pull ghcr.io/$GITHUB_ACTOR/codeasy-prod-laravel-image:latest; then
               echo "Error: Failed to pull image"
               cat ~/.docker/config.json
               exit 1
             fi
-
             # Install Git LFS if not already installed
             if ! command -v git-lfs &> /dev/null; then
               echo "Installing Git LFS..."
@@ -153,7 +132,6 @@ jobs:
               (curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install -y git-lfs)
               git lfs install
             fi
-
             # Clone or update repository with LFS support
             if [ ! -d "codeasy/.git" ]; then
               # Fresh clone with LFS
@@ -169,18 +147,14 @@ jobs:
               git reset --hard origin/main
               git lfs pull
             fi
-
             # Setup environment
             echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env
-
             # Deploy with Docker Compose
             docker compose -f docker-compose.prod.yml down || true
 
             # Prune old images, containers, volumes
             docker system prune -af
-
             docker compose --env-file laravel/.env -f docker-compose.prod.yml pull
             docker compose --env-file laravel/.env -f docker-compose.prod.yml up -d
-
             echo "Deployment completed successfully!"
           ENDSSH
