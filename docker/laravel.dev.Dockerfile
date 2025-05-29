@@ -38,7 +38,15 @@ RUN { \
 
 WORKDIR /var/www/html
 
+# Copy entrypoint script only (do not copy app code, as code is mounted via volume in dev)
+COPY ./docker/entrypoint/laravel-dev-entrypoint.sh /usr/local/bin/laravel-dev-entrypoint.sh
+RUN chmod +x /usr/local/bin/laravel-dev-entrypoint.sh
+
+# Set entrypoint
+ENTRYPOINT ["/usr/local/bin/laravel-dev-entrypoint.sh"]
+
 # Expose dev ports
 EXPOSE 9001 9002
 
+# Default command (can be overridden by docker-compose)
 CMD ["php-fpm", "-F"]
