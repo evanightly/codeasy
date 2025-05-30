@@ -248,12 +248,15 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                 continue;
             }
 
-            // Generate recommendations based on raw data
-            $recommendations = $this->generateRecommendations($classification['raw_data']);
-
-            // Add recommendations to raw data
+            // Use recommendations from FastAPI response instead of generating locally
             $rawData = $classification['raw_data'];
-            $rawData['recommendations'] = $recommendations;
+
+            // Check if FastAPI already provided recommendations
+            if (!isset($rawData['recommendations']) || empty($rawData['recommendations'])) {
+                // Fallback to local generation only if FastAPI didn't provide recommendations
+                $recommendations = $this->generateRecommendations($rawData);
+                $rawData['recommendations'] = $recommendations;
+            }
 
             $userData = [
                 'user_id' => $userId,
