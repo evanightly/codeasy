@@ -241,9 +241,15 @@ export function MaterialClassificationDetails({
                                     </tr>
                                     <tr className='border-b text-xs'>
                                         <th className='py-1 text-left'></th>
-                                        <th className='py-1 text-center text-destructive'>Cost ↓</th>
-                                        <th className='py-1 text-center text-destructive'>Cost ↓</th>
-                                        <th className='py-1 text-center text-destructive'>Cost ↓</th>
+                                        <th className='py-1 text-center text-destructive'>
+                                            Cost ↓
+                                        </th>
+                                        <th className='py-1 text-center text-destructive'>
+                                            Cost ↓
+                                        </th>
+                                        <th className='py-1 text-center text-destructive'>
+                                            Cost ↓
+                                        </th>
                                         <th className='py-1 text-center text-success'>Benefit ↑</th>
                                         <th className='py-1 text-center text-success'>Benefit ↑</th>
                                         <th className='py-1 text-center text-success'>Benefit ↑</th>
