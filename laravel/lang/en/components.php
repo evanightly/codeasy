@@ -142,7 +142,4 @@ return [
         'description' => 'Click an example to insert it into the input field.',
         'docs_link' => 'Python unittest documentation',
     ],
-    'pdf_viewer' => [
-        'document' => 'Document',
-    ],
 ];
