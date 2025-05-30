@@ -453,8 +453,6 @@ async def classify_students(request: ClassificationRequest):
 # Function to generate recommendations based on metrics
 def generate_recommendations(raw_metrics, level, score):
     recommendations = []
-    priority_recommendations = []
-    general_recommendations = []
     
     # Define thresholds for different metrics
     thresholds = {
@@ -465,104 +463,56 @@ def generate_recommendations(raw_metrics, level, score):
         'test_case_completion_rate': {'low': 0.6, 'high': 0.9} # 60% to 90% completion rate
     }
     
-    # Calculate overall metrics to identify the most critical areas
-    total_questions = len(raw_metrics)
-    incomplete_questions = sum(1 for m in raw_metrics if m['completion_status'] == 0)
-    avg_variables = sum(m['variable_count'] for m in raw_metrics) / max(1, total_questions)
-    avg_functions = sum(m['function_count'] for m in raw_metrics) / max(1, total_questions)
-    avg_compile_count = sum(m['compile_count'] for m in raw_metrics) / max(1, total_questions)
-    avg_coding_time = sum(m['coding_time'] for m in raw_metrics) / max(1, total_questions)
-    
-    # Count questions with poor test case performance
-    poor_test_performance = [m for m in raw_metrics if m.get('test_case_completion_rate', 1) < thresholds['test_case_completion_rate']['low']]
-    
-    # Priority 1: Incomplete questions (highest priority)
-    incomplete_count = 0
-    for metrics in raw_metrics:
-        if metrics['completion_status'] == 0 and incomplete_count < 2:  # Limit to 2 incomplete question warnings
-            question_name = metrics.get('question_name', f"Question {metrics.get('order_number', 0)}")
-            priority_recommendations.append(f"Complete '{question_name}' to improve your overall score.")
-            incomplete_count += 1
-    
-    # Priority 2: Test case performance issues
-    if poor_test_performance:
-        for metrics in poor_test_performance[:2]:  # Limit to 2 test case recommendations
-            question_name = metrics.get('question_name', f"Question {metrics.get('order_number', 0)}")
+    # Analyze each question's metrics and provide targeted recommendations
+    for i, metrics in enumerate(raw_metrics):
+        question_num = metrics.get('order_number', i + 1)
+        question_name = metrics.get('question_name', f"Question {question_num}")
+        
+        # Check completion status first
+        if metrics['completion_status'] == 0:
+            recommendations.append(f"Complete '{question_name}' to improve your overall score.")
+            continue
+            
+        # Check variable usage
+        if metrics['variable_count'] < thresholds['variable_count']['low']:
+            recommendations.append(f"In '{question_name}', try to use more variables to better organize your code.")
+        
+        # Check function usage
+        if metrics['function_count'] < thresholds['function_count']['low']:
+            recommendations.append(f"Consider breaking down your solution for '{question_name}' into more functions for better modularity.")
+        
+        # Check compile count
+        if metrics['compile_count'] > thresholds['compile_count']['high']:
+            recommendations.append(f"You compiled your code {metrics['compile_count']} times for '{question_name}'. Try to review your code more carefully before compiling.")
+        
+        # Check coding time
+        if metrics['coding_time'] > thresholds['coding_time']['high']:
+            recommendations.append(f"You spent {metrics['coding_time']} minutes on '{question_name}'. Try to improve your problem-solving speed with more practice.")
+        
+        # Check test case completion rate
+        if 'test_case_completion_rate' in metrics and metrics['test_case_completion_rate'] < thresholds['test_case_completion_rate']['low']:
             test_complete = metrics.get('test_case_complete_count', 0)
             test_total = metrics.get('test_case_total_count', 0)
             if test_total > 0:
-                rate_percentage = int((test_complete / test_total) * 100)
-                priority_recommendations.append(f"'{question_name}': Your test case success rate is {rate_percentage}% ({test_complete}/{test_total}). Focus on improving your solution logic.")
+                recommendations.append(f"Your test case passing rate for '{question_name}' is only {test_complete}/{test_total}. Focus on improving your solution to pass more test cases.")
     
-    # Priority 3: Extreme coding time issues
-    high_time_questions = [m for m in raw_metrics if m['coding_time'] > thresholds['coding_time']['high']]
-    if high_time_questions:
-        # Find the question with the highest coding time
-        max_time_question = max(high_time_questions, key=lambda x: x['coding_time'])
-        question_name = max_time_question.get('question_name', f"Question {max_time_question.get('order_number', 0)}")
-        coding_time = max_time_question['coding_time']
-        priority_recommendations.append(f"'{question_name}': You spent {coding_time:.1f} minutes on this question. Try to improve your problem-solving efficiency with more practice.")
-    
-    # Priority 4: Excessive compilation attempts
-    high_compile_questions = [m for m in raw_metrics if m['compile_count'] > thresholds['compile_count']['high']]
-    if high_compile_questions:
-        # Find the question with the highest compile count
-        max_compile_question = max(high_compile_questions, key=lambda x: x['compile_count'])
-        question_name = max_compile_question.get('question_name', f"Question {max_compile_question.get('order_number', 0)}")
-        compile_count = max_compile_question['compile_count']
-        priority_recommendations.append(f"'{question_name}': You compiled {compile_count} times. Try to review your code more carefully before testing to reduce debugging time.")
-    
-    # General improvement areas (only add if not too many priority issues)
-    if len(priority_recommendations) < 4:
-        # Code structure recommendations (only if it's a consistent pattern)
-        if avg_variables < thresholds['variable_count']['low']:
-            general_recommendations.append("Consider using more variables to organize your code better and make it more readable.")
-        
-        if avg_functions < thresholds['function_count']['low']:
-            general_recommendations.append("Try breaking down complex problems into smaller functions for better code modularity.")
-        
-        # Add coding efficiency recommendations
-        if avg_compile_count > (thresholds['compile_count']['high'] * 0.7):  # 70% of high threshold
-            general_recommendations.append("Work on writing more accurate code on the first try to reduce the number of compilation attempts.")
-        
-        if avg_coding_time > (thresholds['coding_time']['high'] * 0.7):  # 70% of high threshold
-            general_recommendations.append("Practice more coding problems to improve your problem-solving speed and efficiency.")
-    
-    # Combine priority and general recommendations
-    recommendations.extend(priority_recommendations)
-    
-    # Add general recommendations if we have space
-    remaining_slots = 5 - len(recommendations)
-    if remaining_slots > 0:
-        recommendations.extend(general_recommendations[:remaining_slots - 1])  # Leave space for level-based recommendation
-    
-    # Add cognitive level-based recommendation (always include this)
-    level_recommendation = ""
+    # Add general recommendation based on the cognitive level
     if level == "Remember":
-        level_recommendation = "Focus on understanding basic programming concepts and syntax before proceeding to more complex tasks."
+        recommendations.append("Focus on understanding basic concepts before proceeding to more complex tasks.")
     elif level == "Understand":
-        level_recommendation = "Work on understanding the underlying principles of programming concepts rather than just memorizing syntax."
+        recommendations.append("Try to not just memorize, but understand the underlying principles of the code you write.")
     elif level == "Apply":
-        level_recommendation = "Practice applying your programming knowledge to solve different types of problems."
+        recommendations.append("Practice applying your knowledge in different contexts to strengthen your skills.")
     elif level == "Analyze":
-        level_recommendation = "Develop your ability to break down complex problems into smaller, manageable components."
+        recommendations.append("Work on breaking down complex problems into smaller, manageable parts.")
     elif level == "Evaluate":
-        level_recommendation = "Challenge yourself by comparing different solution approaches and evaluating their effectiveness."
+        recommendations.append("Challenge yourself by evaluating different approaches to the same problem.")
     elif level == "Create":
-        level_recommendation = "Excellent cognitive level! Continue developing your creative problem-solving and optimization skills."
+        recommendations.append("Excellent work! Continue developing your creative problem-solving skills.")
     
-    if level_recommendation and len(recommendations) < 5:
-        recommendations.append(level_recommendation)
-    
-    # Ensure we don't exceed 5 recommendations
-    recommendations = recommendations[:5]
-    
-    # If we have very few recommendations, add some encouraging general advice
-    if len(recommendations) < 3:
-        if len(recommendations) < 5:
-            recommendations.append("Keep practicing regularly to strengthen your programming fundamentals.")
-        if len(recommendations) < 5:
-            recommendations.append("Consider reviewing programming best practices and coding standards.")
+    # Limit to 5 most important recommendations to avoid overwhelming the student
+    if len(recommendations) > 5:
+        recommendations = recommendations[:5]
     
     return recommendations
 
