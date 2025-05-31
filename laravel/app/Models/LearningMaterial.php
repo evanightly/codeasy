@@ -26,6 +26,7 @@ class LearningMaterial extends Model {
     ];
     protected $appends = [
         'file_url',
+        'full_file_url', // appended attribute for full PDF URL
     ];
 
     public function getFileUrlAttribute() {
@@ -34,6 +35,17 @@ class LearningMaterial extends Model {
         }
 
         return asset('storage/learning-materials/' . $this->file);
+    }
+
+    // Add accessor for full PDF version URL
+    public function getFullFileUrlAttribute() {
+        if (empty($this->file) || empty($this->file_extension)) {
+            return null;
+        }
+        $baseName = pathinfo($this->file, PATHINFO_FILENAME);
+        $fullName = $baseName . '_full.' . $this->file_extension;
+
+        return asset('storage/learning-materials/' . $fullName);
     }
 
     public function course(): BelongsTo {

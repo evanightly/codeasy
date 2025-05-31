@@ -1057,6 +1057,7 @@ return [
             ],
             'file_info' => 'File: :name (:extension)',
             'view_file' => 'View File',
+            'full_pdf_link' => 'View Full PDF',
         ],
     ],
     'learning_material_question' => [

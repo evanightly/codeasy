@@ -47,6 +47,20 @@ export const LearningMaterialDetails = ({ material, course }: LearningMaterialDe
                                 filename={`${material.title}.${material.file_extension}`}
                                 className='mt-2'
                             />
+                            {material.full_file_url && (
+                                <div className='mt-2'>
+                                    <a
+                                        target='_blank'
+                                        rel='noreferrer'
+                                        href={material.full_file_url}
+                                        className='text-primary hover:underline'
+                                    >
+                                        {t('pages.learning_material.show.full_pdf_link', {
+                                            defaultValue: 'View Full PDF',
+                                        })}
+                                    </a>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className='mt-2'>

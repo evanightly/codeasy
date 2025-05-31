@@ -17,6 +17,7 @@ class LearningMaterialResource extends JsonResource {
             'file' => $this->file,
             'file_extension' => $this->file_extension,
             'file_url' => $this->file_url, // Using the accessor from the model
+            'full_file_url' => $this->full_file_url, // full PDF version URL
             'type' => $this->type,
             'order_number' => $this->order_number,
             'active' => $this->active,

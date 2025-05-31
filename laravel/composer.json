@@ -17,6 +17,8 @@
         "laravel/tinker": "^2.9",
         "phpoffice/phpspreadsheet": "^4.2",
         "predis/predis": "^2.0",
+        "setasign/fpdf": "^1.8",
+        "setasign/fpdi": "^2.6",
         "smalot/pdfparser": "^2.12",
         "spatie/laravel-backup": "^9.2",
         "spatie/laravel-permission": "^6.15",

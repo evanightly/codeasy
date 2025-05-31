@@ -25,7 +25,7 @@ export default function Show({ data: course }: Props) {
         sort_by: 'order_number',
         sort_dir: 'desc',
         learning_material_resource:
-            'id,title,description,type,order_number,active,file,file_extension,file_url',
+            'id,title,description,type,order_number,active,file,file_extension,file_url,full_file_url',
         column_filters: {
             course_id: course.id,
         },

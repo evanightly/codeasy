@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Smalot\PdfParser\Parser as PdfParser;
+use setasign\Fpdi\Fpdi;
+use Smalot\PdfParser\Parser as PdfParser; // Import FPDI for PDF manipulation
 use ZipArchive;
 
 class CourseImportService implements CourseImportServiceInterface {
@@ -297,25 +298,104 @@ class CourseImportService implements CourseImportServiceInterface {
 
         // Get file extension
         $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
-
-        // Generate unique filename
-        $filename = Str::uuid() . '.' . $extension;
-
         // Directory to store the file
         $storageDirectory = "public/{$targetDirectory}";
 
-        // Copy file to storage
-        $storagePath = Storage::putFileAs(
-            $storageDirectory,
-            $fullPath,
-            $filename
-        );
+        // Always generate a UUID filename base (so cut/full use same UUID)
+        $filename = Str::uuid() . '.' . $extension;
 
-        // Track uploaded file
-        $this->uploadedFiles[] = $storagePath;
+        if (strtolower($extension) === 'pdf' && $targetDirectory === 'learning-materials') {
+            // Process PDF section cutting and create both cut and full versions with UUID base
+            $this->processPdfSectionCuttingForFile($fullPath, $storageDirectory, $filename);
+        } else {
+            // Copy file to storage normally
+            $storagePath = Storage::putFileAs(
+                $storageDirectory,
+                $fullPath,
+                $filename
+            );
+            $this->uploadedFiles[] = $storagePath;
+        }
 
-        // Return just the filename and extension (not the path)
+        // Return just the generated filename and extension
         return [$filename, $extension];
+    }
+
+    /**
+     * Process PDF section cutting during file resolution
+     *
+     * @param  string  $sourcePath  Path to the source PDF file
+     * @param  string  $storageDirectory  Storage directory path
+     * @param  string  $baseFilename  Base filename to use
+     */
+    protected function processPdfSectionCuttingForFile(string $sourcePath, string $storageDirectory, string $baseFilename): void {
+        try {
+            // Parse PDF and extract pages
+            $pdfDocument = $this->pdfParser->parseFile($sourcePath);
+            $pages = method_exists($pdfDocument, 'getPages') ? $pdfDocument->getPages() : [];
+            // Detect page where "Pertanyaan" section starts
+            $pertanyaanPage = null;
+            foreach ($pages as $index => $page) {
+                $text = $page->getText();
+                if (stripos($text, 'Pertanyaan') !== false && $this->isValidSectionHeader($text, 0)) {
+                    $pertanyaanPage = $index + 1;
+                    break;
+                }
+            }
+            // Prepare filenames
+            $extension = pathinfo($sourcePath, PATHINFO_EXTENSION);
+            // Derive the original base name (UUID) from baseFilename
+            $baseName = pathinfo($baseFilename, PATHINFO_FILENAME);
+            // Generate cut PDF containing pages before the Pertanyaan section
+            if ($pertanyaanPage !== null && $pertanyaanPage > 1) {
+                $fpdi = new Fpdi;
+                $totalPages = $fpdi->setSourceFile($sourcePath);
+                for ($i = 1; $i < $pertanyaanPage; $i++) {
+                    $tplId = $fpdi->importPage($i);
+                    $fpdi->addPage();
+                    $fpdi->useTemplate($tplId);
+                }
+                // Use the original UUID for cut PDF
+                $cuttedFilename = $baseName . '.' . $extension;
+                $pdfStream = $fpdi->Output('', 'S');
+                // Store the cut PDF under the same base name
+                Storage::put("{$storageDirectory}/{$cuttedFilename}", $pdfStream);
+                $this->uploadedFiles[] = "{$storageDirectory}/{$cuttedFilename}";
+            } else {
+                // No valid split point, fallback to storing original PDF as cut version
+                $cuttedFilename = $baseName . '.' . $extension;
+                $storagePath = Storage::putFileAs(
+                    $storageDirectory,
+                    $sourcePath,
+                    $cuttedFilename
+                );
+                $this->uploadedFiles[] = $storagePath;
+            }
+            // Always store full original version with "_full" suffix using the same base
+            $fullFilename = $baseName . '_full.' . $extension;
+            $fullPath = Storage::putFileAs(
+                $storageDirectory,
+                $sourcePath,
+                $fullFilename
+            );
+            $this->uploadedFiles[] = $fullPath;
+            Log::info('Processed PDF cutting', [
+                'source' => $sourcePath,
+                'cutted' => $cuttedFilename,
+                'full' => $fullFilename,
+                'pertanyaan_page' => $pertanyaanPage,
+            ]);
+        } catch (\Exception $e) {
+            // On failure, fallback to normal storage
+            $this->errors[] = "Error processing PDF cutting for file: {$e->getMessage()}";
+            Log::error('Error processing PDF cutting', ['exception' => $e, 'sourcePath' => $sourcePath]);
+            $storagePath = Storage::putFileAs(
+                $storageDirectory,
+                $sourcePath,
+                $baseFilename
+            );
+            $this->uploadedFiles[] = $storagePath;
+        }
     }
 
     protected function processCourseSheet() {
@@ -472,11 +552,22 @@ class CourseImportService implements CourseImportServiceInterface {
                     !empty($materialData['file']) &&
                     strtolower($materialData['file_extension'] ?? '') === 'pdf') {
 
-                    // Get the full path to the PDF file
-                    $pdfPath = storage_path('app/public/learning-materials/' . $materialData['file']);
+                    // Get the original path in the extracted directory before it was copied to storage
+                    $originalPath = $this->extractDir . DIRECTORY_SEPARATOR . str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $materialData['file']);
 
-                    // Parse PDF to extract questions and test cases
-                    $extractedContent = $this->parsePdfContent($pdfPath);
+                    // Use the full PDF version for question extraction
+                    $baseName = pathinfo($materialData['file'], PATHINFO_FILENAME);
+                    $fullFilename = $baseName . '_full.' . $materialData['file_extension'];
+                    $fullPdfPath = storage_path('app/public/learning-materials/' . $fullFilename);
+                    // Fallback to cut PDF if full version does not exist
+                    if (!file_exists($fullPdfPath)) {
+                        $fallbackCut = storage_path('app/public/learning-materials/' . $materialData['file']);
+                        if (file_exists($fallbackCut)) {
+                            $fullPdfPath = $fallbackCut;
+                        }
+                    }
+                    // Parse the selected PDF to extract questions and test cases
+                    $extractedContent = $this->parsePdfContent($fullPdfPath);
 
                     // If questions were found in the PDF, create them
                     if (!empty($extractedContent['questions'])) {
@@ -735,7 +826,7 @@ class CourseImportService implements CourseImportServiceInterface {
             $pdf = $this->pdfParser->parseFile($filePath);
             $text = $pdf->getText();
 
-            // Extract questions section
+            // Extract questions section from text (section cutting is handled during file resolution)
             $questionsData = $this->extractQuestionsFromPdf($text);
 
             return $questionsData;
@@ -751,35 +842,87 @@ class CourseImportService implements CourseImportServiceInterface {
      * Extract questions and test cases from PDF content
      *
      * @param  string  $pdfText  The text content of the PDF
-     * @return array Array of questions with their test cases
+     * @return array Array of questions with their test cases, pre-code, and example code
      */
     protected function extractQuestionsFromPdf(string $pdfText): array {
         $questions = [];
         $testCases = [];
 
-        // Look for "Pertanyaan Modul" section
-        if (preg_match('/Pertanyaan\s*(.*?)(?:\n\s*$|\Z)/s', $pdfText, $questionsSection)) {
-            $questionsSectionText = $questionsSection[1];
+        $pertanyaanPosition = $this->findPertanyaanSectionPosition($pdfText);
 
-            // Extract individual questions
-            preg_match_all('/Judul:\s*(.*?)\s*Deskripsi:\s*(.*?)\s*Test Case:\s*(.*?)(?=Judul:|$)/s', $questionsSectionText, $matches, PREG_SET_ORDER);
+        Log::info('PDF section extraction started', [
+            'pertanyaan_position' => $pertanyaanPosition,
+            'total_text_length' => strlen($pdfText),
+        ]);
 
-            foreach ($matches as $index => $match) {
-                $title = trim($match[1]);
-                $description = trim($match[2]);
-                $testCaseText = trim($match[3]);
+        if ($pertanyaanPosition !== false) {
+            // Extract content from the Pertanyaan section onwards
+            $questionsSectionText = substr($pdfText, $pertanyaanPosition);
 
-                // Create question array
-                $questionData = [
-                    'title' => $title,
-                    'description' => $description,
-                    'order_number' => $index + 1,
-                ];
-                $questions[] = $questionData;
+            // Clean up section text by removing the "Pertanyaan" header itself
+            $questionsSectionText = preg_replace('/^.*?Pertanyaan[^\n]*\n/i', '', $questionsSectionText);
 
-                // Extract test cases for this question
-                $questionTestCases = $this->extractTestCasesFromQuestion($testCaseText, $index);
-                $testCases = array_merge($testCases, $questionTestCases);
+            // Split questions by looking for "Judul:" patterns, but capture everything between them
+            $questionBlocks = preg_split('/(?=\d+\.\s*Judul:)/i', $questionsSectionText, -1, PREG_SPLIT_NO_EMPTY);
+
+            $validQuestionIndex = 0; // Track the actual valid question index for test case mapping
+
+            foreach ($questionBlocks as $blockIndex => $questionBlock) {
+                if (trim($questionBlock) === '') {
+                    continue;
+                }
+
+                // Extract title and description using more flexible patterns
+                if (preg_match('/Judul:\s*(.*?)(?:\s*Deskripsi:\s*(.*?))?(?=(?:Pre-code:|Contoh Kode:|Test Case:|$))/s', $questionBlock, $titleMatch)) {
+                    $title = trim($titleMatch[1]);
+                    $description = isset($titleMatch[2]) ? trim($titleMatch[2]) : '';
+
+                    // Skip if title contains code indicators (likely false positive)
+                    if ($this->containsCodeIndicators($title)) {
+                        continue;
+                    }
+
+                    // Extract Pre-code and Contoh Kode from this specific question block
+                    $preCode = $this->extractPreCodeSection($questionBlock);
+                    $contohKode = $this->extractContohKodeSection($questionBlock);
+
+                    // Extract test case content
+                    $testCaseText = '';
+                    if (preg_match('/Test Case:\s*(.*?)(?=\d+\.\s*Judul:|$)/s', $questionBlock, $testMatch)) {
+                        $testCaseText = trim($testMatch[1]);
+                    }
+
+                    Log::info('Question extraction results', [
+                        'block_index' => $blockIndex + 1,
+                        'valid_question_index' => $validQuestionIndex,
+                        'title' => $title,
+                        'description_length' => strlen($description),
+                        'pre_code_found' => !is_null($preCode),
+                        'contoh_kode_found' => !is_null($contohKode),
+                        'pre_code_length' => $preCode ? strlen($preCode) : 0,
+                        'contoh_kode_length' => $contohKode ? strlen($contohKode) : 0,
+                        'test_case_length' => strlen($testCaseText),
+                    ]);
+
+                    // Create question array with Pre-code and Contoh Kode from this question
+                    $questionData = [
+                        'title' => $title,
+                        'description' => $description,
+                        'order_number' => $validQuestionIndex + 1,
+                        'pre_code' => $preCode,
+                        'example_code' => $contohKode,
+                    ];
+                    $questions[] = $questionData;
+
+                    // Extract test cases for this question using the valid question index
+                    if (!empty($testCaseText)) {
+                        $questionTestCases = $this->extractTestCasesFromQuestion($testCaseText, $validQuestionIndex);
+                        $testCases = array_merge($testCases, $questionTestCases);
+                    }
+
+                    // Increment the valid question index only after successfully adding a question
+                    $validQuestionIndex++;
+                }
             }
         }
 
@@ -787,6 +930,35 @@ class CourseImportService implements CourseImportServiceInterface {
             'questions' => $questions,
             'testCases' => $testCases,
         ];
+    }
+
+    /**
+     * Check if text contains code indicators
+     *
+     * @param  string  $text  Text to check
+     * @return bool True if contains code indicators
+     */
+    protected function containsCodeIndicators(string $text): bool {
+        $codeIndicators = [
+            'def ',
+            'class ',
+            'import ',
+            'from ',
+            'print(',
+            'return ',
+            '# ',
+            '//',
+            '/*',
+            '*/',
+        ];
+
+        foreach ($codeIndicators as $indicator) {
+            if (stripos($text, $indicator) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -848,14 +1020,25 @@ class CourseImportService implements CourseImportServiceInterface {
         // First, create all questions and store them by index
         foreach ($extractedContent['questions'] as $index => $questionData) {
             try {
-                // Create question
+                // Create question with Pre-code and Example code
                 $question = LearningMaterialQuestion::create([
                     'learning_material_id' => $material->id,
                     'title' => $questionData['title'],
                     'description' => $questionData['description'] ?? null,
                     'type' => $material->type,
                     'order_number' => $orderNumber++,
+                    'pre_code' => $questionData['pre_code'] ?? null,
+                    'example_code' => $questionData['example_code'] ?? null,
                     'active' => true,
+                ]);
+
+                Log::info('Question created from PDF with code sections', [
+                    'question_id' => $question->id,
+                    'title' => $question->title,
+                    'has_pre_code' => !empty($question->pre_code),
+                    'has_example_code' => !empty($question->example_code),
+                    'pre_code_length' => $question->pre_code ? strlen($question->pre_code) : 0,
+                    'example_code_length' => $question->example_code ? strlen($question->example_code) : 0,
                 ]);
 
                 // Store for reference by title
@@ -868,7 +1051,7 @@ class CourseImportService implements CourseImportServiceInterface {
                 $this->successCount['questions']++;
             } catch (\Exception $e) {
                 $this->errors[] = "Error creating question from PDF: {$e->getMessage()}";
-                Log::error('Error creating question from PDF', ['exception' => $e]);
+                Log::error('Error creating question from PDF', ['exception' => $e, 'questionData' => $questionData]);
             }
         }
 
@@ -903,5 +1086,318 @@ class CourseImportService implements CourseImportServiceInterface {
                 Log::error('Error creating test case from PDF', ['exception' => $e, 'testCaseData' => $testCaseData]);
             }
         }
+    }
+
+    /**
+     * Find the position of "Pertanyaan" section in PDF text
+     *
+     * @param  string  $pdfText  The PDF content text
+     * @return int|false Position of the section or false if not found
+     */
+    protected function findPertanyaanSectionPosition(string $pdfText): int|false {
+        // Enhanced pattern to avoid conflicts with code sections
+        // Look for "Pertanyaan" that's likely a section header (not in code comments)
+        $patterns = [
+            '/(?:^|\n)\s*(?:Pertanyaan\s*Modul|Pertanyaan)\s*(?:\n|$)/mi',
+            '/(?:^|\n)\s*(?:\d+\.\s*)?Pertanyaan\s*(?:\n|$)/mi',
+            '/(?:^|\n)\s*(?:##\s*)?Pertanyaan\s*(?:\n|$)/mi',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $pdfText, $matches, PREG_OFFSET_CAPTURE)) {
+                // Additional validation to ensure this isn't in a code section
+                $position = $matches[0][1];
+                if ($this->isValidSectionHeader($pdfText, $position)) {
+                    return $position;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Validate if the found position is a valid section header (not in code)
+     *
+     * @param  string  $pdfText  The PDF content text
+     * @param  int  $position  Position to validate
+     * @return bool True if valid section header
+     */
+    protected function isValidSectionHeader(string $pdfText, int $position): bool {
+        // Get context around the position
+        $contextStart = max(0, $position - 200);
+        $contextEnd = min(strlen($pdfText), $position + 50);
+        $context = substr($pdfText, $contextStart, $contextEnd - $contextStart);
+
+        // Check if we're in a code section by looking for code indicators
+        $codeIndicators = [
+            'Pre-code',
+            'Contoh Kode',
+            'def ',
+            'class ',
+            'import ',
+            'from ',
+            '```',
+            '    #',  // Indented comment
+            'print(',
+        ];
+
+        $linesBeforePosition = explode("\n", substr($pdfText, $contextStart, $position - $contextStart));
+        $recentLines = array_slice($linesBeforePosition, -5); // Last 5 lines before position
+
+        foreach ($recentLines as $line) {
+            foreach ($codeIndicators as $indicator) {
+                if (stripos($line, $indicator) !== false) {
+                    return false; // Likely in a code section
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Extract content before "Pertanyaan" section
+     *
+     * @param  string  $pdfText  The PDF content text
+     * @param  int  $position  Position where "Pertanyaan" section starts
+     * @return string Content before the section
+     */
+    protected function extractContentBeforePertanyaan(string $pdfText, int $position): string {
+        return trim(substr($pdfText, 0, $position));
+    }
+
+    /**
+     * Create a cutted version of the PDF (without Pertanyaan section)
+     *
+     * @param  string  $originalPath  Path to original PDF
+     * @param  string  $cuttedContent  Content without Pertanyaan section
+     * @param  string  $fileName  Original filename without extension
+     * @param  string  $extension  File extension
+     */
+    protected function createCuttedPdfVersion(string $originalPath, string $cuttedContent, string $fileName, string $extension): void {
+        try {
+            // Generate unique filename for cutted version
+            $cuttedFileName = Str::uuid() . '.' . $extension;
+            $storageDirectory = 'public/learning-materials';
+
+            // Create a text file with the cutted content for now
+            // Note: In a production environment, you might want to use a PDF library
+            // like TCPDF or FPDF to create a proper PDF from the cutted content
+            $cuttedTextFileName = Str::uuid() . '_cutted.txt';
+            $textFilePath = Storage::put(
+                $storageDirectory . '/' . $cuttedTextFileName,
+                $cuttedContent
+            );
+
+            // For the actual PDF file, we'll copy the original and mark it as cutted
+            // In production, you would generate a new PDF with only the cutted content
+            $cuttedPath = Storage::putFileAs(
+                $storageDirectory,
+                $originalPath,
+                $cuttedFileName
+            );
+
+            $this->uploadedFiles[] = $cuttedPath;
+
+            Log::info('Created cutted PDF version', [
+                'original' => $originalPath,
+                'cutted' => $cuttedPath,
+                'cutted_text' => $textFilePath,
+                'content_length' => strlen($cuttedContent),
+            ]);
+
+        } catch (\Exception $e) {
+            $this->errors[] = "Error creating cutted PDF version: {$e->getMessage()}";
+            Log::error('Error creating cutted PDF version', ['exception' => $e]);
+        }
+    }
+
+    /**
+     * Create a full version of the PDF with "_full" postfix
+     *
+     * @param  string  $originalPath  Path to original PDF
+     * @param  string  $fileName  Original filename without extension
+     * @param  string  $extension  File extension
+     */
+    protected function createFullPdfVersion(string $originalPath, string $fileName, string $extension): void {
+        try {
+            // Generate unique filename for full version with "_full" postfix
+            $fullFileName = Str::uuid() . '_full.' . $extension;
+            $storageDirectory = 'public/learning-materials';
+
+            // Copy original file as full version
+            $fullPath = Storage::putFileAs(
+                $storageDirectory,
+                $originalPath,
+                $fullFileName
+            );
+
+            $this->uploadedFiles[] = $fullPath;
+
+            Log::info('Created full PDF version', [
+                'original' => $originalPath,
+                'full' => $fullPath,
+            ]);
+
+        } catch (\Exception $e) {
+            $this->errors[] = "Error creating full PDF version: {$e->getMessage()}";
+            Log::error('Error creating full PDF version', ['exception' => $e]);
+        }
+    }
+
+    /**
+     * Extract Pre-code section from PDF content
+     *
+     * @param  string  $pdfText  The PDF content text
+     * @return string|null Pre-code content or null if not found
+     */
+    public function extractPreCodeSection(string $pdfText): ?string {
+        // Enhanced patterns to find "Pre-code" section - stop at next section boundary
+        $patterns = [
+            // Stop at Contoh Kode, Test Case, or next numbered item
+            '/(?:^|\n)\s*(?:Pre-code|pre-code|PRE-CODE)\s*[:\-]?\s*\n(.*?)(?=\n\s*(?:Contoh\s+Kode|Test\s+Case|(?:\d+\.\s*)?(?:Judul|Pre-code|Contoh\s+Kode|Test\s+Case)|$))/si',
+            '/(?:^|\n)\s*(?:\d+\.?\s*)?(?:Pre-code|pre-code|PRE-CODE)\s*[:\-]?\s*\n(.*?)(?=\n\s*(?:Contoh\s+Kode|Test\s+Case|(?:\d+\.\s*)?(?:Judul|Pre-code|Contoh\s+Kode|Test\s+Case)|$))/si',
+            '/(?:^|\n)\s*(?:##\s*)?(?:Pre-code|pre-code|PRE-CODE)\s*[:\-]?\s*\n(.*?)(?=\n\s*(?:Contoh\s+Kode|Test\s+Case|(?:\d+\.\s*)?(?:Judul|Pre-code|Contoh\s+Kode|Test\s+Case)|$))/si',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $pdfText, $matches)) {
+                $preCode = trim($matches[1]);
+
+                // Clean up the extracted code
+                $preCode = $this->cleanExtractedCode($preCode);
+
+                // Additional filtering to remove test case content if it got included
+                $preCode = $this->removeTestCaseContent($preCode);
+
+                // Only return if we have substantial content
+                if (strlen($preCode) > 10) {
+                    Log::info('Pre-code section extracted', [
+                        'length' => strlen($preCode),
+                        'preview' => substr($preCode, 0, 100),
+                    ]);
+
+                    return $preCode;
+                }
+            }
+        }
+
+        Log::info('No Pre-code section found in PDF');
+
+        return null;
+    }
+
+    /**
+     * Extract Contoh Kode (Example Code) section from PDF content
+     *
+     * @param  string  $pdfText  The PDF content text
+     * @return string|null Example code content or null if not found
+     */
+    public function extractContohKodeSection(string $pdfText): ?string {
+        // Enhanced patterns to find "Contoh Kode" section - stop at next section boundary
+        $patterns = [
+            // Stop at Test Case or next numbered item
+            '/(?:^|\n)\s*(?:Contoh\s+Kode|contoh\s+kode|CONTOH\s+KODE|Example\s+Code)\s*[:\-]?\s*\n(.*?)(?=\n\s*(?:Test\s+Case|(?:\d+\.\s*)?(?:Judul|Pre-code|Contoh\s+Kode|Test\s+Case)|$))/si',
+            '/(?:^|\n)\s*(?:\d+\.?\s*)?(?:Contoh\s+Kode|contoh\s+kode|CONTOH\s+KODE|Example\s+Code)\s*[:\-]?\s*\n(.*?)(?=\n\s*(?:Test\s+Case|(?:\d+\.\s*)?(?:Judul|Pre-code|Contoh\s+Kode|Test\s+Case)|$))/si',
+            '/(?:^|\n)\s*(?:##\s*)?(?:Contoh\s+Kode|contoh\s+kode|CONTOH\s+KODE|Example\s+Code)\s*[:\-]?\s*\n(.*?)(?=\n\s*(?:Test\s+Case|(?:\d+\.\s*)?(?:Judul|Pre-code|Contoh\s+Kode|Test\s+Case)|$))/si',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $pdfText, $matches)) {
+                $contohKode = trim($matches[1]);
+
+                // Clean up the extracted code
+                $contohKode = $this->cleanExtractedCode($contohKode);
+
+                // Additional filtering to remove test case content if it got included
+                $contohKode = $this->removeTestCaseContent($contohKode);
+
+                // Only return if we have substantial content
+                if (strlen($contohKode) > 10) {
+                    Log::info('Contoh Kode section extracted', [
+                        'length' => strlen($contohKode),
+                        'preview' => substr($contohKode, 0, 100),
+                    ]);
+
+                    return $contohKode;
+                }
+            }
+        }
+
+        Log::info('No Contoh Kode section found in PDF');
+
+        return null;
+    }
+
+    /**
+     * Remove test case content from extracted code
+     *
+     * @param  string  $code  Raw extracted code that might contain test cases
+     * @return string Cleaned code without test cases
+     */
+    protected function removeTestCaseContent(string $code): string {
+        // Remove test case patterns that might have been included
+        $testCasePatterns = [
+            // Remove content that starts with test case indicators
+            '/(?:^|\n)\s*(?:Test\s+Case|TEST\s+CASE|test\s+case)\s*[:\-]?\s*.*$/mi',
+            '/(?:^|\n)\s*(?:assert|assertEqual|assertTrue|assertFalse|print\(|test_)\s*.*$/mi',
+            '/(?:^|\n)\s*(?:Input|Output|Expected)\s*[:\-].*$/mi',
+            '/(?:^|\n)\s*(?:Hasil|Result)\s*[:\-].*$/mi',
+            // Remove lines that look like test assertions
+            '/(?:^|\n)\s*(?:self\.assert|assert\s+|# Test|#.*test.*|\/\/.*test.*)\s*.*$/mi',
+        ];
+
+        foreach ($testCasePatterns as $pattern) {
+            $code = preg_replace($pattern, '', $code);
+        }
+
+        // Clean up extra whitespace after removal
+        $lines = explode("\n", $code);
+        $cleanedLines = [];
+
+        foreach ($lines as $line) {
+            $trimmedLine = trim($line);
+            // Skip lines that are clearly test-related
+            if (!empty($trimmedLine) &&
+                !preg_match('/^(?:test|assert|expected|input|output|hasil|result)/i', $trimmedLine)) {
+                $cleanedLines[] = $line;
+            }
+        }
+
+        return implode("\n", $cleanedLines);
+    }
+
+    /**
+     * Clean extracted code by removing extra whitespace and formatting
+     *
+     * @param  string  $code  Raw extracted code
+     * @return string Cleaned code
+     */
+    protected function cleanExtractedCode(string $code): string {
+        // Remove excessive whitespace while preserving code structure
+        $lines = explode("\n", $code);
+        $cleanedLines = [];
+
+        foreach ($lines as $line) {
+            // Skip empty lines at the beginning and end, but keep them in the middle
+            $trimmedLine = rtrim($line);
+            if (!empty($cleanedLines) || !empty($trimmedLine)) {
+                $cleanedLines[] = $trimmedLine;
+            }
+        }
+
+        // Remove trailing empty lines
+        while (!empty($cleanedLines) && empty(end($cleanedLines))) {
+            array_pop($cleanedLines);
+        }
+
+        $cleanedCode = implode("\n", $cleanedLines);
+
+        // Remove common PDF artifacts
+        $cleanedCode = preg_replace('/\s*```\s*/', '', $cleanedCode); // Remove code block markers
+        $cleanedCode = preg_replace('/^\s*(?:python|py)\s*\n/i', '', $cleanedCode); // Remove language indicators
+
+        return trim($cleanedCode);
     }
 }
