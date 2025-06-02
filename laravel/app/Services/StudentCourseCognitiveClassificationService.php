@@ -38,53 +38,41 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
     }
 
     /**
-     * Get or create a course-level cognitive classification for a student
-     * This syncs with material-level classifications and aggregates the results
+     * Get a course-level cognitive classification for a student (read-only)
+     * This only retrieves existing classifications without creating new ones
      */
-    public function getOrCreateCourseClassification(
+    public function getCourseClassification(
         int $userId,
         int $courseId,
         string $classificationType = 'topsis'
-    ): StudentCourseCognitiveClassification {
-        // Get existing material-level classifications
-        $materialClassifications = $this->studentCognitiveClassificationService->getMaterialClassificationsForStudent(
+    ): ?StudentCourseCognitiveClassification {
+        // First check if a record exists in StudentCourseCognitiveClassification table
+        $existingClassification = $this->repository->getByUserAndCourseId(
             $userId,
             $courseId,
             $classificationType
         );
 
-        // Get existing course-level classification if any
+        if ($existingClassification) {
+            return $existingClassification;
+        }
+
+        // If not found, check if there's a course-level classification in StudentCognitiveClassification
         $courseClassification = $this->studentCognitiveClassificationService->getCourseClassificationForStudent(
             $userId,
             $courseId,
             $classificationType
         );
 
-        if ($materialClassifications->isEmpty()) {
-            // No materials classified yet, create an empty classification
-            return $this->getOrCreateEmptyCourseClassification($userId, $courseId, $classificationType);
-        }
-
-        // If no course-level classification exists or if it needs updating
-        if (!$courseClassification || $this->needsUpdating($courseClassification, $materialClassifications)) {
-            return $this->createFromMaterialClassifications($userId, $courseId, $classificationType, $materialClassifications);
-        }
-
-        // Add course classification to the database if it only exists in StudentCognitiveClassifications but not in StudentCourseCognitiveClassifications
-        if ($courseClassification && !$this->modelClass->where([
-            'user_id' => $userId,
-            'course_id' => $courseId,
-            'classification_type' => $classificationType,
-        ])->exists()) {
+        if ($courseClassification) {
+            // Create a record in StudentCourseCognitiveClassification for consistency
+            // but only if a classification already exists elsewhere
+            // TODO: might be cause issue regarding classification creation
             return $this->createFromCourseClassification($courseClassification);
         }
 
-        // Find the existing record in StudentCourseCognitiveClassification
-        return $this->modelClass->where([
-            'user_id' => $userId,
-            'course_id' => $courseId,
-            'classification_type' => $classificationType,
-        ])->first();
+        // Return null if no classification exists
+        return null;
     }
 
     /**

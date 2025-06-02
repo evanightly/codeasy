@@ -8,13 +8,13 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 interface StudentCourseCognitiveClassificationServiceInterface extends BaseCrudServiceInterface {
     /**
-     * Get or create a course-level cognitive classification for a student
+     * Get a course-level cognitive classification for a student (read-only)
      */
-    public function getOrCreateCourseClassification(
+    public function getCourseClassification(
         int $userId,
         int $courseId,
         string $classificationType = 'topsis'
-    ): StudentCourseCognitiveClassification;
+    ): ?StudentCourseCognitiveClassification;
 
     /**
      * Get detailed student course cognitive classification with material breakdowns

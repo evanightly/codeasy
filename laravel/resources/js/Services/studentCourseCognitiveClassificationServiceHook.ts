@@ -20,7 +20,7 @@ export const studentCourseCognitiveClassificationServiceHook = {
         courseId: number,
         classificationType: string = 'topsis',
     ) => {
-        return useQuery<StudentCourseCognitiveClassificationResource>({
+        return useQuery<StudentCourseCognitiveClassificationResource | null>({
             queryKey: [
                 TANSTACK_QUERY_KEYS.STUDENT_COURSE_COGNITIVE_CLASSIFICATIONS,
                 'student',
@@ -29,18 +29,26 @@ export const studentCourseCognitiveClassificationServiceHook = {
                 classificationType,
             ],
             queryFn: async () => {
-                const response = await window.axios.get(
-                    route(`${ROUTES.STUDENT_COURSE_COGNITIVE_CLASSIFICATIONS}.index`),
-                    {
-                        params: {
-                            intent: IntentEnum.STUDENT_COURSE_COGNITIVE_CLASSIFICATION_INDEX_GET_BY_USER_AND_COURSE,
-                            user_id: userId,
-                            course_id: courseId,
-                            classification_type: classificationType,
+                try {
+                    const response = await window.axios.get(
+                        route(`${ROUTES.STUDENT_COURSE_COGNITIVE_CLASSIFICATIONS}.index`),
+                        {
+                            params: {
+                                intent: IntentEnum.STUDENT_COURSE_COGNITIVE_CLASSIFICATION_INDEX_GET_BY_USER_AND_COURSE,
+                                user_id: userId,
+                                course_id: courseId,
+                                classification_type: classificationType,
+                            },
                         },
-                    },
-                );
-                return response.data;
+                    );
+                    return response.data;
+                } catch (error: any) {
+                    // If 404, return null instead of throwing error
+                    if (error.response?.status === 404) {
+                        return null;
+                    }
+                    throw error;
+                }
             },
             enabled: !!userId && !!courseId,
         });

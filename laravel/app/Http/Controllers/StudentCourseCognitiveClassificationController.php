@@ -37,11 +37,15 @@ class StudentCourseCognitiveClassificationController extends Controller implemen
                 return response()->json(['error' => 'User ID and Course ID are required'], 422);
             }
 
-            $classification = $this->studentCourseCognitiveClassificationService->getOrCreateCourseClassification(
+            $classification = $this->studentCourseCognitiveClassificationService->getCourseClassification(
                 $userId,
                 $courseId,
                 $classificationType
             );
+
+            if (!$classification) {
+                return response()->json(['message' => 'No classification found for this student and course'], 404);
+            }
 
             return new StudentCourseCognitiveClassificationResource($classification);
         }
