@@ -4,6 +4,7 @@ namespace App\Support\Interfaces\Services;
 
 use Adobrovolsky97\LaravelRepositoryServicePattern\Services\Contracts\BaseCrudServiceInterface;
 use App\Models\StudentCourseCognitiveClassification;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 interface StudentCourseCognitiveClassificationServiceInterface extends BaseCrudServiceInterface {
     /**
@@ -42,4 +43,11 @@ interface StudentCourseCognitiveClassificationServiceInterface extends BaseCrudS
         array $rawData,
         $classifiedAt = null
     ): StudentCourseCognitiveClassification;
+
+    /**
+     * Export TOPSIS calculation steps to Excel
+     */
+    public function exportCalculationStepsToExcel(
+        StudentCourseCognitiveClassification $classification
+    ): StreamedResponse;
 }
