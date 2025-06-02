@@ -4,6 +4,7 @@ import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { IntentEnum } from '@/Support/Enums/intentEnum';
 import { StudentCourseCognitiveClassificationResource } from '@/Support/Interfaces/Resources';
 import { useQuery } from '@tanstack/react-query';
+import { createMutation } from '@/Helpers';
 
 export const studentCourseCognitiveClassificationServiceHook = {
     ...serviceHooksFactory<StudentCourseCognitiveClassificationResource>({
@@ -70,6 +71,23 @@ export const studentCourseCognitiveClassificationServiceHook = {
                 return response.data;
             },
             enabled: !!courseId,
+        });
+    },
+
+    /**
+     * Export calculation steps for course classification
+     */
+    useExportCalculationSteps: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number }) => {
+                // Use window.open for direct download
+                const url = route(`${ROUTES.STUDENT_COURSE_COGNITIVE_CLASSIFICATIONS}.show`, {
+                    id: params.id,
+                    intent: IntentEnum.STUDENT_COURSE_COGNITIVE_CLASSIFICATION_INDEX_EXPORT_CALCULATION_STEPS,
+                });
+                window.open(`${url}?intent=${IntentEnum.STUDENT_COURSE_COGNITIVE_CLASSIFICATION_INDEX_EXPORT_CALCULATION_STEPS}`, '_blank');
+                return true;
+            },
         });
     },
 };

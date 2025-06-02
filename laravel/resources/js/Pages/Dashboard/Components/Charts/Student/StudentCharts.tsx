@@ -8,6 +8,7 @@ import {
     CardTitle,
 } from '@/Components/UI/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/Components/UI/chart';
+import { courseServiceHook } from '@/Services/courseServiceHook';
 import { dashboardServiceHook } from '@/Services/dashboardServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { Link } from '@inertiajs/react';
@@ -23,9 +24,11 @@ import {
     YAxis,
 } from 'recharts';
 import { studentAreaData, studentBarData, studentConfig, studentPieData } from '../../chartData';
+import { StudentClassificationSection } from './StudentClassificationSection';
 
 export function StudentCharts() {
     const { data: latestWorkData, isLoading } = dashboardServiceHook.useGetStudentLatestWork();
+    const { data: coursesData, isLoading: isCoursesLoading } = courseServiceHook.useGetAll();
 
     return (
         <>
@@ -130,6 +133,12 @@ export function StudentCharts() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Classification Section */}
+            <StudentClassificationSection
+                isLoading={isCoursesLoading}
+                courses={coursesData?.data || []}
+            />
 
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* Learning Progress Area Chart */}

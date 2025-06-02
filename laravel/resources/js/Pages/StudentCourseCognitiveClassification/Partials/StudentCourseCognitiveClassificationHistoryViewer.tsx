@@ -11,8 +11,17 @@ import {
 import { studentCourseCognitiveClassificationHistoryServiceHook } from '@/Services/studentCourseCognitiveClassificationHistoryServiceHook';
 import { StudentCourseCognitiveClassificationHistoryResource } from '@/Support/Interfaces/Resources';
 import { format } from 'date-fns';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import {
+    CartesianGrid,
+    Line,
+    LineChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
 
 // Define props for the component
 interface StudentCourseCognitiveClassificationHistoryViewerProps {
@@ -92,6 +101,58 @@ export function StudentCourseCognitiveClassificationHistoryViewer({
         }
     };
 
+    // Function to get numeric level value for charting
+    const getLevelNumericValue = (level: string): number => {
+        switch (level) {
+            case 'Remember':
+                return 1;
+            case 'Understand':
+                return 2;
+            case 'Apply':
+                return 3;
+            case 'Analyze':
+                return 4;
+            case 'Evaluate':
+                return 5;
+            case 'Create':
+                return 6;
+            default:
+                return 0;
+        }
+    };
+
+    // Prepare chart data
+    const chartData = historyRecords
+        .slice()
+        .reverse() // Reverse to show chronological order (oldest first)
+        .map((record, index) => ({
+            date: format(new Date(record.classified_at), 'MMM dd'),
+            fullDate: format(new Date(record.classified_at), 'MMM dd, yyyy HH:mm'),
+            level: record.classification_level,
+            levelValue: getLevelNumericValue(record.classification_level),
+            score: Number(record.classification_score),
+            index: index + 1,
+        }));
+
+    // Custom tooltip for the chart
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div className='rounded-lg border bg-background p-3 shadow-lg'>
+                    <p className='font-medium'>{data.fullDate}</p>
+                    <p className='text-sm text-muted-foreground'>
+                        Level: <span className='font-medium'>{data.level}</span>
+                    </p>
+                    <p className='text-sm text-muted-foreground'>
+                        Score: <span className='font-medium'>{data.score}</span>
+                    </p>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <>
             {isHistoryPending && (
@@ -102,6 +163,87 @@ export function StudentCourseCognitiveClassificationHistoryViewer({
 
             {!isHistoryPending && !isHistoryError && historyRecords.length > 0 && (
                 <div className='space-y-6'>
+                    {/* Classification Progress Chart */}
+                    {historyRecords.length > 1 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className='flex items-center gap-2'>
+                                    <TrendingUp className='h-5 w-5' />
+                                    Classification Progress Over Time
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className='h-64 w-full'>
+                                    <ResponsiveContainer width='100%' height='100%'>
+                                        <LineChart
+                                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                            data={chartData}
+                                        >
+                                            <CartesianGrid
+                                                strokeDasharray='3 3'
+                                                className='stroke-muted'
+                                            />
+                                            <XAxis
+                                                dataKey='date'
+                                                className='fill-muted-foreground text-xs'
+                                            />
+                                            <YAxis
+                                                tickFormatter={(value) => {
+                                                    const levels = [
+                                                        '',
+                                                        'Remember',
+                                                        'Understand',
+                                                        'Apply',
+                                                        'Analyze',
+                                                        'Evaluate',
+                                                        'Create',
+                                                    ];
+                                                    return levels[value] || '';
+                                                }}
+                                                domain={[0, 7]}
+                                                className='fill-muted-foreground text-xs'
+                                            />
+                                            <Tooltip content={<CustomTooltip />} />
+                                            <Line
+                                                type='monotone'
+                                                strokeWidth={2}
+                                                stroke='hsl(var(--primary))'
+                                                dot={{
+                                                    fill: 'hsl(var(--primary))',
+                                                    strokeWidth: 2,
+                                                    r: 4,
+                                                }}
+                                                dataKey='levelValue'
+                                                activeDot={{
+                                                    r: 6,
+                                                    stroke: 'hsl(var(--primary))',
+                                                    strokeWidth: 2,
+                                                }}
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className='mt-4 grid grid-cols-6 gap-2 text-xs'>
+                                    {[
+                                        'Remember',
+                                        'Understand',
+                                        'Apply',
+                                        'Analyze',
+                                        'Evaluate',
+                                        'Create',
+                                    ].map((level) => (
+                                        <div key={level} className='text-center'>
+                                            <div
+                                                className={`mb-1 inline-block h-3 w-3 rounded-full ${getLevelColor(level).split(' ')[0]}`}
+                                            ></div>
+                                            <div className='text-muted-foreground'>{level}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* Trend Card */}
                     {historyRecords.length > 1 && (
                         <Card>

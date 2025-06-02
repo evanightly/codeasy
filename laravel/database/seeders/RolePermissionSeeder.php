@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\Support\Enums\PermissionEnum;
 use App\Support\Enums\RoleEnum;
 use Illuminate\Database\Seeder;
 
@@ -88,6 +89,13 @@ class RolePermissionSeeder extends Seeder {
             $permissions = Permission::query()
                 ->whereIn('group', ['subject', 'exam', 'result', 'student-score'])
                 ->get();
+
+            $permissions->push(
+                PermissionEnum::STUDENT_COGNITIVE_CLASSIFICATION_READ->value,
+                PermissionEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_READ->value,
+                PermissionEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_READ->value,
+                PermissionEnum::COURSE_READ->value
+            );
 
             $this->assignPermissionsToRole($role, $permissions);
             $this->info('Assigned ' . $permissions->count() . " permissions to {$role->name} role");
