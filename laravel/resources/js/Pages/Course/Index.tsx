@@ -30,6 +30,12 @@ export default function Index() {
                 };
             }
 
+            if (roles.includes(RoleEnum.STUDENT)) {
+                return {
+                    id: -1, // dont show courses for students by default
+                };
+            }
+
             return {};
         })(),
         class_room_resource: 'name',
