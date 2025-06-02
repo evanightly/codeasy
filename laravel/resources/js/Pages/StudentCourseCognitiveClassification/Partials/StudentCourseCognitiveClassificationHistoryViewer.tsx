@@ -52,7 +52,7 @@ export function StudentCourseCognitiveClassificationHistoryViewer({
                 user_id: userId,
                 course_id: courseId,
             },
-            // order_by: '-classified_at', // Most recent first
+            order_by: 'created_at', // Oldest first (ascending order)
         },
     });
 
@@ -67,8 +67,9 @@ export function StudentCourseCognitiveClassificationHistoryViewer({
         if (historyRecords.length < 2) return null;
 
         // Compare the latest two classifications
-        const latest = historyRecords[0];
-        const previous = historyRecords[1];
+        // Since data is ordered by created_at ascending, latest is at the end
+        const latest = historyRecords[historyRecords.length - 1];
+        const previous = historyRecords[historyRecords.length - 2];
 
         if (!latest || !previous) return null;
 
@@ -124,7 +125,7 @@ export function StudentCourseCognitiveClassificationHistoryViewer({
     // Prepare chart data
     const chartData = historyRecords
         .slice()
-        .reverse() // Reverse to show chronological order (oldest first)
+        // Data is already ordered by created_at ascending (oldest first) from the query
         .map((record, index) => ({
             date: format(new Date(record.classified_at), 'MMM dd'),
             fullDate: format(new Date(record.classified_at), 'MMM dd, yyyy HH:mm'),
