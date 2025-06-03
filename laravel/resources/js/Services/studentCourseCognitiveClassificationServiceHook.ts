@@ -1,10 +1,10 @@
+import { createMutation } from '@/Helpers';
 import { serviceHooksFactory } from '@/Services/serviceHooksFactory';
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { IntentEnum } from '@/Support/Enums/intentEnum';
 import { StudentCourseCognitiveClassificationResource } from '@/Support/Interfaces/Resources';
 import { useQuery } from '@tanstack/react-query';
-import { createMutation } from '@/Helpers';
 
 export const studentCourseCognitiveClassificationServiceHook = {
     ...serviceHooksFactory<StudentCourseCognitiveClassificationResource>({
@@ -93,7 +93,10 @@ export const studentCourseCognitiveClassificationServiceHook = {
                     id: params.id,
                     intent: IntentEnum.STUDENT_COURSE_COGNITIVE_CLASSIFICATION_INDEX_EXPORT_CALCULATION_STEPS,
                 });
-                window.open(`${url}?intent=${IntentEnum.STUDENT_COURSE_COGNITIVE_CLASSIFICATION_INDEX_EXPORT_CALCULATION_STEPS}`, '_blank');
+                window.open(
+                    `${url}?intent=${IntentEnum.STUDENT_COURSE_COGNITIVE_CLASSIFICATION_INDEX_EXPORT_CALCULATION_STEPS}`,
+                    '_blank',
+                );
                 return true;
             },
         });
