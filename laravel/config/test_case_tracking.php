@@ -18,4 +18,19 @@ return [
 
     // Batch size for processing re-executions
     'batch_size' => env('TEST_CASE_REEXECUTION_BATCH_SIZE', 50),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Progressive Test Case Revelation Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for revealing hidden test cases after failed attempts.
+    |
+    */
+
+    // Number of failed compilation attempts before revealing hidden test cases
+    'failed_attempts_threshold' => env('TEST_CASE_REVELATION_THRESHOLD', 3),
+
+    // Enable/disable progressive test case revelation
+    'enable_progressive_revelation' => env('TEST_CASE_REVELATION_ENABLED', true),
 ];

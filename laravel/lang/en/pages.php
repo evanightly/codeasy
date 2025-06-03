@@ -1511,6 +1511,13 @@ return [
                 'success' => 'Successfully reset workspace! You can now try again.',
                 'error' => 'Failed to reset workspace. Please try again.',
             ],
+            'test_cases_revealed' => 'Additional test cases have been revealed to help you debug your code!',
+            'progressive_revelation' => [
+                'failed_attempts_label' => 'Failed Attempts',
+                'attempts_remaining' => 'more attempts until additional test cases are revealed',
+                'all_revealed' => 'All additional test cases have been revealed',
+                'test_case_revealed' => 'Test Case Revealed',
+            ],
             'mark_as_done' => [
                 'button' => 'Mark as Done',
                 'success' => 'Question marked as done successfully!',

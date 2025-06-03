@@ -14,7 +14,6 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/Components/UI/dialog';
 import { Progress } from '@/Components/UI/progress';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/Components/UI/resizable';
@@ -51,7 +50,6 @@ import {
     Columns2,
     Columns3,
     FileQuestion,
-    FileTextIcon,
     Loader2,
     Lock,
     Redo2,
@@ -98,6 +96,10 @@ interface Props {
         title: string;
         first_question_id?: number;
     };
+    progressiveRevelationConfig: {
+        failed_attempts_threshold: number;
+        enabled: boolean;
+    };
 }
 
 export default function Workspace({
@@ -109,6 +111,7 @@ export default function Workspace({
     latestCode,
     navigation: initialNavigation,
     nextMaterial,
+    progressiveRevelationConfig,
 }: Props) {
     const { t } = useLaravelReactI18n();
     const [code, setCode] = useState(latestCode || '');
@@ -119,7 +122,6 @@ export default function Workspace({
     const [timeSpent, setTimeSpent] = useState(initialTracking.current_time);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [_lastSyncTime, setLastSyncTime] = useState(Date.now());
-    const [materialDialogOpen, setMaterialDialogOpen] = useState(false);
     const [layoutMode, setLayoutMode] = useLocalStorage<'stacked' | 'side-by-side'>(
         'code-editor-view',
         'stacked',
@@ -138,6 +140,15 @@ export default function Workspace({
     const [isAnswerCompleted, setIsAnswerCompleted] = useState(tracking.completion_status || false);
     const [markAsDoneDialogOpen, setMarkAsDoneDialogOpen] = useState(false);
     const [showMarkAsDoneButton, setShowMarkAsDoneButton] = useState(false);
+
+    // Progressive test case revelation state
+    const [failedCompilationCount, setFailedCompilationCount] = useState(0);
+    const [revealedTestCases, setRevealedTestCases] = useState<Set<number>>(new Set());
+    const [newlyRevealedTestCases, setNewlyRevealedTestCases] = useState<Set<number>>(new Set());
+
+    // Configuration for progressive revelation
+    const FAILED_ATTEMPTS_THRESHOLD = progressiveRevelationConfig.failed_attempts_threshold;
+    const PROGRESSIVE_REVELATION_ENABLED = progressiveRevelationConfig.enabled;
 
     // Service hooks for workspace locking
     const reattemptMutation = studentScoreServiceHook.useReattempt();
@@ -235,6 +246,80 @@ export default function Workspace({
             });
 
             setOutput(response.data.output || []);
+
+            // Progressive test case revelation logic
+            let isCompilationFailed = false;
+
+            // Check if compilation failed (no tests passed)
+            if (response.data.output && Array.isArray(response.data.output)) {
+                const hasTestOutput = response.data.output.some(
+                    (output: any) => output.type === 'test_stats' && output.content,
+                );
+
+                if (hasTestOutput) {
+                    const testOutput = response.data.output.find(
+                        (output: any) => output.type === 'test_stats',
+                    );
+
+                    if (testOutput?.content) {
+                        try {
+                            const testStats = JSON.parse(testOutput.content);
+                            // If no tests passed, count as failed compilation
+                            isCompilationFailed = testStats.passed === 0;
+                        } catch (error) {
+                            console.error('Error parsing test stats:', error);
+                        }
+                    }
+                } else {
+                    // If no test output, assume compilation error
+                    isCompilationFailed = true;
+                }
+            } else {
+                // If no output, assume compilation error
+                isCompilationFailed = true;
+            }
+
+            // Handle failed compilation count and test case revelation
+            if (isCompilationFailed && PROGRESSIVE_REVELATION_ENABLED) {
+                const newFailedCount = failedCompilationCount + 1;
+                setFailedCompilationCount(newFailedCount);
+
+                // Check if we should reveal hidden test cases
+                if (newFailedCount >= FAILED_ATTEMPTS_THRESHOLD) {
+                    const hiddenTestCases = testCases.filter(
+                        (tc) => tc.hidden && !revealedTestCases.has(tc.id),
+                    );
+
+                    if (hiddenTestCases.length > 0) {
+                        const newRevealedIds = new Set(revealedTestCases);
+                        const newlyRevealed = new Set<number>();
+
+                        hiddenTestCases.forEach((tc) => {
+                            newRevealedIds.add(tc.id);
+                            newlyRevealed.add(tc.id);
+                        });
+
+                        setRevealedTestCases(newRevealedIds);
+                        setNewlyRevealedTestCases(newlyRevealed);
+
+                        toast.info(
+                            t('pages.student_questions.workspace.test_cases_revealed', {
+                                count: hiddenTestCases.length,
+                                attempts: FAILED_ATTEMPTS_THRESHOLD,
+                            }) ||
+                                `${hiddenTestCases.length} hidden test case(s) revealed after ${FAILED_ATTEMPTS_THRESHOLD} failed attempts`,
+                        );
+
+                        // Clear newly revealed after animation
+                        setTimeout(() => {
+                            setNewlyRevealedTestCases(new Set());
+                        }, 2000);
+                    }
+                }
+            } else if (!isCompilationFailed) {
+                // Reset failed count on successful compilation
+                setFailedCompilationCount(0);
+            }
 
             // Don't automatically set completion status - let student decide
             // Just update the tracking info for test results
@@ -547,52 +632,6 @@ export default function Workspace({
                                         </SheetDescription>
                                     </SheetHeader>
                                     <div className='flex flex-1 flex-col gap-3'>
-                                        {material.data.file_url &&
-                                            material.data.file_extension?.toLowerCase() ===
-                                                'pdf' && (
-                                                <Dialog
-                                                    open={materialDialogOpen}
-                                                    onOpenChange={setMaterialDialogOpen}
-                                                >
-                                                    <DialogTrigger asChild>
-                                                        <Button
-                                                            variant='outline'
-                                                            title={t(
-                                                                'pages.student_questions.workspace.view_material',
-                                                            )}
-                                                            size='sm'
-                                                            className='w-fit'
-                                                        >
-                                                            <FileTextIcon />
-                                                            <span className='hidden md:inline'>
-                                                                {t(
-                                                                    'pages.student_questions.workspace.view_material',
-                                                                )}
-                                                            </span>
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className='max-h-[90vh] max-w-[90vw] overflow-hidden'>
-                                                        <DialogHeader>
-                                                            <DialogTitle>
-                                                                {material.data.title}
-                                                            </DialogTitle>
-                                                            <DialogDescription />
-                                                        </DialogHeader>
-                                                        <div className='overflow-auto'>
-                                                            <PDFViewer
-                                                                fileUrl={material.data.file_url}
-                                                                filename={
-                                                                    material.data.file ||
-                                                                    material.data.title
-                                                                }
-                                                                className='max-h-[80vh]'
-                                                            />
-                                                        </div>
-                                                    </DialogContent>
-                                                </Dialog>
-                                            )}
-
-                                        {/* <ReactMarkdown className='prose prose-sm dark:prose-invert max-w-none'> */}
                                         <ReactMarkdown>{question.data.description}</ReactMarkdown>
 
                                         {question.data.clue && (
@@ -612,23 +651,120 @@ export default function Workspace({
                                                     )}
                                                     :
                                                 </h4>
-                                                {testCases.map((testCase) => (
-                                                    <div
-                                                        key={testCase.id}
-                                                        className='mb-2 rounded-md border bg-muted p-3'
-                                                    >
-                                                        <p className='text-sm'>
-                                                            {testCase.description}
-                                                        </p>
-                                                        {!testCase.hidden && testCase.input && (
-                                                            <pre className='mt-1 overflow-x-auto rounded bg-background p-2 text-xs'>
-                                                                <code>{testCase.input}</code>
-                                                            </pre>
-                                                        )}
-                                                    </div>
-                                                ))}
+                                                {testCases.map((testCase) => {
+                                                    // Determine if this test case should be visible
+                                                    const isTestCaseVisible =
+                                                        !testCase.hidden ||
+                                                        revealedTestCases.has(testCase.id);
+                                                    const isNewlyRevealed =
+                                                        newlyRevealedTestCases.has(testCase.id);
+
+                                                    return (
+                                                        <div
+                                                            key={testCase.id}
+                                                            className={`mb-2 rounded-md border p-3 transition-all duration-500 ${
+                                                                isNewlyRevealed
+                                                                    ? 'animate-pulse border-green-300 bg-green-100 dark:border-green-600 dark:bg-green-900/20'
+                                                                    : 'bg-muted'
+                                                            }`}
+                                                        >
+                                                            <div className='flex items-center gap-2'>
+                                                                <p className='flex-1 text-sm'>
+                                                                    {testCase.description}
+                                                                </p>
+                                                                {testCase.hidden &&
+                                                                    !revealedTestCases.has(
+                                                                        testCase.id,
+                                                                    ) && (
+                                                                        <Lock className='h-3 w-3 text-muted-foreground' />
+                                                                    )}
+                                                                {isNewlyRevealed && (
+                                                                    <Badge
+                                                                        variant='secondary'
+                                                                        className='text-xs'
+                                                                    >
+                                                                        Revealed!
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                            {isTestCaseVisible &&
+                                                                testCase.input && (
+                                                                    <pre className='mt-1 overflow-x-auto rounded bg-background p-2 text-xs'>
+                                                                        <code>
+                                                                            {testCase.input}
+                                                                        </code>
+                                                                    </pre>
+                                                                )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         )}
+
+                                        {/* Failed Attempts Progress Indicator - Mobile */}
+                                        {PROGRESSIVE_REVELATION_ENABLED &&
+                                            testCases.some(
+                                                (tc) => tc.hidden && !revealedTestCases.has(tc.id),
+                                            ) &&
+                                            failedCompilationCount > 0 && (
+                                                <div className='mt-4 rounded-md border border-orange-200 bg-orange-50 p-3 dark:border-orange-800 dark:bg-orange-900/20'>
+                                                    <div className='mb-2 flex items-center gap-2'>
+                                                        <AlertTriangle className='h-4 w-4 text-orange-600 dark:text-orange-400' />
+                                                        <span className='text-sm font-medium text-orange-800 dark:text-orange-200'>
+                                                            {t(
+                                                                'pages.student_questions.workspace.progressive_revelation.failed_attempts_label',
+                                                            )}
+                                                            : {failedCompilationCount}/
+                                                            {FAILED_ATTEMPTS_THRESHOLD}
+                                                        </span>
+                                                    </div>
+                                                    <Progress
+                                                        value={
+                                                            (failedCompilationCount /
+                                                                FAILED_ATTEMPTS_THRESHOLD) *
+                                                            100
+                                                        }
+                                                        className='h-2'
+                                                    />
+                                                    <p className='mt-2 text-xs text-orange-700 dark:text-orange-300'>
+                                                        {failedCompilationCount <
+                                                        FAILED_ATTEMPTS_THRESHOLD
+                                                            ? `${FAILED_ATTEMPTS_THRESHOLD - failedCompilationCount} ${t('pages.student_questions.workspace.progressive_revelation.attempts_remaining')}`
+                                                            : t(
+                                                                  'pages.student_questions.workspace.progressive_revelation.all_revealed',
+                                                              )}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                        {/* Learning Material Section - Mobile */}
+                                        {material.data.description && (
+                                            <div className='mt-6 border-t pt-4'>
+                                                <div className='rounded-md border bg-muted/20 p-4'>
+                                                    <ReactMarkdown>
+                                                        {material.data.description}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* PDF Material Section - Mobile */}
+                                        {material.data.file_url &&
+                                            material.data.file_extension?.toLowerCase() ===
+                                                'pdf' && (
+                                                <div className='mt-6 border-t pt-4'>
+                                                    <div className='rounded-md border bg-background'>
+                                                        <PDFViewer
+                                                            fileUrl={material.data.file_url}
+                                                            filename={
+                                                                material.data.file ||
+                                                                material.data.title
+                                                            }
+                                                            className='min-h-80'
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
                                     </div>
                                 </SheetContent>
                             </Sheet>
@@ -760,116 +896,174 @@ export default function Workspace({
 
                 {/* Main workspace content with resizable panels */}
                 <div className='flex flex-1 overflow-hidden'>
-                    {/* Question description panel - desktop */}
-                    <div
-                        className={`hidden ${layoutMode === 'side-by-side' ? 'w-1/4' : 'w-1/3'} overflow-y-auto border-r lg:block`}
-                    >
-                        <div className='flex flex-col gap-4 p-4'>
-                            {/* <ReactMarkdown className='prose prose-sm dark:prose-invert max-w-none'> */}
+                    <ResizablePanelGroup direction='horizontal' className='hidden lg:flex'>
+                        {/* Question description panel - desktop */}
+                        <ResizablePanel minSize={20} defaultSize={25} className='overflow-hidden'>
+                            <div className='flex h-full flex-col overflow-y-auto border-r'>
+                                <div className='flex flex-col gap-4 p-4'>
+                                    <ReactMarkdown>{question.data.description}</ReactMarkdown>
 
-                            {material.data.file_url &&
-                                material.data.file_extension?.toLowerCase() === 'pdf' && (
-                                    <Dialog
-                                        open={materialDialogOpen}
-                                        onOpenChange={setMaterialDialogOpen}
-                                    >
-                                        <DialogTrigger asChild>
-                                            <Button
-                                                variant='outline'
-                                                title={t(
-                                                    'pages.student_questions.workspace.view_material',
-                                                )}
-                                                size='sm'
-                                                className='w-fit'
-                                            >
-                                                <FileTextIcon />
-                                                <span className='hidden md:inline'>
-                                                    {t(
-                                                        'pages.student_questions.workspace.view_material',
-                                                    )}
-                                                </span>
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className='max-h-[90vh] max-w-[90vw] overflow-hidden'>
-                                            <DialogHeader>
-                                                <DialogTitle>{material.data.title}</DialogTitle>
-                                                <DialogDescription />
-                                            </DialogHeader>
-                                            <div className='overflow-auto'>
-                                                <PDFViewer
-                                                    fileUrl={material.data.file_url}
-                                                    filename={
-                                                        material.data.file || material.data.title
-                                                    }
-                                                    className='max-h-[80vh]'
-                                                />
-                                            </div>
-                                        </DialogContent>
-                                    </Dialog>
-                                )}
-
-                            <ReactMarkdown>{question.data.description}</ReactMarkdown>
-
-                            {question.data.file_url && (
-                                <div>
-                                    <h3 className='mb-2 text-sm font-medium'>
-                                        {t('pages.student_questions.workspace.view_image')}:
-                                    </h3>
-                                    <img
-                                        src={question.data.file_url}
-                                        className='max-w-full rounded-md border'
-                                        alt='Question reference'
-                                    />
-                                </div>
-                            )}
-
-                            {question.data.clue && (
-                                <div className='mt-4 rounded-md border bg-muted p-3'>
-                                    <p className='mb-1 text-sm font-medium'>
-                                        {t('pages.student_questions.workspace.clue')}:
-                                    </p>
-                                    <p className='text-sm'>{question.data.clue}</p>
-                                </div>
-                            )}
-
-                            {testCases.length > 0 && (
-                                <div>
-                                    <h4 className='mb-2 text-sm font-medium'>
-                                        {t('pages.student_questions.workspace.test_cases')}:
-                                    </h4>
-                                    {testCases.map((testCase) => (
-                                        <div
-                                            key={testCase.id}
-                                            className='mb-2 rounded-md border bg-muted p-3'
-                                        >
-                                            <p className='text-sm'>{testCase.description}</p>
-                                            {!testCase.hidden && testCase.input && (
-                                                <pre className='mt-1 overflow-x-auto rounded bg-background p-2 text-xs'>
-                                                    <code>{testCase.input}</code>
-                                                </pre>
-                                            )}
+                                    {question.data.file_url && (
+                                        <div>
+                                            <h3 className='mb-2 text-sm font-medium'>
+                                                {t('pages.student_questions.workspace.view_image')}:
+                                            </h3>
+                                            <img
+                                                src={question.data.file_url}
+                                                className='max-w-full rounded-md border'
+                                                alt='Question reference'
+                                            />
                                         </div>
-                                    ))}
+                                    )}
+
+                                    {question.data.clue && (
+                                        <div className='mt-4 rounded-md border bg-muted p-3'>
+                                            <p className='mb-1 text-sm font-medium'>
+                                                {t('pages.student_questions.workspace.clue')}:
+                                            </p>
+                                            <p className='text-sm'>{question.data.clue}</p>
+                                        </div>
+                                    )}
+
+                                    {testCases.length > 0 && (
+                                        <div>
+                                            <h4 className='mb-2 text-sm font-medium'>
+                                                {t('pages.student_questions.workspace.test_cases')}:
+                                            </h4>
+                                            {testCases.map((testCase) => {
+                                                // Determine if this test case should be visible
+                                                const isTestCaseVisible =
+                                                    !testCase.hidden ||
+                                                    revealedTestCases.has(testCase.id);
+                                                const isNewlyRevealed = newlyRevealedTestCases.has(
+                                                    testCase.id,
+                                                );
+
+                                                return (
+                                                    <div
+                                                        key={testCase.id}
+                                                        className={`mb-2 rounded-md border p-3 transition-all duration-500 ${
+                                                            isNewlyRevealed
+                                                                ? 'animate-pulse border-green-300 bg-green-100 dark:border-green-600 dark:bg-green-900/20'
+                                                                : 'bg-muted'
+                                                        }`}
+                                                    >
+                                                        <div className='flex items-center gap-2'>
+                                                            <p className='flex-1 text-sm'>
+                                                                {testCase.description}
+                                                            </p>
+                                                            {testCase.hidden &&
+                                                                !revealedTestCases.has(
+                                                                    testCase.id,
+                                                                ) && (
+                                                                    <Lock className='h-3 w-3 text-muted-foreground' />
+                                                                )}
+                                                            {isNewlyRevealed && (
+                                                                <Badge
+                                                                    variant='secondary'
+                                                                    className='text-xs'
+                                                                >
+                                                                    {t(
+                                                                        'pages.student_questions.workspace.progressive_revelation.test_case_revealed',
+                                                                    )}
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                        {isTestCaseVisible && testCase.input && (
+                                                            <pre className='mt-1 overflow-x-auto rounded bg-background p-2 text-xs'>
+                                                                <code>{testCase.input}</code>
+                                                            </pre>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    {/* Failed Attempts Progress Indicator - Desktop */}
+                                    {PROGRESSIVE_REVELATION_ENABLED &&
+                                        testCases.some(
+                                            (tc) => tc.hidden && !revealedTestCases.has(tc.id),
+                                        ) &&
+                                        failedCompilationCount > 0 && (
+                                            <div className='mt-4 rounded-md border border-orange-200 bg-orange-50 p-3 dark:border-orange-800 dark:bg-orange-900/20'>
+                                                <div className='mb-2 flex items-center gap-2'>
+                                                    <AlertTriangle className='h-4 w-4 text-orange-600 dark:text-orange-400' />
+                                                    <span className='text-sm font-medium text-orange-800 dark:text-orange-200'>
+                                                        {t(
+                                                            'pages.student_questions.workspace.progressive_revelation.failed_attempts_label',
+                                                        )}
+                                                        : {failedCompilationCount}/
+                                                        {FAILED_ATTEMPTS_THRESHOLD}
+                                                    </span>
+                                                </div>
+                                                <Progress
+                                                    value={
+                                                        (failedCompilationCount /
+                                                            FAILED_ATTEMPTS_THRESHOLD) *
+                                                        100
+                                                    }
+                                                    className='h-2'
+                                                />
+                                                <p className='mt-2 text-xs text-orange-700 dark:text-orange-300'>
+                                                    {failedCompilationCount <
+                                                    FAILED_ATTEMPTS_THRESHOLD
+                                                        ? `${FAILED_ATTEMPTS_THRESHOLD - failedCompilationCount} ${t('pages.student_questions.workspace.progressive_revelation.attempts_remaining')}`
+                                                        : t(
+                                                              'pages.student_questions.workspace.progressive_revelation.all_revealed',
+                                                          )}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                    {/* Learning Material Section */}
+                                    {material.data.description && (
+                                        <div className='mt-6 border-t pt-4'>
+                                            <div className='rounded-md border bg-muted/20 p-4'>
+                                                <ReactMarkdown>
+                                                    {material.data.description}
+                                                </ReactMarkdown>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* PDF Material Section - Show inline without title and dialog */}
+                                    {material.data.file_url &&
+                                        material.data.file_extension?.toLowerCase() === 'pdf' && (
+                                            <div className='mt-6 border-t pt-4'>
+                                                <div className='rounded-md border bg-background'>
+                                                    <PDFViewer
+                                                        fileUrl={material.data.file_url}
+                                                        filename={
+                                                            material.data.file ||
+                                                            material.data.title
+                                                        }
+                                                        className='min-h-96'
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                    <div className='mt-4 text-center text-sm text-muted-foreground'>
+                                        {t('pages.student_questions.workspace.time_spent')}:{' '}
+                                        {formatTime(timeSpent)}
+                                    </div>
                                 </div>
-                            )}
-
-                            <div className='mt-4 text-center text-sm text-muted-foreground'>
-                                {t('pages.student_questions.workspace.time_spent')}:{' '}
-                                {formatTime(timeSpent)}
                             </div>
-                        </div>
-                    </div>
+                        </ResizablePanel>
 
-                    {/* Code editor and output panel - now with resizable layout */}
-                    <div
-                        className={`flex flex-1 ${layoutMode === 'side-by-side' ? 'flex-row' : 'flex-col'} overflow-hidden`}
-                    >
-                        {layoutMode === 'stacked' ? (
-                            <ResizablePanelGroup direction='vertical' className='flex-1'>
-                                {/* Code Editor Panel */}
+                        <ResizableHandle withHandle />
+
+                        {/* Code editor and output panel group */}
+                        <ResizablePanel minSize={50} defaultSize={75} className='overflow-hidden'>
+                            <ResizablePanelGroup
+                                direction={layoutMode === 'stacked' ? 'vertical' : 'horizontal'}
+                                className='h-full'
+                            >
+                                {/* Code editor panel */}
                                 <ResizablePanel
                                     minSize={30}
-                                    defaultSize={60}
+                                    defaultSize={layoutMode === 'stacked' ? 60 : 65}
                                     className='overflow-hidden'
                                 >
                                     <div className='flex h-full flex-col'>
@@ -1000,7 +1194,10 @@ export default function Workspace({
                                 <ResizableHandle withHandle />
 
                                 {/* Output Panel */}
-                                <ResizablePanel minSize={20} defaultSize={40}>
+                                <ResizablePanel
+                                    minSize={20}
+                                    defaultSize={layoutMode === 'stacked' ? 40 : 35}
+                                >
                                     <div className='flex h-full flex-col'>
                                         <div className='border-b bg-muted/30 px-4 py-2'>
                                             <h3 className='font-medium'>
@@ -1127,270 +1324,215 @@ export default function Workspace({
                                     </div>
                                 </ResizablePanel>
                             </ResizablePanelGroup>
-                        ) : (
-                            // Side-by-side layout with horizontal resizable panels
-                            <ResizablePanelGroup direction='horizontal' className='flex-1'>
-                                {/* Code Editor Panel */}
-                                <ResizablePanel
-                                    minSize={40}
-                                    defaultSize={60}
-                                    className='overflow-hidden'
-                                >
-                                    <div className='flex h-full flex-col'>
-                                        <div className='border-b bg-muted/30 px-4 py-2'>
-                                            <h3 className='font-medium'>
-                                                {t('pages.student_questions.workspace.code')}
-                                            </h3>
-                                        </div>
-                                        <div className='flex-1'>
-                                            <CodeEditor
-                                                value={code}
-                                                showThemePicker={true}
-                                                onChange={handleCodeChange}
-                                                language={ProgrammingLanguageEnum.PYTHON}
-                                                height='100%'
-                                                headerClassName='pt-3 px-3'
-                                                headerChildren={
-                                                    <div className='flex items-center gap-2'>
-                                                        <Button
-                                                            title={
-                                                                isAnswerCompleted
-                                                                    ? t(
-                                                                          'pages.student_questions.workspace.locked.answer_locked',
-                                                                      )
-                                                                    : isWorkspaceLocked &&
-                                                                        !canReattempt
-                                                                      ? t(
-                                                                            'pages.student_questions.workspace.locked.cannot_run',
-                                                                        )
-                                                                      : undefined
-                                                            }
-                                                            onClick={handleRunCode}
-                                                            disabled={
-                                                                isCompiling ||
-                                                                isAnswerCompleted ||
-                                                                (isWorkspaceLocked && !canReattempt)
-                                                            }
-                                                        >
-                                                            {isCompiling ? (
-                                                                <Loader2 className='animate-spin' />
-                                                            ) : isAnswerCompleted ? (
-                                                                <Lock />
-                                                            ) : isWorkspaceLocked &&
-                                                              !canReattempt ? (
-                                                                <Lock />
-                                                            ) : (
-                                                                <Redo2 />
-                                                            )}
-                                                            {isCompiling
-                                                                ? t(
-                                                                      'pages.student_questions.workspace.running',
-                                                                  )
-                                                                : isAnswerCompleted
-                                                                  ? t(
-                                                                        'pages.student_questions.workspace.locked.answer_locked_button',
-                                                                    )
-                                                                  : isWorkspaceLocked &&
-                                                                      !canReattempt
-                                                                    ? t(
-                                                                          'pages.student_questions.workspace.locked.button',
-                                                                      )
-                                                                    : t(
-                                                                          'pages.student_questions.workspace.run',
-                                                                      )}
-                                                            {(!isWorkspaceLocked || canReattempt) &&
-                                                                !isAnswerCompleted &&
-                                                                ' (CTRL + Enter)'}
-                                                        </Button>
+                        </ResizablePanel>
+                    </ResizablePanelGroup>
 
-                                                        {/* Mark as Done Button */}
-                                                        {showMarkAsDoneButton &&
-                                                            !isAnswerCompleted && (
-                                                                <Button
-                                                                    variant='outline'
-                                                                    size='sm'
-                                                                    onClick={() =>
-                                                                        setMarkAsDoneDialogOpen(
-                                                                            true,
-                                                                        )
-                                                                    }
-                                                                    disabled={
-                                                                        markAsDoneMutation.isPending
-                                                                    }
-                                                                    className='border-green-500 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950'
-                                                                >
-                                                                    {markAsDoneMutation.isPending ? (
-                                                                        <Loader2 className='h-4 w-4 animate-spin' />
-                                                                    ) : (
-                                                                        <Check className='h-4 w-4' />
-                                                                    )}
-                                                                    <span className='ml-1 hidden md:inline'>
-                                                                        {t(
-                                                                            'pages.student_questions.workspace.mark_as_done.button',
-                                                                        )}
-                                                                    </span>
-                                                                </Button>
-                                                            )}
-
-                                                        {/* Allow Re-attempt Button */}
-                                                        {isAnswerCompleted && (
-                                                            <Button
-                                                                variant='outline'
-                                                                size='sm'
-                                                                onClick={handleAllowReAttempt}
-                                                                disabled={
-                                                                    allowReAttemptMutation.isPending
-                                                                }
-                                                                className='border-blue-500 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950'
-                                                            >
-                                                                {allowReAttemptMutation.isPending ? (
-                                                                    <Loader2 className='h-4 w-4 animate-spin' />
-                                                                ) : (
-                                                                    <RotateCcw className='h-4 w-4' />
-                                                                )}
-                                                                <span className='ml-1 hidden md:inline'>
-                                                                    {t(
-                                                                        'pages.student_questions.workspace.allow_reattempt.button',
-                                                                    )}
-                                                                </span>
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                }
-                                            />
-                                        </div>
-                                    </div>
-                                </ResizablePanel>
-
-                                <ResizableHandle withHandle />
-
-                                {/* Output Panel */}
-                                <ResizablePanel minSize={20} defaultSize={40}>
-                                    <div className='flex h-full flex-col'>
-                                        <div className='border-b bg-muted/30 px-4 py-2'>
-                                            <h3 className='font-medium'>
-                                                {t('pages.student_questions.workspace.output')}
-                                            </h3>
-                                        </div>
-                                        <div className='flex-1 overflow-auto p-4'>
-                                            {output.length === 0 && !isCompiling ? (
-                                                <div className='flex h-full items-center justify-center text-center text-muted-foreground'>
-                                                    <div>
-                                                        <AlertTriangle className='mx-auto mb-2 h-8 w-8' />
-                                                        <p>
-                                                            {t(
-                                                                'pages.student_questions.workspace.no_output_yet',
-                                                            )}
-                                                        </p>
-                                                    </div>
-                                                </div>
+                    {/* Mobile layout */}
+                    <div className='flex flex-1 flex-col lg:hidden'>
+                        {/* Code Editor */}
+                        <div className='flex-1'>
+                            <CodeEditor
+                                value={code}
+                                showThemePicker={true}
+                                onChange={handleCodeChange}
+                                language={ProgrammingLanguageEnum.PYTHON}
+                                height='50vh'
+                                headerClassName='pt-3 px-3'
+                                headerChildren={
+                                    <div className='flex items-center gap-2'>
+                                        <Button
+                                            title={
+                                                isAnswerCompleted
+                                                    ? t(
+                                                          'pages.student_questions.workspace.locked.answer_locked',
+                                                      )
+                                                    : isWorkspaceLocked && !canReattempt
+                                                      ? t(
+                                                            'pages.student_questions.workspace.locked.cannot_run',
+                                                        )
+                                                      : undefined
+                                            }
+                                            size='sm'
+                                            onClick={handleRunCode}
+                                            disabled={
+                                                isCompiling ||
+                                                isAnswerCompleted ||
+                                                (isWorkspaceLocked && !canReattempt)
+                                            }
+                                        >
+                                            {isCompiling ? (
+                                                <Loader2 className='animate-spin' />
+                                            ) : isAnswerCompleted ? (
+                                                <Lock />
+                                            ) : isWorkspaceLocked && !canReattempt ? (
+                                                <Lock />
                                             ) : (
-                                                <div className='space-y-2'>
-                                                    {output.map((out, i) => {
-                                                        if (out.type === 'image') {
-                                                            return (
-                                                                <div key={i}>
-                                                                    <img
-                                                                        src={out.content}
-                                                                        className='mx-auto max-w-full rounded'
-                                                                        alt={`Output ${i}`}
-                                                                    />
-                                                                </div>
-                                                            );
-                                                        } else if (out.type === 'error') {
-                                                            return (
-                                                                <Alert
-                                                                    variant='destructive'
-                                                                    key={i}
-                                                                >
-                                                                    <AlertCircle className='h-4 w-4' />
-                                                                    <AlertTitle>
-                                                                        {t(
-                                                                            'pages.student_questions.workspace.error.title',
-                                                                        )}
-                                                                    </AlertTitle>
-                                                                    <AlertDescription>
-                                                                        <pre className='whitespace-pre-wrap text-xs'>
-                                                                            {out.content}
-                                                                        </pre>
-                                                                    </AlertDescription>
-                                                                </Alert>
-                                                            );
-                                                        } else if (out.type === 'test_stats') {
-                                                            return (
-                                                                <Card key={i}>
-                                                                    <CardContent className='p-4'>
-                                                                        <div className='mb-2 flex items-center justify-between'>
-                                                                            <h4 className='font-medium'>
-                                                                                {t(
-                                                                                    'pages.student_questions.workspace.test_results',
-                                                                                )}
-                                                                            </h4>
-                                                                            <Badge
-                                                                                variant={getTestResultBadgeVariant(
-                                                                                    out.success,
-                                                                                    out.total_tests,
-                                                                                )}
-                                                                            >
-                                                                                {out.success}/
-                                                                                {out.total_tests}
-                                                                                {t(
-                                                                                    'pages.student_questions.workspace.passed',
-                                                                                )}
-                                                                            </Badge>
-                                                                        </div>
-                                                                        <Progress
-                                                                            value={
-                                                                                out.success
-                                                                                    ? (out.success /
-                                                                                          out.total_tests) *
-                                                                                      100
-                                                                                    : 0
-                                                                            }
-                                                                            className='h-2'
-                                                                        />
-                                                                    </CardContent>
-                                                                </Card>
-                                                            );
-                                                        } else if (out.type === 'test_result') {
-                                                            return (
-                                                                <div
-                                                                    key={i}
-                                                                    className='rounded-md bg-muted p-3 text-sm'
-                                                                >
-                                                                    <pre className='whitespace-pre-wrap text-xs'>
-                                                                        {out.content}
-                                                                    </pre>
-                                                                </div>
-                                                            );
-                                                        } else {
-                                                            return <div key={i}>{out.content}</div>;
-                                                        }
-                                                    })}
-                                                    {isCompiling && (
-                                                        <div className='flex items-center justify-center p-4 text-muted-foreground'>
-                                                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                                                            {t(
-                                                                'pages.student_questions.workspace.running',
-                                                            )}
-                                                            ...
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                <Redo2 />
                                             )}
+                                            {isCompiling
+                                                ? t('pages.student_questions.workspace.running')
+                                                : isAnswerCompleted
+                                                  ? t(
+                                                        'pages.student_questions.workspace.locked.answer_locked_button',
+                                                    )
+                                                  : isWorkspaceLocked && !canReattempt
+                                                    ? t(
+                                                          'pages.student_questions.workspace.locked.button',
+                                                      )
+                                                    : t('pages.student_questions.workspace.run')}
+                                        </Button>
+
+                                        {/* Mark as Done Button */}
+                                        {showMarkAsDoneButton && !isAnswerCompleted && (
+                                            <Button
+                                                variant='outline'
+                                                size='sm'
+                                                onClick={() => setMarkAsDoneDialogOpen(true)}
+                                                disabled={markAsDoneMutation.isPending}
+                                                className='border-green-500 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950'
+                                            >
+                                                {markAsDoneMutation.isPending ? (
+                                                    <Loader2 className='h-4 w-4 animate-spin' />
+                                                ) : (
+                                                    <Check className='h-4 w-4' />
+                                                )}
+                                            </Button>
+                                        )}
+
+                                        {/* Allow Re-attempt Button */}
+                                        {isAnswerCompleted && (
+                                            <Button
+                                                variant='outline'
+                                                size='sm'
+                                                onClick={handleAllowReAttempt}
+                                                disabled={allowReAttemptMutation.isPending}
+                                                className='border-blue-500 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950'
+                                            >
+                                                {allowReAttemptMutation.isPending ? (
+                                                    <Loader2 className='h-4 w-4 animate-spin' />
+                                                ) : (
+                                                    <RotateCcw className='h-4 w-4' />
+                                                )}
+                                            </Button>
+                                        )}
+                                    </div>
+                                }
+                            />
+                        </div>
+
+                        {/* Output */}
+                        <div className='border-t bg-background'>
+                            <div className='border-b bg-muted/30 px-4 py-2'>
+                                <h3 className='text-sm font-medium'>
+                                    {t('pages.student_questions.workspace.output')}
+                                </h3>
+                            </div>
+                            <div className='max-h-64 overflow-auto p-4'>
+                                {output.length === 0 && !isCompiling ? (
+                                    <div className='flex h-32 items-center justify-center text-center text-muted-foreground'>
+                                        <div>
+                                            <AlertTriangle className='mx-auto mb-2 h-6 w-6' />
+                                            <p className='text-sm'>
+                                                {t(
+                                                    'pages.student_questions.workspace.no_output_yet',
+                                                )}
+                                            </p>
                                         </div>
                                     </div>
-                                </ResizablePanel>
-                            </ResizablePanelGroup>
-                        )}
-
-                        {/* Run Button Footer - Fixed at bottom */}
-                        {/* <div className='flex items-center justify-between border-t bg-background p-4'>
-                            <div className='text-sm text-muted-foreground lg:hidden'>
-                                {t('pages.student_questions.workspace.time')}:{' '}
-                                {formatTime(timeSpent)}
+                                ) : (
+                                    <div className='space-y-2'>
+                                        {output.map((out, i) => {
+                                            if (out.type === 'image') {
+                                                return (
+                                                    <div key={i}>
+                                                        <img
+                                                            src={out.content}
+                                                            className='mx-auto max-w-full rounded'
+                                                            alt={`Output ${i}`}
+                                                        />
+                                                    </div>
+                                                );
+                                            } else if (out.type === 'error') {
+                                                return (
+                                                    <Alert variant='destructive' key={i}>
+                                                        <AlertCircle className='h-4 w-4' />
+                                                        <AlertTitle>
+                                                            {t(
+                                                                'pages.student_questions.workspace.error.title',
+                                                            )}
+                                                        </AlertTitle>
+                                                        <AlertDescription>
+                                                            <pre className='whitespace-pre-wrap text-xs'>
+                                                                {out.content}
+                                                            </pre>
+                                                        </AlertDescription>
+                                                    </Alert>
+                                                );
+                                            } else if (out.type === 'test_stats') {
+                                                return (
+                                                    <Card key={i}>
+                                                        <CardContent className='p-3'>
+                                                            <div className='mb-2 flex items-center justify-between'>
+                                                                <h4 className='text-sm font-medium'>
+                                                                    {t(
+                                                                        'pages.student_questions.workspace.test_results',
+                                                                    )}
+                                                                </h4>
+                                                                <Badge
+                                                                    variant={getTestResultBadgeVariant(
+                                                                        out.success,
+                                                                        out.total_tests,
+                                                                    )}
+                                                                >
+                                                                    {out.success}/{out.total_tests}
+                                                                    {t(
+                                                                        'pages.student_questions.workspace.passed',
+                                                                    )}
+                                                                </Badge>
+                                                            </div>
+                                                            <Progress
+                                                                value={
+                                                                    out.success
+                                                                        ? (out.success /
+                                                                              out.total_tests) *
+                                                                          100
+                                                                        : 0
+                                                                }
+                                                                className='h-2'
+                                                            />
+                                                        </CardContent>
+                                                    </Card>
+                                                );
+                                            } else if (out.type === 'test_result') {
+                                                return (
+                                                    <div
+                                                        key={i}
+                                                        className='rounded-md bg-muted p-3 text-sm'
+                                                    >
+                                                        <pre className='whitespace-pre-wrap text-xs'>
+                                                            {out.content}
+                                                        </pre>
+                                                    </div>
+                                                );
+                                            } else {
+                                                return (
+                                                    <div key={i} className='text-sm'>
+                                                        {out.content}
+                                                    </div>
+                                                );
+                                            }
+                                        })}
+                                        {isCompiling && (
+                                            <div className='flex items-center justify-center p-4 text-muted-foreground'>
+                                                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                                {t('pages.student_questions.workspace.running')}
+                                                ...
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                        </div> */}
+                        </div>
                     </div>
                 </div>
             </div>

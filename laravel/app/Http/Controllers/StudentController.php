@@ -181,14 +181,14 @@ class StudentController extends Controller {
             ->get()
             ->map(function ($testCase) {
                 // If the test case is hidden, don't send the actual input to the frontend
-                if ($testCase->hidden) {
-                    return [
-                        'id' => $testCase->id,
-                        'description' => $testCase->description,
-                        'hidden' => $testCase->hidden,
-                        'active' => $testCase->active,
-                    ];
-                }
+                // if ($testCase->hidden) {
+                //     return [
+                //         'id' => $testCase->id,
+                //         'description' => $testCase->description,
+                //         'hidden' => $testCase->hidden,
+                //         'active' => $testCase->active,
+                //     ];
+                // }
 
                 return [
                     'id' => $testCase->id,
@@ -270,6 +270,10 @@ class StudentController extends Controller {
             'latestCode' => $latestExecution ? $latestExecution->code : null,
             'navigation' => $navigation,
             'nextMaterial' => $nextMaterial,
+            'progressiveRevelationConfig' => [
+                'failed_attempts_threshold' => config('test_case_tracking.failed_attempts_threshold', 3),
+                'enabled' => config('test_case_tracking.enable_progressive_revelation', true),
+            ],
         ]);
     }
 
