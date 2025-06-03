@@ -6,7 +6,11 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder {
     public function run(): void {
-        if (app()->isProduction()) {
+        // Check if we should force development seeding even in production
+        $forceDevSeeding = env('FORCE_DEV_SEEDING', false);
+
+        // Use production seeding unless development seeding is forced
+        if (app()->isProduction() && !$forceDevSeeding) {
             $this->call([
                 PermissionSeeder::class,
                 RoleSeeder::class,
