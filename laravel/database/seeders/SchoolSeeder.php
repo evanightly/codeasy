@@ -14,7 +14,11 @@ class SchoolSeeder extends Seeder {
     public function __construct(private UserSeeder $userSeeder) {}
 
     public function run(): void {
-        if (app()->isProduction()) {
+        // Check if we should force development seeding even in production
+        $forceDevSeeding = env('FORCE_DEV_SEEDING', false);
+
+        // Use production seeding unless development seeding is forced
+        if (app()->isProduction() && !$forceDevSeeding) {
             $this->seedProductionData();
 
             return;

@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\Log;
 
 class ExecutionResultSeeder extends Seeder {
     public function run(): void {
-        // if (app()->isProduction()) {
-        //     return;
-        // }
+        // Check if we should force development seeding even in production
+        $forceDevSeeding = env('FORCE_DEV_SEEDING', false);
+
+        // Skip seeding if in production and not forced to use development data
+        if (app()->isProduction() && !$forceDevSeeding) {
+            return;
+        }
 
         $this->info('Seeding execution results with realistic attempt history...');
 
