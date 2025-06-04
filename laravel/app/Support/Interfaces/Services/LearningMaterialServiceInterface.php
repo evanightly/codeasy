@@ -12,4 +12,9 @@ interface LearningMaterialServiceInterface extends BaseCrudServiceInterface {
      * Get next and previous question information
      */
     public function getQuestionNavigation(int $materialId, int $currentQuestionId): array;
+
+    /**
+     * Get PDF file as base64 encoded string
+     */
+    public function getPdfAsBase64(string $filePath): array;
 }

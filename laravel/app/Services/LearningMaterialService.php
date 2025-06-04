@@ -228,6 +228,171 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
         ];
     }
 
+    /**
+     * Get PDF file as base64 encoded string
+     *
+     * Handles large files intelligently:
+     * - Files under 50MB: Full base64 encoding
+     * - Files 50MB-200MB: Chunked encoding with memory management
+     * - Files over 200MB: Returns fallback to direct URL
+     */
+    public function getPdfAsBase64(string $filePath): array {
+        try {
+            // Validate file path to prevent directory traversal
+            $cleanPath = str_replace(['../', './'], '', $filePath);
+            $fullPath = storage_path('app/public/' . $cleanPath);
+
+            // Check if file exists and is a PDF
+            if (!file_exists($fullPath)) {
+                return [
+                    'success' => false,
+                    'message' => 'File not found',
+                    'fallback_url' => '/storage/' . $cleanPath,
+                ];
+            }
+
+            // Verify it's a PDF file
+            $mimeType = mime_content_type($fullPath);
+            if ($mimeType !== 'application/pdf') {
+                return [
+                    'success' => false,
+                    'message' => 'File is not a PDF',
+                    'fallback_url' => '/storage/' . $cleanPath,
+                ];
+            }
+
+            // Get file size and determine encoding strategy
+            $fileSize = filesize($fullPath);
+            $fileSizeMB = $fileSize / (1024 * 1024);
+
+            // Size limits (in bytes)
+            $maxDirectBase64Size = 50 * 1024 * 1024; // 50MB
+            $maxChunkedBase64Size = 200 * 1024 * 1024; // 200MB
+            $maxMemoryLimit = ini_get('memory_limit');
+            $maxMemoryBytes = $this->convertToBytes($maxMemoryLimit);
+
+            // For very large files (>200MB), return fallback immediately
+            if ($fileSize > $maxChunkedBase64Size) {
+                return [
+                    'success' => false,
+                    'message' => "File too large for base64 encoding ({$fileSizeMB}MB). Using direct URL fallback.",
+                    'file_size_mb' => round($fileSizeMB, 2),
+                    'fallback_url' => '/storage/' . $cleanPath,
+                    'reason' => 'file_too_large',
+                ];
+            }
+
+            // Check if we have enough memory (base64 needs ~133% of original size + working memory)
+            $estimatedMemoryNeeded = $fileSize * 2; // Conservative estimate
+            if ($estimatedMemoryNeeded > ($maxMemoryBytes * 0.7)) { // Use only 70% of available memory
+                return [
+                    'success' => false,
+                    'message' => 'Insufficient memory for base64 encoding. Using direct URL fallback.',
+                    'file_size_mb' => round($fileSizeMB, 2),
+                    'estimated_memory_mb' => round($estimatedMemoryNeeded / (1024 * 1024), 2),
+                    'available_memory_mb' => round($maxMemoryBytes / (1024 * 1024), 2),
+                    'fallback_url' => '/storage/' . $cleanPath,
+                    'reason' => 'insufficient_memory',
+                ];
+            }
+
+            // For small files (<50MB), use direct encoding
+            if ($fileSize <= $maxDirectBase64Size) {
+                $fileContent = file_get_contents($fullPath);
+                if ($fileContent === false) {
+                    return [
+                        'success' => false,
+                        'message' => 'Unable to read file',
+                        'fallback_url' => '/storage/' . $cleanPath,
+                    ];
+                }
+
+                $base64 = base64_encode($fileContent);
+
+                return [
+                    'success' => true,
+                    'data' => 'data:application/pdf;base64,' . $base64,
+                    'filename' => basename($filePath),
+                    'file_size_mb' => round($fileSizeMB, 2),
+                    'encoding_method' => 'direct',
+                ];
+            }
+
+            // For medium files (50-200MB), use chunked encoding
+            return $this->encodeFileInChunks($fullPath, $cleanPath, $fileSizeMB);
+
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error processing file: ' . $e->getMessage(),
+                'fallback_url' => isset($cleanPath) ? '/storage/' . $cleanPath : null,
+            ];
+        }
+    }
+
+    /**
+     * Encode large files in chunks to manage memory usage
+     */
+    private function encodeFileInChunks(string $fullPath, string $cleanPath, float $fileSizeMB): array {
+        try {
+            $handle = fopen($fullPath, 'rb');
+            if (!$handle) {
+                throw new \Exception('Cannot open file for reading');
+            }
+
+            $chunkSize = 1024 * 1024; // 1MB chunks
+            $base64Chunks = [];
+
+            while (!feof($handle)) {
+                $chunk = fread($handle, $chunkSize);
+                if ($chunk === false) {
+                    fclose($handle);
+                    throw new \Exception('Error reading file chunk');
+                }
+                $base64Chunks[] = base64_encode($chunk);
+            }
+
+            fclose($handle);
+
+            $base64 = implode('', $base64Chunks);
+
+            return [
+                'success' => true,
+                'data' => 'data:application/pdf;base64,' . $base64,
+                'filename' => basename($cleanPath),
+                'file_size_mb' => round($fileSizeMB, 2),
+                'encoding_method' => 'chunked',
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error in chunked encoding: ' . $e->getMessage(),
+                'fallback_url' => '/storage/' . $cleanPath,
+            ];
+        }
+    }
+
+    /**
+     * Convert PHP memory limit string to bytes
+     */
+    private function convertToBytes(string $value): int {
+        $value = trim($value);
+        $last = strtolower($value[strlen($value) - 1]);
+        $value = (int) $value;
+
+        switch ($last) {
+            case 'g':
+                $value *= 1024;
+            case 'm':
+                $value *= 1024;
+            case 'k':
+                $value *= 1024;
+        }
+
+        return $value;
+    }
+
     /** @var LearningMaterialRepository */
     protected $repository;
 

@@ -44,6 +44,8 @@ class StudentCourseCognitiveClassificationController extends Controller implemen
             );
 
             if (!$classification) {
+                return; // disabled because axios will be marked this as an error (i.e. -1 UX for student dashboard)
+
                 return response()->json(['message' => 'No classification found for this student and course'], 404);
             }
 

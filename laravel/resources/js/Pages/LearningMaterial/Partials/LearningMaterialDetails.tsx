@@ -1,9 +1,10 @@
-import { PDFViewer } from '@/Components/PDFViewer';
+import { PDFViewerEnhanced } from '@/Components/PDFViewerEnhanced';
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
 import { ROUTES } from '@/Support/Constants/routes';
 import { LearningMaterialTypeEnum } from '@/Support/Enums/learningMaterialTypeEnum';
 import { LearningMaterialResource } from '@/Support/Interfaces/Resources';
+import { convertUrlForEnhancedViewer } from '@/Utils/pdfViewerUtils';
 import { Link } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
@@ -41,8 +42,9 @@ export const LearningMaterialDetails = ({ material }: LearningMaterialDetailsPro
 
                     {material.file_extension.toLowerCase() === 'pdf' ? (
                         <div className='mt-4'>
-                            <PDFViewer
-                                fileUrl={material?.file_url || ''}
+                            <PDFViewerEnhanced
+                                {...convertUrlForEnhancedViewer(material?.file_url || '')}
+                                useBase64={true}
                                 filename={`${material.title}.${material.file_extension}`}
                                 className='mt-2'
                             />

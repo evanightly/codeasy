@@ -755,6 +755,7 @@ export default function Workspace({
                                                 <div className='mt-6 border-t pt-4'>
                                                     <div className='rounded-md border bg-background'>
                                                         <PDFViewer
+                                                            title='-'
                                                             fileUrl={material.data.file_url}
                                                             filename={
                                                                 material.data.file ||
@@ -1033,6 +1034,7 @@ export default function Workspace({
                                             <div className='mt-6 border-t pt-4'>
                                                 <div className='rounded-md border bg-background'>
                                                     <PDFViewer
+                                                        title='-'
                                                         fileUrl={material.data.file_url}
                                                         filename={
                                                             material.data.file ||

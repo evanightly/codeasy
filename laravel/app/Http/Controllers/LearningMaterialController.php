@@ -6,6 +6,7 @@ use App\Http\Requests\LearningMaterial\StoreLearningMaterialRequest;
 use App\Http\Requests\LearningMaterial\UpdateLearningMaterialRequest;
 use App\Http\Resources\LearningMaterialResource;
 use App\Models\LearningMaterial;
+use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\LearningMaterialServiceInterface;
 use Illuminate\Http\Request;
@@ -30,6 +31,12 @@ class LearningMaterialController extends Controller implements HasMiddleware {
     }
 
     public function index(Request $request) {
+        $intent = $request->get('intent');
+
+        if ($intent === IntentEnum::LEARNING_MATERIAL_INDEX_PDF_BASE64->value) {
+            return $this->learningMaterialService->getPdfAsBase64($request->query('file_path'));
+        }
+
         $data = LearningMaterialResource::collection($this->learningMaterialService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {

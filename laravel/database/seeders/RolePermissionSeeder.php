@@ -91,6 +91,7 @@ class RolePermissionSeeder extends Seeder {
                 ->get();
 
             $permissions->push(
+                PermissionEnum::LEARNING_MATERIAL_READ->value,
                 PermissionEnum::STUDENT_COGNITIVE_CLASSIFICATION_READ->value,
                 PermissionEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_READ->value,
                 PermissionEnum::STUDENT_COURSE_COGNITIVE_CLASSIFICATION_HISTORY_READ->value,
