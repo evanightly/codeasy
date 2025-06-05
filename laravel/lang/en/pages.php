@@ -64,6 +64,9 @@ return [
                 'error' => 'There was a problem creating your account',
             ],
         ],
+        'verify_email' => [
+            'resend_button' => 'Resend Verification Email',
+        ],
     ],
     'user' => [
         'common' => [
@@ -181,6 +184,9 @@ return [
         ],
     ],
     'permission' => [
+        'edit' => [
+            'title' => 'Edit Permission',
+        ],
         'common' => [
             'fields' => [
                 'name' => 'Permission Name',
@@ -1566,6 +1572,75 @@ return [
                 'radial_chart' => 'Radial Chart',
             ],
         ],
+        'student' => [
+            'title' => 'Student Dashboard',
+            'subtitle' => 'View your learning progress here',
+            'latest_work_progress' => [
+                'title' => 'Latest Learning Progress',
+                'description' => 'Continue learning from where you left off',
+                'loading' => 'Loading data...',
+                'no_progress' => 'No learning progress yet.',
+                'course_label' => 'Course:',
+                'material_label' => 'Material:',
+                'current_question_label' => 'Current question progress:',
+                'continue_button' => 'Continue Current Question',
+                'skip_button' => 'Jump to Next Question',
+                'start_next_button' => 'Start Next Question',
+            ],
+            'cognitive_classification' => [
+                'title' => 'Cognitive Classification',
+                'description' => 'Cognitive understanding level based on Bloom\'s taxonomy',
+                'loading' => 'Loading course data...',
+                'no_courses' => 'Not enrolled in any courses yet.',
+                'classification_history_title' => 'Cognitive Classification History -',
+                'classification_history_subtitle' => 'View cognitive level development and learning trends over time',
+                'card' => [
+                    'click_for_details' => 'Click to view detailed history',
+                    'loading' => 'Loading...',
+                    'no_classification' => 'No classification yet',
+                    'last_classified' => 'Last:',
+                ],
+            ],
+            'charts' => [
+                'learning_progress' => [
+                    'title' => 'Learning Progress (Area Chart)',
+                    'description' => 'Since first joined',
+                ],
+                'cognitive_level' => [
+                    'title' => 'Bloom\'s Cognitive Levels (Pie)',
+                    'description' => 'Classification Results',
+                ],
+                'module_progress' => [
+                    'title' => 'Unfinished Modules (Bar)',
+                    'description' => 'Personal module progress',
+                    'footer' => '1 = Completed, 0 = Not Yet',
+                ],
+            ],
+        ],
+        'school_admin' => [
+            'title' => 'School Admin Overview',
+            'subtitle' => 'Summary dashboard for School',
+            'charts' => [
+                'population' => [
+                    'title' => 'School Population (Bar Chart)',
+                    'description' => 'Staff, Teachers, Students',
+                    'footer' => 'Current Stats',
+                ],
+                'facilities' => [
+                    'title' => 'School Facilities (Pie)',
+                    'description' => 'Lab, Projectors, etc.',
+                    'items_label' => 'Items',
+                ],
+                'class_development' => [
+                    'title' => 'Class Development (Radar)',
+                    'description' => 'January vs June',
+                ],
+                'level_performance' => [
+                    'title' => 'Grade Performance (Radial Chart)',
+                    'description' => 'Elementary, Middle, High School',
+                ],
+            ],
+        ],
         'teacher' => [
             'title' => 'Teacher Dashboard',
             'subtitle' => 'Course and student progress overview',
@@ -1619,6 +1694,30 @@ return [
                 'average_score' => 'Average Score',
                 'completion_rate' => 'Completion Rate',
                 'pass_rate' => 'Pass Rate',
+            ],
+        ],
+        'admin' => [
+            'title' => 'Admin Overview',
+            'subtitle' => 'Dashboard ringkasan untuk Administrator',
+            'charts' => [
+                'users_bar' => [
+                    'title' => 'Users (Bar Chart)',
+                    'description' => '6-month Growth',
+                    'footer' => 'Trending up',
+                ],
+                'user_roles_pie' => [
+                    'title' => 'User Roles (Pie Chart)',
+                    'description' => 'Admin / Guru / Siswa',
+                    'total_label' => 'total',
+                ],
+                'site_visits_line' => [
+                    'title' => 'Site Visits (Line Chart)',
+                    'description' => 'One-week data',
+                ],
+                'radar_example' => [
+                    'title' => 'Radar Chart Example',
+                    'description' => 'January vs June',
+                ],
             ],
         ],
         'student_tracking' => [
@@ -1851,6 +1950,384 @@ return [
             ],
             'error' => [
                 'execute' => 'Failed to queue execution',
+            ],
+        ],
+    ],
+
+    'classification' => [
+        'dialog' => [
+            'title' => 'Classification Details',
+            'description' => 'Detailed steps of the classification process',
+        ],
+        'material_dialog' => [
+            'title' => 'Material Classification Details',
+            'description' => 'Detailed information about the material cognitive classification',
+        ],
+        'course_dialog' => [
+            'title' => 'Course Classification Details',
+            'description' => 'Detailed information about the course cognitive classification',
+        ],
+        'report_dialog' => [
+            'title' => 'Cognitive Classification Report',
+        ],
+        'cards' => [
+            'benefit_criteria' => 'Benefit Criteria',
+            'cost_criteria' => 'Cost Criteria',
+            'classification_result' => 'Classification Result',
+            'rule_base_mapping' => 'Rule Base Mapping',
+            'calculation_process' => 'Calculation Process',
+            'classification_overview' => 'Classification Overview',
+            'material_details' => 'Material Details',
+            'material_classification' => 'Material Classification',
+            'recommendations' => 'Recommendations',
+            'areas_for_improvement' => 'Areas for Improvement',
+            'question_performance' => 'Question Performance',
+            'additional_information' => 'Additional Information',
+            'test_case_metrics' => 'Test Case Metrics',
+            'classification_history_memory' => 'Classification History (Memory Test)',
+        ],
+        'section_headers' => [
+            'column_sums' => 'Column Sums',
+            'normalized_matrix' => 'Normalized Matrix',
+            'weights' => 'Weights',
+            'weighted_matrix' => 'Weighted Matrix',
+            'ideal_solutions' => 'Ideal Solutions',
+            'performance_scores' => 'Performance Scores',
+            'final_score' => 'Final Score',
+            'final_level' => 'Final Level',
+            'material_classifications' => 'Material Classifications',
+            'calculation_details' => 'Calculation Details',
+            'students_by_level' => 'Students by Level',
+            'cognitive_classification_report' => 'Cognitive Classification Report',
+        ],
+        'labels' => [
+            'benefits' => 'Benefits:',
+            'costs' => 'Costs:',
+            'course' => 'Course:',
+            'benefit_up' => 'Benefit ↑',
+            'cost_down' => 'Cost ↓',
+            'overall_test_case_completion' => 'Overall Test Case Completion',
+            'no_test_case_metrics' => 'No test case metrics available.',
+            'not_specified' => 'Not specified',
+            'unknown_student' => 'Unknown Student',
+            'unknown_material' => 'Unknown Material',
+        ],
+        'table_headers' => [
+            'material' => 'Material',
+            'material_name' => 'Material Name',
+            'solution' => 'Solution',
+            'alternative' => 'Alternative',
+            'performance_score' => 'Performance Score (Ci)',
+            'level' => 'Level',
+            'score_range' => 'Score Range',
+            'score' => 'Score',
+            'question' => 'Question',
+            'completed' => 'Completed',
+            'total' => 'Total',
+            'completion_rate' => 'Completion Rate',
+            'compiles' => 'Compiles',
+            'time_min' => 'Time (min)',
+            'complete' => 'Complete',
+            'trial' => 'Trial',
+            'variables' => 'Variables',
+            'functions' => 'Functions',
+            'test_cases' => 'Test Cases',
+            'compile_count' => 'compile_count',
+            'coding_time' => 'coding_time',
+            'trial_status' => 'trial_status',
+            'completion_status' => 'completion_status',
+            'variable_count' => 'variable_count',
+            'function_count' => 'function_count',
+            'test_case_rate' => 'test_case_rate',
+        ],
+        'status' => [
+            'loading' => 'Loading classification details...',
+            'error_title' => 'Error',
+            'error_message' => 'Failed to load classification details',
+            'material_error' => 'Error loading material classification details. Please try again.',
+            'material_error_failed' => 'Failed to load material classification details',
+        ],
+    ],
+
+    // Permission Messages
+    'permission' => [
+        'messages' => [
+            'loading' => 'Updating permission...',
+            'success' => 'Permission updated successfully',
+            'error' => 'An error occurred while updating permission',
+        ],
+    ],
+
+    // Sandbox
+    'sandbox' => [
+        'buttons' => [
+            'submit' => 'Submit',
+        ],
+    ],
+
+    'welcome' => [
+        'meta' => [
+            'title' => 'Codeasy - Python and Data Science Learning',
+            'description' => 'Codeasy is a Python learning platform for Data Science with automatic cognitive analysis based on Bloom\'s Taxonomy.',
+            'og_title' => 'Codeasy - Python and Data Science Learning',
+            'og_description' => 'Interactive learning platform with autograding and automatic cognitive analysis.',
+        ],
+        'navbar' => [
+            'brand' => 'Codeasy',
+            'navigation' => [
+                'features' => 'Features',
+                'how_it_works' => 'How it Works',
+                'testimonials' => 'Testimonials',
+                'dashboard' => 'Dashboard',
+                'login' => 'Login',
+                'get_started' => 'Get Started',
+            ],
+            'aria' => [
+                'toggle_navigation' => 'Toggle Navigation',
+            ],
+        ],
+        'hero' => [
+            'badge' => 'Powered by Machine Learning',
+            'title' => 'Data Science Learning System',
+            'rotating_words' => [
+                'data_science' => 'Data Science',
+                'data_analytics' => 'Data Analytics',
+                'business_intelligence' => 'Business Intelligence',
+            ],
+            'subtitle' => 'Enhance your understanding of Python programming for Data Science with autograding system and automatic cognitive analysis based on Bloom\'s Taxonomy.',
+            'cta' => [
+                'get_started' => 'Get Started',
+                'try_sandbox' => 'Try Sandbox',
+            ],
+            'code_editor' => [
+                'filename' => 'cognitive_analysis.py',
+                'language' => 'Python • Machine Learning',
+                'comments' => [
+                    'load_data' => '# Load student data',
+                    'extract_features' => '# Extract features from student code submissions',
+                    'extract_labels' => '# Extract existing cognitive level labels for training',
+                    'split_data' => '# Split data for training and testing',
+                    'train_classifier' => '# Train cognitive level classifier',
+                    'predict_levels' => '# Predict cognitive levels',
+                    'output_accuracy' => '# Output model accuracy and distribution',
+                ],
+                'bloom_levels' => [
+                    'remembering' => 'Remembering',
+                    'understanding' => 'Understanding',
+                    'applying' => 'Applying',
+                    'analyzing' => 'Analyzing',
+                    'evaluating' => 'Evaluating',
+                    'creating' => 'Creating',
+                ],
+                'output' => [
+                    'model_accuracy' => 'Model accuracy:',
+                    'cognitive_distribution' => 'Cognitive level distribution:',
+                ],
+                'legend' => [
+                    'title' => 'Cognitive Level Analysis',
+                    'auto_generated' => 'Auto-generated',
+                    'analysis_result' => 'Real-time analysis shows 85% accuracy in cognitive level classification',
+                    'levels' => [
+                        'remembering' => 'Remembering',
+                        'understanding' => 'Understanding',
+                        'applying' => 'Applying',
+                        'analyzing' => 'Analyzing',
+                        'evaluating' => 'Evaluating',
+                        'creating' => 'Creating',
+                    ],
+                ],
+            ],
+        ],
+        'cognitive_analysis' => [
+            'title' => 'Real-time Cognitive Analysis',
+            'subtitle' => 'Based on Bloom\'s Taxonomy',
+            'levels' => [
+                'remembering' => 'Remembering',
+                'understanding' => 'Understanding',
+                'applying' => 'Applying',
+                'analyzing' => 'Analyzing',
+                'evaluating' => 'Evaluating',
+                'creating' => 'Creating',
+            ],
+        ],
+        'features' => [
+            'badge' => 'Platform Features',
+            'title' => 'Platform Features',
+            'subtitle' => 'Complete learning solution for Python Data Science',
+            'cards' => [
+                'autograding' => [
+                    'title' => 'Automatic Grading',
+                    'description' => 'Instant feedback on your Python code with comprehensive test cases',
+                ],
+                'cognitive_analysis' => [
+                    'title' => 'Cognitive Analysis',
+                    'description' => 'Real-time assessment of learning progress based on Bloom\'s Taxonomy',
+                ],
+                'skkni_curriculum' => [
+                    'title' => 'SKKNI Curriculum',
+                    'description' => 'Curriculum based on Indonesian National Work Competency Standards for Data Science',
+                ],
+            ],
+            'items' => [
+                'autograding' => [
+                    'title' => 'Automatic Grading',
+                    'description' => 'Instant feedback on your Python code with comprehensive test cases',
+                ],
+                'cognitive_analysis' => [
+                    'title' => 'Cognitive Analysis',
+                    'description' => 'Real-time assessment of learning progress based on Bloom\'s Taxonomy',
+                ],
+                'interactive_learning' => [
+                    'title' => 'Interactive Learning',
+                    'description' => 'Hands-on programming exercises with live code execution',
+                ],
+                'progress_tracking' => [
+                    'title' => 'Progress Tracking',
+                    'description' => 'Detailed analytics on learning journey and skill development',
+                ],
+                'adaptive_system' => [
+                    'title' => 'Adaptive System',
+                    'description' => 'Personalized learning path based on individual performance',
+                ],
+                'real_time_feedback' => [
+                    'title' => 'Real-time Feedback',
+                    'description' => 'Immediate responses to code submissions and problem solving',
+                ],
+            ],
+        ],
+        'how_it_works' => [
+            'badge' => 'Simple Process',
+            'title' => 'How Codeasy Works',
+            'subtitle' => 'Simple steps to master Data Science',
+            'steps' => [
+                'choose_material' => [
+                    'title' => 'Choose Learning Material',
+                    'description' => 'Select from our comprehensive Python and Data Science curriculum based on SKKNI standards',
+                ],
+                'learn_concepts' => [
+                    'title' => 'Learn Core Concepts',
+                    'description' => 'Study theoretical foundations with interactive examples and real-world applications',
+                ],
+                'coding_practice' => [
+                    'title' => 'Practice Coding',
+                    'description' => 'Write and execute Python code in our integrated development environment',
+                ],
+                'cognitive_analysis' => [
+                    'title' => 'Get Cognitive Analysis',
+                    'description' => 'Receive detailed assessment of your understanding level based on Bloom\'s Taxonomy',
+                ],
+            ],
+        ],
+        'statistics' => [
+            'badge' => 'Platform Impact',
+            'title' => 'Menciptakan Talenta Data Science Berkualitas',
+            'subtitle' => 'Bergabung dengan ribuan pelajar dari berbagai institusi pendidikan di Indonesia',
+            'stats' => [
+                'active_students' => [
+                    'number' => '10,000+',
+                    'label' => 'Pelajar Aktif',
+                ],
+                'institutions' => [
+                    'number' => '150+',
+                    'label' => 'Institusi Pendidikan',
+                ],
+                'completion_rate' => [
+                    'number' => '95%',
+                    'label' => 'Tingkat Kelulusan',
+                ],
+                'industry_absorption' => [
+                    'number' => '86%',
+                    'label' => 'Alumni Terserap Industri',
+                ],
+            ],
+        ],
+        'testimonials' => [
+            'badge' => 'Testimonials',
+            'title' => 'What Students Say',
+            'subtitle' => 'Feedback from our learning community',
+            'reviews' => [
+                'student_1' => [
+                    'name' => 'Sarah Johnson',
+                    'role' => 'Computer Science Student',
+                    'quote' => 'Codeasy helped me understand Data Science concepts better than any other platform. The cognitive analysis is incredibly helpful.',
+                ],
+                'instructor_1' => [
+                    'name' => 'Dr. Ahmad Rahman',
+                    'role' => 'Data Science Instructor',
+                    'quote' => 'The autograding system provides instant feedback that accelerated my students\' learning process significantly.',
+                ],
+                'student_2' => [
+                    'name' => 'Maria Garcia',
+                    'role' => 'Business Analytics Student',
+                    'quote' => 'I love how the platform adapts to my learning pace and provides personalized challenges.',
+                ],
+            ],
+            'items' => [
+                'testimonial_1' => [
+                    'content' => 'Codeasy helped me understand Data Science concepts better than any other platform. The cognitive analysis is incredibly helpful.',
+                    'author' => 'Sarah Johnson',
+                    'role' => 'Computer Science Student',
+                ],
+                'testimonial_2' => [
+                    'content' => 'The autograding system provides instant feedback that accelerated my learning process significantly.',
+                    'author' => 'Ahmad Rahman',
+                    'role' => 'Data Science Enthusiast',
+                ],
+                'testimonial_3' => [
+                    'content' => 'I love how the platform adapts to my learning pace and provides personalized challenges.',
+                    'author' => 'Maria Garcia',
+                    'role' => 'Business Analytics Student',
+                ],
+            ],
+        ],
+        'partners' => [
+            'badge' => 'Our Partners',
+            'title' => 'Trusted by Leading Institutions',
+            'placeholder' => 'Partner Logo',
+        ],
+        'cta' => [
+            'badge' => 'Get Started',
+            'title' => 'Ready to Start Learning?',
+            'subtitle' => 'Join thousands of students mastering Data Science with Codeasy',
+            'buttons' => [
+                'register_now' => 'Register Now',
+                'learn_more' => 'Learn More',
+            ],
+            'button' => 'Get Started Now',
+        ],
+        'footer' => [
+            'brand' => 'Codeasy',
+            'description' => 'Empowering the next generation of Data Scientists with AI-powered learning platform and cognitive analysis.',
+            'sections' => [
+                'platform' => [
+                    'title' => 'Platform',
+                    'links' => [
+                        'features' => 'Features',
+                        'courses' => 'Courses',
+                        'pricing' => 'Pricing',
+                    ],
+                ],
+                'company' => [
+                    'title' => 'Company',
+                    'links' => [
+                        'about_us' => 'About Us',
+                        'blog' => 'Blog',
+                        'careers' => 'Careers',
+                    ],
+                ],
+                'legal' => [
+                    'title' => 'Legal',
+                    'links' => [
+                        'privacy_policy' => 'Privacy Policy',
+                        'terms_of_service' => 'Terms of Service',
+                    ],
+                ],
+            ],
+            'copyright' => '© :year Codeasy. All rights reserved.',
+            'links' => [
+                'privacy' => 'Privacy Policy',
+                'terms' => 'Terms of Service',
+                'contact' => 'Contact',
             ],
         ],
     ],

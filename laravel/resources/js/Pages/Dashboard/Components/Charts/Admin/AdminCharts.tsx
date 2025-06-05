@@ -7,6 +7,7 @@ import {
     CardTitle,
 } from '@/Components/UI/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/Components/UI/chart';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { TrendingUp } from 'lucide-react';
 import {
     Bar,
@@ -33,18 +34,22 @@ import {
 } from '../../chartData';
 
 export function AdminCharts() {
+    const { t } = useLaravelReactI18n();
+
     return (
         <>
             <div className='space-y-2'>
-                <h1 className='text-2xl font-bold'>Admin Overview</h1>
-                <p className='text-muted-foreground'>Dashboard ringkasan untuk Administrator</p>
+                <h1 className='text-2xl font-bold'>{t('pages.dashboard.admin.title')}</h1>
+                <p className='text-muted-foreground'>{t('pages.dashboard.admin.subtitle')}</p>
             </div>
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* User Growth Bar Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Users (Bar Chart)</CardTitle>
-                        <CardDescription>6-month Growth</CardDescription>
+                        <CardTitle>{t('pages.dashboard.admin.charts.users_bar.title')}</CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.admin.charts.users_bar.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={adminConfig} className='h-[300px] w-full'>
@@ -59,7 +64,8 @@ export function AdminCharts() {
                     </CardContent>
                     <CardFooter className='text-sm'>
                         <div className='flex gap-2 font-medium leading-none'>
-                            Trending up <TrendingUp className='h-4 w-4' />
+                            {t('pages.dashboard.admin.charts.users_bar.footer')}{' '}
+                            <TrendingUp className='h-4 w-4' />
                         </div>
                     </CardFooter>
                 </Card>
@@ -67,8 +73,12 @@ export function AdminCharts() {
                 {/* Roles Distribution Pie Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>User Roles (Pie Chart)</CardTitle>
-                        <CardDescription>Admin / Guru / Siswa</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.admin.charts.user_roles_pie.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.admin.charts.user_roles_pie.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={adminConfig} className='mx-auto h-[300px] w-full'>
@@ -110,7 +120,9 @@ export function AdminCharts() {
                                                             x={viewBox.cx}
                                                             className='fill-muted-foreground text-xs'
                                                         >
-                                                            total
+                                                            {t(
+                                                                'pages.dashboard.admin.charts.user_roles_pie.total_label',
+                                                            )}
                                                         </tspan>
                                                     </text>
                                                 );
@@ -126,8 +138,12 @@ export function AdminCharts() {
                 {/* Site Visits Line Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Site Visits (Line Chart)</CardTitle>
-                        <CardDescription>One-week data</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.admin.charts.site_visits_line.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.admin.charts.site_visits_line.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={adminConfig} className='h-[300px] w-full'>
@@ -150,8 +166,12 @@ export function AdminCharts() {
                 {/* Activity Radar Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Radar Chart Example</CardTitle>
-                        <CardDescription>January vs June</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.admin.charts.radar_example.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.admin.charts.radar_example.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className='flex justify-center'>
                         <ChartContainer config={adminConfig} className='mx-auto h-[300px] w-full'>

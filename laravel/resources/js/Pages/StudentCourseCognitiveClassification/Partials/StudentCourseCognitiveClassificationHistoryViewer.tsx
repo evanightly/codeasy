@@ -11,6 +11,7 @@ import {
 import { studentCourseCognitiveClassificationHistoryServiceHook } from '@/Services/studentCourseCognitiveClassificationHistoryServiceHook';
 import { StudentCourseCognitiveClassificationHistoryResource } from '@/Support/Interfaces/Resources';
 import { format } from 'date-fns';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Sparkles, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -37,6 +38,7 @@ export function StudentCourseCognitiveClassificationHistoryViewer({
     userId,
     courseId,
 }: StudentCourseCognitiveClassificationHistoryViewerProps) {
+    const { t } = useLaravelReactI18n();
     const [historyRecords, setHistoryRecords] = useState<
         StudentCourseCognitiveClassificationHistoryResource[]
     >([]);
@@ -283,7 +285,9 @@ export function StudentCourseCognitiveClassificationHistoryViewer({
                     {/* History Table */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Classification History (Memory Test)</CardTitle>
+                            <CardTitle>
+                                {t('pages.classification.cards.classification_history_memory')}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent className='max-h-[400px] overflow-y-auto'>
                             <Table>

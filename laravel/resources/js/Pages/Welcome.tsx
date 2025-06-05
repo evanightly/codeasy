@@ -21,6 +21,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { Check, Menu, SwatchBook, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react'; // Added useRef, useState, useEffect
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 
 const SetTheme = () => {
     const { currentTheme, availableThemes, setTheme } = useTheme();
@@ -53,6 +54,7 @@ export default function Welcome({
     phpVersion,
 }: PageProps<{ laravelVersion: string; phpVersion: string }>) {
     const { isDarkMode } = useTheme();
+    const { t } = useLaravelReactI18n();
 
     // For better accessibility and performance
     const prefersReducedMotion = useReducedMotion();
@@ -80,7 +82,7 @@ export default function Welcome({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const handleImageError = () => {
+    const _handleImageError = () => {
         document.getElementById('screenshot-container')?.classList.add('!hidden');
         document.getElementById('docs-card')?.classList.add('!row-span-1');
         document.getElementById('docs-card-content')?.classList.add('!flex-row');
@@ -88,7 +90,7 @@ export default function Welcome({
     };
 
     // Cognitive levels data for visualization
-    const cognitiveLevels = [
+    const _cognitiveLevels = [
         { name: 'Remembering', score: 85, color: 'bg-red-500' },
         { name: 'Understanding', score: 78, color: 'bg-orange-500' },
         { name: 'Applying', score: 65, color: 'bg-yellow-500' },
@@ -98,7 +100,7 @@ export default function Welcome({
     ];
 
     // Python code for demonstration
-    const pythonCode = `import pandas as pd
+    const _pythonCode = `import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -132,18 +134,18 @@ print(cognitive_levels.value_counts())`;
 
     return (
         <div className='scroll-smooth'>
-            <Head title='Welcome'>
+            <Head title={t('pages.welcome.meta.title')}>
                 <meta
                     name='description'
-                    content='Codeasy adalah platform pembelajaran Python untuk Data Science dengan analisis kognitif otomatis berdasarkan Taksonomi Bloom.'
+                    content={t('pages.welcome.meta.description')}
                 />
                 <meta
                     property='og:title'
-                    content='Codeasy - Pembelajaran Python dan Data Science'
+                    content={t('pages.welcome.meta.og_title')}
                 />
                 <meta
                     property='og:description'
-                    content='Platform pembelajaran interaktif dengan autograding dan analisis kognitif otomatis.'
+                    content={t('pages.welcome.meta.og_description')}
                 />
                 <meta property='og:type' content='website' />
                 <meta name='viewport' content='width=device-width, initial-scale=1.0' />
@@ -159,7 +161,7 @@ print(cognitive_levels.value_counts())`;
                         >
                             <SparkleHover>
                                 <span className='bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-xl font-bold text-transparent'>
-                                    Codeasy
+                                    {t('pages.welcome.navbar.brand')}
                                 </span>
                             </SparkleHover>
                         </Link>
@@ -171,26 +173,26 @@ print(cognitive_levels.value_counts())`;
                             href='#features'
                             className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
                         >
-                            Features
+                            {t('pages.welcome.navbar.navigation.features')}
                         </a>
                         <a
                             href='#how-it-works'
                             className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
                         >
-                            How it Works
+                            {t('pages.welcome.navbar.navigation.how_it_works')}
                         </a>
                         <a
                             href='#testimonials'
                             className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
                         >
-                            Testimonials
+                            {t('pages.welcome.navbar.navigation.testimonials')}
                         </a>
                         {auth?.user?.username ? (
                             <Link
                                 href={route('dashboard.index')}
                                 className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
                             >
-                                Dashboard
+                                {t('pages.welcome.navbar.navigation.dashboard')}
                             </Link>
                         ) : (
                             <>
@@ -198,7 +200,7 @@ print(cognitive_levels.value_counts())`;
                                     href={route('login')}
                                     className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
                                 >
-                                    Login
+                                    {t('pages.welcome.navbar.navigation.login')}
                                 </Link>
                                 <div className='flex gap-2'>
                                     <Link
@@ -208,7 +210,7 @@ print(cognitive_levels.value_counts())`;
                                                 'border-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
                                         })}
                                     >
-                                        Get Started
+                                        {t('pages.welcome.navbar.navigation.get_started')}
                                     </Link>
                                     <SetTheme />
                                 </div>
@@ -222,7 +224,7 @@ print(cognitive_levels.value_counts())`;
                         size='icon'
                         onClick={toggleMenu}
                         className='inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary md:hidden'
-                        aria-label='Toggle Navigation'
+                        aria-label={t('pages.welcome.navbar.aria.toggle_navigation')}
                         aria-expanded={isMenuOpen}
                         aria-controls='mobile-menu'
                     >
@@ -245,35 +247,35 @@ print(cognitive_levels.value_counts())`;
                                 href='#features'
                                 className='block rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-muted'
                             >
-                                Features
+                                {t('pages.welcome.navbar.navigation.features')}
                             </Link>
                             <Link
                                 onClick={() => setIsMenuOpen(false)}
                                 href='#how-it-works'
                                 className='block rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-muted'
                             >
-                                How it Works
+                                {t('pages.welcome.navbar.navigation.how_it_works')}
                             </Link>
                             <Link
                                 onClick={() => setIsMenuOpen(false)}
                                 href='#testimonials'
                                 className='block rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-muted'
                             >
-                                Testimonials
+                                {t('pages.welcome.navbar.navigation.testimonials')}
                             </Link>
                             <Link
                                 onClick={() => setIsMenuOpen(false)}
                                 href={route('login')}
                                 className='block rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-muted'
                             >
-                                Login
+                                {t('pages.welcome.navbar.navigation.login')}
                             </Link>
                             <Link
                                 onClick={() => setIsMenuOpen(false)}
                                 href={route('register')}
                                 className='mt-2 block rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-2 text-center font-medium text-white'
                             >
-                                Get Started
+                                {t('pages.welcome.navbar.navigation.get_started')}
                             </Link>
                         </div>
                     </motion.div>
@@ -305,7 +307,7 @@ print(cognitive_levels.value_counts())`;
                                 variant='outline'
                                 className='border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary'
                             >
-                                Powered by Machine Learning
+                                {t('pages.welcome.hero.badge')}
                             </Badge>
                             <div className='flex text-left'>
                                 <DashboardNavbarDarkModeToggler />
@@ -317,13 +319,13 @@ print(cognitive_levels.value_counts())`;
                             className='mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl'
                             animate={{ opacity: 1, y: 0 }}
                         >
-                            Sistem Pembelajaran{' '}
+                            {t('pages.welcome.hero.title')}{' '}
                             <span className='relative inline-block'>
                                 <WordRotate
                                     words={[
-                                        'Data Science',
-                                        'Data Analytics',
-                                        'Business Intelligence',
+                                        t('pages.welcome.hero.rotating_words.data_science'),
+                                        t('pages.welcome.hero.rotating_words.data_analytics'),
+                                        t('pages.welcome.hero.rotating_words.business_intelligence'),
                                     ]}
                                     className='text-primary'
                                 />
@@ -336,9 +338,7 @@ print(cognitive_levels.value_counts())`;
                             className='mx-auto mb-8 max-w-2xl text-lg text-muted-foreground'
                             animate={{ opacity: 1, y: 0 }}
                         >
-                            Tingkatkan pemahaman Anda dalam pemrograman Python untuk Data Science
-                            dengan sistem autograding dan analisis kognitif otomatis berdasarkan
-                            Taksonomi Bloom.
+                            {t('pages.welcome.hero.subtitle')}
                         </motion.p>
                     </motion.div>
 
@@ -365,11 +365,11 @@ print(cognitive_levels.value_counts())`;
                                         <div className='h-3 w-3 rounded-full bg-green-500'></div>
                                     </div>
                                     <div className='ml-4 text-sm font-medium'>
-                                        cognitive_analysis.py
+                                        {t('pages.welcome.hero.code_editor.filename')}
                                     </div>
                                 </div>
                                 <div className='text-xs text-muted-foreground'>
-                                    Python • Machine Learning
+                                    {t('pages.welcome.hero.code_editor.language')}
                                 </div>
                             </div>
 
@@ -397,7 +397,7 @@ print(cognitive_levels.value_counts())`;
                                                 <span className='text-green-400'>pd</span>
                                                 <Badge
                                                     variant='outline'
-                                                    title='Remembering'
+                                                    title={t('pages.welcome.hero.code_editor.bloom_levels.remembering')}
                                                     className='ml-3 bg-red-500/10 text-xs text-red-400'
                                                 >
                                                     R
@@ -443,11 +443,11 @@ print(cognitive_levels.value_counts())`;
                                             {/* Comments */}
                                             <div className='mt-3'>
                                                 <span className='text-gray-500'>
-                                                    # Load student data
+                                                    {t('pages.welcome.hero.code_editor.comments.load_data')}
                                                 </span>
                                                 <Badge
                                                     variant='outline'
-                                                    title='Understanding'
+                                                    title={t('pages.welcome.hero.code_editor.bloom_levels.understanding')}
                                                     className='ml-3 bg-orange-500/10 text-xs text-orange-400'
                                                 >
                                                     U
@@ -471,7 +471,7 @@ print(cognitive_levels.value_counts())`;
                                             {/* Comments */}
                                             <div className='mt-3'>
                                                 <span className='text-gray-500'>
-                                                    # Extract features from student code submissions
+                                                    {t('pages.welcome.hero.code_editor.comments.extract_features')}
                                                 </span>
                                             </div>
                                             <div>
@@ -489,7 +489,7 @@ print(cognitive_levels.value_counts())`;
                                                 <span className='text-gray-300'>)</span>
                                                 <Badge
                                                     variant='outline'
-                                                    title='Applying'
+                                                    title={t('pages.welcome.hero.code_editor.bloom_levels.applying')}
                                                     className='ml-3 bg-yellow-500/10 text-xs text-yellow-500'
                                                 >
                                                     A
@@ -499,8 +499,7 @@ print(cognitive_levels.value_counts())`;
                                             {/* Comments */}
                                             <div className='mt-3'>
                                                 <span className='text-gray-500'>
-                                                    # Extract existing cognitive level labels for
-                                                    training
+                                                    {t('pages.welcome.hero.code_editor.comments.extract_labels')}
                                                 </span>
                                             </div>
                                             <div>
@@ -515,21 +514,19 @@ print(cognitive_levels.value_counts())`;
                                                 <span className='text-yellow-300'>
                                                     cognitive_level
                                                 </span>
-                                            </div>
-
-                                            {/* Comments */}
-                                            <div className='mt-3'>
-                                                <span className='text-gray-500'>
-                                                    # Split data for training and testing
-                                                </span>
-                                                <Badge
-                                                    variant='outline'
-                                                    title='Analyzing'
-                                                    className='ml-3 bg-green-500/10 text-xs text-green-400'
-                                                >
-                                                    An
-                                                </Badge>
-                                            </div>
+                                            </div>                            {/* Comments */}
+                            <div className='mt-3'>
+                                <span className='text-gray-500'>
+                                    {t('pages.welcome.hero.code_editor.comments.split_data')}
+                                </span>
+                                <Badge
+                                    variant='outline'
+                                    title={t('pages.welcome.hero.code_editor.bloom_levels.analyzing')}
+                                    className='ml-3 bg-green-500/10 text-xs text-green-400'
+                                >
+                                    An
+                                </Badge>
+                            </div>
                                             <div>
                                                 <span className='text-yellow-300'>X_train</span>
                                                 <span className='text-gray-300'>, </span>
@@ -561,21 +558,19 @@ print(cognitive_levels.value_counts())`;
                                             </div>
                                             <div>
                                                 <span className='text-gray-300'>)</span>
-                                            </div>
-
-                                            {/* Comments */}
-                                            <div className='mt-3'>
-                                                <span className='text-gray-500'>
-                                                    # Train cognitive level classifier
-                                                </span>
-                                                <Badge
-                                                    variant='outline'
-                                                    title='Evaluating'
-                                                    className='ml-3 bg-blue-500/10 text-xs text-blue-400'
-                                                >
-                                                    E
-                                                </Badge>
-                                            </div>
+                                            </div>                            {/* Comments */}
+                            <div className='mt-3'>
+                                <span className='text-gray-500'>
+                                    {t('pages.welcome.hero.code_editor.comments.train_classifier')}
+                                </span>
+                                <Badge
+                                    variant='outline'
+                                    title={t('pages.welcome.hero.code_editor.bloom_levels.evaluating')}
+                                    className='ml-3 bg-blue-500/10 text-xs text-blue-400'
+                                >
+                                    E
+                                </Badge>
+                            </div>
                                             <div>
                                                 <span className='text-yellow-300'>model </span>
                                                 <span className='text-blue-400'>= </span>
@@ -597,21 +592,19 @@ print(cognitive_levels.value_counts())`;
                                                 <span className='text-gray-300'>, </span>
                                                 <span className='text-yellow-300'>y_train</span>
                                                 <span className='text-gray-300'>)</span>
-                                            </div>
-
-                                            {/* Comments */}
-                                            <div className='mt-3'>
-                                                <span className='text-gray-500'>
-                                                    # Predict cognitive levels
-                                                </span>
-                                                <Badge
-                                                    variant='outline'
-                                                    title='Creating'
-                                                    className='ml-3 bg-purple-500/10 text-xs text-purple-400'
-                                                >
-                                                    C
-                                                </Badge>
-                                            </div>
+                                            </div>                            {/* Comments */}
+                            <div className='mt-3'>
+                                <span className='text-gray-500'>
+                                    {t('pages.welcome.hero.code_editor.comments.predict_levels')}
+                                </span>
+                                <Badge
+                                    variant='outline'
+                                    title={t('pages.welcome.hero.code_editor.bloom_levels.creating')}
+                                    className='ml-3 bg-purple-500/10 text-xs text-purple-400'
+                                >
+                                    C
+                                </Badge>
+                            </div>
                                             <div>
                                                 <span className='text-yellow-300'>
                                                     predictions{' '}
@@ -641,7 +634,7 @@ print(cognitive_levels.value_counts())`;
                                                 <span className='text-blue-300'>print</span>
                                                 <span className='text-gray-300'>(</span>
                                                 <span className='text-amber-200'>
-                                                    f"Model accuracy: {'{'}
+                                                    f"{t('pages.welcome.hero.code_editor.output.model_accuracy')} {'{'}
                                                 </span>
                                                 <span className='text-yellow-300'>accuracy</span>
                                                 <span className='text-amber-200'>:.2f{'}'}"</span>
@@ -651,7 +644,7 @@ print(cognitive_levels.value_counts())`;
                                                 <span className='text-blue-300'>print</span>
                                                 <span className='text-gray-300'>(</span>
                                                 <span className='text-amber-200'>
-                                                    "Cognitive level distribution:"
+                                                    "{t('pages.welcome.hero.code_editor.output.cognitive_distribution')}"
                                                 </span>
                                                 <span className='text-gray-300'>)</span>
                                             </div>
@@ -675,10 +668,10 @@ print(cognitive_levels.value_counts())`;
                             <div className='border-t bg-muted/30 p-4'>
                                 <div className='mb-2 flex items-center justify-between'>
                                     <h3 className='text-sm font-semibold'>
-                                        Cognitive Level Analysis
+                                        {t('pages.welcome.hero.code_editor.legend.title')}
                                     </h3>
                                     <Badge variant='secondary' className='text-xs'>
-                                        Auto-generated
+                                        {t('pages.welcome.hero.code_editor.legend.auto_generated')}
                                     </Badge>
                                 </div>
 
@@ -690,7 +683,7 @@ print(cognitive_levels.value_counts())`;
                                         >
                                             R
                                         </Badge>
-                                        <span>Remembering</span>
+                                        <span>{t('pages.welcome.hero.code_editor.legend.levels.remembering')}</span>
                                     </div>
                                     <div className='flex items-center gap-1'>
                                         <Badge
@@ -699,7 +692,7 @@ print(cognitive_levels.value_counts())`;
                                         >
                                             U
                                         </Badge>
-                                        <span>Understanding</span>
+                                        <span>{t('pages.welcome.hero.code_editor.legend.levels.understanding')}</span>
                                     </div>
                                     <div className='flex items-center gap-1'>
                                         <Badge
@@ -708,7 +701,7 @@ print(cognitive_levels.value_counts())`;
                                         >
                                             A
                                         </Badge>
-                                        <span>Applying</span>
+                                        <span>{t('pages.welcome.hero.code_editor.legend.levels.applying')}</span>
                                     </div>
                                     <div className='flex items-center gap-1'>
                                         <Badge
@@ -717,7 +710,7 @@ print(cognitive_levels.value_counts())`;
                                         >
                                             An
                                         </Badge>
-                                        <span>Analyzing</span>
+                                        <span>{t('pages.welcome.hero.code_editor.legend.levels.analyzing')}</span>
                                     </div>
                                     <div className='flex items-center gap-1'>
                                         <Badge
@@ -726,7 +719,7 @@ print(cognitive_levels.value_counts())`;
                                         >
                                             E
                                         </Badge>
-                                        <span>Evaluating</span>
+                                        <span>{t('pages.welcome.hero.code_editor.legend.levels.evaluating')}</span>
                                     </div>
                                     <div className='flex items-center gap-1'>
                                         <Badge
@@ -735,19 +728,12 @@ print(cognitive_levels.value_counts())`;
                                         >
                                             C
                                         </Badge>
-                                        <span>Creating</span>
+                                        <span>{t('pages.welcome.hero.code_editor.legend.levels.creating')}</span>
                                     </div>
                                 </div>
 
                                 <div className='mt-4 text-sm text-muted-foreground'>
-                                    Hasil analisis: Siswa memiliki pemahaman yang baik pada level{' '}
-                                    <span className='font-medium text-foreground'>Remembering</span>{' '}
-                                    dan{' '}
-                                    <span className='font-medium text-foreground'>
-                                        Understanding
-                                    </span>
-                                    , namun perlu pengembangan lebih lanjut pada level{' '}
-                                    <span className='font-medium text-foreground'>Creating</span>.
+                                    {t('pages.welcome.hero.code_editor.legend.analysis_result')}
                                 </div>
                             </div>
                         </div>
@@ -763,7 +749,7 @@ print(cognitive_levels.value_counts())`;
                                     'border-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
                             })}
                         >
-                            Mulai Sekarang
+                            {t('pages.welcome.hero.cta.get_started')}
                         </Link>
                         <Link
                             href={route('sandbox.index')}
@@ -772,7 +758,7 @@ print(cognitive_levels.value_counts())`;
                                 size: 'lg',
                             })}
                         >
-                            Coba Sandbox Dulu
+                            {t('pages.welcome.hero.cta.try_sandbox')}
                         </Link>
                     </div>
                 </div>
@@ -790,14 +776,13 @@ print(cognitive_levels.value_counts())`;
                             variant='outline'
                             className='mb-3 border-primary/20 bg-primary/5 px-3 py-1 text-primary'
                         >
-                            Platform Highlights
+                            {t('pages.welcome.features.badge')}
                         </Badge>
                         <h2 className='mb-4 text-3xl font-bold text-foreground sm:text-4xl'>
-                            Kenapa <span className='text-primary'>Codeasy</span>?
+                            {t('pages.welcome.features.title')}
                         </h2>
                         <p className='mx-auto max-w-2xl text-muted-foreground'>
-                            Platform kami menggunakan teknologi canggih untuk memberikan pengalaman
-                            belajar yang lebih efektif dan terukur.
+                            {t('pages.welcome.features.subtitle')}
                         </p>
                     </div>
                     <div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
@@ -836,11 +821,9 @@ print(cognitive_levels.value_counts())`;
                                     />
                                 </svg>
                             </div>
-                            <h3 className='mb-2 text-xl font-semibold'>Autograding Realtime</h3>
+                            <h3 className='mb-2 text-xl font-semibold'>{t('pages.welcome.features.cards.autograding.title')}</h3>
                             <p className='text-muted-foreground'>
-                                Dapatkan umpan balik instan ketika Anda menuliskan kode Python untuk
-                                Data Science. Perbaiki kesalahan dan tingkatkan pemahaman Anda
-                                secara langsung.
+                                {t('pages.welcome.features.cards.autograding.description')}
                             </p>
                         </div>
                         <div className='group relative rounded-xl border bg-card p-6 shadow-md transition-all hover:shadow-lg'>
@@ -879,11 +862,10 @@ print(cognitive_levels.value_counts())`;
                                 </svg>
                             </div>
                             <h3 className='mb-2 text-xl font-semibold'>
-                                Analisis Pemahaman Kognitif
+                                {t('pages.welcome.features.cards.cognitive_analysis.title')}
                             </h3>
                             <p className='text-muted-foreground'>
-                                Klasifikasi otomatis berdasarkan Taksonomi Bloom untuk mengukur
-                                tingkat kognitif Anda pada enam level pemahaman yang berbeda.
+                                {t('pages.welcome.features.cards.cognitive_analysis.description')}
                             </p>
                         </div>
                         <div className='group relative rounded-xl border bg-card p-6 shadow-md transition-all hover:shadow-lg'>
@@ -921,10 +903,9 @@ print(cognitive_levels.value_counts())`;
                                     />
                                 </svg>
                             </div>
-                            <h3 className='mb-2 text-xl font-semibold'>Kurikulum Berbasis SKKNI</h3>
+                            <h3 className='mb-2 text-xl font-semibold'>{t('pages.welcome.features.cards.skkni_curriculum.title')}</h3>
                             <p className='text-muted-foreground'>
-                                Materi dan modul disusun sesuai Standar Kompetensi Kerja Nasional
-                                Indonesia dengan fokus pada kebutuhan industri terkini.
+                                {t('pages.welcome.features.cards.skkni_curriculum.description')}
                             </p>
                         </div>
                     </div>
@@ -944,14 +925,13 @@ print(cognitive_levels.value_counts())`;
                             variant='outline'
                             className='mb-3 border-primary/20 bg-primary/5 px-3 py-1 text-primary'
                         >
-                            Learning Journey
+                            {t('pages.welcome.how_it_works.badge')}
                         </Badge>
                         <h2 className='mb-4 text-3xl font-bold text-foreground sm:text-4xl'>
-                            Bagaimana Codeasy Bekerja?
+                            {t('pages.welcome.how_it_works.title')}
                         </h2>
                         <p className='mx-auto max-w-2xl text-muted-foreground'>
-                            Proses pembelajaran yang terstruktur dan interaktif untuk memaksimalkan
-                            pemahaman Anda
+                            {t('pages.welcome.how_it_works.subtitle')}
                         </p>
                     </div>
 
@@ -963,9 +943,8 @@ print(cognitive_levels.value_counts())`;
                         <div className='space-y-24'>
                             {[
                                 {
-                                    title: 'Pilih Materi',
-                                    description:
-                                        'Pilih kursus atau modul pembelajaran sesuai dengan kebutuhan dan tingkat kemampuan Anda.',
+                                    title: t('pages.welcome.how_it_works.steps.choose_material.title'),
+                                    description: t('pages.welcome.how_it_works.steps.choose_material.description'),
                                     icon: (
                                         <svg
                                             viewBox='0 0 24 24'
@@ -983,9 +962,8 @@ print(cognitive_levels.value_counts())`;
                                     ),
                                 },
                                 {
-                                    title: 'Belajar Konsep',
-                                    description:
-                                        'Pelajari konsep dasar melalui materi yang disajikan dengan cara yang mudah dipahami dan interaktif.',
+                                    title: t('pages.welcome.how_it_works.steps.learn_concepts.title'),
+                                    description: t('pages.welcome.how_it_works.steps.learn_concepts.description'),
                                     icon: (
                                         <svg
                                             viewBox='0 0 24 24'
@@ -1003,9 +981,8 @@ print(cognitive_levels.value_counts())`;
                                     ),
                                 },
                                 {
-                                    title: 'Latihan Koding',
-                                    description:
-                                        'Praktekkan pengetahuan Anda dengan soal-soal latihan yang dianalisis secara realtime dengan feedback langsung.',
+                                    title: t('pages.welcome.how_it_works.steps.coding_practice.title'),
+                                    description: t('pages.welcome.how_it_works.steps.coding_practice.description'),
                                     icon: (
                                         <svg
                                             viewBox='0 0 24 24'
@@ -1023,9 +1000,8 @@ print(cognitive_levels.value_counts())`;
                                     ),
                                 },
                                 {
-                                    title: 'Analisis Kognitif',
-                                    description:
-                                        'Dapatkan laporan detail tentang tingkat pemahaman Anda berdasarkan Taksonomi Bloom dengan visualisasi interaktif.',
+                                    title: t('pages.welcome.how_it_works.steps.cognitive_analysis.title'),
+                                    description: t('pages.welcome.how_it_works.steps.cognitive_analysis.description'),
                                     icon: (
                                         <svg
                                             viewBox='0 0 24 24'
@@ -1090,23 +1066,34 @@ print(cognitive_levels.value_counts())`;
                             variant='outline'
                             className='mb-3 border-primary/20 bg-primary/5 px-3 py-1 text-primary'
                         >
-                            Platform Impact
+                            {t('pages.welcome.statistics.badge')}
                         </Badge>
                         <h2 className='mb-4 text-3xl font-bold text-foreground sm:text-4xl'>
-                            Menciptakan Talenta Data Science Berkualitas
+                            {t('pages.welcome.statistics.title')}
                         </h2>
                         <p className='mx-auto max-w-2xl text-muted-foreground'>
-                            Bergabung dengan ribuan pelajar dari berbagai institusi pendidikan di
-                            Indonesia
+                            {t('pages.welcome.statistics.subtitle')}
                         </p>
                     </div>
 
                     <div className='grid grid-cols-2 gap-8 md:grid-cols-4'>
                         {[
-                            { number: '10,000+', label: 'Pelajar Aktif' },
-                            { number: '150+', label: 'Institusi Pendidikan' },
-                            { number: '95%', label: 'Tingkat Kelulusan' },
-                            { number: '86%', label: 'Alumni Terserap Industri' },
+                            { 
+                                number: t('pages.welcome.statistics.stats.active_students.number'), 
+                                label: t('pages.welcome.statistics.stats.active_students.label') 
+                            },
+                            { 
+                                number: t('pages.welcome.statistics.stats.institutions.number'), 
+                                label: t('pages.welcome.statistics.stats.institutions.label') 
+                            },
+                            { 
+                                number: t('pages.welcome.statistics.stats.completion_rate.number'), 
+                                label: t('pages.welcome.statistics.stats.completion_rate.label') 
+                            },
+                            { 
+                                number: t('pages.welcome.statistics.stats.industry_absorption.number'), 
+                                label: t('pages.welcome.statistics.stats.industry_absorption.label') 
+                            },
                         ].map((stat, i) => (
                             <motion.div
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -1135,36 +1122,35 @@ print(cognitive_levels.value_counts())`;
                             variant='outline'
                             className='mb-3 border-primary/20 bg-primary/5 px-3 py-1 text-primary'
                         >
-                            Testimonials
+                            {t('pages.welcome.testimonials.badge')}
                         </Badge>
                         <h2 className='mb-4 text-3xl font-bold text-foreground sm:text-4xl'>
-                            Yang Dikatakan Oleh Pengguna Kami
+                            {t('pages.welcome.testimonials.title')}
                         </h2>
                         <p className='mx-auto max-w-2xl text-muted-foreground'>
-                            Apa yang dikatakan siswa dan guru tentang pengalaman belajar dengan
-                            platform Codeasy
+                            {t('pages.welcome.testimonials.subtitle')}
                         </p>
                     </div>
 
                     <div className='grid gap-8 md:grid-cols-2 lg:grid-cols-3'>
                         {[
                             {
-                                name: 'Budi Santoso',
-                                role: 'Student, Universitas Indonesia',
+                                name: t('pages.welcome.testimonials.reviews.student_1.name'),
+                                role: t('pages.welcome.testimonials.reviews.student_1.role'),
                                 image: '/images/avatars/avatar-1.jpg',
-                                quote: 'Platform yang sangat membantu proses belajar saya. Dengan feedback realtime yang diberikan, saya dapat memahami kesalahan koding saya dengan cepat.',
+                                quote: t('pages.welcome.testimonials.reviews.student_1.quote'),
                             },
                             {
-                                name: 'Siti Rahayu',
-                                role: 'Data Science Instructor',
+                                name: t('pages.welcome.testimonials.reviews.instructor_1.name'),
+                                role: t('pages.welcome.testimonials.reviews.instructor_1.role'),
                                 image: '/images/avatars/avatar-2.jpg',
-                                quote: 'Sebagai instruktur, saya sangat terbantu dengan fitur analisis kognitif yang memungkinkan saya memantau perkembangan siswa dengan lebih detail.',
+                                quote: t('pages.welcome.testimonials.reviews.instructor_1.quote'),
                             },
                             {
-                                name: 'Ahmad Fauzi',
-                                role: 'Student, Institut Teknologi Bandung',
+                                name: t('pages.welcome.testimonials.reviews.student_2.name'),
+                                role: t('pages.welcome.testimonials.reviews.student_2.role'),
                                 image: '/images/avatars/avatar-3.jpg',
-                                quote: 'Interface yang intuitif dan materi yang terstruktur dengan baik membuat proses belajar Data Science menjadi jauh lebih menyenangkan.',
+                                quote: t('pages.welcome.testimonials.reviews.student_2.quote'),
                             },
                         ].map((testimonial, i) => (
                             <motion.div
@@ -1206,10 +1192,10 @@ print(cognitive_levels.value_counts())`;
                             variant='outline'
                             className='mb-3 border-primary/20 bg-primary/5 px-3 py-1 text-primary'
                         >
-                            Our Partners
+                            {t('pages.welcome.partners.badge')}
                         </Badge>
                         <h2 className='mb-4 text-2xl font-bold text-foreground'>
-                            Dipercaya oleh institusi terkemuka
+                            {t('pages.welcome.partners.title')}
                         </h2>
                     </div>
 
@@ -1219,7 +1205,7 @@ print(cognitive_levels.value_counts())`;
                                 key={partner}
                                 className='flex h-12 w-32 items-center justify-center rounded bg-muted/50'
                             >
-                                <span className='text-xs text-muted-foreground'>Partner Logo</span>
+                                <span className='text-xs text-muted-foreground'>{t('pages.welcome.partners.placeholder')}</span>
                             </div>
                         ))}
                     </div>
@@ -1243,16 +1229,13 @@ print(cognitive_levels.value_counts())`;
                             variant='outline'
                             className='mb-4 border-primary/20 bg-primary/5 px-3 py-1 text-primary'
                         >
-                            Start Learning Today
+                            {t('pages.welcome.cta.badge')}
                         </Badge>
                         <h2 className='mb-6 text-4xl font-extrabold text-foreground sm:text-5xl'>
-                            Siap Menjadi <span className='text-primary'>Data Scientist</span>{' '}
-                            Handal?
+                            {t('pages.welcome.cta.title')}
                         </h2>
                         <p className='mx-auto mb-10 max-w-2xl text-lg text-muted-foreground'>
-                            Bergabunglah dengan ribuan siswa lain yang telah merasakan kemudahan
-                            belajar Python untuk Data Science menggunakan platform{' '}
-                            <span className='font-bold'>Codeasy</span>.
+                            {t('pages.welcome.cta.subtitle')}
                         </p>
 
                         <div className='flex flex-col items-center justify-center gap-4 sm:flex-row'>
@@ -1264,7 +1247,7 @@ print(cognitive_levels.value_counts())`;
                                         'w-full border-0 bg-gradient-to-r from-blue-600 to-indigo-600 px-8 text-white sm:w-auto',
                                 })}
                             >
-                                Daftar Sekarang
+                                {t('pages.welcome.cta.buttons.register_now')}
                             </Link>
                             <Link
                                 href='#features'
@@ -1274,7 +1257,7 @@ print(cognitive_levels.value_counts())`;
                                     className: 'w-full sm:w-auto',
                                 })}
                             >
-                                Pelajari Lebih Lanjut
+                                {t('pages.welcome.cta.buttons.learn_more')}
                             </Link>
                         </div>
                     </motion.div>
@@ -1288,24 +1271,23 @@ print(cognitive_levels.value_counts())`;
                         <div className='space-y-4'>
                             <div className='flex items-center space-x-2'>
                                 <span className='bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-lg font-bold text-transparent'>
-                                    Codeasy
+                                    {t('pages.welcome.footer.brand')}
                                 </span>
                             </div>
                             <p className='text-sm text-muted-foreground'>
-                                Platform pembelajaran Python dan Data Science berbasis analisis
-                                kognitif.
+                                {t('pages.welcome.footer.description')}
                             </p>
                         </div>
 
                         <div>
-                            <h4 className='mb-4 text-sm font-semibold'>Platform</h4>
+                            <h4 className='mb-4 text-sm font-semibold'>{t('pages.welcome.footer.sections.platform.title')}</h4>
                             <ul className='space-y-2 text-sm'>
                                 <li>
                                     <Link
                                         href='#'
                                         className='text-muted-foreground hover:text-foreground'
                                     >
-                                        Features
+                                        {t('pages.welcome.footer.sections.platform.links.features')}
                                     </Link>
                                 </li>
                                 <li>
@@ -1313,7 +1295,7 @@ print(cognitive_levels.value_counts())`;
                                         href='#'
                                         className='text-muted-foreground hover:text-foreground'
                                     >
-                                        Courses
+                                        {t('pages.welcome.footer.sections.platform.links.courses')}
                                     </Link>
                                 </li>
                                 <li>
@@ -1321,21 +1303,21 @@ print(cognitive_levels.value_counts())`;
                                         href='#'
                                         className='text-muted-foreground hover:text-foreground'
                                     >
-                                        Pricing
+                                        {t('pages.welcome.footer.sections.platform.links.pricing')}
                                     </Link>
                                 </li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className='mb-4 text-sm font-semibold'>Company</h4>
+                            <h4 className='mb-4 text-sm font-semibold'>{t('pages.welcome.footer.sections.company.title')}</h4>
                             <ul className='space-y-2 text-sm'>
                                 <li>
                                     <Link
                                         href='#'
                                         className='text-muted-foreground hover:text-foreground'
                                     >
-                                        About Us
+                                        {t('pages.welcome.footer.sections.company.links.about_us')}
                                     </Link>
                                 </li>
                                 <li>
@@ -1343,7 +1325,7 @@ print(cognitive_levels.value_counts())`;
                                         href='#'
                                         className='text-muted-foreground hover:text-foreground'
                                     >
-                                        Blog
+                                        {t('pages.welcome.footer.sections.company.links.blog')}
                                     </Link>
                                 </li>
                                 <li>
@@ -1351,21 +1333,21 @@ print(cognitive_levels.value_counts())`;
                                         href='#'
                                         className='text-muted-foreground hover:text-foreground'
                                     >
-                                        Careers
+                                        {t('pages.welcome.footer.sections.company.links.careers')}
                                     </Link>
                                 </li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className='mb-4 text-sm font-semibold'>Legal</h4>
+                            <h4 className='mb-4 text-sm font-semibold'>{t('pages.welcome.footer.sections.legal.title')}</h4>
                             <ul className='space-y-2 text-sm'>
                                 <li>
                                     <Link
                                         href='#'
                                         className='text-muted-foreground hover:text-foreground'
                                     >
-                                        Privacy Policy
+                                        {t('pages.welcome.footer.sections.legal.links.privacy_policy')}
                                     </Link>
                                 </li>
                                 <li>
@@ -1373,7 +1355,7 @@ print(cognitive_levels.value_counts())`;
                                         href='#'
                                         className='text-muted-foreground hover:text-foreground'
                                     >
-                                        Terms of Service
+                                        {t('pages.welcome.footer.sections.legal.links.terms_of_service')}
                                     </Link>
                                 </li>
                             </ul>
@@ -1384,7 +1366,7 @@ print(cognitive_levels.value_counts())`;
 
                     <div className='flex flex-col items-center justify-between md:flex-row'>
                         <p className='text-sm text-muted-foreground'>
-                            &copy; {new Date().getFullYear()} Codeasy. All rights reserved.
+                            {t('pages.welcome.footer.copyright', { year: new Date().getFullYear() })}
                         </p>
                         <div className='mt-4 flex items-center space-x-4 md:mt-0'>
                             <Link href='#' className='text-muted-foreground hover:text-foreground'>

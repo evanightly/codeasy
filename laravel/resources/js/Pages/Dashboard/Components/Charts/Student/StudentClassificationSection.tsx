@@ -14,6 +14,7 @@ import { StudentCourseCognitiveClassificationHistoryViewer } from '@/Pages/Stude
 import { studentCourseCognitiveClassificationServiceHook } from '@/Services/studentCourseCognitiveClassificationServiceHook';
 import { usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Brain, Download } from 'lucide-react';
 import { useState } from 'react';
 
@@ -35,6 +36,7 @@ export function StudentClassificationSection({
     courses,
     isLoading = false,
 }: StudentClassificationSectionProps) {
+    const { t } = useLaravelReactI18n();
     const { auth } = usePage().props;
     const currentUserId = auth?.user?.id;
 
@@ -85,24 +87,28 @@ export function StudentClassificationSection({
             <div className='space-y-2'>
                 <div className='flex items-center gap-2'>
                     <Brain className='h-5 w-5 text-primary' />
-                    <h2 className='text-xl font-semibold'>Klasifikasi Kognitif</h2>
+                    <h2 className='text-xl font-semibold'>
+                        {t('pages.dashboard.student.cognitive_classification.title')}
+                    </h2>
                 </div>
                 <p className='text-muted-foreground'>
-                    Tingkat pemahaman kognitif berdasarkan taksonomi Bloom
+                    {t('pages.dashboard.student.cognitive_classification.description')}
                 </p>
             </div>
 
             {isLoading ? (
                 <Card>
                     <CardContent className='pt-6'>
-                        <p className='text-center text-muted-foreground'>Memuat data kursus...</p>
+                        <p className='text-center text-muted-foreground'>
+                            {t('pages.dashboard.student.cognitive_classification.loading')}
+                        </p>
                     </CardContent>
                 </Card>
             ) : courses.length === 0 ? (
                 <Card>
                     <CardContent className='pt-6'>
                         <p className='text-center text-muted-foreground'>
-                            Belum terdaftar di kursus manapun.
+                            {t('pages.dashboard.student.cognitive_classification.no_courses')}
                         </p>
                     </CardContent>
                 </Card>
@@ -126,11 +132,15 @@ export function StudentClassificationSection({
                 <DialogContent className='max-h-[90vh] max-w-screen-xl overflow-y-auto'>
                     <DialogHeader>
                         <DialogTitle>
-                            Riwayat Klasifikasi Kognitif - {selectedCourse?.name}
+                            {t(
+                                'pages.dashboard.student.cognitive_classification.classification_history_title',
+                            )}{' '}
+                            {selectedCourse?.name}
                         </DialogTitle>
                         <DialogDescription>
-                            Lihat perkembangan tingkat kognitif dan tren pembelajaran dari waktu ke
-                            waktu
+                            {t(
+                                'pages.dashboard.student.cognitive_classification.classification_history_subtitle',
+                            )}
                         </DialogDescription>
                     </DialogHeader>
                     {selectedCourse && currentUserId && (
@@ -163,6 +173,7 @@ function SimpleCourseCard({
     onOpenDialog,
     onExportCalculationSteps,
 }: SimpleCourseCardProps) {
+    const { t } = useLaravelReactI18n();
     // Get latest course-level classification
     const { data: courseClassification, isLoading } =
         studentCourseCognitiveClassificationServiceHook.useGetCourseClassificationForStudent(
@@ -177,7 +188,11 @@ function SimpleCourseCard({
                 <div className='flex items-center justify-between'>
                     <div className='flex-1' onClick={() => onOpenDialog(course)}>
                         <CardTitle className='text-lg'>{course.name}</CardTitle>
-                        <CardDescription>Klik untuk melihat riwayat detail</CardDescription>
+                        <CardDescription>
+                            {t(
+                                'pages.dashboard.student.cognitive_classification.card.click_for_details',
+                            )}
+                        </CardDescription>
                     </div>
                     {courseClassification && (
                         <Button
@@ -197,7 +212,9 @@ function SimpleCourseCard({
                 {isLoading ? (
                     <div className='flex items-center justify-center py-4'>
                         <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
-                        <span className='ml-2 text-sm'>Memuat...</span>
+                        <span className='ml-2 text-sm'>
+                            {t('pages.dashboard.student.cognitive_classification.card.loading')}
+                        </span>
                     </div>
                 ) : courseClassification ? (
                     <div className='space-y-3'>
@@ -217,7 +234,9 @@ function SimpleCourseCard({
                                 className='h-2'
                             />
                             <p className='text-xs text-muted-foreground'>
-                                Terakhir:{' '}
+                                {t(
+                                    'pages.dashboard.student.cognitive_classification.card.last_classified',
+                                )}{' '}
                                 {format(
                                     new Date(courseClassification.classified_at),
                                     'dd MMM yyyy',
@@ -227,7 +246,11 @@ function SimpleCourseCard({
                     </div>
                 ) : (
                     <div className='py-4 text-center'>
-                        <p className='text-sm text-muted-foreground'>Belum ada klasifikasi</p>
+                        <p className='text-sm text-muted-foreground'>
+                            {t(
+                                'pages.dashboard.student.cognitive_classification.card.no_classification',
+                            )}
+                        </p>
                     </div>
                 )}
             </CardContent>

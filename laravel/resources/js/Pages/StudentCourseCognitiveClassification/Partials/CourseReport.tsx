@@ -1,3 +1,5 @@
+// TODO: localization not implemented yet
+
 import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
@@ -10,6 +12,7 @@ import {
 import { Skeleton } from '@/Components/UI/skeleton';
 import { courseServiceHook } from '@/Services/courseServiceHook';
 import { studentCourseCognitiveClassificationServiceHook } from '@/Services/studentCourseCognitiveClassificationServiceHook';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useMemo, useRef } from 'react';
 import { CourseReportExport } from './CourseReportExport';
 
@@ -40,6 +43,7 @@ export function CourseReport({
     classificationType = 'topsis',
     triggerButton,
 }: CourseReportProps) {
+    const { t } = useLaravelReactI18n();
     // Create a ref for the report content div (for PDF export)
     const reportRef = useRef<HTMLDivElement>(null);
 
@@ -117,7 +121,9 @@ export function CourseReport({
 
         return (
             <div className='mt-6 space-y-4'>
-                <h3 className='text-lg font-semibold'>Students by Level</h3>
+                <h3 className='text-lg font-semibold'>
+                    {t('pages.classification.section_headers.students_by_level')}
+                </h3>
 
                 <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                     {Object.entries(chartColors).map(([level, color]) => {
@@ -204,8 +210,14 @@ export function CourseReport({
             <div className='space-y-6'>
                 <div className='flex flex-wrap items-center justify-between gap-4'>
                     <div className='space-y-2'>
-                        <h2 className='text-2xl font-bold'>Cognitive Classification Report</h2>
-                        <p className='text-muted-foreground'>Course: {courseName}</p>
+                        <h2 className='text-2xl font-bold'>
+                            {t(
+                                'pages.classification.section_headers.cognitive_classification_report',
+                            )}
+                        </h2>
+                        <p className='text-muted-foreground'>
+                            {t('pages.classification.labels.course')} {courseName}
+                        </p>
                         <p className='text-muted-foreground'>
                             {report.total_students} student{report.total_students !== 1 ? 's' : ''}{' '}
                             classified using {classificationType.toUpperCase()} method
@@ -255,7 +267,7 @@ export function CourseReport({
                 <DialogTrigger asChild>{triggerButton}</DialogTrigger>
                 <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
                     <DialogHeader>
-                        <DialogTitle>Cognitive Classification Report</DialogTitle>
+                        <DialogTitle>{t('pages.classification.report_dialog.title')}</DialogTitle>
                     </DialogHeader>
                     {content()}
                 </DialogContent>

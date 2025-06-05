@@ -8,6 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/Components/UI/table';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 
 interface TestCaseMetrics {
     question_id: number;
@@ -25,14 +26,17 @@ interface TestCaseMetricsDisplayProps {
  * Component to display test case metrics in cognitive classification details
  */
 export function TestCaseMetricsDisplay({ metrics }: TestCaseMetricsDisplayProps) {
+    const { t } = useLaravelReactI18n();
     if (!metrics || metrics.length === 0) {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle>Test Case Metrics</CardTitle>
+                    <CardTitle>{t('pages.classification.cards.test_case_metrics')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className='text-sm text-muted-foreground'>No test case metrics available.</p>
+                    <p className='text-sm text-muted-foreground'>
+                        {t('pages.classification.labels.no_test_case_metrics')}
+                    </p>
                 </CardContent>
             </Card>
         );
@@ -56,12 +60,14 @@ export function TestCaseMetricsDisplay({ metrics }: TestCaseMetricsDisplayProps)
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Test Case Metrics</CardTitle>
+                <CardTitle>{t('pages.classification.cards.test_case_metrics')}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className='mb-4'>
                     <div className='mb-2 flex items-center justify-between'>
-                        <span className='text-sm font-medium'>Overall Test Case Completion</span>
+                        <span className='text-sm font-medium'>
+                            {t('pages.classification.labels.overall_test_case_completion')}
+                        </span>
                         <span className='text-sm font-medium'>{overallRate.toFixed(1)}%</span>
                     </div>
                     <Progress
@@ -73,10 +79,16 @@ export function TestCaseMetricsDisplay({ metrics }: TestCaseMetricsDisplayProps)
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Question</TableHead>
-                            <TableHead>Completed</TableHead>
-                            <TableHead>Total</TableHead>
-                            <TableHead>Completion Rate</TableHead>
+                            <TableHead>
+                                {t('pages.classification.table_headers.question')}
+                            </TableHead>
+                            <TableHead>
+                                {t('pages.classification.table_headers.completed')}
+                            </TableHead>
+                            <TableHead>{t('pages.classification.table_headers.total')}</TableHead>
+                            <TableHead>
+                                {t('pages.classification.table_headers.completion_rate')}
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

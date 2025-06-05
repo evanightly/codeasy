@@ -19,7 +19,7 @@ export default function Index() {
     const usersResponse = userServiceHook.useGetAll({ filters });
 
     return (
-        <AuthenticatedLayout title='Users'>
+        <AuthenticatedLayout title={t('pages.user.index.title')}>
             <div className='flex flex-col gap-4'>
                 <Suspense fallback={t('action.loading')}>
                     <Users

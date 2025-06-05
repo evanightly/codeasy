@@ -12,6 +12,7 @@ import { courseServiceHook } from '@/Services/courseServiceHook';
 import { dashboardServiceHook } from '@/Services/dashboardServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { Link } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
     Area,
     AreaChart,
@@ -27,46 +28,63 @@ import { studentAreaData, studentBarData, studentConfig, studentPieData } from '
 import { StudentClassificationSection } from './StudentClassificationSection';
 
 export function StudentCharts() {
+    const { t } = useLaravelReactI18n();
     const { data: latestWorkData, isLoading } = dashboardServiceHook.useGetStudentLatestWork();
     const { data: coursesData, isLoading: isCoursesLoading } = courseServiceHook.useGetAll();
 
     return (
         <>
             <div className='space-y-2'>
-                <h1 className='text-2xl font-bold'>Siswa Dashboard</h1>
-                <p className='text-muted-foreground'>Lihat perkembangan belajarmu di sini</p>
+                <h1 className='text-2xl font-bold'>{t('pages.dashboard.student.title')}</h1>
+                <p className='text-muted-foreground'>{t('pages.dashboard.student.subtitle')}</p>
             </div>
 
             {/* Latest Work Card - New Addition */}
             <div className='mb-4'>
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Progres Pembelajaran Terakhir</CardTitle>
-                        <CardDescription>Lanjutkan belajar dari terakhir kali</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.student.latest_work_progress.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.student.latest_work_progress.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
                             <div className='flex h-20 items-center justify-center'>
-                                <p>Memuat data...</p>
+                                <p>{t('pages.dashboard.student.latest_work_progress.loading')}</p>
                             </div>
                         ) : !latestWorkData ? (
                             <div className='flex h-20 items-center justify-center'>
-                                <p>Belum ada progres pembelajaran.</p>
+                                <p>
+                                    {t('pages.dashboard.student.latest_work_progress.no_progress')}
+                                </p>
                             </div>
                         ) : (
                             <div className='space-y-4'>
                                 <div className='space-y-2'>
                                     <div className='flex items-center justify-between'>
-                                        <h3 className='text-lg font-semibold'>Kursus:</h3>
+                                        <h3 className='text-lg font-semibold'>
+                                            {t(
+                                                'pages.dashboard.student.latest_work_progress.course_label',
+                                            )}
+                                        </h3>
                                         <span>{latestWorkData.course?.name}</span>
                                     </div>
                                     <div className='flex items-center justify-between'>
-                                        <h3 className='text-lg font-semibold'>Materi:</h3>
+                                        <h3 className='text-lg font-semibold'>
+                                            {t(
+                                                'pages.dashboard.student.latest_work_progress.material_label',
+                                            )}
+                                        </h3>
                                         <span>{latestWorkData?.material?.title}</span>
                                     </div>
                                     <div className='flex items-center justify-between'>
                                         <h3 className='text-lg font-semibold'>
-                                            Progress pertanyaan saat ini:
+                                            {t(
+                                                'pages.dashboard.student.latest_work_progress.current_question_label',
+                                            )}
                                         </h3>
                                         <span>{latestWorkData?.currentQuestion?.title}</span>
                                     </div>
@@ -95,7 +113,9 @@ export function StudentCharts() {
                                                     className: 'flex-1',
                                                 })}
                                             >
-                                                Lanjutkan Pertanyaan Saat Ini
+                                                {t(
+                                                    'pages.dashboard.student.latest_work_progress.continue_button',
+                                                )}
                                             </Link>
                                         )}
 
@@ -123,8 +143,12 @@ export function StudentCharts() {
                                             })}
                                         >
                                             {!latestWorkData?.currentQuestion?.isCompleted
-                                                ? 'Lompat ke Pertanyaan Berikutnya'
-                                                : 'Mulai Pertanyaan Berikutnya'}
+                                                ? t(
+                                                      'pages.dashboard.student.latest_work_progress.skip_button',
+                                                  )
+                                                : t(
+                                                      'pages.dashboard.student.latest_work_progress.start_next_button',
+                                                  )}
                                         </Link>
                                     )}
                                 </div>
@@ -144,8 +168,12 @@ export function StudentCharts() {
                 {/* Learning Progress Area Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Progress Belajar (Area Chart)</CardTitle>
-                        <CardDescription>Sejak pertama bergabung</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.student.charts.learning_progress.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.student.charts.learning_progress.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={studentConfig} className='h-[300px] w-full'>
@@ -191,8 +219,12 @@ export function StudentCharts() {
                 {/* Bloom's Taxonomy Levels Pie Chart */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Tingkat Kognitif Bloom (Pie)</CardTitle>
-                        <CardDescription>Hasil Klasifikasi</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.student.charts.cognitive_level.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.student.charts.cognitive_level.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={studentConfig} className='mx-auto h-[300px] w-full'>
@@ -216,8 +248,12 @@ export function StudentCharts() {
                 {/* Module Progress Bar Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Modul Belum Dikerjakan (Bar)</CardTitle>
-                        <CardDescription>Progress modul personal</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.student.charts.module_progress.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.student.charts.module_progress.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={studentConfig} className='h-[300px] w-full'>
@@ -232,7 +268,7 @@ export function StudentCharts() {
                     </CardContent>
                     <CardFooter className='text-sm'>
                         <div className='flex gap-2 font-medium leading-none'>
-                            1 = Selesai, 0 = Belum
+                            {t('pages.dashboard.student.charts.module_progress.footer')}
                         </div>
                     </CardFooter>
                 </Card>

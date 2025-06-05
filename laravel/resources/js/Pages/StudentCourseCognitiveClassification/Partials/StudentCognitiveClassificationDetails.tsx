@@ -1,3 +1,4 @@
+// TODO: classification not implemented yet
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
@@ -17,6 +18,7 @@ import {
     TableRow,
 } from '@/Components/UI/table';
 import { studentCognitiveClassificationServiceHook } from '@/Services/studentCognitiveClassificationServiceHook';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
 import { TestCaseMetricsDisplay } from './TestCaseMetricsDisplay';
@@ -38,6 +40,7 @@ interface StudentCognitiveClassificationDetailsProps {
 export function StudentCognitiveClassificationDetails({
     classificationId,
 }: StudentCognitiveClassificationDetailsProps) {
+    const { t } = useLaravelReactI18n();
     const [isOpen, setIsOpen] = useState(false);
     const [detailsData, setDetailsData] = useState<any>(null);
     const [isPending, setIsPending] = useState<boolean>(false);
@@ -88,9 +91,9 @@ export function StudentCognitiveClassificationDetails({
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
                     <DialogHeader>
-                        <DialogTitle>Material Classification Details</DialogTitle>
+                        <DialogTitle>{t('pages.classification.material_dialog.title')}</DialogTitle>
                         <DialogDescription>
-                            Detailed information about the material cognitive classification
+                            {t('pages.classification.material_dialog.description')}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -104,7 +107,9 @@ export function StudentCognitiveClassificationDetails({
                         <div className='space-y-6'>
                             <Card>
                                 <CardHeader className='pb-2'>
-                                    <CardTitle>Classification Overview</CardTitle>
+                                    <CardTitle>
+                                        {t('pages.classification.cards.classification_overview')}
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className='space-y-2'>
@@ -150,7 +155,9 @@ export function StudentCognitiveClassificationDetails({
 
                             <Card>
                                 <CardHeader className='pb-2'>
-                                    <CardTitle>Rule Base Mapping</CardTitle>
+                                    <CardTitle>
+                                        {t('pages.classification.cards.rule_base_mapping')}
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <Table>
@@ -229,7 +236,9 @@ export function StudentCognitiveClassificationDetails({
 
                             <Card>
                                 <CardHeader className='pb-2'>
-                                    <CardTitle>Material Details</CardTitle>
+                                    <CardTitle>
+                                        {t('pages.classification.cards.material_details')}
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className='grid grid-cols-2 gap-4'>
@@ -275,8 +284,7 @@ export function StudentCognitiveClassificationDetails({
                             <Card className='border-destructive bg-destructive/10'>
                                 <CardContent className='pt-6'>
                                     <p className='text-center text-destructive'>
-                                        Error loading material classification details. Please try
-                                        again.
+                                        {t('pages.classification.status.material_error')}
                                     </p>
                                 </CardContent>
                             </Card>

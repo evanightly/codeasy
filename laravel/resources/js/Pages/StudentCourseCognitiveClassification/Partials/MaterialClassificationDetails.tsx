@@ -9,6 +9,7 @@ import {
     DialogTitle,
 } from '@/Components/UI/dialog';
 import { studentCognitiveClassificationServiceHook } from '@/Services/studentCognitiveClassificationServiceHook';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
 
@@ -56,6 +57,7 @@ interface MaterialClassificationDetailsProps {
 export function MaterialClassificationDetails({
     classificationId,
 }: MaterialClassificationDetailsProps) {
+    const { t } = useLaravelReactI18n();
     const [isOpen, setIsOpen] = useState(false);
     const [details, setDetails] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +80,7 @@ export function MaterialClassificationDetails({
         } catch (error) {
             console.error('Error loading material classification details:', error);
             setIsError(true);
-            setErrorMessage('Failed to load material classification details');
+            setErrorMessage(t('pages.classification.status.material_error_failed'));
         } finally {
             setIsLoading(false);
         }
@@ -112,14 +114,30 @@ export function MaterialClassificationDetails({
                 <table className='w-full text-sm'>
                     <thead>
                         <tr className='border-b'>
-                            <th className='py-2 text-left'>Question</th>
-                            <th className='py-2 text-left'>Compiles</th>
-                            <th className='py-2 text-left'>Time (min)</th>
-                            <th className='py-2 text-left'>Complete</th>
-                            <th className='py-2 text-left'>Trial</th>
-                            <th className='py-2 text-left'>Variables</th>
-                            <th className='py-2 text-left'>Functions</th>
-                            <th className='py-2 text-left'>Test Cases</th>
+                            <th className='py-2 text-left'>
+                                {t('pages.classification.table_headers.question')}
+                            </th>
+                            <th className='py-2 text-left'>
+                                {t('pages.classification.table_headers.compiles')}
+                            </th>
+                            <th className='py-2 text-left'>
+                                {t('pages.classification.table_headers.time_min')}
+                            </th>
+                            <th className='py-2 text-left'>
+                                {t('pages.classification.table_headers.complete')}
+                            </th>
+                            <th className='py-2 text-left'>
+                                {t('pages.classification.table_headers.trial')}
+                            </th>
+                            <th className='py-2 text-left'>
+                                {t('pages.classification.table_headers.variables')}
+                            </th>
+                            <th className='py-2 text-left'>
+                                {t('pages.classification.table_headers.functions')}
+                            </th>
+                            <th className='py-2 text-left'>
+                                {t('pages.classification.table_headers.test_cases')}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -199,7 +217,9 @@ export function MaterialClassificationDetails({
                         <h4 className='font-semibold'>Criteria Used</h4>
                         <div className='grid grid-cols-2 gap-4'>
                             <div>
-                                <p className='text-sm font-medium'>Benefits:</p>
+                                <p className='text-sm font-medium'>
+                                    {t('pages.classification.labels.benefits')}
+                                </p>
                                 <ul className='list-disc pl-5 text-sm'>
                                     {parsedDetails.criteria.benefits?.map(
                                         (benefit: string, idx: number) => (
@@ -209,7 +229,9 @@ export function MaterialClassificationDetails({
                                 </ul>
                             </div>
                             <div>
-                                <p className='text-sm font-medium'>Costs:</p>
+                                <p className='text-sm font-medium'>
+                                    {t('pages.classification.labels.costs')}
+                                </p>
                                 <ul className='list-disc pl-5 text-sm'>
                                     {parsedDetails.criteria.costs?.map(
                                         (cost: string, idx: number) => <li key={idx}>{cost}</li>,
@@ -250,10 +272,18 @@ export function MaterialClassificationDetails({
                                         <th className='py-1 text-center text-destructive'>
                                             Cost ↓
                                         </th>
-                                        <th className='py-1 text-center text-success'>Benefit ↑</th>
-                                        <th className='py-1 text-center text-success'>Benefit ↑</th>
-                                        <th className='py-1 text-center text-success'>Benefit ↑</th>
-                                        <th className='py-1 text-center text-success'>Benefit ↑</th>
+                                        <th className='py-1 text-center text-success'>
+                                            {t('pages.classification.labels.benefit_up')}
+                                        </th>
+                                        <th className='py-1 text-center text-success'>
+                                            {t('pages.classification.labels.benefit_up')}
+                                        </th>
+                                        <th className='py-1 text-center text-success'>
+                                            {t('pages.classification.labels.benefit_up')}
+                                        </th>
+                                        <th className='py-1 text-center text-success'>
+                                            {t('pages.classification.labels.benefit_up')}
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -807,7 +837,9 @@ export function MaterialClassificationDetails({
             <div className='space-y-6'>
                 <Card>
                     <CardHeader className='pb-2'>
-                        <CardTitle>Material Classification</CardTitle>
+                        <CardTitle>
+                            {t('pages.classification.cards.material_classification')}
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className='space-y-2'>
@@ -849,7 +881,7 @@ export function MaterialClassificationDetails({
 
                 <Card>
                     <CardHeader className='pb-2'>
-                        <CardTitle>Rule Base Mapping</CardTitle>
+                        <CardTitle>{t('pages.classification.cards.rule_base_mapping')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <table className='w-full'>
@@ -925,7 +957,7 @@ export function MaterialClassificationDetails({
                 {rawData?.recommendations && (
                     <Card>
                         <CardHeader className='pb-2'>
-                            <CardTitle>Recommendations</CardTitle>
+                            <CardTitle>{t('pages.classification.cards.recommendations')}</CardTitle>
                         </CardHeader>
                         <CardContent>{renderRecommendations(rawData.recommendations)}</CardContent>
                     </Card>
@@ -935,7 +967,9 @@ export function MaterialClassificationDetails({
                 {rawData?.weak_areas && (
                     <Card>
                         <CardHeader className='pb-2'>
-                            <CardTitle>Areas for Improvement</CardTitle>
+                            <CardTitle>
+                                {t('pages.classification.cards.areas_for_improvement')}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>{renderWeakAreas(rawData.weak_areas)}</CardContent>
                     </Card>
@@ -945,7 +979,9 @@ export function MaterialClassificationDetails({
                 {rawData?.question_metrics && (
                     <Card>
                         <CardHeader className='pb-2'>
-                            <CardTitle>Question Performance</CardTitle>
+                            <CardTitle>
+                                {t('pages.classification.cards.question_performance')}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>{renderQuestionMetrics(rawData.question_metrics)}</CardContent>
                     </Card>
@@ -968,7 +1004,9 @@ export function MaterialClassificationDetails({
                 {/* Other Material Details if any */}
                 <Card>
                     <CardHeader className='pb-2'>
-                        <CardTitle>Additional Information</CardTitle>
+                        <CardTitle>
+                            {t('pages.classification.cards.additional_information')}
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
@@ -1030,9 +1068,9 @@ export function MaterialClassificationDetails({
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
                     <DialogHeader>
-                        <DialogTitle>Material Classification Details</DialogTitle>
+                        <DialogTitle>{t('pages.classification.material_dialog.title')}</DialogTitle>
                         <DialogDescription>
-                            Detailed information about the material cognitive classification
+                            {t('pages.classification.material_dialog.description')}
                         </DialogDescription>
                     </DialogHeader>
 

@@ -10,6 +10,7 @@ import { ProgrammingLanguageEnum } from '@/Support/Enums/programmingLanguageEnum
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
     AlertCircle,
     BookText,
@@ -148,6 +149,7 @@ plt.show()`,
 ];
 
 export default function Index() {
+    const { t } = useLaravelReactI18n();
     const { auth } = usePage().props;
     const { isDarkMode } = useDarkMode();
     const [isCompiling, setIsCompiling] = useState(false);
@@ -163,7 +165,7 @@ export default function Index() {
 
     // Add new states for interactive input
     const [waitingForInput, setWaitingForInput] = useState(false);
-    const [inputPrompt, setInputPrompt] = useState('');
+    const [_inputPrompt, setInputPrompt] = useState('');
     const [userInput, setUserInput] = useState('');
     const [executionId, setExecutionId] = useState<string | null>(null);
     const [executionCode, setExecutionCode] = useState('');
@@ -652,7 +654,9 @@ export default function Index() {
                                                                 className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background'
                                                                 autoFocus
                                                             />
-                                                            <Button type='submit'>Submit</Button>
+                                                            <Button type='submit'>
+                                                                {t('pages.sandbox.buttons.submit')}
+                                                            </Button>
                                                         </form>
                                                     </motion.div>
                                                 )}

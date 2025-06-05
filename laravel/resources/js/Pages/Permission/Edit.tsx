@@ -16,6 +16,7 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { PermissionResource } from '@/Support/Interfaces/Resources';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -38,6 +39,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function Edit({ data: permission }: Props) {
+    const { t } = useLaravelReactI18n();
     const updateMutation = permissionServiceHook.useUpdate();
 
     const form = useForm<FormData>({
@@ -60,12 +62,12 @@ export default function Edit({ data: permission }: Props) {
                 },
             }),
             {
-                loading: 'Updating permission...',
+                loading: t('pages.permission.messages.loading'),
                 success: () => {
                     router.visit(route(`${ROUTES.PERMISSIONS}.index`));
-                    return 'Permission updated successfully';
+                    return t('pages.permission.messages.success');
                 },
-                error: 'An error occurred while updating permission',
+                error: t('pages.permission.messages.error'),
             },
         );
     };
@@ -74,7 +76,7 @@ export default function Edit({ data: permission }: Props) {
         <AuthenticatedLayout title={`Edit Permission: ${permission.name}`}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Edit Permission</CardTitle>
+                    <CardTitle>{t('pages.permission.edit.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -82,16 +84,22 @@ export default function Edit({ data: permission }: Props) {
                             <FormField
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Permission Name</FormLabel>
+                                        <FormLabel>
+                                            {t('pages.permission.common.fields.name')}
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder='e.g., users-create, roles-read'
+                                                placeholder={t(
+                                                    'pages.permission.common.placeholders.name',
+                                                )}
                                                 {...field}
                                             />
                                         </FormControl>
                                         <FormMessage />
                                         <p className='text-sm text-muted-foreground'>
-                                            Valid actions: {PERMISSION_VALID_ACTIONS.join(', ')}
+                                            {t('pages.permission.common.help_texts.valid_actions', {
+                                                actions: PERMISSION_VALID_ACTIONS.join(', '),
+                                            })}
                                         </p>
                                     </FormItem>
                                 )}

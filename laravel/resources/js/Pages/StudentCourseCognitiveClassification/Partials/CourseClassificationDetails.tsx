@@ -18,6 +18,7 @@ import {
 } from '@/Components/UI/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import { studentCourseCognitiveClassificationServiceHook } from '@/Services/studentCourseCognitiveClassificationServiceHook';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
 
@@ -49,6 +50,7 @@ interface CourseClassificationDetailsProps {
 export function CourseClassificationDetails({
     classificationId,
 }: CourseClassificationDetailsProps) {
+    const { t } = useLaravelReactI18n();
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [details, setDetails] = useState<any>(null);
@@ -188,7 +190,9 @@ export function CourseClassificationDetails({
             <div className='space-y-6'>
                 <Card>
                     <CardHeader className='pb-2'>
-                        <CardTitle>Classification Overview</CardTitle>
+                        <CardTitle>
+                            {t('pages.classification.cards.classification_overview')}
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className='space-y-2'>
@@ -218,7 +222,7 @@ export function CourseClassificationDetails({
 
                 <Card>
                     <CardHeader className='pb-2'>
-                        <CardTitle>Rule Base Mapping</CardTitle>
+                        <CardTitle>{t('pages.classification.cards.rule_base_mapping')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -319,9 +323,9 @@ export function CourseClassificationDetails({
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
                     <DialogHeader>
-                        <DialogTitle>Course Classification Details</DialogTitle>
+                        <DialogTitle>{t('pages.classification.course_dialog.title')}</DialogTitle>
                         <DialogDescription>
-                            Detailed information about the course cognitive classification
+                            {t('pages.classification.course_dialog.description')}
                         </DialogDescription>
                     </DialogHeader>
 

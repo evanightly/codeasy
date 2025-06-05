@@ -1,9 +1,11 @@
 import PrimaryButton from '@/Components/PrimaryButton';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { FormEventHandler } from 'react';
 
 export default function VerifyEmail({ status }: { status?: string }) {
+    const { t } = useLaravelReactI18n();
     const { post, processing } = useForm({});
 
     const submit: FormEventHandler = (e) => {
@@ -31,7 +33,9 @@ export default function VerifyEmail({ status }: { status?: string }) {
 
             <form onSubmit={submit}>
                 <div className='mt-4 flex items-center justify-between'>
-                    <PrimaryButton disabled={processing}>Resend Verification Email</PrimaryButton>
+                    <PrimaryButton disabled={processing}>
+                        {t('pages.auth.verify_email.resend_button')}
+                    </PrimaryButton>
 
                     <Link
                         method='post'

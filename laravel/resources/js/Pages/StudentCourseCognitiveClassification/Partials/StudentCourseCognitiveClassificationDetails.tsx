@@ -18,6 +18,7 @@ import {
 } from '@/Components/UI/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import { studentCourseCognitiveClassificationServiceHook } from '@/Services/studentCourseCognitiveClassificationServiceHook';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
 import { StudentCourseCognitiveClassificationHistoryViewer } from './StudentCourseCognitiveClassificationHistoryViewer';
@@ -54,6 +55,7 @@ interface StudentCourseCognitiveClassificationDetailsProps {
 export function StudentCourseCognitiveClassificationDetails({
     classificationId,
 }: StudentCourseCognitiveClassificationDetailsProps) {
+    const { t } = useLaravelReactI18n();
     const [isOpen, setIsOpen] = useState(false);
     const [isPending, setIsPending] = useState<boolean>(false);
     const [isError, setIsError] = useState<boolean>(false);
@@ -107,7 +109,9 @@ export function StudentCourseCognitiveClassificationDetails({
 
         return (
             <div className='space-y-4'>
-                <h3 className='text-lg font-semibold'>Material Classifications</h3>
+                <h3 className='text-lg font-semibold'>
+                    {t('pages.classification.section_headers.material_classifications')}
+                </h3>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -144,7 +148,9 @@ export function StudentCourseCognitiveClassificationDetails({
 
         return (
             <div className='space-y-4'>
-                <h3 className='text-lg font-semibold'>Recommendations</h3>
+                <h3 className='text-lg font-semibold'>
+                    {t('pages.classification.cards.recommendations')}
+                </h3>
                 <Card>
                     <CardContent className='pt-6'>
                         <ul className='list-disc space-y-2 pl-5'>
@@ -168,7 +174,9 @@ export function StudentCourseCognitiveClassificationDetails({
 
         return (
             <div className='space-y-4'>
-                <h3 className='text-lg font-semibold'>Calculation Details</h3>
+                <h3 className='text-lg font-semibold'>
+                    {t('pages.classification.section_headers.calculation_details')}
+                </h3>
                 <Card>
                     <CardContent className='pt-6'>
                         <div className='grid grid-cols-2 gap-4'>
@@ -196,9 +204,9 @@ export function StudentCourseCognitiveClassificationDetails({
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
                     <DialogHeader className='mb-4'>
-                        <DialogTitle>Course Classification Details</DialogTitle>
+                        <DialogTitle>{t('pages.classification.course_dialog.title')}</DialogTitle>
                         <DialogDescription>
-                            Detailed information about the course cognitive classification
+                            {t('pages.classification.course_dialog.description')}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -212,7 +220,9 @@ export function StudentCourseCognitiveClassificationDetails({
                         <div className='space-y-6'>
                             <Card>
                                 <CardHeader className='pb-2'>
-                                    <CardTitle>Classification Overview</CardTitle>
+                                    <CardTitle>
+                                        {t('pages.classification.cards.classification_overview')}
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className='space-y-2'>
@@ -252,7 +262,9 @@ export function StudentCourseCognitiveClassificationDetails({
 
                             <Card>
                                 <CardHeader className='pb-2'>
-                                    <CardTitle>Rule Base Mapping</CardTitle>
+                                    <CardTitle>
+                                        {t('pages.classification.cards.rule_base_mapping')}
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <Table>

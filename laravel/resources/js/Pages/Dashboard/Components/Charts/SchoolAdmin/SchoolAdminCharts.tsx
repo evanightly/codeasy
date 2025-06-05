@@ -7,6 +7,7 @@ import {
     CardTitle,
 } from '@/Components/UI/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/Components/UI/chart';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { TrendingUp } from 'lucide-react';
 import {
     Bar,
@@ -33,18 +34,26 @@ import {
 } from '../../chartData';
 
 export function SchoolAdminCharts() {
+    const { t } = useLaravelReactI18n();
+
     return (
         <>
             <div className='space-y-2'>
-                <h1 className='text-2xl font-bold'>School Admin Overview</h1>
-                <p className='text-muted-foreground'>Dashboard ringkasan untuk Sekolah</p>
+                <h1 className='text-2xl font-bold'>{t('pages.dashboard.school_admin.title')}</h1>
+                <p className='text-muted-foreground'>
+                    {t('pages.dashboard.school_admin.subtitle')}
+                </p>
             </div>
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* Population Bar Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Populasi Sekolah (Bar Chart)</CardTitle>
-                        <CardDescription>Staff, Guru, Siswa</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.school_admin.charts.population.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.school_admin.charts.population.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={schoolConfig} className='h-[300px] w-full'>
@@ -59,7 +68,8 @@ export function SchoolAdminCharts() {
                     </CardContent>
                     <CardFooter className='text-sm'>
                         <div className='flex gap-2 font-medium leading-none'>
-                            Current Stats <TrendingUp className='h-4 w-4' />
+                            {t('pages.dashboard.school_admin.charts.population.footer')}{' '}
+                            <TrendingUp className='h-4 w-4' />
                         </div>
                     </CardFooter>
                 </Card>
@@ -67,8 +77,12 @@ export function SchoolAdminCharts() {
                 {/* Facilities Pie Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Fasilitas Sekolah (Pie)</CardTitle>
-                        <CardDescription>Lab, Projectors, etc.</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.school_admin.charts.facilities.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.school_admin.charts.facilities.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={schoolConfig} className='mx-auto h-[300px] w-full'>
@@ -110,7 +124,9 @@ export function SchoolAdminCharts() {
                                                             x={viewBox.cx}
                                                             className='fill-muted-foreground text-xs'
                                                         >
-                                                            Items
+                                                            {t(
+                                                                'pages.dashboard.school_admin.charts.facilities.items_label',
+                                                            )}
                                                         </tspan>
                                                     </text>
                                                 );
@@ -126,8 +142,12 @@ export function SchoolAdminCharts() {
                 {/* Class Development Radar Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Perkembangan Kelas (Radar)</CardTitle>
-                        <CardDescription>Januari vs Juni</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.school_admin.charts.class_development.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.school_admin.charts.class_development.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={schoolConfig} className='mx-auto h-[300px] w-full'>
@@ -160,8 +180,12 @@ export function SchoolAdminCharts() {
                 {/* Level Performance Radial Chart */}
                 <Card className='w-full'>
                     <CardHeader>
-                        <CardTitle>Performa Nilai (Radial Chart)</CardTitle>
-                        <CardDescription>SD, SMP, SMA</CardDescription>
+                        <CardTitle>
+                            {t('pages.dashboard.school_admin.charts.level_performance.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.school_admin.charts.level_performance.description')}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={schoolConfig} className='mx-auto h-[300px] w-full'>

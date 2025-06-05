@@ -1,3 +1,5 @@
+// TODO: localization not implemented yet
+
 import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
@@ -53,7 +55,7 @@ interface CalculationDetails {
     steps: CalculationStep[];
 }
 
-interface ClassificationDetailsData {
+interface _ClassificationDetailsData {
     id: number;
     user_id: number;
     user: {
@@ -195,7 +197,7 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
                                         const questionData = materials[materialId][questionId];
 
                                         // Generate cells in the exact specified order
-                                        return METRIC_ORDER.map((metricKey, metricIdx) => (
+                                        return METRIC_ORDER.map((metricKey, _metricIdx) => (
                                             <TableCell
                                                 key={`cell-${materialId}-${questionId}-${metricKey}`}
                                             >
@@ -229,7 +231,9 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead rowSpan={2}>Material</TableHead>
+                            <TableHead rowSpan={2}>
+                                {t('pages.classification.table_headers.material')}
+                            </TableHead>
                             {Array.from({ length: questionCount }).map((_, idx) => (
                                 <TableHead
                                     key={`question-${idx}`}
@@ -285,7 +289,7 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
             <div className='grid grid-cols-2 gap-4'>
                 <Card>
                     <CardHeader className='pb-2'>
-                        <CardTitle>Benefit Criteria</CardTitle>
+                        <CardTitle>{t('pages.classification.cards.benefit_criteria')}</CardTitle>
                         <CardDescription>Higher values are better</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -301,7 +305,7 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                 <Card>
                     <CardHeader className='pb-2'>
-                        <CardTitle>Cost Criteria</CardTitle>
+                        <CardTitle>{t('pages.classification.cards.cost_criteria')}</CardTitle>
                         <CardDescription>Lower values are better</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -336,7 +340,9 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
                         <CardContent>
                             {step.column_sums && (
                                 <div className='mb-4'>
-                                    <h4 className='mb-2 text-sm font-medium'>Column Sums</h4>
+                                    <h4 className='mb-2 text-sm font-medium'>
+                                        {t('pages.classification.section_headers.column_sums')}
+                                    </h4>
                                     <div className='overflow-x-auto'>
                                         <Table>
                                             <TableBody>
@@ -355,7 +361,11 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                             {step.normalized_matrix && (
                                 <div className='mb-4'>
-                                    <h4 className='mb-2 text-sm font-medium'>Normalized Matrix</h4>
+                                    <h4 className='mb-2 text-sm font-medium'>
+                                        {t(
+                                            'pages.classification.section_headers.normalized_matrix',
+                                        )}
+                                    </h4>
                                     <div className='overflow-x-auto'>
                                         <Table>
                                             <TableBody>
@@ -378,7 +388,9 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                             {step.weights && (
                                 <div className='mb-4'>
-                                    <h4 className='mb-2 text-sm font-medium'>Weights</h4>
+                                    <h4 className='mb-2 text-sm font-medium'>
+                                        {t('pages.classification.section_headers.weights')}
+                                    </h4>
                                     <div className='overflow-x-auto'>
                                         <Table>
                                             <TableBody>
@@ -397,7 +409,9 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                             {step.weighted_matrix && (
                                 <div className='mb-4'>
-                                    <h4 className='mb-2 text-sm font-medium'>Weighted Matrix</h4>
+                                    <h4 className='mb-2 text-sm font-medium'>
+                                        {t('pages.classification.section_headers.weighted_matrix')}
+                                    </h4>
                                     <div className='overflow-x-auto'>
                                         <Table>
                                             <TableBody>
@@ -420,12 +434,18 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                             {step.ideal_best && step.ideal_worst && (
                                 <div className='mb-4'>
-                                    <h4 className='mb-2 text-sm font-medium'>Ideal Solutions</h4>
+                                    <h4 className='mb-2 text-sm font-medium'>
+                                        {t('pages.classification.section_headers.ideal_solutions')}
+                                    </h4>
                                     <div className='overflow-x-auto'>
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
-                                                    <TableHead>Solution</TableHead>
+                                                    <TableHead>
+                                                        {t(
+                                                            'pages.classification.table_headers.solution',
+                                                        )}
+                                                    </TableHead>
                                                     {step.ideal_best.map((_, idx) => (
                                                         <TableHead key={`ideal-head-${idx}`}>
                                                             C{idx + 1}
@@ -465,7 +485,11 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
-                                                    <TableHead>Alternative</TableHead>
+                                                    <TableHead>
+                                                        {t(
+                                                            'pages.classification.table_headers.alternative',
+                                                        )}
+                                                    </TableHead>
                                                     <TableHead>S+ (from ideal best)</TableHead>
                                                     <TableHead>S- (from ideal worst)</TableHead>
                                                 </TableRow>
@@ -496,7 +520,11 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                             {step.performance_scores && (
                                 <div className='mb-4'>
-                                    <h4 className='mb-2 text-sm font-medium'>Performance Scores</h4>
+                                    <h4 className='mb-2 text-sm font-medium'>
+                                        {t(
+                                            'pages.classification.section_headers.performance_scores',
+                                        )}
+                                    </h4>
                                     <div className='overflow-x-auto'>
                                         <Table>
                                             <TableHeader>
@@ -520,7 +548,9 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                             {step.final_score !== undefined && (
                                 <div className='mb-4'>
-                                    <h4 className='mb-2 text-sm font-medium'>Final Score</h4>
+                                    <h4 className='mb-2 text-sm font-medium'>
+                                        {t('pages.classification.section_headers.final_score')}
+                                    </h4>
                                     <Badge variant='outline' className='py-2 text-lg'>
                                         {formatNumber(step.final_score)}
                                     </Badge>
@@ -529,7 +559,9 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                             {step.final_level && (
                                 <div className='mb-4'>
-                                    <h4 className='mb-2 text-sm font-medium'>Final Level</h4>
+                                    <h4 className='mb-2 text-sm font-medium'>
+                                        {t('pages.classification.section_headers.final_level')}
+                                    </h4>
                                     <Badge className='py-2 text-lg'>{step.final_level}</Badge>
                                 </div>
                             )}
@@ -579,19 +611,19 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className='flex max-h-[90vh] max-w-screen-2xl flex-col overflow-auto'>
                     <DialogHeader>
-                        <DialogTitle>Classification Details</DialogTitle>
+                        <DialogTitle>{t('pages.classification.dialog.title')}</DialogTitle>
                         <DialogDescription>
-                            Detailed steps of the classification process
+                            {t('pages.classification.dialog.description')}
                         </DialogDescription>
                     </DialogHeader>
 
-                    {isPending && <div>Loading classification details...</div>}
+                    {isPending && <div>{t('pages.classification.status.loading')}</div>}
 
                     {isError && (
                         <Alert variant='destructive'>
-                            <AlertTitle>Error</AlertTitle>
+                            <AlertTitle>{t('pages.classification.status.error_title')}</AlertTitle>
                             <AlertDescription>
-                                {error?.message || 'Failed to load classification details'}
+                                {error?.message || t('pages.classification.status.error_message')}
                             </AlertDescription>
                         </Alert>
                     )}
@@ -601,7 +633,9 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
                             <div className='grid grid-cols-2 gap-4'>
                                 <Card>
                                     <CardHeader className='pb-2'>
-                                        <CardTitle>Classification Result</CardTitle>
+                                        <CardTitle>
+                                            {t('pages.classification.cards.classification_result')}
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className='flex flex-col gap-2'>
@@ -637,7 +671,9 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                                 <Card>
                                     <CardHeader className='pb-2'>
-                                        <CardTitle>Rule Base Mapping</CardTitle>
+                                        <CardTitle>
+                                            {t('pages.classification.cards.rule_base_mapping')}
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <Table>
@@ -722,7 +758,9 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
                             <Card className='flex-1'>
                                 <CardHeader className='pb-2'>
-                                    <CardTitle>Calculation Process</CardTitle>
+                                    <CardTitle>
+                                        {t('pages.classification.cards.calculation_process')}
+                                    </CardTitle>
                                     <CardDescription>
                                         Step-by-step breakdown of the classification calculation
                                     </CardDescription>
