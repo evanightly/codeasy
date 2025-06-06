@@ -39,6 +39,17 @@ class UserService extends BaseCrudService implements UserServiceInterface {
         return parent::update($keyOrModel, $data);
     }
 
+    public function updatePreferences($keyOrModel, array $preferences): ?Model {
+        // Get the user model if an ID was passed
+        $user = is_numeric($keyOrModel) ? $this->findOrFail($keyOrModel) : $keyOrModel;
+
+        // Merge new preferences with existing ones
+        $existingPreferences = $user->preferences ?? [];
+        $newPreferences = array_merge($existingPreferences, $preferences);
+
+        return parent::update($user, ['preferences' => $newPreferences]);
+    }
+
     protected function getRepositoryClass(): string {
         return UserRepositoryInterface::class;
     }

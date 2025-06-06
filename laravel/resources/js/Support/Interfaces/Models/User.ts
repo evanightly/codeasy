@@ -11,4 +11,8 @@ export interface User extends Model {
     image_path?: string | null;
     profile_image?: string | null;
     profile_image_path?: string | null;
+    preferences?: {
+        locale?: string;
+        [key: string]: any;
+    } | null;
 }

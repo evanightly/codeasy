@@ -1,6 +1,7 @@
 const intents = {
     CUSTOM_ACTION: 'custom-action',
     USER_INDEX_STUDENTS: 'user.index.students',
+    USER_UPDATE_PREFERENCES: 'user.update.preferences',
     TEACHER_UPDATE_APPROVE: 'teacher.update.approve',
     SCHOOL_UPDATE_ASSIGN_ADMIN: 'school.update.assign.admin',
     SCHOOL_UPDATE_UNASSIGN_ADMIN: 'school.update.unassign.admin',

@@ -1,7 +1,8 @@
 import { SidebarInset, SidebarProvider } from '@/Components/UI/sidebar';
 import { GenericBreadcrumbItem } from '@/Support/Interfaces/Others';
 import { Head, usePage } from '@inertiajs/react';
-import { HTMLAttributes, ReactNode } from 'react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { HTMLAttributes, ReactNode, useEffect } from 'react';
 import { DashboardNavbar } from './Components/DashboardNavbar';
 import { DashboardSidebar } from './Components/DashboardSidebar';
 
@@ -20,6 +21,17 @@ export default function AuthenticatedLayout({
 }: DashboardLayoutProps) {
     const paddingClass = padding ? 'p-5' : 'p-0';
     const { auth } = usePage().props;
+    const { setLocale } = useLaravelReactI18n();
+
+    useEffect(() => {
+        // Ensure the locale is set correctly on initial load
+        setTimeout(() => {
+            if (auth.user.preferences?.locale) {
+                setLocale(auth.user.preferences.locale);
+                window.axios.defaults.headers['Accept-Language'] = auth.user.preferences.locale;
+            }
+        }, 100);
+    }, [auth.user.preferences?.locale]);
 
     return (
         <>

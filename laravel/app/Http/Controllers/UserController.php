@@ -81,8 +81,19 @@ class UserController extends Controller implements HasMiddleware {
     }
 
     public function update(UpdateUserRequest $request, User $user) {
+        $intent = $request->get('intent');
+
+        switch ($intent) {
+            case IntentEnum::USER_UPDATE_PREFERENCES->value:
+                $data = $this->userService->updatePreferences($user, $request->validated());
+                break;
+            default:
+                $data = $this->userService->update($user, $request->validated());
+                break;
+        }
+
         if ($this->ajax()) {
-            return $this->userService->update($user, $request->validated());
+            return $data;
         }
     }
 

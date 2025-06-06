@@ -262,6 +262,11 @@ return [
                 'timestamps' => 'Time Information',
             ],
         ],
+        'messages' => [
+            'loading' => 'Updating permission...',
+            'success' => 'Permission updated successfully',
+            'error' => 'An error occurred while updating permission',
+        ],
     ],
     'role' => [
         'common' => [
@@ -2046,15 +2051,6 @@ return [
             'error_message' => 'Failed to load classification details',
             'material_error' => 'Error loading material classification details. Please try again.',
             'material_error_failed' => 'Failed to load material classification details',
-        ],
-    ],
-
-    // Permission Messages
-    'permission' => [
-        'messages' => [
-            'loading' => 'Updating permission...',
-            'success' => 'Permission updated successfully',
-            'error' => 'An error occurred while updating permission',
         ],
     ],
 

@@ -33,6 +33,7 @@ class UserResource extends JsonResource {
             'updated_at' => $this->updated_at->toDateTimeString(),
             'profile_image' => $this->profile_image,
             'profile_image_url' => $profileImageUrl,
+            'preferences' => $this->preferences,
             'roles' => RoleResource::collection($this->whenLoaded('roles')),
         ];
 
