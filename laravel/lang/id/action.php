@@ -19,7 +19,12 @@ return [
     'submit' => 'Kirim',
     'close' => 'Tutup',
     'filter' => 'Filter',
-    'clear' => 'Bersihkan',
+    'clear' => 'Hapus',
     'select' => 'Pilih',
     'loading' => 'Memuat...',
+    'view_file' => 'Lihat File',
+    'prev' => 'Sebelumnya',
+    'next' => 'Selanjutnya',
+    'back_to_top' => 'Kembali ke Atas',
+    'actions' => 'Aksi',
 ];

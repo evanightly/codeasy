@@ -19,6 +19,7 @@ import {
     useSidebar,
 } from '@/Components/UI/sidebar';
 import { Link, usePage } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { DashboardNavbarDarkModeToggler } from './Components/DashboardDarkModeToggler';
 import { SetLocalization } from './Components/DashboardSetLocalization';
 import { DashboardSetTheme } from './Components/DashboardSetTheme';
@@ -27,6 +28,7 @@ import { DashboardSandboxPromo } from './DashboardSandboxPromo';
 const DashboardSidebarUser = () => {
     const { state } = useSidebar();
     const { isMobile } = useSidebar();
+    const { t } = useLaravelReactI18n();
     const {
         auth: { user },
     } = usePage().props;
@@ -44,7 +46,7 @@ const DashboardSidebarUser = () => {
                     <SidebarMenuButton variant='windui' asChild>
                         <Link href={route('sandbox.index')}>
                             <Terminal />
-                            <span>Sandbox</span>
+                            <span>{t('components.dashboard_sidebar.user.sandbox')}</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -98,7 +100,7 @@ const DashboardSidebarUser = () => {
                         <DropdownMenuGroup>
                             <DropdownMenuItem>
                                 <Sparkles />
-                                Upgrade to Pro
+                                {t('components.dashboard_sidebar.user.upgrade_to_pro')}
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
@@ -106,7 +108,7 @@ const DashboardSidebarUser = () => {
                             <DropdownMenuItem asChild>
                                 <Link href={route('profile.edit')}>
                                     <BadgeCheck />
-                                    Profile
+                                    {t('components.dashboard_sidebar.user.profile')}
                                 </Link>
                             </DropdownMenuItem>
 
@@ -118,7 +120,7 @@ const DashboardSidebarUser = () => {
                         <DropdownMenuItem asChild>
                             <Link method='post' href={route('logout')} className='w-full'>
                                 <LogOut />
-                                Log out
+                                {t('components.dashboard_sidebar.user.log_out')}
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>

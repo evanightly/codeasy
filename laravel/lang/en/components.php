@@ -53,6 +53,12 @@ return [
             'courses' => 'My Courses',
             'progress' => 'My Progress',
         ],
+        'user' => [
+            'sandbox' => 'Sandbox',
+            'upgrade_to_pro' => 'Upgrade to Pro',
+            'profile' => 'Profile',
+            'log_out' => 'Log out',
+        ],
     ],
     'filepond' => [
         'labels' => [

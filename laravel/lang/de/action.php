@@ -22,4 +22,9 @@ return [
     'clear' => 'Löschen',
     'select' => 'Auswählen',
     'loading' => 'Laden...',
+    'view_file' => 'Datei anzeigen',
+    'prev' => 'Zurück',
+    'next' => 'Weiter',
+    'back_to_top' => 'Nach oben',
+    'actions' => 'Aktionen',
 ];
