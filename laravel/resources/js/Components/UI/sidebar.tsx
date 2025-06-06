@@ -12,13 +12,17 @@ import { Skeleton } from '@/Components/UI/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/UI/tooltip';
 import { useIsMobile } from '@/Hooks/use-mobile';
 import { ny } from '@/Lib/Utils';
+import { useLocalStorage } from '@uidotdev/usehooks';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = '16rem';
+const _SIDEBAR_WIDTH = '16rem';
 const SIDEBAR_WIDTH_MOBILE = '18rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
+const SIDEBAR_MIN_WIDTH = 200; // 12.5rem in pixels
+const SIDEBAR_MAX_WIDTH = 480; // 30rem in pixels
+const SIDEBAR_DEFAULT_WIDTH = 256; // 16rem in pixels
 
 interface SidebarContext {
     state: 'expanded' | 'collapsed';
@@ -28,6 +32,10 @@ interface SidebarContext {
     setOpenMobile: (open: boolean) => void;
     isMobile: boolean;
     toggleSidebar: () => void;
+    width: number;
+    setWidth: (width: number) => void;
+    isResizing: boolean;
+    setIsResizing: (resizing: boolean) => void;
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
@@ -51,7 +59,7 @@ const SidebarProvider = React.forwardRef<
 >(
     (
         {
-            defaultOpen = true,
+            defaultOpen: _defaultOpen = true,
             open: openProp,
             onOpenChange: setOpenProp,
             className,
@@ -64,22 +72,53 @@ const SidebarProvider = React.forwardRef<
         const isMobile = useIsMobile();
         const [openMobile, setOpenMobile] = React.useState(false);
 
+        // Use useLocalStorage for persistent state
+        const [storedCollapsed, setStoredCollapsed] = useLocalStorage('sidebar:collapsed', false);
+        const [storedWidth, setStoredWidth] = useLocalStorage(
+            'sidebar:width',
+            SIDEBAR_DEFAULT_WIDTH,
+        );
+
+        // Width and resizing state
+        const [isResizing, setIsResizing] = React.useState(false);
+
+        // Clamp stored width to valid bounds
+        const clampedWidth = Math.max(SIDEBAR_MIN_WIDTH, Math.min(SIDEBAR_MAX_WIDTH, storedWidth));
+
         // This is the internal state of the sidebar.
         // We use openProp and setOpenProp for control from outside the component.
-        const [_open, _setOpen] = React.useState(defaultOpen);
+        const [_open, _setOpen] = React.useState(openProp ?? !storedCollapsed);
         const open = openProp ?? _open;
+
         const setOpen = React.useCallback(
             (value: boolean | ((value: boolean) => boolean)) => {
+                const newValue = typeof value === 'function' ? value(open) : value;
+
                 if (setOpenProp) {
-                    return setOpenProp?.(typeof value === 'function' ? value(open) : value);
+                    setOpenProp(newValue);
+                } else {
+                    _setOpen(newValue);
                 }
 
-                _setOpen(value);
+                // Store the collapsed state
+                setStoredCollapsed(!newValue);
 
                 // This sets the cookie to keep the sidebar state.
-                document.cookie = `${SIDEBAR_COOKIE_NAME}=${open}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+                document.cookie = `${SIDEBAR_COOKIE_NAME}=${newValue}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
             },
-            [setOpenProp, open],
+            [setOpenProp, open, setStoredCollapsed],
+        );
+
+        // Width setter with persistence
+        const setWidth = React.useCallback(
+            (newWidth: number) => {
+                const clampedWidth = Math.max(
+                    SIDEBAR_MIN_WIDTH,
+                    Math.min(SIDEBAR_MAX_WIDTH, newWidth),
+                );
+                setStoredWidth(clampedWidth);
+            },
+            [setStoredWidth],
         );
 
         // Helper to toggle the sidebar.
@@ -113,8 +152,24 @@ const SidebarProvider = React.forwardRef<
                 openMobile,
                 setOpenMobile,
                 toggleSidebar,
+                width: clampedWidth,
+                setWidth,
+                isResizing,
+                setIsResizing,
             }),
-            [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+            [
+                state,
+                open,
+                setOpen,
+                isMobile,
+                openMobile,
+                setOpenMobile,
+                toggleSidebar,
+                clampedWidth,
+                setWidth,
+                isResizing,
+                setIsResizing,
+            ],
         );
 
         return (
@@ -123,7 +178,7 @@ const SidebarProvider = React.forwardRef<
                     <div
                         style={
                             {
-                                '--sidebar-width': SIDEBAR_WIDTH,
+                                '--sidebar-width': `${clampedWidth}px`,
                                 '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
                                 ...style,
                             } as React.CSSProperties
@@ -275,25 +330,85 @@ SidebarTrigger.displayName = 'SidebarTrigger';
 
 const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<'button'>>(
     ({ className, ...props }, ref) => {
-        const { toggleSidebar } = useSidebar();
+        const { toggleSidebar, width, setWidth, isResizing, setIsResizing, state } = useSidebar();
+        const [isDragging, setIsDragging] = React.useState(false);
+        const startXRef = React.useRef<number>(0);
+        const startWidthRef = React.useRef<number>(0);
+
+        const handleMouseDown = React.useCallback(
+            (e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (state === 'collapsed') {
+                    toggleSidebar();
+                    return;
+                }
+
+                setIsDragging(true);
+                setIsResizing(true);
+                startXRef.current = e.clientX;
+                startWidthRef.current = width;
+
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+            },
+            [state, toggleSidebar, width, setIsResizing],
+        );
+
+        const handleMouseMove = React.useCallback(
+            (e: MouseEvent) => {
+                if (!isDragging) return;
+
+                const deltaX = e.clientX - startXRef.current;
+                const newWidth = startWidthRef.current + deltaX;
+
+                setWidth(newWidth);
+            },
+            [isDragging, setWidth],
+        );
+
+        const handleMouseUp = React.useCallback(() => {
+            setIsDragging(false);
+            setIsResizing(false);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }, [setIsResizing]);
+
+        React.useEffect(() => {
+            if (isDragging) {
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+
+                return () => {
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                };
+            }
+        }, [isDragging, handleMouseMove, handleMouseUp]);
 
         return (
             <button
-                title='Toggle Sidebar'
+                title={
+                    state === 'collapsed' ? 'Expand Sidebar' : 'Drag to resize or click to collapse'
+                }
                 tabIndex={-1}
                 ref={ref}
-                onClick={toggleSidebar}
+                onMouseDown={handleMouseDown}
                 data-sidebar='rail'
                 className={ny(
                     'absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex',
-                    '[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize',
+                    '[[data-side=left]_&]:cursor-col-resize [[data-side=right]_&]:cursor-col-resize',
                     '[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
                     'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar',
                     '[[data-side=left][data-collapsible=offcanvas]_&]:-right-2',
                     '[[data-side=right][data-collapsible=offcanvas]_&]:-left-2',
+                    isResizing && 'cursor-col-resize',
                     className,
                 )}
-                aria-label='Toggle Sidebar'
+                aria-label={
+                    state === 'collapsed' ? 'Expand Sidebar' : 'Drag to resize or click to collapse'
+                }
                 {...props}
             />
         );
