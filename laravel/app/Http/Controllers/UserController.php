@@ -28,7 +28,7 @@ class UserController extends Controller implements HasMiddleware {
 
         return [
             self::createPermissionMiddleware([PermissionEnum::USER_CREATE->value], ['create', 'store']),
-            self::createPermissionMiddleware([PermissionEnum::USER_UPDATE->value], ['edit', 'update']),
+            self::createPermissionMiddleware([PermissionEnum::USER_UPDATE->value], ['edit', 'update'], [IntentEnum::USER_UPDATE_PREFERENCES->value]),
             self::createPermissionMiddleware($userReadPermissions, ['index', 'show']),
             self::createPermissionMiddleware([PermissionEnum::USER_DELETE->value], ['destroy']),
         ];

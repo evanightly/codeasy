@@ -36,10 +36,15 @@ abstract class Controller {
     protected static function createPermissionMiddleware(
         array $permissions,
         array $only = [],
-        string $type = 'permission'
+        array $allowedIntents = [],
+        string $type = 'permission',
     ): Middleware {
         $permissionString = implode('|', $permissions);
+        $allowedIntentsString = implode(',', $allowedIntents);
 
-        return new Middleware("{$type}:{$permissionString}", only: $only);
+        return new Middleware(
+            "intent_permission_override:{$permissionString},{$allowedIntentsString},{$type}",
+            only: $only
+        );
     }
 }
