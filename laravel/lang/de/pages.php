@@ -207,7 +207,7 @@ return [
                 'stats' => 'Vorschau-Statistiken',
                 'students_list' => 'Schülerliste',
                 'student_count' => 'Gesamtzahl der Schüler: :count',
-            ]
+            ],
         ],
     ],
     'permission' => [

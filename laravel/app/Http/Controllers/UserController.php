@@ -8,11 +8,10 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
-use App\Support\Interfaces\Services\UserServiceInterface;
 use App\Support\Interfaces\Services\User\StudentImportServiceInterface;
+use App\Support\Interfaces\Services\UserServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller implements HasMiddleware {
     public function __construct(
