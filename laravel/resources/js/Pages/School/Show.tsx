@@ -4,8 +4,9 @@ import { useConfirmation } from '@/Contexts/ConfirmationDialogContext';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { schoolServiceHook } from '@/Services/schoolServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { SchoolResource } from '@/Support/Interfaces/Resources';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -18,9 +19,11 @@ interface Props {
 
 export default function Show({ data: school }: Props) {
     const { t } = useLaravelReactI18n();
+    const { auth } = usePage().props;
     const confirmAction = useConfirmation();
     const unassignAdminMutation = schoolServiceHook.useUnassignAdmin();
     const unassignStudentMutation = schoolServiceHook.useUnassignStudent();
+    const bulkUnassignStudentsMutation = schoolServiceHook.useBulkUnassignStudents();
 
     const handleUnassignAdmin = async (userId: number) => {
         confirmAction(async () => {
@@ -60,6 +63,31 @@ export default function Show({ data: school }: Props) {
         });
     };
 
+    const handleBulkUnassignStudents = async (userIds: number[]) => {
+        confirmAction(async () => {
+            toast.promise(
+                bulkUnassignStudentsMutation.mutateAsync({
+                    id: school.id,
+                    data: { user_ids: userIds },
+                }),
+                {
+                    loading: t('pages.school.common.messages.pending.unassign_students'),
+                    success: t('pages.school.common.messages.success.unassign_students', {
+                        count: userIds.length,
+                    }),
+                    error: t('pages.school.common.messages.error.unassign_students'),
+                    finally: () => {
+                        location.reload(); // cant use router.reload due to early return in promise
+                        // router.reload();
+                    },
+                },
+            );
+        });
+    };
+
+    const isSuperAdmin = auth.user.roles.includes(RoleEnum.SUPER_ADMIN) ?? false;
+    const isSchoolAdmin = auth.user.roles.includes(RoleEnum.SCHOOL_ADMIN) ?? false;
+
     return (
         <AuthenticatedLayout title={t('pages.school.show.title', { name: school?.name ?? '' })}>
             <div className='space-y-6'>
@@ -71,10 +99,10 @@ export default function Show({ data: school }: Props) {
                     {t('pages.school.show.buttons.back')}
                 </Link>
 
-                <div className='grid gap-6 md:grid-cols-2'>
+                <div className='flex flex-col gap-6'>
                     <SchoolDetails school={school} />
 
-                    <div className='space-y-6'>
+                    <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
                         <Card>
                             <CardHeader>
                                 <CardTitle>
@@ -88,7 +116,7 @@ export default function Show({ data: school }: Props) {
                                     emptyMessage={t(
                                         'pages.school.common.empty_states.no_administrators',
                                     )}
-                                    canDelete={true}
+                                    canDelete={isSuperAdmin}
                                 />
                             </CardContent>
                         </Card>
@@ -112,9 +140,11 @@ export default function Show({ data: school }: Props) {
                             <CardContent>
                                 <UsersList
                                     users={school.students}
+                                    useDataTable={true}
                                     onDelete={handleUnassignStudent}
+                                    onBulkDelete={handleBulkUnassignStudents}
                                     emptyMessage={t('pages.school.common.empty_states.no_students')}
-                                    canDelete={true}
+                                    canDelete={isSchoolAdmin}
                                 />
                             </CardContent>
                         </Card>

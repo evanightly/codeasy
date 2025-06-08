@@ -46,6 +46,7 @@ export function Schools({ response, filters, setFilters, baseKey, baseRoute }: S
     const deleteMutation = schoolServiceHook.useDelete();
     const assignAdminMutation = schoolServiceHook.useAssignAdmin();
     const assignStudentMutation = schoolServiceHook.useAssignStudent();
+    const bulkAssignStudentMutation = schoolServiceHook.useBulkAssignStudents();
 
     const handleDeleteSchool = async (school: SchoolResource) => {
         if (!school.id) return;
@@ -77,23 +78,44 @@ export function Schools({ response, filters, setFilters, baseKey, baseRoute }: S
         );
     };
 
-    const handleAssignStudent = async (userId: number) => {
+    const handleAssignStudent = async (userIds: number[]) => {
         if (!selectedSchool) return;
 
-        toast.promise(
-            assignStudentMutation.mutateAsync({
-                id: selectedSchool.id,
-                data: { user_id: userId },
-            }),
-            {
-                loading: t('pages.school.common.messages.pending.assign_student'),
-                success: () => {
-                    setShowAssignStudent(false);
-                    return t('pages.school.common.messages.success.assign_student');
+        if (userIds.length === 1) {
+            // Use single assignment for backward compatibility
+            toast.promise(
+                assignStudentMutation.mutateAsync({
+                    id: selectedSchool.id,
+                    data: { user_id: userIds[0] },
+                }),
+                {
+                    loading: t('pages.school.common.messages.pending.assign_student'),
+                    success: () => {
+                        setShowAssignStudent(false);
+                        return t('pages.school.common.messages.success.assign_student');
+                    },
+                    error: t('pages.school.common.messages.error.assign_student'),
                 },
-                error: t('pages.school.common.messages.error.assign_student'),
-            },
-        );
+            );
+        } else {
+            // Use bulk assignment for multiple students
+            toast.promise(
+                bulkAssignStudentMutation.mutateAsync({
+                    id: selectedSchool.id,
+                    data: { user_ids: userIds },
+                }),
+                {
+                    loading: t('pages.school.common.messages.pending.assign_students'),
+                    success: () => {
+                        setShowAssignStudent(false);
+                        return t('pages.school.common.messages.success.assign_students', {
+                            count: userIds.length,
+                        });
+                    },
+                    error: t('pages.school.common.messages.error.assign_students'),
+                },
+            );
+        }
     };
 
     const columns = [

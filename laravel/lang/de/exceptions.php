@@ -24,12 +24,14 @@ return [
             'student' => [
                 'already_assigned' => 'Benutzer ist bereits Schüler in dieser Schule.',
                 'different_role' => 'Benutzer hat bereits eine andere Rolle in dieser Schule.',
+                'all_already_assigned' => 'Alle ausgewählten Schüler sind bereits dieser Schule zugewiesen',
             ],
         ],
         'classroom' => [
             'unauthorized' => 'Nicht berechtigt, diesen Klassenraum zu :action',
             'student' => [
                 'already_assigned' => 'Schüler ist bereits diesem Klassenraum zugewiesen',
+                'all_already_assigned' => 'Alle ausgewählten Schüler sind bereits diesem Klassenraum zugewiesen',
             ],
         ],
         'school_request' => [

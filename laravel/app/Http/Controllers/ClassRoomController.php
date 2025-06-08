@@ -81,6 +81,14 @@ class ClassRoomController extends Controller implements HasMiddleware {
                     $this->classRoomService->unassignStudent($classRoom, $request->validated());
 
                     return;
+                case IntentEnum::CLASS_ROOM_UPDATE_BULK_ASSIGN_STUDENTS->value:
+                    $this->classRoomService->assignBulkStudents($classRoom, $request->validated());
+
+                    return;
+                case IntentEnum::CLASS_ROOM_UPDATE_BULK_UNASSIGN_STUDENTS->value:
+                    $this->classRoomService->unassignBulkStudents($classRoom, $request->validated());
+
+                    return;
             }
 
             return $this->classRoomService->update($classRoom, $request->validated());

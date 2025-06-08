@@ -104,6 +104,30 @@ class ClassRoomService extends BaseCrudService implements ClassRoomServiceInterf
         $classroom->students()->detach($validatedRequest['user_id']);
     }
 
+    public function assignBulkStudents(ClassRoom $classroom, array $validatedRequest): void {
+        $userIds = $validatedRequest['user_ids'];
+
+        // Get already assigned student IDs to avoid duplicates
+        $existingStudentIds = $classroom->students()->pluck('user_id')->toArray();
+
+        // Filter out already assigned students
+        $newStudentIds = array_diff($userIds, $existingStudentIds);
+
+        if (empty($newStudentIds)) {
+            throw new \InvalidArgumentException(__('exceptions.services.classroom.student.all_already_assigned'));
+        }
+
+        // Attach new students
+        $classroom->students()->attach($newStudentIds);
+    }
+
+    public function unassignBulkStudents(ClassRoom $classroom, array $validatedRequest): void {
+        $userIds = $validatedRequest['user_ids'];
+
+        // Remove students from classroom
+        $classroom->students()->detach($userIds);
+    }
+
     protected function getRepositoryClass(): string {
         return ClassRoomRepositoryInterface::class;
     }

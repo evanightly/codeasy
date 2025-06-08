@@ -27,4 +27,5 @@ return [
     'next' => 'Selanjutnya',
     'back_to_top' => 'Kembali ke Atas',
     'actions' => 'Aksi',
+    'no_data_available' => 'Tidak ada data yang tersedia',
 ];

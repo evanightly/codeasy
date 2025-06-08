@@ -20,4 +20,20 @@ interface ClassRoomServiceInterface extends BaseCrudServiceInterface {
      * - user_id
      */
     public function unassignStudent(ClassRoom $classRoom, array $validatedRequest): void;
+
+    /**
+     * Assign multiple students to a classroom
+     *
+     * required data:
+     * - user_ids (array)
+     */
+    public function assignBulkStudents(ClassRoom $classRoom, array $validatedRequest): void;
+
+    /**
+     * Unassign multiple students from a classroom
+     *
+     * required data:
+     * - user_ids (array)
+     */
+    public function unassignBulkStudents(ClassRoom $classRoom, array $validatedRequest): void;
 }

@@ -89,6 +89,14 @@ class SchoolController extends Controller implements HasMiddleware {
                     $this->schoolService->unassignStudent($school, $request->validated());
 
                     return;
+                case IntentEnum::SCHOOL_UPDATE_BULK_ASSIGN_STUDENTS->value:
+                    $this->schoolService->assignBulkStudents($school, $request->validated());
+
+                    return;
+                case IntentEnum::SCHOOL_UPDATE_BULK_UNASSIGN_STUDENTS->value:
+                    $this->schoolService->unassignBulkStudents($school, $request->validated());
+
+                    return;
             }
 
             return $this->schoolService->update($school, $request->validated());

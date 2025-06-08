@@ -38,4 +38,30 @@ export const classRoomServiceHook = {
             invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
         });
     },
+    useBulkAssignStudents: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number; data: { user_ids: number[] } }) => {
+                return mutationApi({
+                    method: 'put',
+                    url: route(`${ROUTES.CLASS_ROOMS}.update`, params.id),
+                    data: params.data,
+                    params: { intent: IntentEnum.CLASS_ROOM_UPDATE_BULK_ASSIGN_STUDENTS },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
+        });
+    },
+    useBulkUnassignStudents: () => {
+        return createMutation({
+            mutationFn: async (params: { id: number; data: { user_ids: number[] } }) => {
+                return mutationApi({
+                    method: 'put',
+                    url: route(`${ROUTES.CLASS_ROOMS}.update`, params.id),
+                    data: params.data,
+                    params: { intent: IntentEnum.CLASS_ROOM_UPDATE_BULK_UNASSIGN_STUDENTS },
+                });
+            },
+            invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],
+        });
+    },
 };

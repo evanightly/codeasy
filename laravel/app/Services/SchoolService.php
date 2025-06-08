@@ -126,10 +126,10 @@ class SchoolService extends BaseCrudService implements SchoolServiceInterface {
         ]);
 
         // Assign student role if they don't have it
-        $user = $this->userService->findOrFail($userId);
-        if (!$user->hasRole(RoleEnum::STUDENT->value)) {
-            $user->assignRole(RoleEnum::STUDENT->value);
-        }
+        // $user = $this->userService->findOrFail($userId);
+        // if (!$user->hasRole(RoleEnum::STUDENT->value)) {
+        //     $user->assignRole(RoleEnum::STUDENT->value);
+        // }
     }
 
     public function unassignStudent(School $school, array $validatedRequest): void {
@@ -139,9 +139,51 @@ class SchoolService extends BaseCrudService implements SchoolServiceInterface {
         $school->students()->detach($userId);
 
         // Remove Student role if user has no other schools where they are student
-        $user = $this->userService->findOrFail($userId);
-        if (!$user->schools()->wherePivot('role', RoleEnum::STUDENT->value)->exists()) {
-            $user->removeRole(RoleEnum::STUDENT->value);
+        // $user = $this->userService->findOrFail($userId);
+        // if (!$user->schools()->wherePivot('role', RoleEnum::STUDENT->value)->exists()) {
+        //     $user->removeRole(RoleEnum::STUDENT->value);
+        // }
+    }
+
+    public function assignBulkStudents(School $school, array $validatedRequest): void {
+        $userIds = $validatedRequest['user_ids'];
+
+        // Get already assigned student IDs to avoid duplicates
+        $existingStudentIds = $school->students()->pluck('user_id')->toArray();
+
+        // Filter out already assigned students
+        $newStudentIds = array_diff($userIds, $existingStudentIds);
+
+        if (empty($newStudentIds)) {
+            throw new \InvalidArgumentException(__('exceptions.services.school.student.all_already_assigned'));
         }
+
+        // Attach new students to school
+        $school->users()->attach($newStudentIds, [
+            'role' => RoleEnum::STUDENT->value,
+        ]);
+
+        // Assign student role to users who don't have it
+        // foreach ($newStudentIds as $userId) {
+        //     $user = $this->userService->findOrFail($userId);
+        //     if (!$user->hasRole(RoleEnum::STUDENT->value)) {
+        //         $user->assignRole(RoleEnum::STUDENT->value);
+        //     }
+        // }
+    }
+
+    public function unassignBulkStudents(School $school, array $validatedRequest): void {
+        $userIds = $validatedRequest['user_ids'];
+
+        // Remove students from school
+        $school->students()->detach($userIds);
+
+        // Remove Student role for users who have no other schools where they are student
+        // foreach ($userIds as $userId) {
+        //     $user = $this->userService->findOrFail($userId);
+        //     if (!$user->schools()->wherePivot('role', RoleEnum::STUDENT->value)->exists()) {
+        //         $user->removeRole(RoleEnum::STUDENT->value);
+        //     }
+        // }
     }
 }

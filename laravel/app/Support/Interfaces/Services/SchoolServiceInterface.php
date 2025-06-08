@@ -36,4 +36,20 @@ interface SchoolServiceInterface extends BaseCrudServiceInterface {
      * - user_id
      */
     public function unassignStudent(School $school, array $validatedRequest): void;
+
+    /**
+     * Assign multiple users as students in bulk
+     *
+     * request needed:
+     * - user_ids (array)
+     */
+    public function assignBulkStudents(School $school, array $validatedRequest): void;
+
+    /**
+     * Unassign multiple users as students in bulk
+     *
+     * request needed:
+     * - user_ids (array)
+     */
+    public function unassignBulkStudents(School $school, array $validatedRequest): void;
 }

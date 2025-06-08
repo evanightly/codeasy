@@ -21,6 +21,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
         $query = $this->getQuery();
 
         switch ($intent) {
+            // Used in School/AssignStudentDialog
             case IntentEnum::USER_INDEX_STUDENTS->value:
                 $schoolId = request()->get('school_id');
 
@@ -34,6 +35,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
                     $query->where('schools.id', $schoolId);
                 });
                 break;
+                // Used in Classroom/AssignStudentDialog
             case IntentEnum::USER_INDEX_CLASS_ROOM_STUDENTS->value:
                 $schoolId = request()->get('school_id');
                 $classroomId = request()->get('classroom_id');
@@ -51,6 +53,10 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
         $query = $this->applySearchFilters($query, $searchParams, ['name', 'username', 'email']);
 
         $query = $this->applyRelationshipArrayFilters($query, $searchParams, [
+            'roles' => [
+                'relation' => 'roles',
+                'column' => 'name',
+            ],
             'schools' => [
                 'relation' => 'schools',
                 'column' => 'id',

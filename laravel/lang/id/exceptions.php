@@ -24,12 +24,14 @@ return [
             'student' => [
                 'already_assigned' => 'Pengguna sudah menjadi siswa di sekolah ini.',
                 'different_role' => 'Pengguna sudah memiliki peran yang berbeda di sekolah ini.',
+                'all_already_assigned' => 'Semua siswa yang dipilih sudah ditugaskan ke sekolah ini.',
             ],
         ],
         'classroom' => [
             'unauthorized' => 'Tidak diizinkan untuk :action ruang kelas ini',
             'student' => [
                 'already_assigned' => 'Siswa sudah ditugaskan ke ruang kelas ini',
+                'all_already_assigned' => 'Semua siswa yang dipilih sudah ditugaskan ke ruang kelas ini',
             ],
         ],
         'school_request' => [

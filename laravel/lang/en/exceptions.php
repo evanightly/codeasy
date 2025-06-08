@@ -24,12 +24,14 @@ return [
             'student' => [
                 'already_assigned' => 'User is already a student in this school.',
                 'different_role' => 'User already has a different role in this school.',
+                'all_already_assigned' => 'All selected students are already assigned to this school.',
             ],
         ],
         'classroom' => [
             'unauthorized' => 'Unauthorized to :action this classroom',
             'student' => [
                 'already_assigned' => 'Student is already assigned to this classroom',
+                'all_already_assigned' => 'All selected students are already assigned to this classroom',
             ],
         ],
         'school_request' => [

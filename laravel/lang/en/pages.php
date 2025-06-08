@@ -207,7 +207,7 @@ return [
                 'stats' => 'Preview Stats',
                 'students_list' => 'Students List',
                 'student_count' => 'Total Students: :count',
-            ]
+            ],
         ],
     ],
     'permission' => [
@@ -391,6 +391,8 @@ return [
                 'email' => 'Enter school email',
                 'website' => 'Enter school website',
                 'select_user' => 'Select a user',
+                'student' => 'Student',
+                'select_students' => 'Select students',
             ],
             'validations' => [
                 'name' => [
@@ -412,6 +414,8 @@ return [
                     'unassign_admin' => 'Removing administrator...',
                     'assign_student' => 'Assigning students...',
                     'unassign_student' => 'Removing student...',
+                    'assign_students' => 'Assigning students...',
+                    'unassign_students' => 'Removing students...',
                 ],
                 'success' => [
                     'create' => 'School created successfully',
@@ -421,6 +425,8 @@ return [
                     'unassign_admin' => 'Administrator removed successfully',
                     'assign_student' => 'Students assigned successfully',
                     'unassign_student' => 'Student removed successfully',
+                    'assign_students' => ':count students assigned successfully',
+                    'unassign_students' => ':count students removed successfully',
                 ],
                 'error' => [
                     'create' => 'Error creating school',
@@ -430,6 +436,8 @@ return [
                     'unassign_admin' => 'Error removing administrator',
                     'assign_student' => 'Error assigning students',
                     'unassign_student' => 'Error removing student',
+                    'assign_students' => 'Error assigning students',
+                    'unassign_students' => 'Error removing students',
                 ],
             ],
             'sections' => [
@@ -447,6 +455,10 @@ return [
                 'no_administrators' => 'No administrators assigned',
                 'no_teachers' => 'No teachers assigned',
                 'no_students' => 'No students enrolled',
+            ],
+            'bulk_actions' => [
+                'selected_count' => ':count selected',
+                'unassign_selected' => 'Unassign Selected',
             ],
         ],
         'index' => [
@@ -485,6 +497,15 @@ return [
             'buttons' => [
                 'back' => 'Back to Schools',
             ],
+            'dialogs' => [
+                'assign_student' => [
+                    'title' => 'Assign Students',
+                    'description' => 'Select students to assign to this school',
+                    'buttons' => [
+                        'assign' => 'Assign Students',
+                    ],
+                ],
+            ],
         ],
         'assign_admin' => [
             'title' => 'Assign School Administrator',
@@ -492,20 +513,6 @@ return [
             'buttons' => [
                 'assign' => 'Assign Administrator',
                 'cancel' => 'Cancel',
-            ],
-        ],
-        'assign_student' => [
-            'title' => 'Assign Students',
-            'description' => 'Select students to assign to this school',
-            'buttons' => [
-                'assign' => 'Assign Students',
-            ],
-        ],
-        'assign_student' => [
-            'title' => 'Assign Student',
-            'description' => 'Select a student to assign to this school',
-            'buttons' => [
-                'assign' => 'Assign Student',
             ],
         ],
     ],
@@ -690,6 +697,7 @@ return [
                 'status' => 'Select status',
                 'students' => 'Select a student',
                 'student' => 'Select a student',
+                'select_students' => 'Select students',
             ],
             'validations' => [
                 'school_id' => [
@@ -718,6 +726,7 @@ return [
                     'update' => 'Updating classroom...',
                     'delete' => 'Deleting classroom...',
                     'assign_student' => 'Assigning students...',
+                    'assign_students' => 'Assigning students...',
                     'remove_student' => 'Removing student...',
                 ],
                 'success' => [
@@ -725,7 +734,9 @@ return [
                     'update' => 'Classroom updated successfully',
                     'delete' => 'Classroom deleted successfully',
                     'assign_student' => 'Students assigned successfully',
+                    'assign_students' => ':count students assigned successfully',
                     'remove_student' => 'Student removed successfully',
+                    'unassign_students' => ':count students removed successfully',
                 ],
                 'error' => [
                     'create' => 'Error creating classroom',
@@ -733,12 +744,17 @@ return [
                     'delete' => 'Error deleting classroom',
                     'unauthorized' => 'You are not authorized to manage classrooms in this school',
                     'assign_student' => 'Error assigning students',
+                    'assign_students' => 'Error assigning students',
                     'remove_student' => 'Error removing student',
                 ],
             ],
             'status' => [
                 'active' => 'Active',
                 'inactive' => 'Inactive',
+            ],
+            'bulk_actions' => [
+                'selected_count' => ':count selected',
+                'unassign_selected' => 'Unassign Selected',
             ],
         ],
         'index' => [

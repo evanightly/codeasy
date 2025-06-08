@@ -27,4 +27,5 @@ return [
     'next' => 'Next',
     'back_to_top' => 'Back to Top',
     'actions' => 'Actions',
+    'no_data_available' => 'No data available',
 ];

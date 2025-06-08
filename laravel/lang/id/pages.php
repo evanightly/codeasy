@@ -207,7 +207,7 @@ return [
                 'stats' => 'Statistik Pratinjau',
                 'students_list' => 'Daftar Siswa',
                 'student_count' => 'Jumlah Siswa: :count',
-            ]
+            ],
         ],
     ],
     'permission' => [
@@ -386,6 +386,8 @@ return [
                 'email' => 'Masukkan email sekolah',
                 'website' => 'Masukkan website sekolah',
                 'select_user' => 'Pilih pengguna',
+                'student' => 'Siswa',
+                'select_students' => 'Pilih siswa',
             ],
             'validations' => [
                 'name' => [
@@ -407,6 +409,8 @@ return [
                     'unassign_admin' => 'Menghapus administrator...',
                     'assign_student' => 'Menetapkan siswa...',
                     'unassign_student' => 'Menghapus siswa...',
+                    'assign_students' => 'Menetapkan siswa...',
+                    'unassign_students' => 'Menghapus siswa...',
                 ],
                 'success' => [
                     'create' => 'Sekolah berhasil dibuat',
@@ -416,6 +420,8 @@ return [
                     'unassign_admin' => 'Administrator berhasil dihapus',
                     'assign_student' => 'Siswa berhasil ditetapkan',
                     'unassign_student' => 'Siswa berhasil dihapus',
+                    'assign_students' => ':count siswa berhasil ditetapkan',
+                    'unassign_students' => ':count siswa berhasil dihapus',
                 ],
                 'error' => [
                     'create' => 'Error membuat sekolah',
@@ -425,6 +431,8 @@ return [
                     'unassign_admin' => 'Error menghapus administrator',
                     'assign_student' => 'Error menetapkan siswa',
                     'unassign_student' => 'Error menghapus siswa',
+                    'assign_students' => 'Error menetapkan siswa',
+                    'unassign_students' => 'Error menghapus siswa',
                 ],
             ],
             'sections' => [
@@ -480,6 +488,15 @@ return [
             'buttons' => [
                 'back' => 'Kembali ke Sekolah',
             ],
+            'dialogs' => [
+                'assign_student' => [
+                    'title' => 'Tetapkan Siswa',
+                    'description' => 'Pilih siswa untuk ditetapkan ke sekolah ini',
+                    'buttons' => [
+                        'assign' => 'Tetapkan Siswa',
+                    ],
+                ],
+            ],
         ],
         'assign_admin' => [
             'title' => 'Tetapkan Administrator Sekolah',
@@ -488,6 +505,10 @@ return [
                 'assign' => 'Tetapkan Administrator',
                 'cancel' => 'Batal',
             ],
+        ],
+        'bulk_actions' => [
+            'selected_count' => ':count dipilih',
+            'unassign_selected' => 'Lepas yang Dipilih',
         ],
         'assign_student' => [
             'title' => 'Tetapkan Siswa',
@@ -678,6 +699,7 @@ return [
                 'status' => 'Pilih status',
                 'students' => 'Pilih siswa',
                 'student' => 'Pilih siswa',
+                'select_students' => 'Pilih siswa',
             ],
             'validations' => [
                 'school_id' => [
@@ -706,6 +728,7 @@ return [
                     'update' => 'Memperbarui kelas...',
                     'delete' => 'Menghapus kelas...',
                     'assign_student' => 'Menetapkan siswa...',
+                    'assign_students' => 'Menetapkan siswa...',
                     'remove_student' => 'Menghapus siswa...',
                 ],
                 'success' => [
@@ -713,6 +736,7 @@ return [
                     'update' => 'Kelas berhasil diperbarui',
                     'delete' => 'Kelas berhasil dihapus',
                     'assign_student' => 'Siswa berhasil ditetapkan',
+                    'assign_students' => ':count siswa berhasil ditetapkan',
                     'remove_student' => 'Siswa berhasil dihapus',
                 ],
                 'error' => [
@@ -721,6 +745,7 @@ return [
                     'delete' => 'Error menghapus kelas',
                     'unauthorized' => 'Anda tidak memiliki otorisasi untuk mengelola kelas di sekolah ini',
                     'assign_student' => 'Error menetapkan siswa',
+                    'assign_students' => 'Error menetapkan siswa',
                     'remove_student' => 'Error menghapus siswa',
                 ],
             ],
@@ -774,6 +799,10 @@ return [
                         'assign' => 'Tetapkan Siswa',
                     ],
                 ],
+            ],
+            'bulk_actions' => [
+                'selected_count' => ':count dipilih',
+                'unassign_selected' => 'Lepas yang Dipilih',
             ],
         ],
     ],

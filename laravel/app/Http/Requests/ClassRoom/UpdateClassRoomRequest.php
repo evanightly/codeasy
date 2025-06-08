@@ -18,6 +18,16 @@ class UpdateClassRoomRequest extends FormRequest {
                 return [
                     'user_id' => ['required', 'exists:users,id'],
                 ];
+            case IntentEnum::CLASS_ROOM_UPDATE_BULK_ASSIGN_STUDENTS->value:
+                return [
+                    'user_ids' => ['required', 'array', 'min:1'],
+                    'user_ids.*' => ['required', 'exists:users,id'],
+                ];
+            case IntentEnum::CLASS_ROOM_UPDATE_BULK_UNASSIGN_STUDENTS->value:
+                return [
+                    'user_ids' => ['required', 'array', 'min:1'],
+                    'user_ids.*' => ['required', 'exists:users,id'],
+                ];
         }
 
         return [
