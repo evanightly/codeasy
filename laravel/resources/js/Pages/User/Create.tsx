@@ -269,9 +269,12 @@ export default function Create() {
                                                                     );
                                                                 }
                                                             }}
+                                                            id={`role-${role.id}`}
                                                             checked={field.value.includes(role.id)}
                                                         />
-                                                        <label>{role.name}</label>
+                                                        <label htmlFor={`role-${role.id}`}>
+                                                            {role.name}
+                                                        </label>
                                                     </div>
                                                 ))}
                                             </div>
