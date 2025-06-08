@@ -8,12 +8,14 @@ use App\Services\Course\CourseImportService;
 use App\Services\DashboardService;
 use App\Services\ExecutionResultService;
 use App\Services\StudentScoreService;
+use App\Services\User\StudentImportService;
 use App\Support\Interfaces\Repositories\ExecutionResultRepositoryInterface;
 use App\Support\Interfaces\Repositories\StudentScoreRepositoryInterface;
 use App\Support\Interfaces\Services\Course\CourseImportServiceInterface;
 use App\Support\Interfaces\Services\DashboardServiceInterface;
 use App\Support\Interfaces\Services\ExecutionResultServiceInterface;
 use App\Support\Interfaces\Services\StudentScoreServiceInterface;
+use App\Support\Interfaces\Services\User\StudentImportServiceInterface;
 use FilesystemIterator;
 use Illuminate\Support\ServiceProvider;
 
@@ -57,6 +59,8 @@ class RepositoryServiceProvider extends ServiceProvider {
         $this->app->bind(ExecutionResultServiceInterface::class, ExecutionResultService::class);
 
         $this->app->bind(CourseImportServiceInterface::class, CourseImportService::class);
+
+        $this->app->bind(StudentImportServiceInterface::class, StudentImportService::class);
 
         $this->app->bind(DashboardServiceInterface::class, DashboardService::class);
     }

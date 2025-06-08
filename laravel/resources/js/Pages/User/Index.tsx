@@ -3,17 +3,29 @@ import { Users } from '@/Pages/User/Partials/Users';
 import { userServiceHook } from '@/Services/userServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
+import { usePage } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Suspense, useState } from 'react';
 
 export default function Index() {
     const { t } = useLaravelReactI18n();
+    const { user } = usePage().props.auth;
     const [filters, setFilters] = useState<ServiceFilterOptions>({
         page: 1,
         page_size: 10,
         sort_by: 'created_at',
         user_resource: 'id,name,username,email',
+        relations_array_filters: (() => {
+            if (user.roles.includes(RoleEnum.SCHOOL_ADMIN)) {
+                return {
+                    schools: user.administeredSchools,
+                };
+            }
+
+            return undefined;
+        })(),
     });
 
     const usersResponse = userServiceHook.useGetAll({ filters });

@@ -8,16 +8,18 @@ import {
     DropdownMenuTrigger,
 } from '@/Components/UI/dropdown-menu';
 import { useConfirmation } from '@/Contexts/ConfirmationDialogContext';
+import { StudentImport } from '@/Pages/User/Partials/StudentImport';
 import { userServiceHook } from '@/Services/userServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { PaginateMeta, PaginateResponse, ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { UserResource } from '@/Support/Interfaces/Resources';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { MoreHorizontal } from 'lucide-react';
-import { useMemo } from 'react';
+import { MoreHorizontal, Upload } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 interface UsersProps {
@@ -31,10 +33,15 @@ interface UsersProps {
 
 const Users = ({ response, filters, setFilters, baseKey, baseRoute }: UsersProps) => {
     const { t } = useLaravelReactI18n();
+    const { user } = usePage().props.auth;
     const confirmAction = useConfirmation();
     const columnHelper = createColumnHelper<UserResource>();
+    const [showImportDialog, setShowImportDialog] = useState(false);
 
     const deleteMutation = userServiceHook.useDelete();
+
+    // Check if user is school admin
+    const isSchoolAdmin = user.roles.includes(RoleEnum.SCHOOL_ADMIN);
 
     const handleDeleteUser = async (user: UserResource) => {
         if (!user.id) return;
@@ -111,25 +118,43 @@ const Users = ({ response, filters, setFilters, baseKey, baseRoute }: UsersProps
     const memoizedColumns = useMemo(() => columns, []);
 
     return (
-        <DataTable
-            setFilters={setFilters}
-            meta={response?.data?.meta}
-            filters={filters}
-            filterComponents={(_) => {
-                return (
-                    <Link
-                        href={route(`${ROUTES.USERS}.create`)}
-                        className={buttonVariants({ variant: 'create' })}
-                    >
-                        {t('pages.user.index.actions.create')}
-                    </Link>
-                );
-            }}
-            data={response?.data?.data ?? []}
-            columns={memoizedColumns}
-            baseRoute={baseRoute}
-            baseKey={baseKey}
-        />
+        <>
+            <DataTable
+                setFilters={setFilters}
+                meta={response?.data?.meta}
+                filters={filters}
+                filterComponents={(_) => {
+                    return (
+                        <div className='flex items-center gap-2'>
+                            <Link
+                                href={route(`${ROUTES.USERS}.create`)}
+                                className={buttonVariants({ variant: 'create' })}
+                            >
+                                {t('pages.user.index.actions.create')}
+                            </Link>
+                            {isSchoolAdmin && (
+                                <Button
+                                    variant='outline'
+                                    onClick={() => setShowImportDialog(true)}
+                                    className='flex items-center gap-2'
+                                >
+                                    <Upload className='h-4 w-4' />
+                                    {t('pages.user.index.actions.import_students')}
+                                </Button>
+                            )}
+                        </div>
+                    );
+                }}
+                data={response?.data?.data ?? []}
+                columns={memoizedColumns}
+                baseRoute={baseRoute}
+                baseKey={baseKey}
+            />
+
+            {isSchoolAdmin && (
+                <StudentImport open={showImportDialog} onOpenChange={setShowImportDialog} />
+            )}
+        </>
     );
 };
 

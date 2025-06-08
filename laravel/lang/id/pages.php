@@ -131,6 +131,7 @@ return [
                 'create' => 'Buat Pengguna',
                 'edit' => 'Edit Pengguna',
                 'delete' => 'Hapus Pengguna',
+                'import_students' => 'Impor Siswa',
             ],
             'columns' => [
                 'name' => 'Nama',
@@ -181,6 +182,32 @@ return [
                     'super_admin' => 'Super Admin',
                 ],
             ],
+        ],
+        'import' => [
+            'upload_title' => 'File untuk pengunggahan siswa',
+            'title' => 'Impor Siswa',
+            'description' => 'Unggah file CSV atau Excel untuk mengimpor siswa secara massal. Pastikan file Anda memiliki format yang diperlukan.',
+            'download_excel_template' => 'Unduh Template Excel',
+            'download_csv_template' => 'Unduh Template CSV',
+            'template_description' => 'Unduh file template untuk melihat format yang diperlukan untuk impor siswa.',
+            'buttons' => [
+                'cancel' => 'Batal',
+                'preview' => 'Pratinjau',
+                'confirm_import' => 'Konfirmasi Impor',
+            ],
+            'previewing' => 'Memindai file untuk pratinjau...',
+            'preview_error' => 'Terjadi kesalahan saat membuat pratinjau file. Periksa format dan coba lagi.',
+            'preview_success' => 'Pratinjau file berhasil. Periksa data di bawah ini sebelum impor.',
+            'import_error' => 'Terjadi kesalahan saat mengimpor file. Periksa format dan coba lagi.',
+            'import_success' => 'File berhasil diimpor.',
+            'importing' => 'Mengimpor siswa, harap tunggu...',
+            'preview' => [
+                'title' => 'Pratinjau Siswa yang Diimpor',
+                'description' => 'Periksa data sebelum impor. Pastikan semua informasi benar.',
+                'stats' => 'Statistik Pratinjau',
+                'students_list' => 'Daftar Siswa',
+                'student_count' => 'Jumlah Siswa: :count',
+            ]
         ],
     ],
     'permission' => [

@@ -50,6 +50,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
 
         $query = $this->applySearchFilters($query, $searchParams, ['name', 'username', 'email']);
 
+        $query = $this->applyRelationshipArrayFilters($query, $searchParams, [
+            'schools' => [
+                'relation' => 'schools',
+                'column' => 'id',
+            ],
+        ]);
+
         $query = $this->applyResolvedRelations($query, $searchParams);
 
         $query = $this->applyColumnFilters($query, $searchParams, ['created_at', 'updated_at']);

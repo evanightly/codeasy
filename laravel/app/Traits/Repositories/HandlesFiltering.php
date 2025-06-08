@@ -102,9 +102,10 @@ trait HandlesFiltering {
             $relation = $config['relation'] ?? $paramKey;  // Default to param key if not specified
             $column = $config['column'] ?? 'name';  // Default to 'name' if not specified
 
-            // Apply whereHas filter
+            // Apply whereHas filter with table prefix for column to avoid ambiguity
             $query->whereHas($relation, function ($subQuery) use ($column, $values) {
-                $subQuery->whereIn($column, $values);
+                $table = $subQuery->getModel()->getTable();
+                $subQuery->whereIn("{$table}.{$column}", $values);
             });
         }
 

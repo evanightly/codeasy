@@ -131,6 +131,7 @@ return [
                 'create' => 'Create User',
                 'edit' => 'Edit User',
                 'delete' => 'Delete User',
+                'import_students' => 'Import Students',
             ],
             'columns' => [
                 'name' => 'Name',
@@ -181,6 +182,32 @@ return [
                     'super_admin' => 'Super Admin',
                 ],
             ],
+        ],
+        'import' => [
+            'upload_title' => 'Upload Student File',
+            'title' => 'Import Students',
+            'description' => 'Upload a CSV or Excel file to import students in bulk. Make sure your file follows the required format.',
+            'download_excel_template' => 'Download Excel Template',
+            'download_csv_template' => 'Download CSV Template',
+            'template_description' => 'Download a template file to see the required format for importing students.',
+            'buttons' => [
+                'cancel' => 'Cancel',
+                'preview' => 'Preview',
+                'confirm_import' => 'Confirm Import',
+            ],
+            'previewing' => 'Scanning file for preview...',
+            'preview_error' => 'There was an error previewing the file. Please check the format and try again.',
+            'preview_success' => 'File preview successful. Review the data below before importing.',
+            'import_error' => 'There was an error importing the file. Please check the format and try again.',
+            'import_success' => 'File imported successfully.',
+            'importing' => 'Importing students, please wait...',
+            'preview' => [
+                'title' => 'Preview Imported Students',
+                'description' => 'Review the data before importing. Ensure all information is correct.',
+                'stats' => 'Preview Stats',
+                'students_list' => 'Students List',
+                'student_count' => 'Total Students: :count',
+            ]
         ],
     ],
     'permission' => [

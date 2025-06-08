@@ -131,6 +131,7 @@ return [
                 'create' => 'Benutzer erstellen',
                 'edit' => 'Benutzer bearbeiten',
                 'delete' => 'Benutzer löschen',
+                'import_students' => 'Schüler importieren',
             ],
             'columns' => [
                 'name' => 'Name',
@@ -181,6 +182,32 @@ return [
                     'super_admin' => 'Superadmin',
                 ],
             ],
+        ],
+        'import' => [
+            'upload_title' => 'Datei für Schülerupload',
+            'title' => 'Schüler importieren',
+            'description' => 'Laden Sie eine CSV- oder Excel-Datei hoch, um Schüler in Bulk zu importieren. Stellen Sie sicher, dass Ihre Datei das erforderliche Format hat.',
+            'download_excel_template' => 'Excel-Vorlage herunterladen',
+            'download_csv_template' => 'CSV-Vorlage herunterladen',
+            'template_description' => 'Laden Sie eine Vorlagendatei herunter, um das erforderliche Format für den Import von Schülern zu sehen.',
+            'buttons' => [
+                'cancel' => 'Abbrechen',
+                'preview' => 'Vorschau',
+                'confirm_import' => 'Import bestätigen',
+            ],
+            'previewing' => 'Datei wird für Vorschau gescannt...',
+            'preview_error' => 'Beim Erstellen der Vorschau der Datei ist ein Fehler aufgetreten. Bitte überprüfen Sie das Format und versuchen Sie es erneut.',
+            'preview_success' => 'Dateivorschau erfolgreich. Überprüfen Sie die unten angezeigten Daten vor dem Import.',
+            'import_error' => 'Beim Importieren der Datei ist ein Fehler aufgetreten. Bitte überprüfen Sie das Format und versuchen Sie es erneut.',
+            'import_success' => 'Datei erfolgreich importiert.',
+            'importing' => 'Schüler werden importiert, bitte warten...',
+            'preview' => [
+                'title' => 'Importierte Schüler vorschauen',
+                'description' => 'Überprüfen Sie die Daten vor dem Import. Stellen Sie sicher, dass alle Informationen korrekt sind.',
+                'stats' => 'Vorschau-Statistiken',
+                'students_list' => 'Schülerliste',
+                'student_count' => 'Gesamtzahl der Schüler: :count',
+            ]
         ],
     ],
     'permission' => [
