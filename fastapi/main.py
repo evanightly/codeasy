@@ -1113,19 +1113,18 @@ class TestCaseDebugInput(BaseModel):
 
 @app.post("/debug-test-case")
 async def debug_test_case(input: TestCaseDebugInput):
-    try:
-        # Properly indent all test case lines for method scope
-        test_case_lines = input.test_case_code.strip().split('\n')
-        # Filter out empty lines and properly indent each line
-        indented_lines = []
-        for line in test_case_lines:
-            if line.strip():  # Only process non-empty lines
-                # Add proper indentation for method scope (8 spaces)
-                indented_lines.append('        ' + line.strip())
-        indented_test_case = '\n'.join(indented_lines)
-        
-        # Format the test code with unittest structure
-        test_code = f"""
+    # Properly indent all test case lines for method scope
+    test_case_lines = input.test_case_code.strip().split('\n')
+    # Filter out empty lines and properly indent each line
+    indented_lines = []
+    for line in test_case_lines:
+        if line.strip():  # Only process non-empty lines
+            # Add proper indentation for method scope (8 spaces)
+            indented_lines.append('        ' + line.strip())
+    indented_test_case = '\n'.join(indented_lines)
+
+    # Format the test code with unittest structure
+    test_code = f"""
 import unittest
 import io
 import sys
@@ -1135,15 +1134,18 @@ student_code = '''
 {input.student_code}
 '''
 
-# Execute student code in global scope first
-exec(student_code)
+# Try to execute student code in global scope, but ignore errors
+try:
+    exec(student_code)
+except Exception as e:
+    # Print error but continue
+    print(f'Student code execution error: {{e}}')
 
 # Create test case class
 class TestUserCode(unittest.TestCase):
     def setUp(self):
         # Make student_code available as instance variable
         self.student_code = student_code
-    
     def test_case(self):
         # The student code is already executed in global scope
         # so all functions and variables are available here
@@ -1160,33 +1162,21 @@ result = runner.run(unittest.makeSuite(TestUserCode))
 print("TEST_RESULT:", "SUCCESS" if result.wasSuccessful() else "FAILURE")
 print("TEST_OUTPUT:", stream.getvalue())
 """
-        
-        # Execute the test code
-        outputs = kernel_mgr.execute_code(test_code)
-        
-        # Process the test results
-        test_results = []
-        success = False
-        
-        for output in outputs:
-            if output['type'] == 'text' and 'TEST_RESULT: SUCCESS' in output['content']:
-                success = True
-                
-            # Add all outputs to results
-            test_results.append(output)
-                
-        return {
-            "results": test_results,
-            "success": success
-        }
-        
-    except Exception as e:
-        return {
-            "results": [{
-                "type": "error",
-                "content": str(e),
-                "error_type": type(e).__name__,
-                "error_msg": str(e)
-            }],
-            "success": False
-        }
+
+    # Execute the test code
+    outputs = kernel_mgr.execute_code(test_code)
+
+    # Process the test results
+    test_results = []
+    success = False
+
+    for output in outputs:
+        if output['type'] == 'text' and 'TEST_RESULT: SUCCESS' in output['content']:
+            success = True
+        # Add all outputs to results
+        test_results.append(output)
+
+    return {
+        "results": test_results,
+        "success": success
+    }
