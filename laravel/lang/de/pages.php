@@ -986,6 +986,10 @@ return [
             'previewing' => 'Analysiere Importdatei...',
             'preview_success' => 'Vorschau erfolgreich erstellt',
             'preview_error' => 'Fehler beim Erstellen der Vorschau',
+            'download_material_template' => 'Download Materialvorlage',
+            'downloading_material_template' => 'Materialvorlage wird heruntergeladen...',
+            'download_material_success' => 'Materialvorlage erfolgreich heruntergeladen',
+            'download_material_error' => 'Fehler beim Herunterladen der Materialvorlage',
         ],
     ],
     'learning_material' => [

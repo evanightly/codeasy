@@ -174,6 +174,26 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
     }
 
     /**
+     * Download a DOCX template file for importing courses.
+     */
+    public function downloadMaterialTemplate() {
+        // Path to the DOCX template (ensure this file exists in your storage)
+        $path = app_path('Assets/Templates/import-course-material-template.docx');
+        if (!file_exists($path)) {
+            abort(404, 'DOCX template not found');
+        }
+
+        return response()->download(
+            $path,
+            'course_import_template.docx',
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'Content-Disposition' => 'attachment; filename="course_import_template.docx"',
+            ]
+        );
+    }
+
+    /**
      * Create the Instructions sheet with help text
      */
     private function createInstructionsSheet(Spreadsheet $spreadsheet) {

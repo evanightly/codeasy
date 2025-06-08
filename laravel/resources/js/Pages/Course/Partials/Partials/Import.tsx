@@ -26,6 +26,7 @@ const Import = () => {
     const [previewData, setPreviewData] = useState<CourseImportPreview | null>(null);
 
     const templateMutation = courseServiceHook.downloadImportTemplate();
+    const docxTemplateMutation = courseServiceHook.downloadImportDocxTemplate();
     const courseImportMutation = courseServiceHook.importCourses();
     const previewImportMutation = courseServiceHook.previewImport();
 
@@ -69,6 +70,39 @@ const Import = () => {
             error: () =>
                 t('pages.course.import.download_error', {
                     defaultValue: 'Failed to download template',
+                }),
+        });
+    };
+
+    const handleDownloadDocxTemplate = () => {
+        toast.promise(docxTemplateMutation.mutateAsync({}), {
+            loading: t('pages.course.import.downloading_material_template', {
+                defaultValue: 'Downloading DOCX template...',
+            }),
+            success: (response) => {
+                const blob = new Blob([response.data], { type: response.headers['content-type'] });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                const contentDisposition = response.headers['content-disposition'];
+                const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                const matches = filenameRegex.exec(contentDisposition);
+                const filename =
+                    matches && matches[1]
+                        ? matches[1].replace(/['"]/g, '')
+                        : 'course_import_template.docx';
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(link);
+                return t('pages.course.import.download_material_success', {
+                    defaultValue: 'DOCX template downloaded successfully',
+                });
+            },
+            error: () =>
+                t('pages.course.import.download_material_error', {
+                    defaultValue: 'Failed to download DOCX template',
                 }),
         });
     };
@@ -199,6 +233,22 @@ const Import = () => {
                                         )}
                                         {t('pages.course.import.download_template', {
                                             defaultValue: 'Download Template',
+                                        })}
+                                    </Button>
+                                    <Button
+                                        variant='link'
+                                        size='sm'
+                                        onClick={handleDownloadDocxTemplate}
+                                        disabled={docxTemplateMutation.isPending}
+                                        className='ml-2 h-auto p-0 text-xs'
+                                    >
+                                        {docxTemplateMutation.isPending ? (
+                                            <Loader2 className='mr-1 h-3 w-3 animate-spin' />
+                                        ) : (
+                                            <FileSpreadsheet className='mr-1 h-3 w-3' />
+                                        )}
+                                        {t('pages.course.import.download_material_template', {
+                                            defaultValue: 'Download DOCX Template',
                                         })}
                                     </Button>
                                 </CardDescription>

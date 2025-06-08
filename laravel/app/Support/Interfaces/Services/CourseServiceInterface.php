@@ -16,6 +16,11 @@ interface CourseServiceInterface extends BaseCrudServiceInterface {
     public function downloadTemplate();
 
     /**
+     * Download a DOCX template file for importing courses.
+     */
+    public function downloadMaterialTemplate();
+
+    /**
      * Preview the import file contents
      */
     public function previewImport(Request $request);

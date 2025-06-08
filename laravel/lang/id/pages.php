@@ -1008,6 +1008,10 @@ return [
             'previewing' => 'Menganalisis file impor...',
             'preview_success' => 'Pratinjau berhasil dibuat',
             'preview_error' => 'Gagal membuat pratinjau',
+            'download_material_template' => 'Unduh Template Materi',
+            'downloading_material_template' => 'Mengunduh template Materi...',
+            'download_material_success' => 'Template Materi berhasil diunduh',
+            'download_material_error' => 'Gagal mengunduh template Materi',
         ],
     ],
     'learning_material' => [

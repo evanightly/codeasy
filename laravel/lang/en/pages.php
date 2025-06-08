@@ -1007,6 +1007,10 @@ return [
             'previewing' => 'Analyzing import file...',
             'preview_success' => 'Preview generated successfully',
             'preview_error' => 'Failed to generate preview',
+            'download_material_template' => 'Download Material Template',
+            'downloading_material_template' => 'Downloading Material template...',
+            'download_material_success' => 'Material template downloaded successfully',
+            'download_material_error' => 'Failed to download Material template',
         ],
     ],
     'learning_material' => [

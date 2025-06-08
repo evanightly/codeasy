@@ -69,4 +69,20 @@ export const courseServiceHook = {
             },
         });
     },
+    downloadImportDocxTemplate: () => {
+        return createMutation({
+            mutationFn: async () => {
+                return mutationApi({
+                    method: 'get',
+                    url: route(`${ROUTES.COURSES}.index`),
+                    params: {
+                        intent: IntentEnum.COURSE_INDEX_IMPORT_MATERIAL_TEMPLATE,
+                    },
+                    requestConfig: {
+                        responseType: 'blob',
+                    },
+                });
+            },
+        });
+    },
 };
