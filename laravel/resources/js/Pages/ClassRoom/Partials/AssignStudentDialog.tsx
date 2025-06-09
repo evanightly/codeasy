@@ -45,7 +45,7 @@ export function AssignStudentDialog({ classroom, isOpen, onClose, onAssign, load
                     page_size: 'all',
                     relations_array_filters: {
                         schools: [classroom.school_id!],
-                        roles: [RoleEnum.STUDENT], 
+                        roles: [RoleEnum.STUDENT],
                         // TODO: exclude student filters, we can handle it from HandlesFiltering trait
                         // classrooms: classroom.id,
                     },

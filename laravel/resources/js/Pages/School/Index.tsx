@@ -20,11 +20,11 @@ export default function Index() {
         column_filters: (() => {
             if (auth.user.roles.includes(RoleEnum.SCHOOL_ADMIN)) {
                 return {
-                    'id': auth.user.administeredSchools,
+                    id: auth.user.administeredSchools,
                 };
             }
             return {};
-        })()
+        })(),
     });
 
     const schoolsResponse = schoolServiceHook.useGetAll({ filters });
