@@ -42,7 +42,7 @@ export function AssignStudentDialog({ school, isOpen, onClose, onAssign, loading
             setIsLoadingStudents(true);
             const response = await userServiceHook.getAll({
                 filters: {
-                    page_size: 50,
+                    page_size: 'all',
                     relations_array_filters: {
                         roles: [RoleEnum.STUDENT],
                     },

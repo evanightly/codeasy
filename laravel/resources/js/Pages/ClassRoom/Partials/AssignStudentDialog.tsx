@@ -18,7 +18,7 @@ import {
     MultiSelectValue,
 } from '@/Components/UI/multi-select';
 import { userServiceHook } from '@/Services/userServiceHook';
-import { IntentEnum } from '@/Support/Enums/intentEnum';
+import { RoleEnum } from '@/Support/Enums/roleEnum';
 import { ClassRoomResource, UserResource } from '@/Support/Interfaces/Resources';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useEffect, useState } from 'react';
@@ -42,16 +42,25 @@ export function AssignStudentDialog({ classroom, isOpen, onClose, onAssign, load
             setIsLoadingStudents(true);
             const response = await userServiceHook.getAll({
                 filters: {
-                    column_filters: {
-                        school_id: classroom.school_id,
-                        classroom_id: classroom.id,
+                    page_size: 'all',
+                    relations_array_filters: {
+                        schools: [classroom.school_id!],
+                        roles: [RoleEnum.STUDENT], 
+                        // TODO: exclude student filters, we can handle it from HandlesFiltering trait
+                        // classrooms: classroom.id,
                     },
                 },
-                axiosRequestConfig: {
-                    params: {
-                        intent: IntentEnum.USER_INDEX_CLASS_ROOM_STUDENTS,
-                    },
-                },
+                // filters: {
+                //     column_filters: {
+                //         school_id: classroom.school_id,
+                //         classroom_id: classroom.id,
+                //     },
+                // },
+                // axiosRequestConfig: {
+                //     params: {
+                //         intent: IntentEnum.USER_INDEX_CLASS_ROOM_STUDENTS,
+                //     },
+                // },
             });
             setAvailableStudents(response.data || []);
         } catch (error) {

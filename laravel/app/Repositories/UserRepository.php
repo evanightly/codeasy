@@ -61,6 +61,15 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
                 'relation' => 'schools',
                 'column' => 'id',
             ],
+            'classrooms' => [
+                'relation' => 'classrooms',
+                'column' => 'id',
+            ],
+            // Uncomment if you want to filter by classroom name
+            // 'classroom_name' => [
+            //     'relation' => 'classrooms',
+            //     'column' => 'name',
+            // ],
         ]);
 
         $query = $this->applyResolvedRelations($query, $searchParams);

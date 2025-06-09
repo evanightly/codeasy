@@ -6,11 +6,14 @@ use App\Http\Requests\ClassRoom\StoreClassRoomRequest;
 use App\Http\Requests\ClassRoom\UpdateClassRoomRequest;
 use App\Http\Resources\ClassRoomResource;
 use App\Models\ClassRoom;
+use App\Models\User;
 use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
+use App\Support\Enums\RoleEnum;
 use App\Support\Interfaces\Services\ClassRoomServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Auth;
 
 class ClassRoomController extends Controller implements HasMiddleware {
     public function __construct(protected ClassRoomServiceInterface $classRoomService) {}
@@ -53,6 +56,14 @@ class ClassRoomController extends Controller implements HasMiddleware {
     }
 
     public function show(ClassRoom $classRoom) {
+
+        /** @var User $user */
+        $user = Auth::user();
+        // if user is school admin, check if they have access to the classroom
+        if ($user->hasRole(RoleEnum::SCHOOL_ADMIN) && !$user->schools->contains($classRoom->school)) {
+            abort(403, 'You do not have access to this classroom.');
+        }
+
         $data = ClassRoomResource::make($classRoom->load(['school', 'students', 'courses']));
 
         if ($this->ajax()) {

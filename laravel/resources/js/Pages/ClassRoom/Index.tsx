@@ -10,7 +10,7 @@ import { Suspense, useState } from 'react';
 import { Classrooms } from './Partials/Classrooms';
 
 export default function Index() {
-    const { roles, teachedSchools } = usePage().props.auth.user;
+    const { roles, teachedSchools, administeredSchools } = usePage().props.auth.user;
     const { t } = useLaravelReactI18n();
 
     const [filters, setFilters] = useState<ServiceFilterOptions>({
@@ -20,8 +20,10 @@ export default function Index() {
         class_room_resource: 'id,name,description,grade,year,active,school',
         relations: 'school',
         column_filters: (() => {
-            if (roles.includes(RoleEnum.SUPER_ADMIN)) {
-                return undefined;
+            if (roles.includes(RoleEnum.SCHOOL_ADMIN)) {
+                return {
+                    school_id: administeredSchools.length > 0 ? administeredSchools : -1,
+                };
             }
 
             // Single role logic

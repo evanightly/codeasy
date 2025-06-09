@@ -6,11 +6,13 @@ use App\Http\Requests\School\StoreSchoolRequest;
 use App\Http\Requests\School\UpdateSchoolRequest;
 use App\Http\Resources\SchoolResource;
 use App\Models\School;
+use App\Models\User;
 use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
 use App\Support\Interfaces\Services\SchoolServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Auth;
 
 class SchoolController extends Controller implements HasMiddleware {
     public function __construct(protected SchoolServiceInterface $schoolService) {}
@@ -53,6 +55,13 @@ class SchoolController extends Controller implements HasMiddleware {
     }
 
     public function show(School $school) {
+        /** @var User $user */
+        $user = Auth::user();
+        // Check if user administrator of the school
+        if (!$user->isSchoolAdmin($school)) {
+            abort(403, 'You do not have permission to view this school.');
+        }
+
         $data = SchoolResource::make($school->load(['administrators', 'teachers', 'students']));
 
         if ($this->ajax()) {
