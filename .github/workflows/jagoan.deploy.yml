@@ -88,7 +88,7 @@ jobs:
           SSH_PASSWORD: ${{ secrets.JAGOAN_SSH_PASSWORD }}    
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST bash -s << 'ENDSSH'
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST bash -s << ENDSSH
             set -ex
             mkdir -p ~/.docker
             echo '{
