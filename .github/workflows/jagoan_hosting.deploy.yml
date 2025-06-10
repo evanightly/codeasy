@@ -10,31 +10,41 @@ jobs:
     defaults:
       run:
         working-directory: ./laravel
+
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.3'
+
       - name: Install PHP dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
       - name: Run Pint Fix
         run: ./vendor/bin/pint
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: './laravel/package-lock.json'
+
       - name: Install Node.js dependencies
         run: npm install -D
+
       - name: Run NPM Lint
         run: npm run lint
+
       - name: Run Prettier
         run: npm run prettier
+
       - name: Check for changes
+        working-directory: .
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
@@ -63,54 +73,94 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
+
       - name: Test GHCR Access
         run: |
           echo "Testing GHCR authentication..."
           docker pull ghcr.io/${{ github.repository_owner }}/codeasy-prod-laravel-image:latest || true
+
       - name: Build & Push Docker Image
         run: |
           docker build \
             -t ghcr.io/${{ github.repository_owner }}/codeasy-prod-laravel-image:latest \
             -f docker/laravel.prod.Dockerfile .
+
           docker push ghcr.io/${{ github.repository_owner }}/codeasy-prod-laravel-image:latest
 
   deploy:
-    name: Deploy to VPS (Jagoan Hosting)
+    name: Deploy to VPS
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Install sshpass
-        run: sudo apt-get update && sudo apt-get install -y sshpass
-      - name: Deploy via SSH using sshpass
-        env:
-          SSH_HOST: ${{ secrets.JAGOAN_SSH_HOST }}         
-          SSH_USERNAME: ${{ secrets.JAGOAN_SSH_USERNAME }}    
-          SSH_PASSWORD: ${{ secrets.JAGOAN_SSH_PASSWORD }}    
-          GITHUB_ACTOR: ${{ github.actor }}
-          CR_PAT: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.JAGOAN_SSH_PRIVATE_KEY }}
+
+      - name: Add SSH Known Hosts
         run: |
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST bash -s << ENDSSH
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.JAGOAN_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        env:
+          SSH_HOST: ${{ secrets.JAGOAN_SSH_HOST }}
+          SSH_USERNAME: ${{ secrets.JAGOAN_SSH_USERNAME }}
+          CR_PAT: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create the Docker config content
+          DOCKER_CONFIG=$(echo -n "$GITHUB_ACTOR:$CR_PAT" | base64)
+          
+          # Deploy using SSH with heredoc (remove quotes from ENDSSH to allow variable expansion)
+          ssh $SSH_USERNAME@$SSH_HOST bash -s << ENDSSH
             set -ex
+            
+            # Setup Docker authentication
             mkdir -p ~/.docker
-            DOCKER_CONFIG=\$(echo -n "$GITHUB_ACTOR:\$CR_PAT" | base64)
             echo '{
               "auths": {
                 "ghcr.io": {
-                  "auth": "'"$DOCKER_CONFIG"'"
+                  "auth": "${DOCKER_CONFIG}"
                 }
               }
             }' > ~/.docker/config.json
+            
             chmod 600 ~/.docker/config.json
 
-            echo "Pulling Docker image..."
-            docker pull ghcr.io/$GITHUB_ACTOR/codeasy-prod-laravel-image:latest
+            # Verify Docker auth and config
+            echo "Testing Docker configuration..."
+            if ! cat ~/.docker/config.json | jq . > /dev/null 2>&1; then
+              echo "Error: Invalid JSON in config file"
+              cat ~/.docker/config.json
+              exit 1
+            fi
 
+            # Test Docker pull
+            if ! docker pull ghcr.io/$GITHUB_ACTOR/codeasy-prod-laravel-image:latest; then
+              echo "Error: Failed to pull image"
+              cat ~/.docker/config.json
+              exit 1
+            fi
+
+            # Install Git LFS if not already installed
+            if ! command -v git-lfs &> /dev/null; then
+              echo "Installing Git LFS..."
+              apt-get update && apt-get install -y git-lfs || \
+              (curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install -y git-lfs)
+              git lfs install
+            fi
+
+            # Clone or update repository with LFS support
             if [ ! -d "codeasy/.git" ]; then
+              # Fresh clone with LFS
               git clone https://github.com/evanightly/codeasy.git
               cd codeasy
               git lfs install
               git lfs pull
             else
+              # Update existing repo and pull LFS files
               cd codeasy
               git lfs install
               git fetch --all
@@ -118,12 +168,17 @@ jobs:
               git lfs pull
             fi
 
+            # Setup environment
             echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env
 
+            # Deploy with Docker Compose
             docker compose -f docker-compose.prod.yml down || true
+
+            # Prune old images, containers, volumes
             docker system prune -af
+
             docker compose --env-file laravel/.env -f docker-compose.prod.yml pull
             docker compose --env-file laravel/.env -f docker-compose.prod.yml up -d
 
-            echo "Jagoan Deployment completed successfully!"
+            echo "Deployment completed successfully!"
           ENDSSH
