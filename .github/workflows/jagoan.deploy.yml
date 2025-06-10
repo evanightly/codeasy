@@ -87,14 +87,16 @@ jobs:
           SSH_USERNAME: ${{ secrets.JAGOAN_SSH_USERNAME }}    
           SSH_PASSWORD: ${{ secrets.JAGOAN_SSH_PASSWORD }}    
           GITHUB_ACTOR: ${{ github.actor }}
+          CR_PAT: ${{ secrets.CODEASY_PROD_LARAVEL_IMAGE_PAT }}
         run: |
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST bash -s << ENDSSH
             set -ex
             mkdir -p ~/.docker
+            DOCKER_CONFIG=\$(echo -n "$GITHUB_ACTOR:\$CR_PAT" | base64)
             echo '{
               "auths": {
                 "ghcr.io": {
-                  "auth": "'"$(echo -n "$GITHUB_ACTOR:$SSH_PASSWORD" | base64)"'"
+                  "auth": "'"$DOCKER_CONFIG"'"
                 }
               }
             }' > ~/.docker/config.json
