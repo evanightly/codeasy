@@ -136,29 +136,29 @@ jobs:
               exit 1
             fi
 
-            # Install Git LFS if not already installed
-            if ! command -v git-lfs &> /dev/null; then
-              echo "Installing Git LFS..."
-              apt-get update && apt-get install -y git-lfs || \
-              (curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install -y git-lfs)
-              git lfs install
-            fi
-
-            # Clone or update repository with LFS support
+            # Clone or update repository WITHOUT LFS support
             if [ ! -d "codeasy/.git" ]; then
-              # Fresh clone with LFS
+              # Fresh clone without LFS
               git clone https://github.com/evanightly/codeasy.git
               cd codeasy
-              git lfs install
-              git lfs pull
             else
-              # Update existing repo and pull LFS files
+              # Update existing repo without LFS
               cd codeasy
-              git lfs install
               git fetch --all
               git reset --hard origin/main
-              git lfs pull
             fi
+
+            # Only install Git LFS if specifically needed (commented out for now)
+            # if ! command -v git-lfs &> /dev/null; then
+            #   echo "Installing Git LFS..."
+            #   apt-get update && apt-get install -y git-lfs || \
+            #   (curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install -y git-lfs)
+            #   git lfs install
+            # fi
+
+            # Remove LFS operations
+            # git lfs install
+            # git lfs pull
 
             # Setup environment
             echo "${{ secrets.PRODUCTION_ENV }}" > laravel/.env
