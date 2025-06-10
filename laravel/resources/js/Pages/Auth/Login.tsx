@@ -301,17 +301,32 @@ export default function Login({
                                             />
 
                                             <div className='mt-4 flex items-center justify-between'>
-                                                <div className='space-x-4 text-sm'>
-                                                    {canResetPassword && (
-                                                        <Link href={route(ROUTES.PASSWORD_REQUEST)}>
-                                                            {t(
-                                                                'pages.auth.login.buttons.forgot_password',
-                                                            )}
+                                                <div className='flex items-center space-x-4'>
+                                                    <Button
+                                                        variant='ghost'
+                                                        type='button'
+                                                        onClick={() => setStep('emailStep')}
+                                                        disabled={loginMutation.isPending}
+                                                        className='px-2'
+                                                    >
+                                                        ← {t('pages.auth.login.buttons.back')}
+                                                    </Button>
+                                                    <div className='space-x-4 text-sm'>
+                                                        {canResetPassword && (
+                                                            <Link
+                                                                href={route(
+                                                                    ROUTES.PASSWORD_REQUEST,
+                                                                )}
+                                                            >
+                                                                {t(
+                                                                    'pages.auth.login.buttons.forgot_password',
+                                                                )}
+                                                            </Link>
+                                                        )}
+                                                        <Link href={route(ROUTES.REGISTER)}>
+                                                            {t('pages.auth.login.buttons.sign_up')}
                                                         </Link>
-                                                    )}
-                                                    <Link href={route(ROUTES.REGISTER)}>
-                                                        {t('pages.auth.login.buttons.sign_up')}
-                                                    </Link>
+                                                    </div>
                                                 </div>
                                                 <Button
                                                     onClick={signIn}

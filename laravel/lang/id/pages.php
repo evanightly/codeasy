@@ -30,6 +30,7 @@ return [
             ],
             'buttons' => [
                 'next' => 'Selanjutnya',
+                'back' => 'Kembali',
                 'sign_in' => 'Masuk',
                 'sign_up' => 'Daftar',
                 'forgot_password' => 'Lupa kata sandi?',

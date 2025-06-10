@@ -30,6 +30,7 @@ return [
             ],
             'buttons' => [
                 'next' => 'Next',
+                'back' => 'Back',
                 'sign_in' => 'Sign In',
                 'sign_up' => 'Sign Up',
                 'forgot_password' => 'Forgot password?',

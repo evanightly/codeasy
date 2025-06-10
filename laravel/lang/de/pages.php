@@ -30,6 +30,7 @@ return [
             ],
             'buttons' => [
                 'next' => 'Weiter',
+                'back' => 'Zurück',
                 'sign_in' => 'Anmelden',
                 'sign_up' => 'Registrieren',
                 'forgot_password' => 'Passwort vergessen?',
