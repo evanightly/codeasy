@@ -102,9 +102,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
           # If the authorized_keys file is empty, add the public key from GitHub secrets
-          if [ ! -s ~/.ssh/authorized_keys ]; then
-            echo "${{ secrets.JAGOAN_SSH_PUBLIC_KEY }}" >> ~/.ssh/authorized_keys
-          fi
+          echo "${{ secrets.JAGOAN_SSH_PUBLIC_KEY }}" >> ~/.ssh/authorized_keys
 
       - name: Deploy to VPS
         env:
