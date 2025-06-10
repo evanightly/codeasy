@@ -2131,6 +2131,8 @@ return [
                 'features' => 'Fitur',
                 'how_it_works' => 'Cara Kerja',
                 'testimonials' => 'Testimoni',
+                'manual_book' => 'Buku Manual',
+                'questionnaire' => 'Kuesioner',
                 'dashboard' => 'Dashboard',
                 'login' => 'Masuk',
                 'get_started' => 'Mulai',

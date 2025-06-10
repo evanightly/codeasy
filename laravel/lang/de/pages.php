@@ -2109,6 +2109,8 @@ return [
                 'features' => 'Features',
                 'how_it_works' => 'Wie es funktioniert',
                 'testimonials' => 'Testimonials',
+                'manual_book' => 'Handbuch',
+                'questionnaire' => 'Fragebogen',
                 'dashboard' => 'Dashboard',
                 'login' => 'Anmelden',
                 'get_started' => 'Loslegen',

@@ -2121,6 +2121,8 @@ return [
                 'features' => 'Features',
                 'how_it_works' => 'How it Works',
                 'testimonials' => 'Testimonials',
+                'manual_book' => 'Manual Book',
+                'questionnaire' => 'Questionnaire',
                 'dashboard' => 'Dashboard',
                 'login' => 'Login',
                 'get_started' => 'Get Started',

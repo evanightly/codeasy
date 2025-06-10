@@ -99,6 +99,11 @@ export default function Welcome({
         { name: 'Creating', score: 28, color: 'bg-purple-500' },
     ];
 
+    const manualBookLink =
+        'https://1drv.ms/w/c/9dfbab10a5b6be20/Ecp5hK_SHxROtttT70Fu_vYB14pO4FBhFPpupu29UUlY1w?e=NkuQJr';
+    const questionnaireLink =
+        'https://docs.google.com/forms/d/e/1FAIpQLSddamprRAJTAHZT_t-5yME5qHtl1ySYEZgGb84p9SGx4dXPHg/viewform?usp=dialog';
+
     // Python code for demonstration
     const _pythonCode = `import pandas as pd
 import numpy as np
@@ -178,6 +183,27 @@ print(cognitive_levels.value_counts())`;
                         >
                             {t('pages.welcome.navbar.navigation.testimonials')}
                         </a>
+                        {/* Manual Book and Questionnaire Links */}
+                        <a
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            href={manualBookLink}
+                            className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+                        >
+                            {t('pages.welcome.navbar.navigation.manual_book', {
+                                defaultValue: 'Manual Book',
+                            })}
+                        </a>
+                        <a
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            href={questionnaireLink}
+                            className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+                        >
+                            {t('pages.welcome.navbar.navigation.questionnaire', {
+                                defaultValue: 'Questionnaire',
+                            })}
+                        </a>
                         {auth?.user?.username ? (
                             <Link
                                 href={route('dashboard.index')}
@@ -254,6 +280,29 @@ print(cognitive_levels.value_counts())`;
                             >
                                 {t('pages.welcome.navbar.navigation.testimonials')}
                             </Link>
+                            {/* Manual Book and Questionnaire Links */}
+                            <a
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                onClick={() => setIsMenuOpen(false)}
+                                href={manualBookLink}
+                                className='block rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-muted'
+                            >
+                                {t('pages.welcome.navbar.navigation.manual_book', {
+                                    defaultValue: 'Manual Book',
+                                })}
+                            </a>
+                            <a
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                onClick={() => setIsMenuOpen(false)}
+                                href={questionnaireLink}
+                                className='block rounded-md px-3 py-2 text-base font-medium text-foreground hover:bg-muted'
+                            >
+                                {t('pages.welcome.navbar.navigation.questionnaire', {
+                                    defaultValue: 'Questionnaire',
+                                })}
+                            </a>
                             <Link
                                 onClick={() => setIsMenuOpen(false)}
                                 href={route('login')}
