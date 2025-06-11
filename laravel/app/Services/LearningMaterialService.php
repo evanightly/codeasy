@@ -144,12 +144,18 @@ class LearningMaterialService extends BaseCrudService implements LearningMateria
                 $completed++;
             }
 
+            // Calculate score based on test case completion percentage
+            $calculatedScore = 0;
+            if ($score && $score->test_case_total_count > 0) {
+                $calculatedScore = round(($score->test_case_complete_count / $score->test_case_total_count) * 100);
+            }
+
             $questionsProgress[] = [
                 'id' => $question->id,
                 'title' => $question->title,
                 'order_number' => $question->order_number,
                 'completed' => $isCompleted,
-                'score' => $score ? $score->score : 0,
+                'score' => $calculatedScore,
                 'coding_time' => $score ? $score->coding_time : 0,
                 'trial_status' => $score ? $score->trial_status : false,
             ];

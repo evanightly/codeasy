@@ -193,6 +193,7 @@ export default function Show({ course, material, progress, nextMaterial }: Props
                                         )}
 
                                         {question.completed && (
+                                            // Score is calculated based on the completed test cases
                                             <div>
                                                 {t('pages.student_materials.show.score')}:{' '}
                                                 {question.score}/100
