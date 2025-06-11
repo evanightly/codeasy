@@ -2,8 +2,6 @@ import { PDFViewer } from '@/Components/PDFViewer';
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
-import { DataTable } from '@/Components/UI/data-table';
-import { DataTableColumnHeader } from '@/Components/UI/data-table-column-header';
 import {
     Dialog,
     DialogContent,
@@ -12,15 +10,22 @@ import {
     DialogTitle,
 } from '@/Components/UI/dialog';
 import { Progress } from '@/Components/UI/progress';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/Components/UI/table';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { ROUTES } from '@/Support/Constants/routes';
 import { LearningMaterialTypeEnum } from '@/Support/Enums/learningMaterialTypeEnum';
 import { CourseResource, LearningMaterialResource } from '@/Support/Interfaces/Resources';
 import { Link } from '@inertiajs/react';
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { ArrowLeft, BookIcon, Code, Eye, FileTextIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 interface Props {
     course: {
@@ -33,7 +38,6 @@ interface Props {
 
 export default function Show({ course, materials }: Props) {
     const { t } = useLaravelReactI18n();
-    const columnHelper = createColumnHelper<LearningMaterialResource>();
     const [previewMaterial, setPreviewMaterial] = useState<LearningMaterialResource | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -64,99 +68,6 @@ export default function Show({ course, materials }: Props) {
                 return type;
         }
     };
-
-    const columns = [
-        columnHelper.accessor('title', {
-            header: ({ column }) => (
-                <DataTableColumnHeader
-                    title={t('pages.student_materials.common.fields.title')}
-                    column={column}
-                />
-            ),
-            cell: ({ row }) => (
-                <div className='font-medium'>
-                    <Link
-                        href={route(`${ROUTES.STUDENT_COURSE_MATERIALS}.show`, [
-                            course.data.id,
-                            row.original.id,
-                        ])}
-                        className='text-blue-600 hover:underline'
-                    >
-                        {row.original.title}
-                    </Link>
-                </div>
-            ),
-        }),
-        columnHelper.accessor('type', {
-            header: ({ column }) => (
-                <DataTableColumnHeader
-                    title={t('pages.student_materials.common.fields.type')}
-                    column={column}
-                />
-            ),
-            cell: ({ row }) => (
-                <div className='flex items-center'>
-                    <Badge variant='outline' className='flex items-center'>
-                        {renderTypeIcon(row?.original?.type ?? '')}
-                        {renderTypeName(row?.original?.type ?? '')}
-                    </Badge>
-                </div>
-            ),
-        }),
-        columnHelper.accessor('description', {
-            header: ({ column }) => (
-                <DataTableColumnHeader
-                    title={t('pages.student_materials.common.fields.description')}
-                    column={column}
-                />
-            ),
-            cell: ({ row }) => (
-                <div className='max-w-[300px] truncate'>{row.original.description}</div>
-            ),
-        }),
-        columnHelper.display({
-            id: 'progress',
-            header: () => t('pages.student_courses.common.fields.progress'),
-            cell: ({ row }) => {
-                const progress = row.original.progress_percentage ?? 0;
-                return (
-                    <div className='group relative flex min-w-[120px] items-center'>
-                        <Progress
-                            value={progress}
-                            indicatorClassName={progress === 100 ? 'bg-green-500' : 'bg-blue-500'}
-                        />
-                        <span className='absolute right-2 text-xs font-semibold text-white drop-shadow'>
-                            {progress}%
-                        </span>
-                    </div>
-                );
-            },
-        }),
-        columnHelper.display({
-            id: 'actions',
-            header: () => <div className='text-right'>{t('action.actions')}</div>,
-            cell: ({ row }) => {
-                const material = row.original;
-                return (
-                    <div className='flex justify-end'>
-                        {material.file_url && material.file_extension?.toLowerCase() === 'pdf' && (
-                            <Button
-                                variant='ghost'
-                                size='sm'
-                                onClick={() => handleOpenPreview(material)}
-                                className='flex items-center gap-1'
-                            >
-                                <Eye className='h-4 w-4' />
-                                <span>{t('pages.learning_material.show.view_file')}</span>
-                            </Button>
-                        )}
-                    </div>
-                );
-            },
-        }),
-    ] as Array<ColumnDef<LearningMaterialResource, LearningMaterialResource>>;
-
-    const memoizedColumns = useMemo(() => columns, []);
 
     return (
         <AuthenticatedLayout title={course.data.name}>
@@ -202,12 +113,89 @@ export default function Show({ course, materials }: Props) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <DataTable
-                        data={materials.data}
-                        columns={memoizedColumns}
-                        baseRoute='student.materials'
-                        baseKey='student-materials'
-                    />
+                    <Table className='min-h-[600px]'>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>
+                                    {t('pages.student_materials.common.fields.title')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('pages.student_materials.common.fields.type')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('pages.student_materials.common.fields.description')}
+                                </TableHead>
+                                <TableHead>
+                                    {t('pages.student_courses.common.fields.progress')}
+                                </TableHead>
+                                <TableHead className='text-right'>{t('action.actions')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {materials.data.map((material) => (
+                                <TableRow key={material.id}>
+                                    <TableCell className='font-medium'>
+                                        <Link
+                                            href={route(`${ROUTES.STUDENT_COURSE_MATERIALS}.show`, [
+                                                course.data.id,
+                                                material.id,
+                                            ])}
+                                            className='text-blue-600 hover:underline'
+                                        >
+                                            {material.title}
+                                        </Link>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge
+                                            variant='outline'
+                                            className='flex w-fit items-center'
+                                        >
+                                            {renderTypeIcon(material?.type ?? '')}
+                                            {renderTypeName(material?.type ?? '')}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className='max-w-[300px] truncate'>
+                                            {material.description}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className='group relative flex min-w-[120px] items-center'>
+                                            <Progress
+                                                value={material.progress_percentage ?? 0}
+                                                indicatorClassName={
+                                                    (material.progress_percentage ?? 0) === 100
+                                                        ? 'bg-green-500'
+                                                        : 'bg-blue-500'
+                                                }
+                                            />
+                                            <span className='absolute right-2 text-xs font-semibold text-white drop-shadow'>
+                                                {material.progress_percentage ?? 0}%
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {material.file_url &&
+                                            material.file_extension?.toLowerCase() === 'pdf' && (
+                                                <Button
+                                                    variant='ghost'
+                                                    size='sm'
+                                                    onClick={() => handleOpenPreview(material)}
+                                                    className='ml-auto flex items-center gap-1'
+                                                >
+                                                    <Eye />
+                                                    <span>
+                                                        {t(
+                                                            'pages.learning_material.show.view_file',
+                                                        )}
+                                                    </span>
+                                                </Button>
+                                            )}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </CardContent>
             </Card>
 
