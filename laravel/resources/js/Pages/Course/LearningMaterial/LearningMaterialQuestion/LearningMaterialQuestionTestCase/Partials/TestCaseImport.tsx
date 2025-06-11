@@ -74,9 +74,12 @@ export const TestCaseImport = ({ question, learningMaterial, course }: TestCaseI
                             defaultValue: 'Template downloaded successfully',
                         },
                     ),
-                    error: t('pages.learning_material_question_test_case.import.messages.download_error', {
-                        defaultValue: 'Failed to download template',
-                    }),
+                    error: t(
+                        'pages.learning_material_question_test_case.import.messages.download_error',
+                        {
+                            defaultValue: 'Failed to download template',
+                        },
+                    ),
                 },
             );
         },
@@ -108,23 +111,32 @@ export const TestCaseImport = ({ question, learningMaterial, course }: TestCaseI
                 question,
             }),
             {
-                loading: t('pages.learning_material_question_test_case.import.messages.previewing', {
-                    defaultValue: 'Analyzing import file...',
-                }),
+                loading: t(
+                    'pages.learning_material_question_test_case.import.messages.previewing',
+                    {
+                        defaultValue: 'Analyzing import file...',
+                    },
+                ),
                 success: (response) => {
                     console.log('Preview response:', response);
 
                     setPreviewData(response.data);
                     setPreviewOpen(true);
-                    return t('pages.learning_material_question_test_case.import.messages.preview_success', {
-                        defaultValue: 'Preview loaded successfully',
-                    });
+                    return t(
+                        'pages.learning_material_question_test_case.import.messages.preview_success',
+                        {
+                            defaultValue: 'Preview loaded successfully',
+                        },
+                    );
                 },
                 error: (error) => {
                     console.error('Preview error:', error);
-                    return t('pages.learning_material_question_test_case.import.messages.preview_error', {
-                        defaultValue: 'Failed to preview file',
-                    });
+                    return t(
+                        'pages.learning_material_question_test_case.import.messages.preview_error',
+                        {
+                            defaultValue: 'Failed to preview file',
+                        },
+                    );
                 },
             },
         );
@@ -153,17 +165,23 @@ export const TestCaseImport = ({ question, learningMaterial, course }: TestCaseI
 
                     const message =
                         data.data?.message ||
-                        t('pages.learning_material_question_test_case.import.messages.import_success', {
-                            defaultValue: 'Test cases imported successfully',
-                        });
+                        t(
+                            'pages.learning_material_question_test_case.import.messages.import_success',
+                            {
+                                defaultValue: 'Test cases imported successfully',
+                            },
+                        );
 
                     return message;
                 },
                 error: (error) => {
                     console.error('Import error:', error);
-                    return t('pages.learning_material_question_test_case.import.messages.import_error', {
-                        defaultValue: 'Failed to import test cases',
-                    });
+                    return t(
+                        'pages.learning_material_question_test_case.import.messages.import_error',
+                        {
+                            defaultValue: 'Failed to import test cases',
+                        },
+                    );
                 },
             },
         );
