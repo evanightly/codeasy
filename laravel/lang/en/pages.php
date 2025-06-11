@@ -1382,6 +1382,42 @@ return [
                 'details' => 'Test Case Details',
             ],
         ],
+        'import' => [
+            'title' => 'Import Test Cases',
+            'description' => 'Upload a CSV or Excel file to import test cases in bulk',
+            'template' => [
+                'title' => 'Download Template',
+                'description' => 'Download a template file with the correct format',
+            ],
+            'preview' => [
+                'title' => 'Import Preview',
+                'total_rows' => 'Total rows: :count',
+                'row_number' => 'Row #',
+            ],
+            'buttons' => [
+                'download_csv' => 'Download CSV Template',
+                'download_excel' => 'Download Excel Template',
+                'preview' => 'Preview',
+                'back' => 'Back',
+                'confirm_import' => 'Confirm Import',
+                'import' => 'Import Test Cases',
+                'cancel' => 'Cancel',
+            ],
+            'messages' => [
+                'downloading_template' => 'Downloading template...',
+                'download_success' => 'Template downloaded successfully',
+                'download_error' => 'Failed to download template',
+                'previewing' => 'Analyzing import file...',
+                'preview_success' => 'Preview loaded successfully',
+                'preview_error' => 'Failed to preview file',
+                'importing' => 'Importing test cases...',
+                'import_success' => 'Test cases imported successfully',
+                'import_error' => 'Failed to import test cases',
+            ],
+            'upload' => [
+                'title' => 'Upload Test Cases',
+            ],
+        ],
     ],
     'profile' => [
         'edit' => [

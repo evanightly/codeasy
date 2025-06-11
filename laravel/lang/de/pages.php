@@ -1361,6 +1361,42 @@ return [
                 'details' => 'Testfall-Details',
             ],
         ],
+        'import' => [
+            'title' => 'Testfälle importieren',
+            'description' => 'CSV- oder Excel-Datei hochladen, um Testfälle in großen Mengen zu importieren',
+            'template' => [
+                'title' => 'Vorlage herunterladen',
+                'description' => 'Eine Vorlagendatei mit dem korrekten Format herunterladen',
+            ],
+            'preview' => [
+                'title' => 'Import-Vorschau',
+                'total_rows' => 'Gesamte Zeilen: :count',
+                'row_number' => 'Zeile #',
+            ],
+            'buttons' => [
+                'download_csv' => 'CSV-Vorlage herunterladen',
+                'download_excel' => 'Excel-Vorlage herunterladen',
+                'preview' => 'Vorschau',
+                'back' => 'Zurück',
+                'confirm_import' => 'Import bestätigen',
+                'import' => 'Importieren',
+                'cancel' => 'Abbrechen',
+            ],
+            'messages' => [
+                'downloading_template' => 'Vorlage wird heruntergeladen...',
+                'download_success' => 'Vorlage erfolgreich heruntergeladen',
+                'download_error' => 'Fehler beim Herunterladen der Vorlage',
+                'previewing' => 'Importdatei wird analysiert...',
+                'preview_success' => 'Vorschau erfolgreich geladen',
+                'preview_error' => 'Fehler beim Anzeigen der Dateivorschau',
+                'importing' => 'Testfälle werden importiert...',
+                'import_success' => 'Testfälle erfolgreich importiert',
+                'import_error' => 'Fehler beim Importieren der Testfälle',
+            ],
+            'upload' => [
+                'title' => 'Testfälle hochladen',
+            ],
+        ],
     ],
     'profile' => [
         'edit' => [

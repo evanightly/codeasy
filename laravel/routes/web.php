@@ -148,7 +148,7 @@ Route::middleware('auth')->group(function () {
             // Test Cases in context of a Course/LearningMaterial/Question (view only)
             Route::prefix('questions/{question}')->name('questions.')->group(function () {
                 Route::resource('test-cases', CourseLearningMaterialQuestionTestCaseController::class)
-                    ->only(['index', 'show', 'create', 'edit']);
+                    ->only(['index', 'show', 'create', 'edit', 'store']);
             });
         });
     });

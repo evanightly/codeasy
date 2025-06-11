@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Course\LearningMaterial\LearningMaterialQuestion;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LearningMaterialQuestionTestCase\ImportLearningMaterialQuestionTestCaseRequest;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\LearningMaterialQuestionResource;
 use App\Http\Resources\LearningMaterialQuestionTestCaseResource;
@@ -12,7 +13,9 @@ use App\Models\LearningMaterial;
 use App\Models\LearningMaterialQuestion;
 use App\Models\LearningMaterialQuestionTestCase;
 use App\Services\LearningMaterialQuestionTestCaseService;
+use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
 
@@ -37,14 +40,25 @@ class LearningMaterialQuestionTestCaseController extends Controller implements H
     /**
      * Display test cases for a specific question
      */
-    public function index(Course $course, LearningMaterial $learningMaterial, LearningMaterialQuestion $question) {
+    public function index(Course $course, LearningMaterial $learningMaterial, LearningMaterialQuestion $question, Request $request) {
         // Verify relationships
         if ($learningMaterial->course_id != $course->id || $question->learning_material_id != $learningMaterial->id) {
             abort(404);
         }
 
+        $intent = $request->get('intent');
+
+        // Handle import template downloads
+        if ($intent === IntentEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_INDEX_IMPORT_TEMPLATE->value) {
+            return $this->testCaseService->downloadTemplate();
+        }
+
+        if ($intent === IntentEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_INDEX_IMPORT_CSV_TEMPLATE->value) {
+            return $this->testCaseService->downloadExcelTemplate();
+        }
+
         $testCases = $this->testCaseService->getAll([
-            'question_id' => $question->id,
+            'learning_material_question_id' => $question->id,
         ]);
 
         if ($this->ajax()) {
@@ -125,5 +139,53 @@ class LearningMaterialQuestionTestCaseController extends Controller implements H
             'question' => new LearningMaterialQuestionResource($question),
             'testCase' => new LearningMaterialQuestionTestCaseResource($testCase),
         ]);
+    }
+
+    /**
+     * Store a new test case or handle import operations
+     */
+    public function store(Course $course, LearningMaterial $learningMaterial, LearningMaterialQuestion $question, ImportLearningMaterialQuestionTestCaseRequest $request) {
+        // Verify relationships
+        if ($learningMaterial->course_id != $course->id || $question->learning_material_id != $learningMaterial->id) {
+            abort(404);
+        }
+
+        $intent = $request->get('intent');
+
+        // Handle import operations
+        if ($intent === IntentEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_STORE_IMPORT->value) {
+            $request->merge(['learning_material_question_id' => $question->id]);
+
+            return $this->testCaseService->import($request);
+        }
+
+        if ($intent === IntentEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_STORE_PREVIEW_IMPORT->value) {
+            return $this->testCaseService->previewImport($request);
+        }
+
+        // TODO: refactor this
+        // Handle regular test case creation - fall back to regular request validation
+        $data = $request->validate([
+            'description' => 'nullable|string',
+            'language' => 'required|string',
+            'input' => 'required|string',
+            'hidden' => 'boolean',
+            'active' => 'boolean',
+            'expected_output_file' => 'nullable|file',
+        ]);
+
+        $data['learning_material_question_id'] = $question->id;
+
+        $testCase = $this->testCaseService->create($data);
+
+        if ($this->ajax()) {
+            return new LearningMaterialQuestionTestCaseResource($testCase);
+        }
+
+        // return redirect()->route('courses.learning-materials.questions.test-cases.index', [
+        //     'course' => $course,
+        //     'learningMaterial' => $learningMaterial,
+        //     'question' => $question,
+        // ]);
     }
 }

@@ -1383,6 +1383,42 @@ return [
                 'details' => 'Detail Kasus Uji',
             ],
         ],
+        'import' => [
+            'title' => 'Impor Kasus Uji',
+            'description' => 'Unggah file CSV atau Excel untuk mengimpor kasus uji secara massal',
+            'template' => [
+                'title' => 'Unduh Template',
+                'description' => 'Unduh file template dengan format yang benar',
+            ],
+            'preview' => [
+                'title' => 'Pratinjau Impor',
+                'total_rows' => 'Total baris: :count',
+                'row_number' => 'Baris #',
+            ],
+            'buttons' => [
+                'download_csv' => 'Unduh Template CSV',
+                'download_excel' => 'Unduh Template Excel',
+                'preview' => 'Pratinjau',
+                'back' => 'Kembali',
+                'confirm_import' => 'Konfirmasi Impor',
+                'import' => 'Impor Kasus Uji',
+                'cancel' => 'Batal',
+            ],
+            'messages' => [
+                'downloading_template' => 'Mengunduh template...',
+                'download_success' => 'Template berhasil diunduh',
+                'download_error' => 'Gagal mengunduh template',
+                'previewing' => 'Menganalisis file impor...',
+                'preview_success' => 'Pratinjau berhasil dimuat',
+                'preview_error' => 'Gagal melihat pratinjau file',
+                'importing' => 'Mengimpor kasus uji...',
+                'import_success' => 'Kasus uji berhasil diimpor',
+                'import_error' => 'Gagal mengimpor kasus uji',
+            ],
+            'upload' => [
+                'title' => 'Unggah File Impor Test Case',
+            ],
+        ],
     ],
     'profile' => [
         'edit' => [

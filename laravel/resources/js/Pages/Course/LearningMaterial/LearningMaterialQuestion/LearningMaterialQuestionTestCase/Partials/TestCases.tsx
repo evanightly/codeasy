@@ -19,6 +19,7 @@ import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { EyeIcon, EyeOffIcon, MoreHorizontal } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
+import TestCaseImport from './TestCaseImport';
 
 interface TestCasesProps {
     response?: UseQueryResult<PaginateResponse<LearningMaterialQuestionTestCaseResource>, Error>;
@@ -185,13 +186,14 @@ export const TestCases = ({
 
     return (
         <>
-            <div className='mb-4 flex justify-end'>
+            <div className='mb-4 flex justify-between'>
+                <TestCaseImport
+                    question={questionId}
+                    learningMaterial={learningMaterialId}
+                    course={courseId}
+                />
                 <Link
-                    href={route(`${baseRoute}.create`, {
-                        course: courseId,
-                        learningMaterial: learningMaterialId,
-                        question: questionId,
-                    })}
+                    href={route(`${baseRoute}.create`, [courseId, learningMaterialId, questionId])}
                     className={buttonVariants({ variant: 'create' })}
                 >
                     {t('pages.learning_material_question_test_case.index.buttons.create')}
@@ -203,6 +205,7 @@ export const TestCases = ({
                 filters={filters}
                 data={response?.data?.data ?? []}
                 columns={memoizedColumns}
+                className='mt-4'
                 baseRoute={baseRoute}
                 baseKey={baseKey}
             />
