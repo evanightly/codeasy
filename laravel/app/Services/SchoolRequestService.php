@@ -29,6 +29,13 @@ class SchoolRequestService extends BaseCrudService implements SchoolRequestServi
         }
 
         DB::transaction(function () use ($schoolRequest) {
+            // Handle if the teacher already exists in the school
+            if ($schoolRequest->school->users()->where('user_id', $schoolRequest->user_id)->exists()) {
+                $schoolRequest->approve();
+
+                return;
+            }
+
             // Attach the teacher to school using the base users relationship
             $schoolRequest->school->users()->attach($schoolRequest->user_id, [
                 'role' => RoleEnum::TEACHER->value,
@@ -51,6 +58,13 @@ class SchoolRequestService extends BaseCrudService implements SchoolRequestServi
         }
 
         DB::transaction(function () use ($schoolRequest) {
+            // Handle if the student already exists in the school
+            if ($schoolRequest->school->users()->where('user_id', $schoolRequest->user_id)->exists()) {
+                $schoolRequest->approve();
+
+                return;
+            }
+
             // Attach the student to school using the base users relationship
             $schoolRequest->school->users()->attach($schoolRequest->user_id, [
                 'role' => RoleEnum::STUDENT->value,
