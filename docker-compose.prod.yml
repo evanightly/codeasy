@@ -122,6 +122,21 @@ services:
       fastapi:
         condition: service_started
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      - PMA_HOST=${DB_HOST}
+      - PMA_PORT=${DB_PORT}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "8000:80"
+    networks:
+      - app-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
 networks:
   app-network:
     driver: bridge
