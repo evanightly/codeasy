@@ -38,7 +38,7 @@ export default function AuthenticatedLayout({
             <Head title={title} />
             <SidebarProvider>
                 {auth.user && <DashboardSidebar />}
-                <SidebarInset>
+                <SidebarInset className='overflow-x-scroll'>
                     <DashboardNavbar breadcrumbs={breadcrumbs} />
                     <main className={`flex flex-1 flex-col gap-4 text-foreground ${paddingClass}`}>
                         {children}

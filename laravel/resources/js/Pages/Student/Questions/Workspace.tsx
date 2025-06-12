@@ -127,33 +127,6 @@ export default function Workspace({
         'stacked',
     );
 
-    // Workspace panel sizes persistence
-    const [mainPanelSizes, setMainPanelSizes] = useLocalStorage<number[]>(
-        'workspace-main-panel-sizes',
-        [25, 75], // default: question panel 25%, editor area 75%
-    );
-
-    const [editorPanelSizes, setEditorPanelSizes] = useLocalStorage<{
-        stacked: number[];
-        sideBySide: number[];
-    }>('workspace-editor-panel-sizes', {
-        stacked: [60, 40], // default for stacked: code 60%, output 40%
-        sideBySide: [65, 35], // default for side-by-side: code 65%, output 35%
-    });
-
-    // Panel resize handlers
-    const handleMainPanelResize = (sizes: number[]) => {
-        setMainPanelSizes(sizes);
-    };
-
-    const handleEditorPanelResize = (sizes: number[]) => {
-        const modeKey = layoutMode === 'side-by-side' ? 'sideBySide' : 'stacked';
-        setEditorPanelSizes((prev) => ({
-            ...prev,
-            [modeKey]: sizes,
-        }));
-    };
-
     // Workspace locking state
     const [isWorkspaceLocked, setIsWorkspaceLocked] = useState(
         tracking.is_workspace_locked || false,
@@ -577,7 +550,7 @@ export default function Workspace({
         <AuthenticatedLayout title={question.data.title} padding={false}>
             <div className='flex min-h-screen flex-col'>
                 {/* Header with navigation */}
-                <div className='sticky top-0 z-10 border-b bg-background'>
+                <div className='sticky top-0 z-[1] border-b bg-background'>
                     <div className='flex items-center justify-between p-4'>
                         <div className='flex items-center gap-4'>
                             <Link
@@ -924,17 +897,9 @@ export default function Workspace({
 
                 {/* Main workspace content with resizable panels */}
                 <div className='flex flex-1 overflow-hidden'>
-                    <ResizablePanelGroup
-                        onLayout={handleMainPanelResize}
-                        direction='horizontal'
-                        className='hidden lg:flex'
-                    >
+                    <ResizablePanelGroup direction='horizontal' className='hidden lg:flex'>
                         {/* Question description panel - desktop */}
-                        <ResizablePanel
-                            minSize={20}
-                            defaultSize={mainPanelSizes[0]}
-                            className='overflow-hidden'
-                        >
+                        <ResizablePanel minSize={20} defaultSize={25} className='overflow-hidden'>
                             <div className='flex h-full flex-col overflow-y-auto border-r'>
                                 <div className='flex flex-col gap-4 p-4'>
                                     <ReactMarkdown>{question.data.description}</ReactMarkdown>
@@ -1092,25 +1057,15 @@ export default function Workspace({
                         <ResizableHandle withHandle />
 
                         {/* Code editor and output panel group */}
-                        <ResizablePanel
-                            minSize={50}
-                            defaultSize={mainPanelSizes[1]}
-                            className='overflow-hidden'
-                        >
+                        <ResizablePanel minSize={50} defaultSize={75}>
                             <ResizablePanelGroup
-                                onLayout={handleEditorPanelResize}
                                 direction={layoutMode === 'stacked' ? 'vertical' : 'horizontal'}
                                 className='h-full'
                             >
                                 {/* Code editor panel */}
                                 <ResizablePanel
                                     minSize={30}
-                                    defaultSize={
-                                        editorPanelSizes[
-                                            layoutMode === 'stacked' ? 'stacked' : 'sideBySide'
-                                        ][0]
-                                    }
-                                    className='overflow-hidden'
+                                    defaultSize={layoutMode === 'stacked' ? 60 : 65}
                                 >
                                     <div className='flex h-full flex-col'>
                                         <div className='border-b bg-muted/30 px-4 py-2'>
@@ -1242,11 +1197,7 @@ export default function Workspace({
                                 {/* Output Panel */}
                                 <ResizablePanel
                                     minSize={20}
-                                    defaultSize={
-                                        editorPanelSizes[
-                                            layoutMode === 'stacked' ? 'stacked' : 'sideBySide'
-                                        ][1]
-                                    }
+                                    defaultSize={layoutMode === 'stacked' ? 40 : 35}
                                 >
                                     <div className='flex h-full flex-col'>
                                         <div className='border-b bg-muted/30 px-4 py-2'>
@@ -1254,7 +1205,7 @@ export default function Workspace({
                                                 {t('pages.student_questions.workspace.output')}
                                             </h3>
                                         </div>
-                                        <div className='flex-1 overflow-auto p-4'>
+                                        <div className='max-h-20 flex-1 overflow-auto p-4 lg:max-h-[calc(100vh-200px)]'>
                                             {output.length === 0 && !isCompiling ? (
                                                 <div className='flex h-full items-center justify-center text-center text-muted-foreground'>
                                                     <div>
@@ -1295,7 +1246,7 @@ export default function Workspace({
                                                                         )}
                                                                     </AlertTitle>
                                                                     <AlertDescription>
-                                                                        <pre className='whitespace-pre-wrap text-xs'>
+                                                                        <pre className='whitespace-pre-wrap break-all text-xs'>
                                                                             {out.content}
                                                                         </pre>
                                                                     </AlertDescription>
@@ -1343,7 +1294,7 @@ export default function Workspace({
                                                                     key={i}
                                                                     className='rounded-md bg-muted p-3 text-sm'
                                                                 >
-                                                                    <pre className='whitespace-pre-wrap text-xs'>
+                                                                    <pre className='whitespace-pre-wrap break-all text-xs'>
                                                                         {out.content}
                                                                     </pre>
                                                                 </div>
@@ -1352,7 +1303,7 @@ export default function Workspace({
                                                             return (
                                                                 <div
                                                                     key={i}
-                                                                    className='rounded-md bg-muted p-3 text-sm'
+                                                                    className='break-all rounded-md bg-muted p-3 text-sm'
                                                                 >
                                                                     {out.content}
                                                                 </div>
@@ -1386,7 +1337,6 @@ export default function Workspace({
                                 showThemePicker={true}
                                 onChange={handleCodeChange}
                                 language={ProgrammingLanguageEnum.PYTHON}
-                                height='50vh'
                                 headerClassName='pt-3 px-3'
                                 headerChildren={
                                     <div className='flex items-center gap-2'>
@@ -1512,7 +1462,7 @@ export default function Workspace({
                                                             )}
                                                         </AlertTitle>
                                                         <AlertDescription>
-                                                            <pre className='whitespace-pre-wrap text-xs'>
+                                                            <pre className='whitespace-pre-wrap break-all text-xs'>
                                                                 {out.content}
                                                             </pre>
                                                         </AlertDescription>
@@ -1559,14 +1509,14 @@ export default function Workspace({
                                                         key={i}
                                                         className='rounded-md bg-muted p-3 text-sm'
                                                     >
-                                                        <pre className='whitespace-pre-wrap text-xs'>
+                                                        <pre className='whitespace-pre-wrap break-all text-xs'>
                                                             {out.content}
                                                         </pre>
                                                     </div>
                                                 );
                                             } else {
                                                 return (
-                                                    <div key={i} className='text-sm'>
+                                                    <div key={i} className='break-all text-sm'>
                                                         {out.content}
                                                     </div>
                                                 );
@@ -1585,78 +1535,74 @@ export default function Workspace({
                         </div>
                     </div>
                 </div>
-
-                {/* Mark as Done Dialog */}
-                <Dialog open={markAsDoneDialogOpen} onOpenChange={setMarkAsDoneDialogOpen}>
-                    <DialogContent className='sm:max-w-md'>
-                        <DialogHeader>
-                            <DialogTitle className='flex items-center gap-2'>
-                                <Check className='h-5 w-5 text-green-600' />
-                                {t('pages.student_questions.workspace.mark_as_done.dialog.title')}
-                            </DialogTitle>
-                            <DialogDescription>
-                                {t(
-                                    'pages.student_questions.workspace.mark_as_done.dialog.description',
-                                )}
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className='mt-3 space-y-4'>
-                            <Alert>
-                                <AlertCircle />
-                                <AlertTitle>
-                                    {t(
-                                        'pages.student_questions.workspace.mark_as_done.dialog.warning_title',
-                                    )}
-                                </AlertTitle>
-                                <AlertDescription>
-                                    {t(
-                                        'pages.student_questions.workspace.mark_as_done.dialog.warning_description',
-                                    )}
-                                </AlertDescription>
-                            </Alert>
-                            <div className='flex justify-end gap-3'>
-                                <Button
-                                    variant='outline'
-                                    onClick={() => {
-                                        setMarkAsDoneDialogOpen(false);
-                                        // Clear pending navigation if exists
-                                        delete (window as any).pendingNavigationQuestionId;
-                                    }}
-                                    disabled={markAsDoneMutation.isPending}
-                                >
-                                    {t(
-                                        'pages.student_questions.workspace.mark_as_done.dialog.cancel',
-                                    )}
-                                </Button>
-                                <Button
-                                    variant='outline'
-                                    onClick={proceedWithNavigation}
-                                    disabled={markAsDoneMutation.isPending}
-                                    className='border-blue-500 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950'
-                                >
-                                    {t(
-                                        'pages.student_questions.workspace.mark_as_done.dialog.continue',
-                                    )}
-                                </Button>
-                                <Button
-                                    onClick={handleMarkAsDone}
-                                    disabled={markAsDoneMutation.isPending}
-                                    className='bg-green-600 hover:bg-green-700'
-                                >
-                                    {markAsDoneMutation.isPending ? (
-                                        <Loader2 className='mr-2 animate-spin' />
-                                    ) : (
-                                        <Check className='mr-2' />
-                                    )}
-                                    {t(
-                                        'pages.student_questions.workspace.mark_as_done.dialog.mark_done',
-                                    )}
-                                </Button>
-                            </div>
-                        </div>
-                    </DialogContent>
-                </Dialog>
             </div>
+
+            {/* Mark as Done Dialog */}
+            <Dialog open={markAsDoneDialogOpen} onOpenChange={setMarkAsDoneDialogOpen}>
+                <DialogContent className='sm:max-w-md'>
+                    <DialogHeader>
+                        <DialogTitle className='flex items-center gap-2'>
+                            <Check className='h-5 w-5 text-green-600' />
+                            {t('pages.student_questions.workspace.mark_as_done.dialog.title')}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {t('pages.student_questions.workspace.mark_as_done.dialog.description')}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className='mt-3 space-y-4'>
+                        <Alert>
+                            <AlertCircle />
+                            <AlertTitle>
+                                {t(
+                                    'pages.student_questions.workspace.mark_as_done.dialog.warning_title',
+                                )}
+                            </AlertTitle>
+                            <AlertDescription>
+                                {t(
+                                    'pages.student_questions.workspace.mark_as_done.dialog.warning_description',
+                                )}
+                            </AlertDescription>
+                        </Alert>
+                        <div className='flex justify-end gap-3'>
+                            <Button
+                                variant='outline'
+                                onClick={() => {
+                                    setMarkAsDoneDialogOpen(false);
+                                    // Clear pending navigation if exists
+                                    delete (window as any).pendingNavigationQuestionId;
+                                }}
+                                disabled={markAsDoneMutation.isPending}
+                            >
+                                {t('pages.student_questions.workspace.mark_as_done.dialog.cancel')}
+                            </Button>
+                            <Button
+                                variant='outline'
+                                onClick={proceedWithNavigation}
+                                disabled={markAsDoneMutation.isPending}
+                                className='border-blue-500 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950'
+                            >
+                                {t(
+                                    'pages.student_questions.workspace.mark_as_done.dialog.continue',
+                                )}
+                            </Button>
+                            <Button
+                                onClick={handleMarkAsDone}
+                                disabled={markAsDoneMutation.isPending}
+                                className='bg-green-600 hover:bg-green-700'
+                            >
+                                {markAsDoneMutation.isPending ? (
+                                    <Loader2 className='mr-2 animate-spin' />
+                                ) : (
+                                    <Check className='mr-2' />
+                                )}
+                                {t(
+                                    'pages.student_questions.workspace.mark_as_done.dialog.mark_done',
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AuthenticatedLayout>
     );
 }
