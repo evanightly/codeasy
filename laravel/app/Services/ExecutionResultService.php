@@ -65,6 +65,7 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
                 'code' => $code,
                 'type' => 'student',
                 'testcases' => $testCases,
+                'student_id' => $studentScore->user_id, // Pass student ID for isolation
             ];
 
             $response = Http::post(config('services.fastapi.url') . '/test', $payload);

@@ -45,6 +45,11 @@ Proyek ini sekaligus menjadi bagian dari penelitian skripsi untuk meningkatkan k
    - Blackbox testing dengan **Cypress**.  
    - Kuesioner **SUS** (System Usability Scale) untuk menilai kemudahan aplikasi.
 
+6. **Student Code Isolation**  
+   - Setiap siswa mendapat **kernel Python terpisah** untuk eksekusi kode.  
+   - Mencegah **interferensi antar siswa** saat mengerjakan soal secara bersamaan.  
+   - Dukungan **eksekusi konkuren** tanpa konflik variabel atau memori.
+
 ---
 
 ## Reminder

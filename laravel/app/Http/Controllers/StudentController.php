@@ -336,6 +336,7 @@ class StudentController extends Controller {
                 'code' => $code,
                 'testcases' => $testCaseInputs,
                 'question_id' => $question->id,
+                'student_id' => $user->id, // Pass student ID for isolation
             ]);
 
             if ($response->successful()) {

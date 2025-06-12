@@ -21,6 +21,7 @@ class CodeInput(BaseModel):
     testcases: Optional[List[str]] = None
     type: Optional[str] = None
     question_id: Optional[int] = None
+    student_id: Optional[int] = None  # Add student ID for isolation
 
 class QuestionData(BaseModel):
     question_id: int
@@ -137,12 +138,11 @@ def contains_input_function(code):
 
 class JupyterKernelManager:
     def __init__(self):
-        self.km = KernelManager(kernel_name='python3')
-        self.km.start_kernel()
-        self.kc = self.km.client()
-        self.kc.start_channels()
+        # Remove shared kernel - we'll create per-request kernels
+        pass
 
-    def execute_code(self, code: str, is_sandbox: bool = False):
+    def execute_code_isolated(self, code: str, is_sandbox: bool = False, student_id: Optional[int] = None):
+        """Execute code in an isolated kernel instance to prevent student interference"""
         outputs = []
         
         # Check for input() usage and reject if found
@@ -155,11 +155,25 @@ class JupyterKernelManager:
             })
             return outputs
         
-        msg_id = self.kc.execute(code)
+        # Create a new isolated kernel for this request
+        km = None
+        kc = None
         
         try:
+            # Create fresh kernel instance
+            km = KernelManager(kernel_name='python3')
+            km.start_kernel()
+            kc = km.client()
+            kc.start_channels()
+            
+            # Wait for kernel to be ready
+            kc.wait_for_ready(timeout=30)
+            
+            # Execute the code in the isolated kernel
+            msg_id = kc.execute(code)
+            
             while True:
-                msg = self.kc.get_iopub_msg(timeout=10)
+                msg = kc.get_iopub_msg(timeout=10)
                 msg_type = msg['msg_type']
                 content = msg['content']
 
@@ -177,8 +191,8 @@ class JupyterKernelManager:
                 elif msg_type in ['display_data', 'execute_result']:
                     if 'image/png' in content.get('data', {}):
                         image_data = content['data']['image/png']
-                        # Add sandbox_ prefix for temporary files
-                        prefix = "sandbox_" if is_sandbox else "visual_"
+                        # Add student_id and sandbox prefix for file isolation
+                        prefix = f"sandbox_{student_id}_" if is_sandbox else f"visual_{student_id}_"
                         image_filename = f"{prefix}{uuid.uuid4().hex}.png"
 
                         # Create visualization directory if it doesn't exist
@@ -233,6 +247,18 @@ class JupyterKernelManager:
                 "error_type": type(e).__name__,
                 "error_msg": str(e)
             })
+        finally:
+            # Always clean up the kernel to prevent resource leaks
+            if kc:
+                try:
+                    kc.stop_channels()
+                except:
+                    pass
+            if km:
+                try:
+                    km.shutdown_kernel()
+                except:
+                    pass
 
         return outputs
 
@@ -243,11 +269,32 @@ async def test_code(input: CodeInput):
     try:
         is_sandbox = input.type == "sandbox"
         
+        # Simple console logging for request tracking
+        print("=" * 80)
+        print(f"📝 FASTAPI REQUEST - Student ID: {input.student_id or 'unknown'}")
+        print(f"🔧 Type: {input.type or 'normal'}")
+        print(f"❓ Question ID: {input.question_id or 'unknown'}")
+        print(f"📄 Code Length: {len(input.code)} characters")
+        print(f"🧪 Test Cases Count: {len(input.testcases) if input.testcases else 0}")
+        print(f"💻 Student Code:")
+        print("-" * 40)
+        print(input.code)
+        print("-" * 40)
+        if input.testcases:
+            print(f"🧪 Test Cases:")
+            for i, tc in enumerate(input.testcases):
+                print(f"  Test {i+1}: {tc}")
+        print("=" * 80)
+        
         # Analyze code complexity
         code_analysis = analyze_code_complexity(input.code)
         
-        # Execute the code
-        outputs = kernel_mgr.execute_code(input.code, is_sandbox)
+        # Execute the code with proper isolation using student_id
+        outputs = kernel_mgr.execute_code_isolated(
+            input.code, 
+            is_sandbox, 
+            input.student_id
+        )
         
         # Add code complexity metrics
         outputs.append({
@@ -257,79 +304,87 @@ async def test_code(input: CodeInput):
         })
         
         if input.testcases:
-            # Setup test environment
-            setup_code = """
-            import unittest
-            import io
-            import sys
-            import json
-
-            # Store student code in a variable for tests to access
-            student_code = '''{}'''
-
-            class TestUserCode(unittest.TestCase):
-                pass
-            """.format(input.code.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"'))
+            # Build complete test code that runs in a single isolated kernel
+            # This ensures all test setup, test methods, and execution happen in the same context
             
-            kernel_mgr.execute_code(setup_code)
+            # Escape the student code properly
+            escaped_code = input.code.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
             
-            # Add test methods
+            # Build test methods dynamically
+            test_methods = []
             for i, tc in enumerate(input.testcases):
                 test_method = f"""
-                def test_{i}(self):
-                    # Execute student code in the test method scope
-                    # This makes all functions and variables available for testing
-                    try:
-                        exec(student_code, globals(), locals())
-                    except Exception as e:
-                        # If student code has errors, we still want to continue with tests
-                        # Any variables/functions defined before the error will still be available
-                        print(f"Student code execution error: {{e}}")
-                    
-                    # Now run the test case with access to the student's functions
-                    {tc}
-                TestUserCode.test_{i} = test_{i}
-                """
-                kernel_mgr.execute_code(test_method)
+    def test_{i}(self):
+        # The test case can access student_code directly
+        # student_code contains the raw code as a string for string-based assertions
+        {tc}"""
+                test_methods.append(test_method)
             
-            # Run tests with combined JSON output
-            run_code = """
-            # Run tests
-            stream = io.StringIO()
-            runner = unittest.TextTestRunner(stream=stream)
-            result = runner.run(unittest.makeSuite(TestUserCode))
+            # Combine all test code into a single execution block
+            complete_test_code = f"""
+import unittest
+import io
+import sys
+import json
 
-            # Combine test stats and results
-            test_output = stream.getvalue()
-            combined_results = {
-                "stats": {
-                    "type": "test_stats",
-                    "total_tests": result.testsRun,
-                    "success": result.testsRun - len(result.failures) - len(result.errors),
-                    "fail": len(result.failures) + len(result.errors)
-                },
-                "results": {
-                    "type": "test_result",
-                    "status": "passed" if result.wasSuccessful() else "failed",
-                    "content": test_output
-                }
-            }
+# Store student code in a variable for tests to access
+student_code = '''{escaped_code}'''
 
-            # Print as single JSON string
-            print("TEST_OUTPUT:" + json.dumps(combined_results))
-            """
-            test_outputs = kernel_mgr.execute_code(run_code)
+class TestUserCode(unittest.TestCase):
+{''.join(test_methods)}
+
+# Run tests
+stream = io.StringIO()
+runner = unittest.TextTestRunner(stream=stream)
+result = runner.run(unittest.makeSuite(TestUserCode))
+
+# Combine test stats and results
+test_output = stream.getvalue()
+combined_results = {{
+    "stats": {{
+        "type": "test_stats", 
+        "total_tests": result.testsRun,
+        "success": result.testsRun - len(result.failures) - len(result.errors),
+        "fail": len(result.failures) + len(result.errors)
+    }},
+    "results": {{
+        "type": "test_result",
+        "status": "passed" if result.wasSuccessful() else "failed",
+        "content": test_output
+    }}
+}}
+
+# Print as single JSON string
+print("TEST_OUTPUT:" + json.dumps(combined_results))
+"""
+            
+            # Execute all test code in a single isolated kernel
+            test_outputs = kernel_mgr.execute_code_isolated(complete_test_code, is_sandbox, input.student_id)
             
             # Process outputs
+            test_stats = None
             for output in test_outputs:
                 if output['type'] == 'text' and output['content'].startswith('TEST_OUTPUT:'):
                     results = json.loads(output['content'][12:])  # Skip "TEST_OUTPUT:"
+                    test_stats = results['stats']
                     outputs.append(results['stats'])
                     outputs.append(results['results'])
+            
+            # Log test results
+            if test_stats:
+                print(f"✅ TEST RESULTS - Student {input.student_id or 'unknown'}: "
+                      f"{test_stats.get('success', 0)}/{test_stats.get('total_tests', 0)} passed")
+        
+        # Log final response summary
+        error_count = sum(1 for output in outputs if output.get('type') == 'error')
+        text_count = sum(1 for output in outputs if output.get('type') == 'text')
+        print(f"📤 RESPONSE - Student {input.student_id or 'unknown'}: "
+              f"{len(outputs)} outputs, {text_count} text, {error_count} errors")
         
         return outputs
         
     except Exception as e:
+        print(f"❌ ERROR - Student {input.student_id or 'unknown'}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/classify", response_model=ClassificationResponse)
@@ -1164,7 +1219,7 @@ print("TEST_OUTPUT:", stream.getvalue())
 """
 
     # Execute the test code
-    outputs = kernel_mgr.execute_code(test_code)
+    outputs = kernel_mgr.execute_code_isolated(test_code, False, None)
 
     # Process the test results
     test_results = []
