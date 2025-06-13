@@ -46,17 +46,24 @@ import {
     ArrowLeft,
     ArrowRight,
     Check,
+    ChevronDown,
     Clock,
     Columns2,
     Columns3,
     FileQuestion,
+    FileText,
+    GripVertical,
     Loader2,
     Lock,
     Redo2,
     RotateCcw,
+    X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Draggable from 'react-draggable';
 import ReactMarkdown from 'react-markdown';
+import { Resizable } from 'react-resizable';
+import 'react-resizable/css/styles.css';
 import { toast } from 'sonner';
 
 interface TrackingInfo {
@@ -145,6 +152,44 @@ export default function Workspace({
     const [failedCompilationCount, setFailedCompilationCount] = useState(0);
     const [revealedTestCases, setRevealedTestCases] = useState<Set<number>>(new Set());
     const [newlyRevealedTestCases, setNewlyRevealedTestCases] = useState<Set<number>>(new Set());
+
+    // Floating material preview state
+    const [materialPreviewOpen, setMaterialPreviewOpen] = useState(false);
+    const [stickyMaterialVisible, setStickyMaterialVisible] = useLocalStorage(
+        'material-panel-visible',
+        true,
+    );
+    const [isScrolling, setIsScrolling] = useState(false);
+    const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
+    const [lastScrollY, setLastScrollY] = useState(0);
+    const [scrollSpeed, setScrollSpeed] = useState(0);
+    const [dragOffset, setDragOffset] = useState(0);
+
+    // Resizable panel state
+    const [panelWidth, setPanelWidth] = useLocalStorage('material-panel-width', 320); // Default 320px (w-80)
+    const [panelHeight, setPanelHeight] = useLocalStorage('material-panel-height', 384); // Default 384px (max-h-96)
+
+    // Helper function to calculate left-side vertical center position
+    const getCenterPosition = () => {
+        if (typeof window === 'undefined') {
+            return { x: 16, y: 0 }; // Fallback for SSR
+        }
+        const leftX = 16; // Keep on left side (16px from edge)
+        const centerY = Math.max(0, (window.innerHeight - panelHeight) / 2 - 100); // Vertically centered with header offset
+        return { x: leftX, y: centerY };
+    };
+
+    // Draggable panel position state
+    const [panelPosition, setPanelPosition] = useLocalStorage('material-panel-position', {
+        x: 16,
+        y: 0,
+    });
+    const draggableRef = useRef<HTMLDivElement>(null);
+
+    // Reset panel position to left side, vertically centered
+    const resetPanelPosition = () => {
+        setPanelPosition(getCenterPosition());
+    };
 
     // Configuration for progressive revelation
     const FAILED_ATTEMPTS_THRESHOLD = progressiveRevelationConfig.failed_attempts_threshold;
@@ -546,8 +591,285 @@ export default function Workspace({
         return () => clearInterval(countdownTimer);
     }, [isWorkspaceLocked, workspaceUnlockAt]);
 
+    // Scroll detection for floating material dragged effect
+    useEffect(() => {
+        let scrollTimer: NodeJS.Timeout;
+        let lastScrollTime = Date.now();
+        let animationFrame: number;
+
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            const currentTime = Date.now();
+            const timeDiff = currentTime - lastScrollTime;
+            const scrollDiff = currentScrollY - lastScrollY;
+
+            // Calculate scroll speed (pixels per millisecond)
+            const speed = timeDiff > 0 ? Math.abs(scrollDiff) / timeDiff : 0;
+            setScrollSpeed(speed);
+
+            // Determine scroll direction
+            if (currentScrollY > lastScrollY) {
+                setScrollDirection('down');
+            } else if (currentScrollY < lastScrollY) {
+                setScrollDirection('up');
+            }
+
+            // Calculate drag offset based on scroll velocity and direction
+            const maxOffset = 15; // Maximum pixels to move
+            const dampening = 0.8; // Reduces the effect slightly
+            const rawOffset = Math.min(maxOffset, Math.abs(scrollDiff) * dampening);
+            const offset = scrollDirection === 'down' ? rawOffset : -rawOffset;
+
+            setDragOffset(offset);
+            setLastScrollY(currentScrollY);
+            setIsScrolling(true);
+            lastScrollTime = currentTime;
+
+            // Clear existing timer
+            clearTimeout(scrollTimer);
+
+            // Set timer to stop scrolling state and return to center
+            scrollTimer = setTimeout(() => {
+                setIsScrolling(false);
+                setScrollSpeed(0);
+
+                // Smoothly return to center position
+                let currentOffset = offset;
+                const returnToCenter = () => {
+                    currentOffset *= 0.85; // Ease back to center
+                    setDragOffset(currentOffset);
+
+                    if (Math.abs(currentOffset) > 0.5) {
+                        animationFrame = requestAnimationFrame(returnToCenter);
+                    } else {
+                        setDragOffset(0);
+                    }
+                };
+                returnToCenter();
+            }, 150);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            clearTimeout(scrollTimer);
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+        };
+    }, [lastScrollY, scrollDirection]);
+
     return (
         <AuthenticatedLayout title={question.data.title} padding={false}>
+            {/* Custom CSS for dragged effect and resize cursor */}
+            <style>
+                {`
+                @keyframes fadeSlideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-50%) translateX(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(-50%) translateX(0px);
+                    }
+                }
+                
+                .dragged-glow {
+                    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+                }
+                
+                .material-enter {
+                    animation: fadeSlideIn 0.5s ease-out;
+                }
+                `}
+            </style>
+
+            {/* Sticky Floating Material Preview */}
+            {(material.data.description ||
+                (material.data.file_url &&
+                    material.data.file_extension?.toLowerCase() === 'pdf')) &&
+                stickyMaterialVisible && (
+                    <Draggable
+                        position={panelPosition}
+                        onDrag={(e, data) => {
+                            setPanelPosition({ x: data.x, y: data.y });
+                        }}
+                        nodeRef={draggableRef}
+                        handle='.drag-header'
+                        bounds='body'
+                    >
+                        <div
+                            style={{
+                                transform: `translateY(calc(-50% + ${dragOffset}px))`,
+                                transition: isScrolling ? 'none' : 'transform 0.3s ease-out',
+                            }}
+                            ref={draggableRef}
+                            className={`material-enter fixed top-1/2 z-40 hidden transition-all duration-300 lg:block`}
+                        >
+                            <Resizable
+                                width={panelWidth}
+                                resizeHandles={['se']}
+                                onResize={(e, { size }) => {
+                                    setPanelWidth(size.width);
+                                    setPanelHeight(size.height);
+                                }}
+                                minConstraints={[280, 200]}
+                                maxConstraints={[600, 800]}
+                                height={panelHeight}
+                            >
+                                <div className='group relative'>
+                                    {/* Material Preview Card */}
+                                    <div
+                                        style={{
+                                            width: `${panelWidth}px`,
+                                            height: `${panelHeight}px`,
+                                        }}
+                                        className={`transform overflow-hidden rounded-lg border bg-background shadow-lg transition-all duration-300 group-hover:scale-105 ${
+                                            isScrolling ? 'dragged-glow' : ''
+                                        }`}
+                                    >
+                                        {/* Header */}
+                                        <div className='drag-header flex cursor-move items-center justify-between border-b bg-muted/30 px-4 py-3 transition-colors hover:bg-muted/40'>
+                                            <div className='flex items-center gap-2'>
+                                                {/* Drag Handle Visual Indicator */}
+                                                <div
+                                                    title={t(
+                                                        'pages.student_questions.workspace.drag_panel',
+                                                        { defaultValue: 'Drag to move panel' },
+                                                    )}
+                                                    className='rounded p-1 transition-colors'
+                                                >
+                                                    <GripVertical className='h-4 w-4 text-muted-foreground transition-colors' />
+                                                </div>
+                                                <FileText
+                                                    className={`h-4 w-4 text-primary transition-colors duration-300 ${
+                                                        isScrolling ? 'text-blue-500' : ''
+                                                    }`}
+                                                />
+                                                <h3 className='truncate text-sm font-medium'>
+                                                    {material.data.title}
+                                                </h3>
+                                            </div>
+                                            <Button
+                                                variant='ghost'
+                                                size='sm'
+                                                onClick={() => setStickyMaterialVisible(false)}
+                                                className='h-6 w-6 p-0 opacity-70 hover:opacity-100'
+                                            >
+                                                <X className='h-3 w-3' />
+                                                <span className='sr-only'>
+                                                    {t('pages.student_questions.workspace.close', {
+                                                        defaultValue: 'Close',
+                                                    })}
+                                                </span>
+                                            </Button>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div
+                                            style={{ height: `${panelHeight - 60}px` }} // Subtract header height
+                                            className='space-y-3 overflow-auto p-4'
+                                        >
+                                            {/* Learning Material Description */}
+                                            {material.data.description && (
+                                                <div className='rounded-md bg-muted/20 p-3'>
+                                                    <h4 className='mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+                                                        {t(
+                                                            'pages.student_questions.workspace.description',
+                                                            { defaultValue: 'Description' },
+                                                        )}
+                                                    </h4>
+                                                    <div className='prose prose-sm max-w-none text-sm'>
+                                                        <ReactMarkdown>
+                                                            {material.data.description}
+                                                        </ReactMarkdown>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* PDF Material Section */}
+                                            {material.data.file_url &&
+                                                material.data.file_extension?.toLowerCase() ===
+                                                    'pdf' && (
+                                                    <div className='overflow-hidden rounded-md border bg-background'>
+                                                        <PDFViewer
+                                                            title='-'
+                                                            fileUrl={material.data.file_url}
+                                                            filename={
+                                                                material.data.file ||
+                                                                material.data.title
+                                                            }
+                                                            className='h-full'
+                                                        />
+                                                    </div>
+                                                )}
+                                        </div>
+
+                                        {/* Expand Button */}
+                                        <div className='border-t bg-muted/10 px-4 py-2'>
+                                            <Button
+                                                variant='ghost'
+                                                size='sm'
+                                                onClick={() => setMaterialPreviewOpen(true)}
+                                                className='w-full justify-center text-xs'
+                                            >
+                                                {t(
+                                                    'pages.student_questions.workspace.expand_material',
+                                                    { defaultValue: 'Expand Material' },
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Resizable>
+
+                            {/* Drag indicator with direction arrow */}
+                            {isScrolling && (
+                                <div className='absolute -right-3 top-1/2 flex -translate-y-1/2 transform flex-col items-center'>
+                                    <div
+                                        className={`w-1 animate-pulse rounded-full shadow-lg transition-all duration-200 ${
+                                            scrollSpeed > 0.5
+                                                ? 'h-12 bg-gradient-to-b from-primary to-primary/60'
+                                                : 'h-8 bg-gradient-to-b from-primary to-primary/80'
+                                        }`}
+                                    />
+                                    <div
+                                        className={`mt-1 transform text-primary transition-transform duration-200 ${
+                                            scrollDirection === 'up' ? 'rotate-180' : ''
+                                        }`}
+                                    >
+                                        <ChevronDown className='h-3 w-3' />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Quick restore button when material is hidden */}
+                            {!stickyMaterialVisible && (
+                                <div className='absolute -left-16 top-4'>
+                                    <Button
+                                        title={t(
+                                            'pages.student_questions.workspace.show_material',
+                                            {
+                                                defaultValue: 'Show Material',
+                                            },
+                                        )}
+                                        size='sm'
+                                        onClick={() => {
+                                            resetPanelPosition();
+                                            setStickyMaterialVisible(true);
+                                        }}
+                                        className='h-10 w-10 animate-pulse rounded-full p-0 shadow-lg transition-all duration-300 hover:shadow-xl'
+                                    >
+                                        <FileText className='h-4 w-4' />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </Draggable>
+                )}
+
             <div className='flex min-h-screen flex-col'>
                 {/* Header with navigation */}
                 <div className='sticky top-0 z-[1] border-b bg-background'>
@@ -616,6 +938,23 @@ export default function Workspace({
                             >
                                 {layoutMode === 'stacked' ? <Columns2 /> : <Columns3 />}
                             </Button>
+
+                            {/* Material Preview Button - Mobile (opens dialog) */}
+                            {(material.data.description ||
+                                (material.data.file_url &&
+                                    material.data.file_extension?.toLowerCase() === 'pdf')) && (
+                                <Button
+                                    variant='outline'
+                                    title={t('pages.student_questions.workspace.view_material', {
+                                        defaultValue: 'View Material',
+                                    })}
+                                    size='sm'
+                                    onClick={() => setMaterialPreviewOpen(true)}
+                                    className='lg:hidden'
+                                >
+                                    <FileText className='h-4 w-4' />
+                                </Button>
+                            )}
 
                             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                                 <SheetTrigger asChild>
@@ -734,36 +1073,6 @@ export default function Workspace({
                                                                   'pages.student_questions.workspace.progressive_revelation.all_revealed',
                                                               )}
                                                     </p>
-                                                </div>
-                                            )}
-
-                                        {/* Learning Material Section - Mobile */}
-                                        {material.data.description && (
-                                            <div className='mt-6 border-t pt-4'>
-                                                <div className='rounded-md border bg-muted/20 p-4'>
-                                                    <ReactMarkdown>
-                                                        {material.data.description}
-                                                    </ReactMarkdown>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* PDF Material Section - Mobile */}
-                                        {material.data.file_url &&
-                                            material.data.file_extension?.toLowerCase() ===
-                                                'pdf' && (
-                                                <div className='mt-6 border-t pt-4'>
-                                                    <div className='rounded-md border bg-background'>
-                                                        <PDFViewer
-                                                            title='-'
-                                                            fileUrl={material.data.file_url}
-                                                            filename={
-                                                                material.data.file ||
-                                                                material.data.title
-                                                            }
-                                                            className='min-h-80'
-                                                        />
-                                                    </div>
                                                 </div>
                                             )}
                                     </div>
@@ -902,6 +1211,56 @@ export default function Workspace({
                         <ResizablePanel minSize={20} defaultSize={25} className='overflow-hidden'>
                             <div className='flex h-full flex-col overflow-y-auto border-r'>
                                 <div className='flex flex-col gap-4 p-4'>
+                                    {/* Material Preview Button - Desktop */}
+                                    {(material.data.description ||
+                                        (material.data.file_url &&
+                                            material.data.file_extension?.toLowerCase() ===
+                                                'pdf')) && (
+                                        <Button
+                                            variant={stickyMaterialVisible ? 'default' : 'outline'}
+                                            title={
+                                                stickyMaterialVisible
+                                                    ? t(
+                                                          'pages.student_questions.workspace.hide_material',
+                                                          {
+                                                              defaultValue: 'Hide Material',
+                                                          },
+                                                      )
+                                                    : t(
+                                                          'pages.student_questions.workspace.show_material',
+                                                          {
+                                                              defaultValue: 'Show Material',
+                                                          },
+                                                      )
+                                            }
+                                            size='sm'
+                                            onClick={() => {
+                                                if (!stickyMaterialVisible) {
+                                                    // Reset position when showing the material panel
+                                                    resetPanelPosition();
+                                                }
+                                                setStickyMaterialVisible(!stickyMaterialVisible);
+                                            }}
+                                            className='hidden w-fit lg:flex'
+                                        >
+                                            <FileText className='h-4 w-4' />
+                                            <span className='ml-1'>
+                                                {stickyMaterialVisible
+                                                    ? t(
+                                                          'pages.student_questions.workspace.hide_material',
+                                                          {
+                                                              defaultValue: 'Hide',
+                                                          },
+                                                      )
+                                                    : t(
+                                                          'pages.student_questions.workspace.show_material',
+                                                          {
+                                                              defaultValue: 'Material',
+                                                          },
+                                                      )}
+                                            </span>
+                                        </Button>
+                                    )}
                                     <ReactMarkdown>{question.data.description}</ReactMarkdown>
 
                                     {question.data.file_url && (
@@ -1014,35 +1373,6 @@ export default function Workspace({
                                                               'pages.student_questions.workspace.progressive_revelation.all_revealed',
                                                           )}
                                                 </p>
-                                            </div>
-                                        )}
-
-                                    {/* Learning Material Section */}
-                                    {material.data.description && (
-                                        <div className='mt-6 border-t pt-4'>
-                                            <div className='rounded-md border bg-muted/20 p-4'>
-                                                <ReactMarkdown>
-                                                    {material.data.description}
-                                                </ReactMarkdown>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* PDF Material Section - Show inline without title and dialog */}
-                                    {material.data.file_url &&
-                                        material.data.file_extension?.toLowerCase() === 'pdf' && (
-                                            <div className='mt-6 border-t pt-4'>
-                                                <div className='rounded-md border bg-background'>
-                                                    <PDFViewer
-                                                        title='-'
-                                                        fileUrl={material.data.file_url}
-                                                        filename={
-                                                            material.data.file ||
-                                                            material.data.title
-                                                        }
-                                                        className='min-h-96'
-                                                    />
-                                                </div>
                                             </div>
                                         )}
 
@@ -1535,74 +1865,118 @@ export default function Workspace({
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Mark as Done Dialog */}
-            <Dialog open={markAsDoneDialogOpen} onOpenChange={setMarkAsDoneDialogOpen}>
-                <DialogContent className='sm:max-w-md'>
-                    <DialogHeader>
-                        <DialogTitle className='flex items-center gap-2'>
-                            <Check className='h-5 w-5 text-green-600' />
-                            {t('pages.student_questions.workspace.mark_as_done.dialog.title')}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {t('pages.student_questions.workspace.mark_as_done.dialog.description')}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className='mt-3 space-y-4'>
-                        <Alert>
-                            <AlertCircle />
-                            <AlertTitle>
-                                {t(
-                                    'pages.student_questions.workspace.mark_as_done.dialog.warning_title',
+                {/* Floating Material Preview Dialog */}
+                <Dialog open={materialPreviewOpen} onOpenChange={setMaterialPreviewOpen}>
+                    <DialogContent className='max-h-[90vh] max-w-[90vw] overflow-hidden'>
+                        <DialogHeader>
+                            <DialogTitle className='flex items-center gap-2'>
+                                <FileText className='h-5 w-5' />
+                                {material.data.title}
+                            </DialogTitle>
+                            <DialogDescription></DialogDescription>
+                        </DialogHeader>
+
+                        <div className='flex flex-col gap-4 overflow-auto'>
+                            {/* Learning Material Description */}
+                            {material.data.description && (
+                                <div className='rounded-md border bg-muted/20 p-4'>
+                                    <h3 className='mb-2 text-sm font-medium'>
+                                        {t('pages.student_questions.workspace.description', {
+                                            defaultValue: 'Description',
+                                        })}
+                                    </h3>
+                                    <ReactMarkdown>{material.data.description}</ReactMarkdown>
+                                </div>
+                            )}
+
+                            {/* PDF Material Section */}
+                            {material.data.file_url &&
+                                material.data.file_extension?.toLowerCase() === 'pdf' && (
+                                    <div className='my-3 rounded-md border bg-background'>
+                                        <PDFViewer
+                                            title='-'
+                                            fileUrl={material.data.file_url}
+                                            filename={material.data.file || material.data.title}
+                                            className='max-h-[60vh] min-h-96'
+                                        />
+                                    </div>
                                 )}
-                            </AlertTitle>
-                            <AlertDescription>
-                                {t(
-                                    'pages.student_questions.workspace.mark_as_done.dialog.warning_description',
-                                )}
-                            </AlertDescription>
-                        </Alert>
-                        <div className='flex justify-end gap-3'>
-                            <Button
-                                variant='outline'
-                                onClick={() => {
-                                    setMarkAsDoneDialogOpen(false);
-                                    // Clear pending navigation if exists
-                                    delete (window as any).pendingNavigationQuestionId;
-                                }}
-                                disabled={markAsDoneMutation.isPending}
-                            >
-                                {t('pages.student_questions.workspace.mark_as_done.dialog.cancel')}
-                            </Button>
-                            <Button
-                                variant='outline'
-                                onClick={proceedWithNavigation}
-                                disabled={markAsDoneMutation.isPending}
-                                className='border-blue-500 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950'
-                            >
-                                {t(
-                                    'pages.student_questions.workspace.mark_as_done.dialog.continue',
-                                )}
-                            </Button>
-                            <Button
-                                onClick={handleMarkAsDone}
-                                disabled={markAsDoneMutation.isPending}
-                                className='bg-green-600 hover:bg-green-700'
-                            >
-                                {markAsDoneMutation.isPending ? (
-                                    <Loader2 className='mr-2 animate-spin' />
-                                ) : (
-                                    <Check className='mr-2' />
-                                )}
-                                {t(
-                                    'pages.student_questions.workspace.mark_as_done.dialog.mark_done',
-                                )}
-                            </Button>
                         </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Mark as Done Dialog */}
+                <Dialog open={markAsDoneDialogOpen} onOpenChange={setMarkAsDoneDialogOpen}>
+                    <DialogContent className='sm:max-w-md'>
+                        <DialogHeader>
+                            <DialogTitle className='flex items-center gap-2'>
+                                <Check className='h-5 w-5 text-green-600' />
+                                {t('pages.student_questions.workspace.mark_as_done.dialog.title')}
+                            </DialogTitle>
+                            <DialogDescription>
+                                {t(
+                                    'pages.student_questions.workspace.mark_as_done.dialog.description',
+                                )}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className='mt-3 space-y-4'>
+                            <Alert>
+                                <AlertCircle />
+                                <AlertTitle>
+                                    {t(
+                                        'pages.student_questions.workspace.mark_as_done.dialog.warning_title',
+                                    )}
+                                </AlertTitle>
+                                <AlertDescription>
+                                    {t(
+                                        'pages.student_questions.workspace.mark_as_done.dialog.warning_description',
+                                    )}
+                                </AlertDescription>
+                            </Alert>
+                            <div className='flex justify-end gap-3'>
+                                <Button
+                                    variant='outline'
+                                    onClick={() => {
+                                        setMarkAsDoneDialogOpen(false);
+                                        // Clear pending navigation if exists
+                                        delete (window as any).pendingNavigationQuestionId;
+                                    }}
+                                    disabled={markAsDoneMutation.isPending}
+                                >
+                                    {t(
+                                        'pages.student_questions.workspace.mark_as_done.dialog.cancel',
+                                    )}
+                                </Button>
+                                <Button
+                                    variant='outline'
+                                    onClick={proceedWithNavigation}
+                                    disabled={markAsDoneMutation.isPending}
+                                    className='border-blue-500 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950'
+                                >
+                                    {t(
+                                        'pages.student_questions.workspace.mark_as_done.dialog.continue',
+                                    )}
+                                </Button>
+                                <Button
+                                    onClick={handleMarkAsDone}
+                                    disabled={markAsDoneMutation.isPending}
+                                    className='bg-green-600 hover:bg-green-700'
+                                >
+                                    {markAsDoneMutation.isPending ? (
+                                        <Loader2 className='mr-2 animate-spin' />
+                                    ) : (
+                                        <Check className='mr-2' />
+                                    )}
+                                    {t(
+                                        'pages.student_questions.workspace.mark_as_done.dialog.mark_done',
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            </div>
         </AuthenticatedLayout>
     );
 }
