@@ -130,7 +130,7 @@ services:
       - PMA_PORT=${DB_PORT}
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
     ports:
-      - "8000:80"
+      - "127.0.0.1:8000:80"  # Bind only to localhost for security
     networks:
       - app-network
     depends_on:
