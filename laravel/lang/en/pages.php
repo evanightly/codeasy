@@ -710,7 +710,7 @@ return [
             'export' => [
                 'title' => 'Export Classifications',
                 'description' => 'Select the course to export classifications',
-            ]
+            ],
         ],
         'messages' => [
             'no_material_classifications' => 'No material classifications found for this course',
