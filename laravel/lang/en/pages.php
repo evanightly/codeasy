@@ -23,6 +23,9 @@ return [
     'auth' => [
         'login' => [
             'title' => 'Welcome Back',
+            'subtitle' => 'Master Data Science with AI-Powered Learning Platform',
+            'description' => 'Experience personalized learning with Bloom\'s Taxonomy',
+            'hero_title' => 'Codeasy',
             'fields' => [
                 'identifier' => 'Email or Username',
                 'password' => 'Password',
@@ -41,9 +44,29 @@ return [
                 'success' => 'Successfully logged in!',
                 'error' => 'Invalid credentials',
             ],
+            'features' => [
+                'ai_assessment' => 'AI-Powered Cognitive Assessment',
+                'personalized_learning' => 'Adaptive Learning Paths',
+                'real_world_projects' => 'Real-world Data Science Projects',
+            ],
+            'placeholders' => [
+                'identifier' => 'Enter your email or username',
+                'password' => 'Enter your password',
+            ],
+            'ui' => [
+                'welcome_back_header' => 'Welcome Back',
+                'continue_journey' => 'Continue your learning journey',
+                'verifying_credentials' => 'Please wait while we verify your credentials...',
+                'toggle_dark_mode' => 'Toggle dark mode',
+                'switch_to_light' => 'Switch to Light Mode',
+                'switch_to_dark' => 'Switch to Dark Mode',
+            ],
         ],
         'register' => [
             'title' => 'Create an Account',
+            'subtitle' => 'Begin your Data Science journey with personalized learning',
+            'description' => 'Create your account and unlock the power of AI-driven education',
+            'hero_title' => 'Join Codeasy',
             'fields' => [
                 'name' => 'Name',
                 'email' => 'Email',
@@ -63,6 +86,24 @@ return [
                 'pending' => 'Creating your account...',
                 'success' => 'Account created successfully!',
                 'error' => 'There was a problem creating your account',
+            ],
+            'features' => [
+                'intelligent_assessment' => 'Intelligent Assessment & Feedback',
+                'progress_tracking' => 'Progress Tracking & Analytics',
+                'comprehensive_materials' => 'Comprehensive Learning Materials',
+            ],
+            'placeholders' => [
+                'name' => 'Enter your full name',
+                'email' => 'Enter your email address',
+                'password' => 'Create a strong password',
+                'password_confirmation' => 'Confirm your password',
+            ],
+            'ui' => [
+                'get_started' => 'Get Started',
+                'create_account_subtitle' => 'Create your account to start learning',
+                'toggle_dark_mode' => 'Toggle dark mode',
+                'switch_to_light' => 'Switch to Light Mode',
+                'switch_to_dark' => 'Switch to Dark Mode',
             ],
         ],
         'verify_email' => [

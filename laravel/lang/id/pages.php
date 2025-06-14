@@ -23,6 +23,9 @@ return [
     'auth' => [
         'login' => [
             'title' => 'Selamat Datang Kembali',
+            'subtitle' => 'Kuasai Data Science dengan Platform Pembelajaran bertenaga AI',
+            'description' => 'Rasakan pembelajaran yang dipersonalisasi dengan Taksonomi Bloom',
+            'hero_title' => 'Codeasy',
             'fields' => [
                 'identifier' => 'Email atau Nama Pengguna',
                 'password' => 'Kata Sandi',
@@ -41,9 +44,29 @@ return [
                 'success' => 'Berhasil masuk!',
                 'error' => 'Kredensial tidak valid',
             ],
+            'features' => [
+                'ai_assessment' => 'Penilaian Kognitif bertenaga AI',
+                'personalized_learning' => 'Jalur Pembelajaran Adaptif',
+                'real_world_projects' => 'Pengalaman Proyek Dunia Nyata',
+            ],
+            'placeholders' => [
+                'identifier' => 'Masukkan email atau nama pengguna Anda',
+                'password' => 'Masukkan kata sandi Anda',
+            ],
+            'ui' => [
+                'welcome_back_header' => 'Selamat Datang Kembali',
+                'continue_journey' => 'Lanjutkan perjalanan belajar Anda',
+                'verifying_credentials' => 'Mohon tunggu sementara kami memverifikasi kredensial Anda...',
+                'toggle_dark_mode' => 'Alihkan mode gelap',
+                'switch_to_light' => 'Beralih ke Mode Terang',
+                'switch_to_dark' => 'Beralih ke Mode Gelap',
+            ],
         ],
         'register' => [
             'title' => 'Buat Akun',
+            'subtitle' => 'Mulai perjalanan Data Science Anda dengan pembelajaran yang dipersonalisasi',
+            'description' => 'Buat akun Anda dan buka kekuatan pendidikan bertenaga AI',
+            'hero_title' => 'Bergabung dengan Codeasy',
             'fields' => [
                 'name' => 'Nama',
                 'email' => 'Email',
@@ -63,6 +86,24 @@ return [
                 'pending' => 'Membuat akun Anda...',
                 'success' => 'Akun berhasil dibuat!',
                 'error' => 'Terjadi masalah saat membuat akun Anda',
+            ],
+            'features' => [
+                'intelligent_assessment' => 'Penilaian Cerdas & Umpan Balik',
+                'progress_tracking' => 'Pelacakan Kemajuan & Analitik',
+                'comprehensive_materials' => 'Materi Pembelajaran Komprehensif',
+            ],
+            'placeholders' => [
+                'name' => 'Masukkan nama lengkap Anda',
+                'email' => 'Masukkan alamat email Anda',
+                'password' => 'Buat kata sandi yang kuat',
+                'password_confirmation' => 'Konfirmasi kata sandi Anda',
+            ],
+            'ui' => [
+                'get_started' => 'Mulai',
+                'create_account_subtitle' => 'Buat akun Anda untuk mulai belajar',
+                'toggle_dark_mode' => 'Alihkan mode gelap',
+                'switch_to_light' => 'Beralih ke Mode Terang',
+                'switch_to_dark' => 'Beralih ke Mode Gelap',
             ],
         ],
         'verify_email' => [

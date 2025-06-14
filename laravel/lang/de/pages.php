@@ -23,6 +23,9 @@ return [
     'auth' => [
         'login' => [
             'title' => 'Willkommen zurück',
+            'subtitle' => 'Meistern Sie Data Science mit KI-gestützter Lernplattform',
+            'description' => 'Erleben Sie personalisiertes Lernen mit Bloom\'s Taxonomie',
+            'hero_title' => 'Codeasy',
             'fields' => [
                 'identifier' => 'E-Mail oder Benutzername',
                 'password' => 'Passwort',
@@ -37,13 +40,33 @@ return [
                 'dont_have_account' => 'Noch kein Konto?',
             ],
             'messages' => [
-                'authenticating' => 'Authentifizierung läuft...',
+                'authenticating' => 'Authentifizierung...',
                 'success' => 'Erfolgreich angemeldet!',
                 'error' => 'Ungültige Anmeldedaten',
+            ],
+            'features' => [
+                'ai_assessment' => 'KI-gestützte kognitive Bewertung',
+                'personalized_learning' => 'Adaptive Lernpfade',
+                'real_world_projects' => 'Praktische Projekte',
+            ],
+            'placeholders' => [
+                'identifier' => 'Geben Sie Ihre E-Mail oder Ihren Benutzernamen ein',
+                'password' => 'Geben Sie Ihr Passwort ein',
+            ],
+            'ui' => [
+                'welcome_back_header' => 'Willkommen zurück',
+                'continue_journey' => 'Setzen Sie Ihre Lernreise fort',
+                'verifying_credentials' => 'Bitte warten Sie, während wir Ihre Anmeldedaten überprüfen...',
+                'toggle_dark_mode' => 'Dunklen Modus umschalten',
+                'switch_to_light' => 'Zum hellen Modus wechseln',
+                'switch_to_dark' => 'Zum dunklen Modus wechseln',
             ],
         ],
         'register' => [
             'title' => 'Konto erstellen',
+            'subtitle' => 'Beginnen Sie Ihre Data Science-Reise mit personalisiertem Lernen',
+            'description' => 'Erstellen Sie Ihr Konto und entdecken Sie die Kraft der KI-gesteuerten Bildung',
+            'hero_title' => 'Bei Codeasy anmelden',
             'fields' => [
                 'name' => 'Name',
                 'email' => 'E-Mail',
@@ -63,6 +86,24 @@ return [
                 'pending' => 'Konto wird erstellt...',
                 'success' => 'Konto erfolgreich erstellt!',
                 'error' => 'Es gab ein Problem beim Erstellen Ihres Kontos',
+            ],
+            'features' => [
+                'intelligent_assessment' => 'Intelligente Bewertung & Feedback',
+                'progress_tracking' => 'Fortschrittsverfolgung & Analytics',
+                'comprehensive_materials' => 'Umfassende Lernmaterialien',
+            ],
+            'placeholders' => [
+                'name' => 'Geben Sie Ihren vollständigen Namen ein',
+                'email' => 'Geben Sie Ihre E-Mail-Adresse ein',
+                'password' => 'Erstellen Sie ein sicheres Passwort',
+                'password_confirmation' => 'Bestätigen Sie Ihr Passwort',
+            ],
+            'ui' => [
+                'get_started' => 'Loslegen',
+                'create_account_subtitle' => 'Erstellen Sie Ihr Konto, um mit dem Lernen zu beginnen',
+                'toggle_dark_mode' => 'Dunklen Modus umschalten',
+                'switch_to_light' => 'Zum hellen Modus wechseln',
+                'switch_to_dark' => 'Zum dunklen Modus wechseln',
             ],
         ],
         'verify_email' => [
