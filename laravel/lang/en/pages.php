@@ -707,6 +707,10 @@ return [
                 'title' => 'Delete Classification',
                 'description' => 'Are you sure you want to delete this classification? This action cannot be undone.',
             ],
+            'export' => [
+                'title' => 'Export Classifications',
+                'description' => 'Select the course to export classifications',
+            ]
         ],
         'messages' => [
             'no_material_classifications' => 'No material classifications found for this course',

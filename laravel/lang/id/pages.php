@@ -709,6 +709,10 @@ return [
                 'title' => 'Hapus Klasifikasi',
                 'description' => 'Apakah Anda yakin ingin menghapus klasifikasi ini? Tindakan ini tidak dapat dibatalkan.',
             ],
+            'export' => [
+                'title' => 'Ekspor Klasifikasi',
+                'description' => 'Pilih kursus untuk ekspor klasifikasi kognitif',
+            ],
         ],
         'messages' => [
             'no_material_classifications' => 'Tidak ada klasifikasi materi ditemukan untuk kursus ini',

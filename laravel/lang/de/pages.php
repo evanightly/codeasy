@@ -695,6 +695,10 @@ return [
                 'title' => 'Klassifikation löschen',
                 'description' => 'Sind Sie sicher, dass Sie diese Klassifikation löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
             ],
+            'export' => [
+                'title' => 'Klassifikationen exportieren',
+                'description' => 'Wählen Sie die Klassifikationen aus, die Sie exportieren möchten. Sie können alle oder nur bestimmte Klassifikationen auswählen.',
+            ],
         ],
         'messages' => [
             'no_material_classifications' => 'Keine Materialklassifikationen für diesen Kurs gefunden',

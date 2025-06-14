@@ -148,7 +148,7 @@ export default function Index() {
                                         <DialogFooter>
                                             <Button type='submit'>
                                                 {t(
-                                                    'pages.student_course_cognitive_classification.buttons.generate',
+                                                    'pages.student_course_cognitive_classification.buttons.export_excel',
                                                 )}
                                             </Button>
                                         </DialogFooter>
