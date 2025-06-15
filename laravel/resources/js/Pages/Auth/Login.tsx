@@ -1,3 +1,4 @@
+import { Alert } from '@/Components/UI/alert';
 import AnimatedGradientText from '@/Components/UI/animated-gradient-text';
 import { AnimatedGridPattern } from '@/Components/UI/animated-grid-pattern';
 import { Button } from '@/Components/UI/button';
@@ -13,7 +14,6 @@ import {
 import { Input } from '@/Components/UI/input';
 import { NeonGradientCard } from '@/Components/UI/neon-gradient-card';
 import { Ripple } from '@/Components/UI/ripple';
-import { ShineBorder } from '@/Components/UI/shine-border';
 import SparklesText from '@/Components/UI/sparkles-text';
 import { TextAnimate } from '@/Components/UI/text-animate';
 import { useDarkMode } from '@/Contexts/ThemeContext';
@@ -308,14 +308,15 @@ export default function Login({
 
                                 {/* Status Message */}
                                 {status && (
-                                    <ShineBorder
+                                    <Alert
+                                        variant='default'
                                         color='#10B981'
-                                        className='border-green-400 bg-green-500/20 p-3'
+                                        className='border-green-400 bg-green-500/20'
                                     >
                                         <p className='text-center text-sm text-green-300'>
                                             {status}
                                         </p>
-                                    </ShineBorder>
+                                    </Alert>
                                 )}
 
                                 {/* Login Form */}
@@ -407,21 +408,36 @@ export default function Login({
 
                                                         <FormField
                                                             render={({ field }) => (
-                                                                <FormItem className='flex items-center space-x-2 space-y-0'>
-                                                                    <FormControl>
-                                                                        <Checkbox
-                                                                            onCheckedChange={
-                                                                                field.onChange
-                                                                            }
-                                                                            className='border-foreground/50 data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600'
-                                                                            checked={field.value}
-                                                                        />
-                                                                    </FormControl>
-                                                                    <FormLabel className='cursor-pointer text-sm font-normal text-foreground/50'>
-                                                                        {t(
-                                                                            'pages.auth.login.fields.remember',
+                                                                <FormItem className='flex items-center justify-between space-x-2 space-y-0'>
+                                                                    <div className='flex items-center justify-between space-x-2 space-y-0'>
+                                                                        <FormControl>
+                                                                            <Checkbox
+                                                                                onCheckedChange={
+                                                                                    field.onChange
+                                                                                }
+                                                                                className='border-foreground/50 data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600'
+                                                                                checked={
+                                                                                    field.value
+                                                                                }
+                                                                            />
+                                                                        </FormControl>
+                                                                        <FormLabel className='cursor-pointer text-sm font-normal text-foreground/50'>
+                                                                            {t(
+                                                                                'pages.auth.login.fields.remember',
+                                                                            )}
+                                                                        </FormLabel>
+                                                                    </div>
+
+                                                                    <Link
+                                                                        href={route(
+                                                                            'password.request',
                                                                         )}
-                                                                    </FormLabel>
+                                                                        className='text-sm text-blue-300 transition-colors hover:text-blue-200'
+                                                                    >
+                                                                        {t(
+                                                                            'pages.auth.login.buttons.forgot_password',
+                                                                        )}
+                                                                    </Link>
                                                                 </FormItem>
                                                             )}
                                                             name='remember'

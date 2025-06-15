@@ -54,7 +54,7 @@ return [
                 'password' => 'Masukkan kata sandi Anda',
             ],
             'ui' => [
-                'welcome_back_header' => 'Selamat Datang Kembali',
+                'welcome_back_header' => 'Masuk',
                 'continue_journey' => 'Lanjutkan perjalanan belajar Anda',
                 'verifying_credentials' => 'Mohon tunggu sementara kami memverifikasi kredensial Anda...',
                 'toggle_dark_mode' => 'Alihkan mode gelap',
@@ -108,6 +108,75 @@ return [
         ],
         'verify_email' => [
             'resend_button' => 'Kirim Ulang Email Verifikasi',
+        ],
+        'forgot_password' => [
+            'title' => 'Lupa Kata Sandi',
+            'subtitle' => 'Reset kata sandi Anda dengan aman dan kembali belajar',
+            'description' => 'Jangan khawatir, kami akan membantu Anda mendapatkan akses ke akun Anda dengan cepat',
+            'hero_title' => 'Reset Kata Sandi',
+            'instruction' => 'Masukkan alamat email Anda dan kami akan mengirimkan tautan reset kata sandi.',
+            'fields' => [
+                'email' => 'Alamat Email',
+            ],
+            'placeholders' => [
+                'email' => 'Masukkan alamat email Anda',
+            ],
+            'buttons' => [
+                'send_reset_link' => 'Kirim Tautan Reset',
+                'sending' => 'Mengirim...',
+                'back_to_login' => 'Kembali ke Login',
+            ],
+            'messages' => [
+                'pending' => 'Mengirim tautan reset kata sandi...',
+                'success' => 'Tautan reset kata sandi telah dikirim ke email Anda!',
+                'error' => 'Gagal mengirim tautan reset. Silakan coba lagi.',
+            ],
+            'features' => [
+                'secure_reset' => 'Proses Reset Kata Sandi Aman',
+                'quick_access' => 'Pemulihan Akses Cepat',
+            ],
+            'ui' => [
+                'switch_to_light' => 'Beralih ke Mode Terang',
+                'switch_to_dark' => 'Beralih ke Mode Gelap',
+                'toggle_dark_mode' => 'Toggle Mode Gelap',
+                'back_to_login' => 'Kembali ke Login',
+            ],
+        ],
+        'reset_password' => [
+            'title' => 'Reset Kata Sandi',
+            'subtitle' => 'Buat kata sandi aman baru untuk akun Anda',
+            'description' => 'Pilih kata sandi yang kuat untuk menjaga kemajuan pembelajaran Anda tetap aman',
+            'hero_title' => 'Kata Sandi Baru',
+            'instruction' => 'Masukkan kata sandi baru Anda di bawah ini untuk menyelesaikan proses reset.',
+            'fields' => [
+                'email' => 'Alamat Email',
+                'password' => 'Kata Sandi Baru',
+                'password_confirmation' => 'Konfirmasi Kata Sandi Baru',
+            ],
+            'placeholders' => [
+                'password' => 'Masukkan kata sandi baru Anda',
+                'password_confirmation' => 'Konfirmasi kata sandi baru Anda',
+            ],
+            'buttons' => [
+                'reset_password' => 'Reset Kata Sandi',
+                'resetting' => 'Mereset...',
+                'back_to_login' => 'Kembali ke Login',
+            ],
+            'messages' => [
+                'pending' => 'Mereset kata sandi Anda...',
+                'success' => 'Kata sandi berhasil direset! Anda sekarang dapat login.',
+                'error' => 'Gagal mereset kata sandi. Silakan coba lagi.',
+            ],
+            'features' => [
+                'secure_process' => 'Proses Reset Aman',
+                'strong_password' => 'Perlindungan Kata Sandi Kuat',
+            ],
+            'ui' => [
+                'switch_to_light' => 'Beralih ke Mode Terang',
+                'switch_to_dark' => 'Beralih ke Mode Gelap',
+                'toggle_dark_mode' => 'Toggle Mode Gelap',
+                'back_to_login' => 'Kembali ke Login',
+            ],
         ],
     ],
     'user' => [

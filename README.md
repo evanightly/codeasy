@@ -108,7 +108,23 @@ Langkah-langkah dasar untuk memulai pengembangan lokal:
 
     Endpoint default: http://localhost:8001
 
-6. **Akses Aplikasi**
+6. **Email Development dengan MailHog**
+
+    Platform ini menggunakan MailHog untuk debugging email di **development environment saja**:
+
+    ```bash
+    # MailHog akan otomatis tersedia di: http://localhost:8025
+    # Semua email yang dikirim aplikasi akan muncul di MailHog interface
+    ```
+
+    ⚠️ **Penting**: MailHog hanya untuk development! Di production, gunakan layanan email seperti SendGrid, SES, atau Mailgun.
+
+    Untuk menggunakan password reset dan fitur email lainnya:
+    - Pastikan MailHog service berjalan: `docker-compose ps mailhog`
+    - Buka http://localhost:8025 untuk melihat email yang dikirim
+    - Email tidak akan dikirim ke email sesungguhnya, hanya tampil di MailHog
+
+7. **Akses Aplikasi**
 
     Laravel + Inertia di http://localhost:9001 (menyesuaikan mapping di docker-compose.yml).
 

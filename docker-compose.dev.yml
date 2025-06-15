@@ -139,6 +139,15 @@ services:
       mariadb:
         condition: service_healthy
 
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: codeasy_mailhog
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge

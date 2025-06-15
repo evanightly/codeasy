@@ -54,7 +54,7 @@ return [
                 'password' => 'Enter your password',
             ],
             'ui' => [
-                'welcome_back_header' => 'Welcome Back',
+                'welcome_back_header' => 'Sign in',
                 'continue_journey' => 'Continue your learning journey',
                 'verifying_credentials' => 'Please wait while we verify your credentials...',
                 'toggle_dark_mode' => 'Toggle dark mode',
@@ -108,6 +108,75 @@ return [
         ],
         'verify_email' => [
             'resend_button' => 'Resend Verification Email',
+        ],
+        'forgot_password' => [
+            'title' => 'Forgot Password',
+            'subtitle' => 'Reset your password securely and get back to learning',
+            'description' => 'Don\'t worry, we\'ll help you regain access to your account quickly',
+            'hero_title' => 'Password Reset',
+            'instruction' => 'Enter your email address and we\'ll send you a password reset link.',
+            'fields' => [
+                'email' => 'Email Address',
+            ],
+            'placeholders' => [
+                'email' => 'Enter your email address',
+            ],
+            'buttons' => [
+                'send_reset_link' => 'Send Reset Link',
+                'sending' => 'Sending...',
+                'back_to_login' => 'Back to Login',
+            ],
+            'messages' => [
+                'pending' => 'Sending password reset link...',
+                'success' => 'Password reset link sent to your email!',
+                'error' => 'Failed to send reset link. Please try again.',
+            ],
+            'features' => [
+                'secure_reset' => 'Secure Password Reset Process',
+                'quick_access' => 'Quick Access Recovery',
+            ],
+            'ui' => [
+                'switch_to_light' => 'Switch to Light Mode',
+                'switch_to_dark' => 'Switch to Dark Mode',
+                'toggle_dark_mode' => 'Toggle Dark Mode',
+                'back_to_login' => 'Back to Login',
+            ],
+        ],
+        'reset_password' => [
+            'title' => 'Reset Password',
+            'subtitle' => 'Create a new secure password for your account',
+            'description' => 'Choose a strong password to keep your learning progress safe',
+            'hero_title' => 'New Password',
+            'instruction' => 'Enter your new password below to complete the reset process.',
+            'fields' => [
+                'email' => 'Email Address',
+                'password' => 'New Password',
+                'password_confirmation' => 'Confirm New Password',
+            ],
+            'placeholders' => [
+                'password' => 'Enter your new password',
+                'password_confirmation' => 'Confirm your new password',
+            ],
+            'buttons' => [
+                'reset_password' => 'Reset Password',
+                'resetting' => 'Resetting...',
+                'back_to_login' => 'Back to Login',
+            ],
+            'messages' => [
+                'pending' => 'Resetting your password...',
+                'success' => 'Password reset successfully! You can now login.',
+                'error' => 'Failed to reset password. Please try again.',
+            ],
+            'features' => [
+                'secure_process' => 'Secure Reset Process',
+                'strong_password' => 'Strong Password Protection',
+            ],
+            'ui' => [
+                'switch_to_light' => 'Switch to Light Mode',
+                'switch_to_dark' => 'Switch to Dark Mode',
+                'toggle_dark_mode' => 'Toggle Dark Mode',
+                'back_to_login' => 'Back to Login',
+            ],
         ],
     ],
     'user' => [

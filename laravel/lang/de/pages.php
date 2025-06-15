@@ -109,6 +109,75 @@ return [
         'verify_email' => [
             'resend_button' => 'Verifizierungs-E-Mail erneut senden',
         ],
+        'forgot_password' => [
+            'title' => 'Passwort vergessen',
+            'subtitle' => 'Setzen Sie Ihr Passwort sicher zurück und kehren Sie zum Lernen zurück',
+            'description' => 'Keine Sorge, wir helfen Ihnen schnell wieder Zugang zu Ihrem Konto zu bekommen',
+            'hero_title' => 'Passwort zurücksetzen',
+            'instruction' => 'Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen des Passworts.',
+            'fields' => [
+                'email' => 'E-Mail-Adresse',
+            ],
+            'placeholders' => [
+                'email' => 'Geben Sie Ihre E-Mail-Adresse ein',
+            ],
+            'buttons' => [
+                'send_reset_link' => 'Reset-Link senden',
+                'sending' => 'Senden...',
+                'back_to_login' => 'Zurück zur Anmeldung',
+            ],
+            'messages' => [
+                'pending' => 'Passwort-Reset-Link wird gesendet...',
+                'success' => 'Passwort-Reset-Link wurde an Ihre E-Mail gesendet!',
+                'error' => 'Fehler beim Senden des Reset-Links. Bitte versuchen Sie es erneut.',
+            ],
+            'features' => [
+                'secure_reset' => 'Sicherer Passwort-Reset-Prozess',
+                'quick_access' => 'Schnelle Zugangswiederherstellung',
+            ],
+            'ui' => [
+                'switch_to_light' => 'Zum hellen Modus wechseln',
+                'switch_to_dark' => 'Zum dunklen Modus wechseln',
+                'toggle_dark_mode' => 'Dunklen Modus umschalten',
+                'back_to_login' => 'Zurück zur Anmeldung',
+            ],
+        ],
+        'reset_password' => [
+            'title' => 'Passwort zurücksetzen',
+            'subtitle' => 'Erstellen Sie ein neues sicheres Passwort für Ihr Konto',
+            'description' => 'Wählen Sie ein starkes Passwort, um Ihren Lernfortschritt sicher zu halten',
+            'hero_title' => 'Neues Passwort',
+            'instruction' => 'Geben Sie Ihr neues Passwort unten ein, um den Reset-Vorgang abzuschließen.',
+            'fields' => [
+                'email' => 'E-Mail-Adresse',
+                'password' => 'Neues Passwort',
+                'password_confirmation' => 'Neues Passwort bestätigen',
+            ],
+            'placeholders' => [
+                'password' => 'Geben Sie Ihr neues Passwort ein',
+                'password_confirmation' => 'Bestätigen Sie Ihr neues Passwort',
+            ],
+            'buttons' => [
+                'reset_password' => 'Passwort zurücksetzen',
+                'resetting' => 'Zurücksetzen...',
+                'back_to_login' => 'Zurück zur Anmeldung',
+            ],
+            'messages' => [
+                'pending' => 'Ihr Passwort wird zurückgesetzt...',
+                'success' => 'Passwort erfolgreich zurückgesetzt! Sie können sich jetzt anmelden.',
+                'error' => 'Fehler beim Zurücksetzen des Passworts. Bitte versuchen Sie es erneut.',
+            ],
+            'features' => [
+                'secure_process' => 'Sicherer Reset-Prozess',
+                'strong_password' => 'Starker Passwortschutz',
+            ],
+            'ui' => [
+                'switch_to_light' => 'Zum hellen Modus wechseln',
+                'switch_to_dark' => 'Zum dunklen Modus wechseln',
+                'toggle_dark_mode' => 'Dunklen Modus umschalten',
+                'back_to_login' => 'Zurück zur Anmeldung',
+            ],
+        ],
     ],
     'user' => [
         'common' => [
