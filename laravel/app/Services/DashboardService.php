@@ -512,6 +512,45 @@ class DashboardService implements DashboardServiceInterface {
     }
 
     /**
+     * Get students with no progress for a specific course.
+     */
+    public function getCourseStudentsNoProgress(int $courseId): array {
+        $course = Course::with(['classroom.students'])->findOrFail($courseId);
+
+        if (!$course->classroom) {
+            return [
+                'students_no_progress' => [],
+                'total_count' => 0,
+            ];
+        }
+
+        $allStudents = $course->classroom->students;
+
+        $studentsWithProgress = StudentScore::whereHas('learning_material_question.learning_material', function ($query) use ($courseId) {
+            $query->where('course_id', $courseId);
+        })
+            ->distinct('user_id')
+            ->pluck('user_id')
+            ->toArray();
+
+        // Filter students who have no progress (no StudentScore records for this course)
+        $studentsNoProgress = $allStudents->filter(function ($student) use ($studentsWithProgress) {
+            return !in_array($student->id, $studentsWithProgress);
+        })->map(function ($student) {
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+            ];
+        })->values()->toArray();
+
+        return [
+            'students_no_progress' => $studentsNoProgress,
+            'total_count' => count($studentsNoProgress),
+        ];
+    }
+
+    /**
      * Calculate completion statistics for multiple courses.
      */
     private function calculateCompletionStatistics($courses): array {

@@ -25,7 +25,6 @@ import {
     FileText,
     HelpCircle,
     User,
-    Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -50,6 +49,7 @@ import {
     teacherRadarData,
     teacherRadialData,
 } from '../../chartData';
+import { CourseCard } from './CourseCard';
 
 export function TeacherCharts() {
     const { t } = useLaravelReactI18n();
@@ -63,6 +63,9 @@ export function TeacherCharts() {
 
     const { data: selectedCourseProgress, isLoading: isCourseProgressLoading } =
         dashboardServiceHook.useGetCourseLatestProgress(selectedCourseId || 0);
+
+    const { data: courseStudentsNoProgress, isLoading: isStudentsNoProgressLoading } =
+        dashboardServiceHook.useGetCourseStudentsNoProgress(selectedCourseId || 0);
 
     // Helper function to format time ago
     const formatTimeAgo = (dateString: string) => {
@@ -285,53 +288,14 @@ export function TeacherCharts() {
                             ) : (
                                 <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
                                     {teacherCourses.map((course: CourseData) => (
-                                        <Card
+                                        <CourseCard
                                             onClick={() => {
                                                 setSelectedCourseId(course.id);
                                                 setIsDialogOpen(true);
                                             }}
                                             key={course.id}
-                                            className='cursor-pointer transition-all hover:shadow-md hover:ring-2 hover:ring-primary/20'
-                                        >
-                                            <CardHeader className='pb-3'>
-                                                <CardTitle className='flex items-center justify-between text-base'>
-                                                    <span className='truncate'>{course.name}</span>
-                                                    <BookOpen className='h-4 w-4 text-muted-foreground' />
-                                                </CardTitle>
-                                                {course.description && (
-                                                    <CardDescription className='line-clamp-2 text-xs'>
-                                                        {course.description}
-                                                    </CardDescription>
-                                                )}
-                                            </CardHeader>
-                                            <CardContent className='pt-0'>
-                                                <div className='space-y-2'>
-                                                    <div className='flex items-center justify-between text-sm'>
-                                                        <span className='flex items-center gap-1 text-muted-foreground'>
-                                                            <Users className='h-3 w-3' />
-                                                            {t(
-                                                                'pages.dashboard.teacher.latest_progress.labels.students',
-                                                            )}
-                                                        </span>
-                                                        <Badge variant='secondary'>
-                                                            {course.student_count}
-                                                        </Badge>
-                                                    </div>
-
-                                                    <div className='flex items-center justify-between text-sm'>
-                                                        <span className='flex items-center gap-1 text-muted-foreground'>
-                                                            <Clock className='h-3 w-3' />
-                                                            {t(
-                                                                'pages.dashboard.teacher.latest_progress.labels.recent_activity',
-                                                            )}
-                                                        </span>
-                                                        <Badge variant='outline'>
-                                                            {course.recent_activity_count}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
+                                            course={course}
+                                        />
                                     ))}
                                 </div>
                             )}
@@ -368,25 +332,144 @@ export function TeacherCharts() {
                                     </DialogHeader>
 
                                     <div className='mt-4'>
-                                        {isCourseProgressLoading ? (
-                                            renderLoadingState()
-                                        ) : !selectedCourseProgress ||
-                                          selectedCourseProgress.length === 0 ? (
-                                            renderEmptyState()
-                                        ) : (
-                                            <div className='space-y-4'>
-                                                {selectedCourseProgress.map(
-                                                    (
-                                                        progressItem: TeacherLatestProgressData,
-                                                        index: number,
-                                                    ) =>
-                                                        renderProgressItem(
-                                                            progressItem,
-                                                            `dialog-${index}`,
-                                                        ),
+                                        <Tabs defaultValue='recent-progress' className='w-full'>
+                                            <TabsList className='grid w-full grid-cols-2'>
+                                                <TabsTrigger value='recent-progress'>
+                                                    {t(
+                                                        'pages.dashboard.teacher.latest_progress.tabs.recent_progress',
+                                                    )}
+                                                </TabsTrigger>
+                                                <TabsTrigger value='no-progress'>
+                                                    {t(
+                                                        'pages.dashboard.teacher.latest_progress.tabs.no_progress',
+                                                    )}
+                                                </TabsTrigger>
+                                            </TabsList>
+
+                                            {/* Recent Progress Tab */}
+                                            <TabsContent value='recent-progress' className='mt-4'>
+                                                {isCourseProgressLoading ? (
+                                                    renderLoadingState()
+                                                ) : !selectedCourseProgress ||
+                                                  selectedCourseProgress.length === 0 ? (
+                                                    renderEmptyState()
+                                                ) : (
+                                                    <div className='space-y-4'>
+                                                        {selectedCourseProgress.map(
+                                                            (
+                                                                progressItem: TeacherLatestProgressData,
+                                                                index: number,
+                                                            ) =>
+                                                                renderProgressItem(
+                                                                    progressItem,
+                                                                    `dialog-${index}`,
+                                                                ),
+                                                        )}
+                                                    </div>
                                                 )}
-                                            </div>
-                                        )}
+                                            </TabsContent>
+
+                                            {/* No Progress Tab */}
+                                            <TabsContent value='no-progress' className='mt-4'>
+                                                {isStudentsNoProgressLoading ? (
+                                                    <div className='flex h-40 items-center justify-center'>
+                                                        <div className='flex items-center space-x-4'>
+                                                            <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
+                                                            <p>
+                                                                {t(
+                                                                    'pages.dashboard.teacher.latest_progress.loading.no_progress_data',
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ) : !courseStudentsNoProgress ||
+                                                  courseStudentsNoProgress.total_count === 0 ? (
+                                                    <div className='flex h-40 items-center justify-center'>
+                                                        <div className='text-center'>
+                                                            <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100'>
+                                                                <CheckCircle className='h-8 w-8 text-green-600' />
+                                                            </div>
+                                                            <h3 className='text-lg font-medium text-gray-900'>
+                                                                {t(
+                                                                    'pages.dashboard.teacher.latest_progress.no_progress.all_students_active.title',
+                                                                )}
+                                                            </h3>
+                                                            <p className='text-sm text-gray-500'>
+                                                                {t(
+                                                                    'pages.dashboard.teacher.latest_progress.no_progress.all_students_active.description',
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className='space-y-4'>
+                                                        <div className='flex items-center justify-between'>
+                                                            <h4 className='text-lg font-medium'>
+                                                                {t(
+                                                                    'pages.dashboard.teacher.latest_progress.no_progress.title',
+                                                                )}
+                                                            </h4>
+                                                            <Badge
+                                                                variant='outline'
+                                                                className='bg-red-50 text-red-700'
+                                                            >
+                                                                {
+                                                                    courseStudentsNoProgress.total_count
+                                                                }{' '}
+                                                                {t(
+                                                                    'pages.dashboard.teacher.latest_progress.no_progress.students_count',
+                                                                )}
+                                                            </Badge>
+                                                        </div>
+
+                                                        <div className='rounded-lg border'>
+                                                            <div className='grid grid-cols-3 gap-4 border-b bg-muted p-3 text-sm font-medium'>
+                                                                <div>
+                                                                    {t(
+                                                                        'pages.dashboard.teacher.latest_progress.no_progress.columns.name',
+                                                                    )}
+                                                                </div>
+                                                                <div>
+                                                                    {t(
+                                                                        'pages.dashboard.teacher.latest_progress.no_progress.columns.email',
+                                                                    )}
+                                                                </div>
+                                                                <div>
+                                                                    {t(
+                                                                        'pages.dashboard.teacher.latest_progress.no_progress.columns.status',
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            {courseStudentsNoProgress.students_no_progress.map(
+                                                                (student) => (
+                                                                    <div
+                                                                        key={student.id}
+                                                                        className='grid grid-cols-3 gap-4 border-b p-3 text-sm'
+                                                                    >
+                                                                        <div className='font-medium'>
+                                                                            {student.name}
+                                                                        </div>
+                                                                        <div className='text-muted-foreground'>
+                                                                            {student.email}
+                                                                        </div>
+                                                                        <div>
+                                                                            <Badge
+                                                                                variant='secondary'
+                                                                                className='bg-gray-100 text-gray-600'
+                                                                            >
+                                                                                {t(
+                                                                                    'pages.dashboard.teacher.latest_progress.no_progress.status.not_started',
+                                                                                )}
+                                                                            </Badge>
+                                                                        </div>
+                                                                    </div>
+                                                                ),
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </TabsContent>
+                                        </Tabs>
                                     </div>
                                 </DialogContent>
                             </Dialog>

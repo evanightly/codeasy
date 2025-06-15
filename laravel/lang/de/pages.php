@@ -1827,6 +1827,7 @@ return [
                     'time_spent' => 'Verbrachte Zeit',
                     'students' => 'Schüler',
                     'recent_activity' => 'Aktuelle Aktivität',
+                    'no_progress' => 'Kein Fortschritt',
                 ],
                 'status' => [
                     'completed' => 'Abgeschlossen',
@@ -1842,6 +1843,27 @@ return [
                 'tabs' => [
                     'overview' => 'Übersicht',
                     'courses' => 'Kurse',
+                    'recent_progress' => 'Neueste Fortschritte',
+                    'no_progress' => 'Schüler ohne Fortschritt',
+                ],
+                'no_progress' => [
+                    'title' => 'Schüler ohne Fortschritt',
+                    'students_count' => 'Schüler',
+                    'columns' => [
+                        'name' => 'Schülername',
+                        'email' => 'E-Mail',
+                        'status' => 'Status',
+                    ],
+                    'status' => [
+                        'not_started' => 'Nicht gestartet',
+                    ],
+                    'all_students_active' => [
+                        'title' => 'Alle Schüler sind aktiv!',
+                        'description' => 'Alle Schüler in diesem Kurs haben mit der Bearbeitung der Materialien begonnen.',
+                    ],
+                ],
+                'loading' => [
+                    'no_progress_data' => 'Lade Schülerdaten...',
                 ],
                 'dialog' => [
                     'course_progress_title' => 'Kursfortschritt',

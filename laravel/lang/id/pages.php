@@ -1864,6 +1864,27 @@ return [
                 'tabs' => [
                     'overview' => 'Ikhtisar',
                     'courses' => 'Kursus',
+                    'recent_activity' => 'Aktivitas Terbaru',
+                    'no_progress' => 'Siswa Tanpa Progres',
+                ],
+                'no_progress' => [
+                    'title' => 'Siswa Tanpa Progres',
+                    'students_count' => 'siswa',
+                    'columns' => [
+                        'name' => 'Nama Siswa',
+                        'email' => 'Email',
+                        'status' => 'Status',
+                    ],
+                    'status' => [
+                        'not_started' => 'Belum Dimulai',
+                    ],
+                    'all_students_active' => [
+                        'title' => 'Semua Siswa Aktif!',
+                        'description' => 'Semua siswa dalam kursus ini telah mulai mengerjakan materi.',
+                    ],
+                ],
+                'loading' => [
+                    'no_progress_data' => 'Memuat data siswa...',
                 ],
                 'dialog' => [
                     'course_progress_title' => 'Progres Kursus',

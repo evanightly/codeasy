@@ -49,4 +49,9 @@ interface DashboardServiceInterface {
      * Get the latest progress/activity data for a specific course.
      */
     public function getCourseLatestProgress(int $courseId): array;
+
+    /**
+     * Get students with no progress for a specific course.
+     */
+    public function getCourseStudentsNoProgress(int $courseId): array;
 }

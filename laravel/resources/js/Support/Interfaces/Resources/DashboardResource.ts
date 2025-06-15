@@ -162,3 +162,14 @@ export interface CourseData {
     created_at: string;
     updated_at: string;
 }
+
+export interface StudentNoProgressData {
+    id: number;
+    name: string;
+    email: string;
+}
+
+export interface CourseStudentsNoProgressData {
+    students_no_progress: StudentNoProgressData[];
+    total_count: number;
+}

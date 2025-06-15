@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
     CourseData,
     CourseProgressData,
+    CourseStudentsNoProgressData,
     DashboardProgressData,
     DetailedMaterialProgressData,
     StudentDetailedProgressData,
@@ -148,6 +149,25 @@ export const dashboardServiceHook = {
                 const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
                     params: {
                         intent: IntentEnum.DASHBOARD_INDEX_GET_COURSE_LATEST_PROGRESS,
+                        courseId,
+                    },
+                });
+                return response.data;
+            },
+            enabled: !!courseId,
+        });
+    },
+
+    /**
+     * Get students with no progress for a specific course
+     */
+    useGetCourseStudentsNoProgress: (courseId: number) => {
+        return useQuery<CourseStudentsNoProgressData>({
+            queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD, 'course-students-no-progress', courseId],
+            queryFn: async () => {
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_COURSE_STUDENTS_NO_PROGRESS,
                         courseId,
                     },
                 });

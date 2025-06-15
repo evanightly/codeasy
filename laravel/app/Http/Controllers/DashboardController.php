@@ -61,6 +61,12 @@ class DashboardController extends Controller {
 
                 return response()->json($data);
 
+            case IntentEnum::DASHBOARD_INDEX_GET_COURSE_STUDENTS_NO_PROGRESS->value:
+                $courseId = $request->get('courseId');
+                $data = $this->dashboardService->getCourseStudentsNoProgress($courseId);
+
+                return response()->json($data);
+
             case IntentEnum::DASHBOARD_INDEX_GET_DATA->value:
             default:
                 $dashboardData = $this->dashboardService->getDashboardData($user);
