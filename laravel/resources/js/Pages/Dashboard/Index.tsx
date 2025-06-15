@@ -23,7 +23,6 @@ export default function Dashboard() {
                 {roles.includes(RoleEnum.TEACHER) && (
                     <>
                         <TeacherCharts />
-                        {/* Student Task Tracking System */}
                         <StudentTaskTrackingSection />
                     </>
                 )}
