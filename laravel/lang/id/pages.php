@@ -1838,6 +1838,37 @@ return [
                 'completion_rate' => 'Tingkat Penyelesaian',
                 'pass_rate' => 'Tingkat Kelulusan',
             ],
+            'latest_progress' => [
+                'title' => 'Progres Siswa Terbaru',
+                'description' => 'Aktivitas siswa dan pembaruan progres terbaru',
+                'labels' => [
+                    'course' => 'Kursus',
+                    'material' => 'Materi',
+                    'question' => 'Soal',
+                    'score' => 'Nilai',
+                    'time_spent' => 'Waktu yang Dihabiskan',
+                    'students' => 'Siswa',
+                    'recent_activity' => 'Aktivitas Terbaru',
+                ],
+                'status' => [
+                    'completed' => 'Selesai',
+                    'in_progress' => 'Sedang Berlangsung',
+                    'started' => 'Dimulai',
+                ],
+                'no_activity' => [
+                    'title' => 'Tidak Ada Aktivitas Terbaru',
+                    'description' => 'Tidak ada aktivitas siswa terbaru untuk ditampilkan.',
+                ],
+                'showing_recent' => 'Menampilkan :count aktivitas terbaru (dari :total total)',
+                'showing_recent_for_course' => 'Menampilkan :count aktivitas terbaru untuk :course',
+                'tabs' => [
+                    'overview' => 'Ikhtisar',
+                    'courses' => 'Kursus',
+                ],
+                'dialog' => [
+                    'course_progress_title' => 'Progres Kursus',
+                ],
+            ],
         ],
         'admin' => [
             'title' => 'Admin Overview',

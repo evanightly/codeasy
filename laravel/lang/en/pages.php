@@ -1837,6 +1837,37 @@ return [
                 'completion_rate' => 'Completion Rate',
                 'pass_rate' => 'Pass Rate',
             ],
+            'latest_progress' => [
+                'title' => 'Latest Student Progress',
+                'description' => 'Recent student activity and progress updates',
+                'labels' => [
+                    'course' => 'Course',
+                    'material' => 'Material',
+                    'question' => 'Question',
+                    'score' => 'Score',
+                    'time_spent' => 'Time Spent',
+                    'students' => 'Students',
+                    'recent_activity' => 'Recent Activity',
+                ],
+                'status' => [
+                    'completed' => 'Completed',
+                    'in_progress' => 'In Progress',
+                    'started' => 'Started',
+                ],
+                'no_activity' => [
+                    'title' => 'No Recent Activity',
+                    'description' => 'No recent student activity to display.',
+                ],
+                'showing_recent' => 'Showing :count most recent activities (of :total total)',
+                'showing_recent_for_course' => 'Showing :count most recent activities for :course',
+                'tabs' => [
+                    'overview' => 'Overview',
+                    'courses' => 'Courses',
+                ],
+                'dialog' => [
+                    'course_progress_title' => 'Course Progress',
+                ],
+            ],
         ],
         'admin' => [
             'title' => 'Admin Overview',

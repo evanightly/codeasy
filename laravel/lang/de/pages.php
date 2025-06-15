@@ -1816,6 +1816,37 @@ return [
                 'completion_rate' => 'Abschlussquote',
                 'pass_rate' => 'Bestehensquote',
             ],
+            'latest_progress' => [
+                'title' => 'Neuester Schülerfortschritt',
+                'description' => 'Aktuelle Schüleraktivitäten und Fortschrittsupdates',
+                'labels' => [
+                    'course' => 'Kurs',
+                    'material' => 'Material',
+                    'question' => 'Frage',
+                    'score' => 'Punktzahl',
+                    'time_spent' => 'Verbrachte Zeit',
+                    'students' => 'Schüler',
+                    'recent_activity' => 'Aktuelle Aktivität',
+                ],
+                'status' => [
+                    'completed' => 'Abgeschlossen',
+                    'in_progress' => 'In Bearbeitung',
+                    'started' => 'Gestartet',
+                ],
+                'no_activity' => [
+                    'title' => 'Keine aktuelle Aktivität',
+                    'description' => 'Keine aktuelle Schüleraktivität anzuzeigen.',
+                ],
+                'showing_recent' => ':count neueste Aktivitäten anzeigen (von :total gesamt)',
+                'showing_recent_for_course' => ':count neueste Aktivitäten anzeigen für :course',
+                'tabs' => [
+                    'overview' => 'Übersicht',
+                    'courses' => 'Kurse',
+                ],
+                'dialog' => [
+                    'course_progress_title' => 'Kursfortschritt',
+                ],
+            ],
         ],
         'admin' => [
             'title' => 'Admin-Übersicht',

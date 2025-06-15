@@ -323,6 +323,195 @@ class DashboardService implements DashboardServiceInterface {
     }
 
     /**
+     * Get the latest progress/activity data for teacher's students.
+     * This shows which student, course, material, and question they last worked on.
+     */
+    public function getTeacherLatestProgress(int $teacherId): array {
+        // Get courses taught by this teacher
+        $courses = Course::where('teacher_id', $teacherId)
+            ->where('active', true)
+            ->with(['classroom.students', 'learning_materials.learning_material_questions'])
+            ->get();
+
+        $latestProgressData = [];
+
+        // Get all student IDs from teacher's courses
+        $studentIds = [];
+        foreach ($courses as $course) {
+            foreach ($course->classroom->students as $student) {
+                $studentIds[] = $student->id;
+            }
+        }
+
+        // Remove duplicates
+        $studentIds = array_unique($studentIds);
+
+        // Get the most recent student scores for each student
+        foreach ($studentIds as $studentId) {
+            $latestScore = StudentScore::where('user_id', $studentId)
+                ->with([
+                    'learning_material_question.learning_material.course',
+                    'user',
+                ])
+                ->orderBy('updated_at', 'desc')
+                ->first();
+
+            if ($latestScore) {
+                $question = $latestScore->learning_material_question;
+                $material = $question->learning_material;
+                $course = $material->course;
+                $student = $latestScore->user;
+
+                // Only include if this course belongs to the teacher
+                if ($course->teacher_id === $teacherId) {
+                    $latestProgressData[] = [
+                        'student' => [
+                            'id' => $student->id,
+                            'name' => $student->name,
+                        ],
+                        'course' => [
+                            'id' => $course->id,
+                            'name' => $course->name,
+                        ],
+                        'material' => [
+                            'id' => $material->id,
+                            'title' => $material->title,
+                        ],
+                        'question' => [
+                            'id' => $question->id,
+                            'title' => $question->title,
+                        ],
+                        'activity' => [
+                            'last_updated' => $latestScore->updated_at,
+                            'coding_time' => $latestScore->coding_time,
+                            'completion_status' => $latestScore->completion_status,
+                            'trial_status' => $latestScore->trial_status,
+                            'score' => $latestScore->test_case_complete_count > 0 && $latestScore->test_case_total_count > 0
+                                ? round(($latestScore->test_case_complete_count / $latestScore->test_case_total_count) * 100)
+                                : 0,
+                        ],
+                    ];
+                }
+            }
+        }
+
+        // Sort by most recent activity first
+        usort($latestProgressData, function ($a, $b) {
+            return $b['activity']['last_updated']->timestamp <=> $a['activity']['last_updated']->timestamp;
+        });
+
+        // Limit to most recent 20 activities
+        $latestProgressData = array_slice($latestProgressData, 0, 20);
+
+        return $latestProgressData;
+    }
+
+    /**
+     * Get all courses taught by a teacher.
+     */
+    public function getTeacherCourses(int $teacherId): array {
+        $courses = Course::where('teacher_id', $teacherId)
+            ->where('active', true)
+            ->with(['classroom.students'])
+            ->get();
+
+        $coursesData = [];
+        foreach ($courses as $course) {
+            $studentCount = $course->classroom ? $course->classroom->students->count() : 0;
+
+            // Get recent activity count for this course
+            $recentActivityCount = StudentScore::whereHas('learning_material_question.learning_material', function ($query) use ($course) {
+                $query->where('course_id', $course->id);
+            })
+                ->where('updated_at', '>=', now()->subDays(7)) // Last 7 days
+                ->distinct('user_id')
+                ->count();
+
+            $coursesData[] = [
+                'id' => $course->id,
+                'name' => $course->name,
+                'description' => $course->description,
+                'student_count' => $studentCount,
+                'recent_activity_count' => $recentActivityCount,
+                'created_at' => $course->created_at,
+                'updated_at' => $course->updated_at,
+            ];
+        }
+
+        return $coursesData;
+    }
+
+    /**
+     * Get the latest progress/activity data for a specific course.
+     */
+    public function getCourseLatestProgress(int $courseId): array {
+        $course = Course::with(['classroom.students'])->findOrFail($courseId);
+
+        $latestProgressData = [];
+
+        // Get all student IDs from this course
+        $studentIds = $course->classroom ? $course->classroom->students->pluck('id')->toArray() : [];
+
+        // Get the most recent student scores for each student in this course
+        foreach ($studentIds as $studentId) {
+            $latestScore = StudentScore::where('user_id', $studentId)
+                ->whereHas('learning_material_question.learning_material', function ($query) use ($courseId) {
+                    $query->where('course_id', $courseId);
+                })
+                ->with([
+                    'learning_material_question.learning_material',
+                    'user',
+                ])
+                ->orderBy('updated_at', 'desc')
+                ->first();
+
+            if ($latestScore) {
+                $question = $latestScore->learning_material_question;
+                $material = $question->learning_material;
+                $student = $latestScore->user;
+
+                $latestProgressData[] = [
+                    'student' => [
+                        'id' => $student->id,
+                        'name' => $student->name,
+                    ],
+                    'course' => [
+                        'id' => $course->id,
+                        'name' => $course->name,
+                    ],
+                    'material' => [
+                        'id' => $material->id,
+                        'title' => $material->title,
+                    ],
+                    'question' => [
+                        'id' => $question->id,
+                        'title' => $question->title,
+                    ],
+                    'activity' => [
+                        'last_updated' => $latestScore->updated_at,
+                        'coding_time' => $latestScore->coding_time,
+                        'completion_status' => $latestScore->completion_status,
+                        'trial_status' => $latestScore->trial_status,
+                        'score' => $latestScore->test_case_complete_count > 0 && $latestScore->test_case_total_count > 0
+                            ? round(($latestScore->test_case_complete_count / $latestScore->test_case_total_count) * 100)
+                            : 0,
+                    ],
+                ];
+            }
+        }
+
+        // Sort by most recent activity first
+        usort($latestProgressData, function ($a, $b) {
+            return $b['activity']['last_updated']->timestamp <=> $a['activity']['last_updated']->timestamp;
+        });
+
+        // Limit to most recent 15 activities for this course
+        $latestProgressData = array_slice($latestProgressData, 0, 15);
+
+        return $latestProgressData;
+    }
+
+    /**
      * Calculate completion statistics for multiple courses.
      */
     private function calculateCompletionStatistics($courses): array {

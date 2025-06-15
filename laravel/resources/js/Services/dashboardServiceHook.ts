@@ -3,11 +3,13 @@ import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { IntentEnum } from '@/Support/Enums/intentEnum';
 import { useQuery } from '@tanstack/react-query';
 import {
+    CourseData,
     CourseProgressData,
     DashboardProgressData,
     DetailedMaterialProgressData,
     StudentDetailedProgressData,
     StudentLatestWorkData,
+    TeacherLatestProgressData,
 } from '../Support/Interfaces/Resources/DashboardResource';
 
 export const dashboardServiceHook = {
@@ -99,6 +101,59 @@ export const dashboardServiceHook = {
                 });
                 return response.data;
             },
+        });
+    },
+
+    /**
+     * Get the latest progress data for teacher's students
+     */
+    useGetTeacherLatestProgress: () => {
+        return useQuery<TeacherLatestProgressData[]>({
+            queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD, 'teacher-latest-progress'],
+            queryFn: async () => {
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_TEACHER_LATEST_PROGRESS,
+                    },
+                });
+                return response.data;
+            },
+        });
+    },
+
+    /**
+     * Get all courses taught by the current teacher
+     */
+    useGetTeacherCourses: () => {
+        return useQuery<CourseData[]>({
+            queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD, 'teacher-courses'],
+            queryFn: async () => {
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_TEACHER_COURSES,
+                    },
+                });
+                return response.data;
+            },
+        });
+    },
+
+    /**
+     * Get the latest progress data for a specific course
+     */
+    useGetCourseLatestProgress: (courseId: number) => {
+        return useQuery<TeacherLatestProgressData[]>({
+            queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD, 'course-latest-progress', courseId],
+            queryFn: async () => {
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_COURSE_LATEST_PROGRESS,
+                        courseId,
+                    },
+                });
+                return response.data;
+            },
+            enabled: !!courseId,
         });
     },
 };

@@ -126,3 +126,39 @@ export interface StudentLatestWorkData {
         title?: string;
     };
 }
+
+export interface TeacherLatestProgressData {
+    student: {
+        id: number;
+        name: string;
+    };
+    course: {
+        id: number;
+        name: string;
+    };
+    material: {
+        id: number;
+        title: string;
+    };
+    question: {
+        id: number;
+        title: string;
+    };
+    activity: {
+        last_updated: string;
+        coding_time: number;
+        completion_status: boolean;
+        trial_status: boolean;
+        score: number;
+    };
+}
+
+export interface CourseData {
+    id: number;
+    name: string;
+    description?: string;
+    student_count: number;
+    recent_activity_count: number;
+    created_at: string;
+    updated_at: string;
+}

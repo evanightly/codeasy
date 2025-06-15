@@ -34,4 +34,19 @@ interface DashboardServiceInterface {
      * Get the latest work data for a specific student.
      */
     public function getStudentLatestWork(int $userId): array;
+
+    /**
+     * Get the latest progress/activity data for teacher's students.
+     */
+    public function getTeacherLatestProgress(int $teacherId): array;
+
+    /**
+     * Get all courses taught by a teacher.
+     */
+    public function getTeacherCourses(int $teacherId): array;
+
+    /**
+     * Get the latest progress/activity data for a specific course.
+     */
+    public function getCourseLatestProgress(int $courseId): array;
 }
