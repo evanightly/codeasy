@@ -131,6 +131,8 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
     ports:
       - "127.0.0.1:8000:80"  # Bind only to localhost for security
+    volumes:
+      - ./docker/phpmyadmin-uploads.ini:/usr/local/etc/php/conf.d/phpmyadmin-uploads.ini:ro
     networks:
       - app-network
     depends_on:
