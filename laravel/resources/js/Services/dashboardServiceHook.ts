@@ -3,6 +3,7 @@ import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { IntentEnum } from '@/Support/Enums/intentEnum';
 import { useQuery } from '@tanstack/react-query';
 import {
+    ActiveUsersData,
     CourseData,
     CourseProgressData,
     CourseStudentsNoProgressData,
@@ -174,6 +175,26 @@ export const dashboardServiceHook = {
                 return response.data;
             },
             enabled: !!courseId,
+        });
+    },
+
+    /**
+     * Get currently active users grouped by roles
+     */
+    useGetActiveUsers: (minutesThreshold: number = 15) => {
+        return useQuery<ActiveUsersData>({
+            queryKey: [TANSTACK_QUERY_KEYS.DASHBOARD, 'active-users', minutesThreshold],
+            queryFn: async () => {
+                const response = await window.axios.get(route(`${ROUTES.DASHBOARD}.index`), {
+                    params: {
+                        intent: IntentEnum.DASHBOARD_INDEX_GET_ACTIVE_USERS,
+                        minutesThreshold,
+                    },
+                });
+                return response.data;
+            },
+            // Refetch every 30 seconds to keep the data current
+            refetchInterval: 30000,
         });
     },
 };

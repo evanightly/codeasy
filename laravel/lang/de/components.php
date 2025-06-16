@@ -60,6 +60,13 @@ return [
             'log_out' => 'Abmelden',
         ],
     ],
+    'roles' => [
+        'super_admin' => 'Super Admin',
+        'school_admin' => 'Schuladministrator',
+        'admin' => 'Administrator',
+        'teacher' => 'Lehrer',
+        'student' => 'Schüler',
+    ],
     'filepond' => [
         'labels' => [
             'label_idle' => 'Dateien hier ablegen oder <span class="filepond--label-action">Durchsuchen</span>',

@@ -25,6 +25,7 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
+import { ActiveUsersCard } from '../../ActiveUsersCard';
 import {
     schoolBarData,
     schoolConfig,
@@ -44,6 +45,10 @@ export function SchoolAdminCharts() {
                     {t('pages.dashboard.school_admin.subtitle')}
                 </p>
             </div>
+
+            {/* Active Users Card */}
+            <ActiveUsersCard />
+
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* Population Bar Chart */}
                 <Card className='w-full'>

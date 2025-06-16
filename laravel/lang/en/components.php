@@ -60,6 +60,13 @@ return [
             'log_out' => 'Log out',
         ],
     ],
+    'roles' => [
+        'super_admin' => 'Super Admin',
+        'school_admin' => 'School Admin',
+        'admin' => 'Admin',
+        'teacher' => 'Teacher',
+        'student' => 'Student',
+    ],
     'filepond' => [
         'labels' => [
             'label_idle' => 'Drag and drop files here or <span class="filepond--label-action">Browse</span>',

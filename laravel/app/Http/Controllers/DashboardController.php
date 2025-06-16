@@ -67,6 +67,12 @@ class DashboardController extends Controller {
 
                 return response()->json($data);
 
+            case IntentEnum::DASHBOARD_INDEX_GET_ACTIVE_USERS->value:
+                $minutesThreshold = $request->get('minutesThreshold', 15);
+                $data = $this->dashboardService->getActiveUsers($minutesThreshold);
+
+                return response()->json($data);
+
             case IntentEnum::DASHBOARD_INDEX_GET_DATA->value:
             default:
                 $dashboardData = $this->dashboardService->getDashboardData($user);

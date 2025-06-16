@@ -173,3 +173,18 @@ export interface CourseStudentsNoProgressData {
     students_no_progress: StudentNoProgressData[];
     total_count: number;
 }
+
+export interface ActiveUserData {
+    id: number;
+    name: string;
+    email: string;
+    profile_image_url?: string;
+}
+
+export interface ActiveUsersData {
+    total_active: number;
+    by_role: Record<string, number>;
+    users_by_role: Record<string, ActiveUserData[]>;
+    last_updated: string;
+    threshold_minutes: number;
+}

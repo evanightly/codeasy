@@ -25,6 +25,7 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
+import { ActiveUsersCard } from '../../ActiveUsersCard';
 import {
     adminBarData,
     adminConfig,
@@ -42,6 +43,10 @@ export function AdminCharts() {
                 <h1 className='text-2xl font-bold'>{t('pages.dashboard.admin.title')}</h1>
                 <p className='text-muted-foreground'>{t('pages.dashboard.admin.subtitle')}</p>
             </div>
+
+            {/* Active Users Card */}
+            <ActiveUsersCard />
+
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* User Growth Bar Chart */}
                 <Card className='w-full'>

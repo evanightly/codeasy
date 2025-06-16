@@ -1992,6 +1992,118 @@ return [
                 ],
             ],
         ],
+        'active_users' => [
+            'title' => 'Active Users',
+            'description' => 'Users currently online in the last 15 minutes',
+            'no_active_users' => 'No active users at the moment',
+            'loading' => 'Loading active users...',
+            'error_loading' => 'Failed to load active users',
+            'total_active' => 'active',
+            'users_count' => ' users',
+            'and_more' => 'and :count more...',
+            'last_updated' => 'Last updated',
+        ],
+        'admin' => [
+            'title' => 'Admin Overview',
+            'subtitle' => 'Dashboard ringkasan untuk Administrator',
+            'charts' => [
+                'users_bar' => [
+                    'title' => 'Users (Bar Chart)',
+                    'description' => '6-month Growth',
+                    'footer' => 'Trending up',
+                ],
+                'user_roles_pie' => [
+                    'title' => 'User Roles (Pie Chart)',
+                    'description' => 'Admin / Guru / Siswa',
+                    'total_label' => 'total',
+                ],
+                'site_visits_line' => [
+                    'title' => 'Site Visits (Line Chart)',
+                    'description' => 'One-week data',
+                ],
+                'radar_example' => [
+                    'title' => 'Radar Chart Example',
+                    'description' => 'January vs June',
+                ],
+            ],
+        ],
+        'student_tracking' => [
+            'title' => 'Student Task Tracking System',
+            'description' => 'Track student progress through courses, materials, and questions',
+            'no_data' => [
+                'title' => 'No data available',
+                'description' => 'No student progress data is currently available.',
+            ],
+            'no_courses' => [
+                'title' => 'No Courses Available',
+                'subtitle' => 'Please check back later.',
+                'description' => 'No courses are currently available for tracking.',
+            ],
+            'loading' => [
+                'dashboard_data' => 'Loading dashboard data...',
+                'progress_data' => 'Loading student progress data...',
+                'course_details' => 'Loading course details...',
+                'student_details' => 'Loading student details...',
+            ],
+            'tabs' => [
+                'overview' => 'Overview',
+                'courses' => 'Courses',
+                'students' => 'Students',
+            ],
+            'sections' => [
+                'learning_materials' => 'Learning Materials',
+                'course_completion' => 'Course Completion Overview',
+                'top_students' => 'Top Performing Students',
+            ],
+            'stats' => [
+                'total_courses' => 'Total Courses',
+                'total_students' => 'Total Students',
+                'completed_courses' => 'Completed Courses',
+            ],
+            'labels' => [
+                'students' => 'students',
+                'materials' => 'materials',
+                'avg_completion' => 'Avg. Completion',
+                'questions' => 'questions',
+                'complete' => 'Complete',
+                'courses' => 'courses',
+                'enrolled_in' => 'Enrolled in',
+                'students_enrolled' => 'students enrolled',
+            ],
+            'columns' => [
+                'student' => 'Student',
+                'completed' => 'Completed',
+                'progress' => 'Progress',
+                'status' => 'Status',
+                'material' => 'Material',
+                'courses' => 'Courses',
+                'avg_score' => 'Avg. Score',
+                'student_name' => 'Student Name',
+                'actions' => 'Actions',
+            ],
+            'status' => [
+                'complete' => 'Complete',
+                'in_progress' => 'In Progress',
+                'not_started' => 'Not Started',
+            ],
+            'actions' => [
+                'view_details' => 'View Details',
+                'view_progress' => 'View Progress',
+            ],
+            'instructions' => [
+                'click_student' => 'Click on a student to view their detailed progress across all courses and materials.',
+            ],
+            'dialogs' => [
+                'course_details' => [
+                    'title' => 'Course Details: :name',
+                    'description' => 'Student progress for each learning material',
+                ],
+                'student_progress' => [
+                    'title' => 'Student Progress: :name',
+                    'description' => 'Detailed progress across all courses and materials',
+                ],
+            ],
+        ],
     ],
     'student_cognitive_classification' => [
         'index' => [

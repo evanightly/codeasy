@@ -60,6 +60,13 @@ return [
             'log_out' => 'Keluar',
         ],
     ],
+    'roles' => [
+        'super_admin' => 'Super Admin',
+        'school_admin' => 'Admin Sekolah',
+        'admin' => 'Admin',
+        'teacher' => 'Guru',
+        'student' => 'Siswa',
+    ],
     'filepond' => [
         'labels' => [
             'label_idle' => 'Seret dan lepas file di sini atau <span class="filepond--label-action">Jelajahi</span>',

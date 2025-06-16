@@ -1992,6 +1992,118 @@ return [
                 ],
             ],
         ],
+        'active_users' => [
+            'title' => 'Pengguna Aktif',
+            'description' => 'Pengguna yang sedang online dalam 15 menit terakhir',
+            'no_active_users' => 'Tidak ada pengguna aktif saat ini',
+            'loading' => 'Memuat pengguna aktif...',
+            'error_loading' => 'Gagal memuat pengguna aktif',
+            'total_active' => 'aktif',
+            'users_count' => ' pengguna',
+            'and_more' => 'dan :count lainnya...',
+            'last_updated' => 'Terakhir diperbarui',
+        ],
+        'admin' => [
+            'title' => 'Ringkasan Admin',
+            'subtitle' => 'Dashboard ringkasan untuk Administrator',
+            'charts' => [
+                'users_bar' => [
+                    'title' => 'Pengguna (Grafik Batang)',
+                    'description' => 'Pertumbuhan 6 bulan',
+                    'footer' => 'Trending naik',
+                ],
+                'user_roles_pie' => [
+                    'title' => 'Peran Pengguna (Grafik Lingkaran)',
+                    'description' => 'Admin / Guru / Siswa',
+                    'total_label' => 'total',
+                ],
+                'site_visits_line' => [
+                    'title' => 'Kunjungan Situs (Grafik Garis)',
+                    'description' => 'Data satu minggu',
+                ],
+                'radar_example' => [
+                    'title' => 'Contoh Grafik Radar',
+                    'description' => 'Januari vs Juni',
+                ],
+            ],
+        ],
+        'student_tracking' => [
+            'title' => 'Sistem Pelacakan Tugas Siswa',
+            'description' => 'Lacak kemajuan siswa melalui kursus, materi, dan soal',
+            'no_data' => [
+                'title' => 'Tidak ada data tersedia',
+                'description' => 'Data kemajuan siswa saat ini tidak tersedia.',
+            ],
+            'no_courses' => [
+                'title' => 'Tidak Ada Kursus Tersedia',
+                'subtitle' => 'Silakan periksa kembali nanti.',
+                'description' => 'Saat ini tidak ada kursus yang tersedia untuk dilacak.',
+            ],
+            'loading' => [
+                'dashboard_data' => 'Memuat data dashboard...',
+                'progress_data' => 'Memuat data kemajuan siswa...',
+                'course_details' => 'Memuat detail kursus...',
+                'student_details' => 'Memuat detail siswa...',
+            ],
+            'tabs' => [
+                'overview' => 'Ringkasan',
+                'courses' => 'Kursus',
+                'students' => 'Siswa',
+            ],
+            'sections' => [
+                'learning_materials' => 'Materi Pembelajaran',
+                'course_completion' => 'Ringkasan Penyelesaian Kursus',
+                'top_students' => 'Siswa Berprestasi Tertinggi',
+            ],
+            'stats' => [
+                'total_courses' => 'Total Kursus',
+                'total_students' => 'Total Siswa',
+                'completed_courses' => 'Kursus Selesai',
+            ],
+            'labels' => [
+                'students' => 'siswa',
+                'materials' => 'materi',
+                'avg_completion' => 'Rata-rata Penyelesaian',
+                'questions' => 'soal',
+                'complete' => 'Selesai',
+                'courses' => 'kursus',
+                'enrolled_in' => 'Terdaftar di',
+                'students_enrolled' => 'siswa terdaftar',
+            ],
+            'columns' => [
+                'student' => 'Siswa',
+                'completed' => 'Selesai',
+                'progress' => 'Kemajuan',
+                'status' => 'Status',
+                'material' => 'Materi',
+                'courses' => 'Kursus',
+                'avg_score' => 'Nilai Rata-rata',
+                'student_name' => 'Nama Siswa',
+                'actions' => 'Aksi',
+            ],
+            'status' => [
+                'complete' => 'Selesai',
+                'in_progress' => 'Dalam Proses',
+                'not_started' => 'Belum Dimulai',
+            ],
+            'actions' => [
+                'view_details' => 'Lihat Detail',
+                'view_progress' => 'Lihat Kemajuan',
+            ],
+            'instructions' => [
+                'click_student' => 'Klik pada siswa untuk melihat kemajuan detail mereka di semua kursus dan materi.',
+            ],
+            'dialogs' => [
+                'course_details' => [
+                    'title' => 'Detail Kursus: :name',
+                    'description' => 'Kemajuan siswa untuk setiap materi pembelajaran',
+                ],
+                'student_progress' => [
+                    'title' => 'Kemajuan Siswa: :name',
+                    'description' => 'Kemajuan detail di semua kursus dan materi',
+                ],
+            ],
+        ],
     ],
     'student_cognitive_classification' => [
         'index' => [

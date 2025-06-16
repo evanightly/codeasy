@@ -54,4 +54,9 @@ interface DashboardServiceInterface {
      * Get students with no progress for a specific course.
      */
     public function getCourseStudentsNoProgress(int $courseId): array;
+
+    /**
+     * Get currently active users grouped by roles.
+     */
+    public function getActiveUsers(int $minutesThreshold = 15): array;
 }

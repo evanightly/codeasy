@@ -24,6 +24,7 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
+import { ActiveUsersCard } from '../../ActiveUsersCard';
 import { studentAreaData, studentBarData, studentConfig, studentPieData } from '../../chartData';
 import { StudentClassificationSection } from './StudentClassificationSection';
 
@@ -38,6 +39,9 @@ export function StudentCharts() {
                 <h1 className='text-2xl font-bold'>{t('pages.dashboard.student.title')}</h1>
                 <p className='text-muted-foreground'>{t('pages.dashboard.student.subtitle')}</p>
             </div>
+
+            {/* Active Users Card */}
+            <ActiveUsersCard />
 
             {/* Latest Work Card - New Addition */}
             <div className='mb-4'>

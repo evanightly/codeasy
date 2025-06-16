@@ -12,6 +12,7 @@ use App\Support\Interfaces\Services\CourseServiceInterface;
 use App\Support\Interfaces\Services\DashboardServiceInterface;
 use App\Support\Interfaces\Services\LearningMaterialServiceInterface;
 use App\Support\Interfaces\Services\StudentScoreServiceInterface;
+use Illuminate\Support\Facades\DB;
 
 class DashboardService implements DashboardServiceInterface {
     public function __construct(
@@ -738,6 +739,71 @@ class DashboardService implements DashboardServiceInterface {
             'progress_percentage' => $progressPercentage,
             'completed_questions' => $completedCount,
             'total_questions' => $totalQuestions,
+        ];
+    }
+
+    /**
+     * Get currently active users grouped by roles.
+     */
+    public function getActiveUsers(int $minutesThreshold = 15): array {
+        $cutoffTime = now()->subMinutes($minutesThreshold);
+
+        // Get active user IDs from sessions table
+        $activeUserIds = DB::table('sessions')
+            ->where('last_activity', '>=', $cutoffTime->timestamp)
+            ->whereNotNull('user_id')
+            ->distinct()
+            ->pluck('user_id');
+
+        if ($activeUserIds->isEmpty()) {
+            return [
+                'total_active' => 0,
+                'by_role' => [],
+                'users_by_role' => [],
+                'last_updated' => now()->toISOString(),
+            ];
+        }
+
+        // Get active users with their roles
+        $activeUsers = User::whereIn('id', $activeUserIds)
+            ->with('roles')
+            ->get();
+
+        $usersByRole = [];
+        $countByRole = [];
+
+        foreach ($activeUsers as $user) {
+            $userRoles = $user->roles->pluck('name')->toArray();
+
+            // If user has no roles, categorize as 'student' (default role)
+            if (empty($userRoles)) {
+                $userRoles = [RoleEnum::STUDENT->value];
+            }
+
+            foreach ($userRoles as $role) {
+                // Role names from database already match enum values
+                if (!isset($usersByRole[$role])) {
+                    $usersByRole[$role] = [];
+                    $countByRole[$role] = 0;
+                }
+
+                $usersByRole[$role][] = [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'profile_image_url' => $user->profile_image ? asset('storage/profile-images/' . $user->profile_image) : null,
+                ];
+
+                $countByRole[$role]++;
+            }
+        }
+
+        return [
+            'total_active' => $activeUsers->count(),
+            'by_role' => $countByRole,
+            'users_by_role' => $usersByRole,
+            'last_updated' => now()->toISOString(),
+            'threshold_minutes' => $minutesThreshold,
         ];
     }
 }

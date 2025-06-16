@@ -1971,6 +1971,118 @@ return [
                 ],
             ],
         ],
+        'active_users' => [
+            'title' => 'Aktive Benutzer',
+            'description' => 'Benutzer, die in den letzten 15 Minuten online waren',
+            'no_active_users' => 'Momentan keine aktiven Benutzer',
+            'loading' => 'Lade aktive Benutzer...',
+            'error_loading' => 'Fehler beim Laden der aktiven Benutzer',
+            'total_active' => 'aktiv',
+            'users_count' => ' Benutzer',
+            'and_more' => 'und :count weitere...',
+            'last_updated' => 'Zuletzt aktualisiert',
+        ],
+        'admin' => [
+            'title' => 'Admin-Übersicht',
+            'subtitle' => 'Dashboard-Zusammenfassung für Administrator',
+            'charts' => [
+                'users_bar' => [
+                    'title' => 'Benutzer (Balkendiagramm)',
+                    'description' => '6-Monats-Wachstum',
+                    'footer' => 'Aufwärtstrend',
+                ],
+                'user_roles_pie' => [
+                    'title' => 'Benutzerrollen (Kreisdiagramm)',
+                    'description' => 'Admin / Lehrer / Schüler',
+                    'total_label' => 'gesamt',
+                ],
+                'site_visits_line' => [
+                    'title' => 'Website-Besuche (Liniendiagramm)',
+                    'description' => 'Eine Woche Daten',
+                ],
+                'radar_example' => [
+                    'title' => 'Radar-Diagramm Beispiel',
+                    'description' => 'Januar vs Juni',
+                ],
+            ],
+        ],
+        'student_tracking' => [
+            'title' => 'Schüler-Aufgaben-Verfolgungssystem',
+            'description' => 'Verfolgen Sie den Fortschritt der Schüler durch Kurse, Materialien und Fragen',
+            'no_data' => [
+                'title' => 'Keine Daten verfügbar',
+                'description' => 'Derzeit sind keine Schülerfortschrittsdaten verfügbar.',
+            ],
+            'no_courses' => [
+                'title' => 'Keine Kurse verfügbar',
+                'subtitle' => 'Bitte schauen Sie später noch einmal vorbei.',
+                'description' => 'Derzeit sind keine Kurse zur Verfolgung verfügbar.',
+            ],
+            'loading' => [
+                'dashboard_data' => 'Lade Dashboard-Daten...',
+                'progress_data' => 'Lade Schülerfortschrittsdaten...',
+                'course_details' => 'Lade Kursdetails...',
+                'student_details' => 'Lade Schülerdetails...',
+            ],
+            'tabs' => [
+                'overview' => 'Übersicht',
+                'courses' => 'Kurse',
+                'students' => 'Schüler',
+            ],
+            'sections' => [
+                'learning_materials' => 'Lernmaterialien',
+                'course_completion' => 'Kursabschluss-Übersicht',
+                'top_students' => 'Beste Schüler',
+            ],
+            'stats' => [
+                'total_courses' => 'Gesamte Kurse',
+                'total_students' => 'Gesamte Schüler',
+                'completed_courses' => 'Abgeschlossene Kurse',
+            ],
+            'labels' => [
+                'students' => 'Schüler',
+                'materials' => 'Materialien',
+                'avg_completion' => 'Durchschn. Abschluss',
+                'questions' => 'Fragen',
+                'complete' => 'Vollständig',
+                'courses' => 'Kurse',
+                'enrolled_in' => 'Eingeschrieben in',
+                'students_enrolled' => 'eingeschriebene Schüler',
+            ],
+            'columns' => [
+                'student' => 'Schüler',
+                'completed' => 'Abgeschlossen',
+                'progress' => 'Fortschritt',
+                'status' => 'Status',
+                'material' => 'Material',
+                'courses' => 'Kurse',
+                'avg_score' => 'Durchschn. Punktzahl',
+                'student_name' => 'Schülername',
+                'actions' => 'Aktionen',
+            ],
+            'status' => [
+                'complete' => 'Vollständig',
+                'in_progress' => 'In Bearbeitung',
+                'not_started' => 'Nicht begonnen',
+            ],
+            'actions' => [
+                'view_details' => 'Details anzeigen',
+                'view_progress' => 'Fortschritt anzeigen',
+            ],
+            'instructions' => [
+                'click_student' => 'Klicken Sie auf einen Schüler, um seinen detaillierten Fortschritt in allen Kursen und Materialien anzuzeigen.',
+            ],
+            'dialogs' => [
+                'course_details' => [
+                    'title' => 'Kursdetails: :name',
+                    'description' => 'Schülerfortschritt für jedes Lernmaterial',
+                ],
+                'student_progress' => [
+                    'title' => 'Schülerfortschritt: :name',
+                    'description' => 'Detaillierter Fortschritt über alle Kurse und Materialien',
+                ],
+            ],
+        ],
     ],
     'student_cognitive_classification' => [
         'index' => [
