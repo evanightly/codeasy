@@ -17,25 +17,22 @@ const customDevPlugins = isProduction
 
 export default defineConfig({
     server: {
-        host: '0.0.0.0', // agar bisa diakses dari luar container
+        host: '0.0.0.0', // accessible from anywhere
         port: 9002,
         hmr: {
-            clientPort: 9002, // port untuk HMR,
-            host: 'localhost',
+            port: 9002,
+            host: 'localhost', // Force localhost for browser URLs
         },
+        allowedHosts: ['localhost', 'laravel', '0.0.0.0'], // Allow Docker service name
         watch: {
-            usePolling: true, // terkadang diperlukan di Docker env
+            usePolling: true, // often needed in Docker env
         },
+        cors: true, // Enable CORS for cross-origin requests
     },
     plugins: [
         laravel({
             input: 'resources/js/app.tsx',
             refresh: true,
-            devServer: {
-                // inilah yang dipakai plugin untuk injeksi script HMR ke browser
-                host: 'localhost',
-                port: 9002,
-            },
         }),
         react(),
         i18n(),

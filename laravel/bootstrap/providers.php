@@ -9,6 +9,7 @@ $providers = [
 $localProviders = [
     // Development-only Providers
     App\Providers\TelescopeServiceProvider::class,
+    App\Providers\ViteServiceProvider::class,
     // Add more local-only providers here
     // Example: App\Providers\DebugbarServiceProvider::class,
 ];

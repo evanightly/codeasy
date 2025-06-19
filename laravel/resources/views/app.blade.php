@@ -12,8 +12,13 @@
 
         <!-- Scripts -->
         @routes
-        @viteReactRefresh
-        @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
+        @if(app()->environment('local'))
+            @viteReactRefreshWithHost
+            @viteWithHost(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
+        @else
+            @viteReactRefresh
+            @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
+        @endif
         @inertiaHead
     </head>
     <body class="font-sans antialiased">

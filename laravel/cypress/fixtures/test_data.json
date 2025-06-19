@@ -1,0 +1,47 @@
+{
+  "users": {
+    "admin": {
+      "email": "admin@codeasy.local",
+      "password": "password123",
+      "role": "admin"
+    },
+    "student": {
+      "email": "student@test.local", 
+      "password": "student123",
+      "role": "student"
+    }
+  },
+  "courses": {
+    "data_science": {
+      "title": "Data Science Fundamentals",
+      "description": "SKKNI-based data science competency course",
+      "modules": 6
+    },
+    "python_programming": {
+      "title": "Python Programming",
+      "description": "Basic to advanced Python programming concepts",
+      "modules": 6
+    }
+  },
+  "test_code": {
+    "simple_print": "print('Hello, Cypress!')",
+    "basic_function": "def greet(name):\n    return f'Hello, {name}!'\n\nresult = greet('Cypress')\nprint(result)",
+    "data_analysis": "import pandas as pd\n\n# Simple data analysis\ndata = [1, 2, 3, 4, 5]\naverage = sum(data) / len(data)\nprint(f'Average: {average}')",
+    "error_code": "print('Unclosed string",
+    "complex_algorithm": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)\n\nfor i in range(10):\n    print(f'F({i}) = {fibonacci(i)}')"
+  },
+  "selectors": {
+    "course_card": "[data-testid='course-card'], .course-card, [class*='course'], a[href*='/courses/']",
+    "material_card": "[data-testid='material-card'], .material-card, [class*='material'], a[href*='/workspace'], a[href*='/questions']",
+    "code_editor": "[data-testid='code-editor'], .monaco-editor, textarea, [contenteditable='true']",
+    "run_button": "[data-testid='run-button'], button[class*='run'], button:contains('Run'), button:contains('Execute')",
+    "output_panel": "[data-testid='output'], .output, [class*='output']",
+    "test_case": "[data-testid='test-case'], .test-case, [class*='test']"
+  },
+  "timeouts": {
+    "page_load": 15000,
+    "code_execution": 30000,
+    "element_visibility": 10000,
+    "network_request": 10000
+  }
+}

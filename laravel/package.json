@@ -6,7 +6,10 @@
         "dev": "vite",
         "lint": "eslint --fix .",
         "prettier": "prettier --write ./resources",
-        "prepare": "husky"
+        "prepare": "husky",
+        "cypress:open": "cypress open --project cypress",
+        "cypress:run": "cypress run --project cypress",
+        "cypress:run:headless": "cypress run --project cypress --headless"
     },
     "devDependencies": {
         "@eslint/js": "^9.20.0",
@@ -15,7 +18,7 @@
         "@stylistic/eslint-plugin-js": "^3.1.0",
         "@tailwindcss/forms": "^0.5.3",
         "@types/json-schema": "^7.0.15",
-        "@types/node": "^18.13.0",
+        "@types/node": "^18.19.112",
         "@types/prismjs": "^1.26.5",
         "@types/react": "^18.0.28",
         "@types/react-dom": "^18.0.10",
@@ -96,6 +99,7 @@
         "clsx": "^2.1.1",
         "cmdk": "^1.0.0",
         "cobe": "^0.6.3",
+        "cypress": "^14.5.0",
         "date-fns": "^3.6.0",
         "embla-carousel-react": "^8.5.2",
         "filepond": "^4.32.7",

@@ -82,13 +82,17 @@ services:
     ports:
       - "9001:9001"
       - "9002:9002"
+    environment:
+      - APP_URL=http://localhost:9001
+      - VITE_DEV_SERVER_URL=http://localhost:9002
+      - DOCKER_ENV=true
     depends_on:
       mariadb:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "php", "artisan", "--version"]
+      test: ["CMD", "sh", "-c", "php artisan --version && curl -f http://localhost:9001 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -140,6 +144,38 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+
+  cypress-e2e:
+    build:
+      context: .
+      dockerfile: docker/cypress.Dockerfile
+    container_name: codeasy_cypress_e2e
+    volumes:
+      - ./laravel/cypress:/e2e/cypress
+      - ./laravel/node_modules:/e2e/cypress/node_modules
+    ports:
+      - "5900:5900"   # VNC access
+      - "6080:6080"   # noVNC web access
+    environment:
+      - CYPRESS_baseUrl=http://laravel:9001
+      - DISPLAY=:99
+      - TZ=Asia/Jakarta
+    networks:
+      - app-network
+    depends_on:
+      laravel:
+        condition: service_healthy
+      fastapi:
+        condition: service_started
+    # By default, start in interactive mode
+    # Change to ["run"] for headless mode
+    # Change to ["run-firefox"] for Firefox headless mode
+    command: ["open"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   app-network:
