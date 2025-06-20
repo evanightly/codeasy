@@ -3,6 +3,8 @@
 describe('Code Workspace and Execution', () => {
   beforeEach(() => {
     // Ensure user is logged in before each test
+    cy.login();
+    cy.waitForPageLoad();
     cy.visit('/');
     cy.url({ timeout: 15000 }).should('match', /\/(dashboard|courses)/);
   });

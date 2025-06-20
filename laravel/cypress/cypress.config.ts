@@ -34,4 +34,5 @@ export default defineConfig({
         openMode: 0,
     },
     experimentalStudio: true,
+    watchForFileChanges: false,
 });

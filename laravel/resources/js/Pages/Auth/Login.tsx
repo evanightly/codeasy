@@ -413,6 +413,7 @@ export default function Login({
                                                                             onCheckedChange={
                                                                                 field.onChange
                                                                             }
+                                                                            name='remember'
                                                                             className='border-foreground/50 data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600'
                                                                             checked={field.value}
                                                                         />
@@ -463,10 +464,11 @@ export default function Login({
                                                                 variant='ghost'
                                                                 type='button'
                                                                 onClick={() => setStep('emailStep')}
+                                                                name='back-button'
                                                                 disabled={loginMutation.isPending}
                                                                 className='h-8 w-8 p-0 text-foreground/50'
                                                             >
-                                                                <ArrowLeft className='h-4 w-4' />
+                                                                <ArrowLeft />
                                                             </Button>
                                                             <div className='flex items-center gap-2'>
                                                                 <Mail className='h-4 w-4 text-foreground/50' />

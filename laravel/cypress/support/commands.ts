@@ -24,6 +24,10 @@ interface CustomCommands {
     executeCodeInWorkspace(code: string): void;
     navigateToModule(moduleId: number): void;
     checkTestCaseVisible(testCaseId: number): void;
+    selectShadcnOption(triggerSelector: string, optionText: string): void;
+    checkLoadingState(): void;
+    waitForLoadingStateOptional(timeoutMs?: number): void;
+    closeHttp500ErrorDialog(): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
@@ -37,33 +41,37 @@ declare global {
 
 // Login command - handles auto-login or manual login
 Cypress.Commands.add('login', () => {
-    cy.visit('/');
+    cy.fixture('login').then((credentials) => {
+        cy.visit('/');
 
-    // Check if we're already logged in (redirected to dashboard)
-    cy.url().then((url) => {
-        if (url.includes('/dashboard')) {
-            // Already logged in via auto-login
-            cy.log('Auto-login successful');
-        } else {
-            // Need to manually login
-            cy.visit('/login');
+        // Check if we're already logged in (redirected to dashboard)
+        cy.url().then((url) => {
+            if (url.includes('/dashboard')) {
+                // Already logged in via auto-login
+                cy.log('Auto-login successful');
+            } else {
+                // Need to manually login
+                cy.visit('/login');
+                cy.waitForPageLoad();
 
-            // Check if login form exists
-            cy.get('body').then(($body) => {
-                if ($body.find('input[name="email"]').length > 0) {
-                    // Manual login required
-                    cy.get('input[name="email"]').type('admin@codeasy.local');
-                    cy.get('input[name="password"]').type('password123');
-                    cy.get('button[type="submit"]').click();
-                    cy.url().should('include', '/dashboard');
-                    cy.log('Manual login successful');
-                } else {
-                    // Check if we're redirected to dashboard automatically
-                    cy.url().should('include', '/dashboard');
-                    cy.log('Auto-redirect to dashboard');
-                }
-            });
-        }
+                // Manual login using fixture credentials
+                cy.get('input[name="email"]').type(credentials.email);
+                cy.get('button').contains('Next').click();
+
+                // Check for loading state within 2 seconds, proceed if none found
+                cy.waitForLoadingStateOptional(2000);
+
+                cy.get('input[name="password"]')
+                    .should('be.visible')
+                    .clear()
+                    .type(credentials.password);
+                cy.get('button').contains('Sign In').click();
+
+                // Wait for authentication to complete
+                cy.url({ timeout: 10000 }).should('include', '/dashboard');
+                cy.log('Manual login successful with fixture credentials');
+            }
+        });
     });
 });
 
@@ -75,8 +83,24 @@ Cypress.Commands.add('waitForPageLoad', () => {
     // Wait for any loading spinners to disappear
     cy.get('body').should('not.contain', 'Loading...');
 
-    // Wait for main content area to be visible
-    cy.get('main, [role="main"], .main-content').should('be.visible');
+    // Wait for page content to be visible - check for common content containers
+    cy.get('body').should('be.visible');
+
+    // Try to find main content areas, but don't fail if they don't exist
+    cy.get('body').then(($body) => {
+        if ($body.find('main, [role="main"], .main-content').length > 0) {
+            cy.get('main, [role="main"], .main-content').should('be.visible');
+        } else if ($body.find('form').length > 0) {
+            // For auth pages, wait for form to be visible
+            cy.get('form').should('be.visible');
+        } else if ($body.find('[data-component]').length > 0) {
+            // For pages with data-component attribute
+            cy.get('[data-component]').should('be.visible');
+        } else {
+            // Fallback: just ensure body has some content
+            cy.get('body').should('not.be.empty');
+        }
+    });
 });
 
 // Check if element exists without failing
@@ -112,4 +136,72 @@ Cypress.Commands.add('navigateToModule', (moduleId: number) => {
 Cypress.Commands.add('checkTestCaseVisible', (testCaseId: number) => {
     cy.get(`[data-testid="test-case-${testCaseId}"]`).should('be.visible');
     cy.get(`[data-testid="test-case-${testCaseId}"]`).should('not.contain', 'Lock');
+});
+
+// Custom command to handle ShadCN Select components
+Cypress.Commands.add('selectShadcnOption', (triggerSelector: string, optionText: string) => {
+    // Click the select trigger
+    cy.get(triggerSelector).click();
+
+    // Wait for the dropdown content to be visible
+    cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
+
+    // Find and click the option within the listbox
+    cy.get('[role="listbox"]').within(() => {
+        cy.get('[role="option"]').contains(optionText).click({ force: true });
+    });
+
+    // Verify the option is selected by checking the trigger contains the text
+    cy.get(triggerSelector).should('contain', optionText);
+});
+
+// Simple utility to check for any loading state
+Cypress.Commands.add('checkLoadingState', () => {
+    cy.get('body').should('satisfy', ($body) => {
+        const hasLoadingText = /authenticating|loading|processing/i.test($body.text());
+        const hasSpinner = $body.find('.animate-spin, .spinner, [data-loading]').length > 0;
+        const hasDisabledButton = $body.find('button:disabled').length > 0;
+
+        return hasLoadingText || hasSpinner || hasDisabledButton;
+    });
+});
+
+// Conditionally wait for loading state with timeout
+Cypress.Commands.add('waitForLoadingStateOptional', (timeoutMs = 2000) => {
+    cy.get('body', { timeout: timeoutMs }).then(($body) => {
+        const hasLoadingText = /authenticating|loading|processing/i.test($body.text());
+        const hasSpinner = $body.find('.animate-spin, .spinner, [data-loading]').length > 0;
+        const hasDisabledButton = $body.find('button:disabled').length > 0;
+
+        if (hasLoadingText || hasSpinner || hasDisabledButton) {
+            cy.log(`Loading state detected, waiting for it to disappear`);
+            // Wait for loading state to disappear
+            cy.get('body').should('satisfy', ($body) => {
+                const stillLoading =
+                    /authenticating|loading|processing/i.test($body.text()) ||
+                    $body.find('.animate-spin, .spinner, [data-loading]').length > 0 ||
+                    $body.find('button:disabled').length > 0;
+                return !stillLoading;
+            });
+        } else {
+            cy.log(`No loading state detected within ${timeoutMs}ms, proceeding directly`);
+        }
+    });
+});
+
+// Close HTTP 500 error dialog if it appears
+Cypress.Commands.add('closeHttp500ErrorDialog', () => {
+    // the error dialog has "Internal Server Error" text
+    // and a close button with text "On It!"
+    // using body.contains is preferable because radix has mixed up classes and selectors
+    cy.get('body').then(($body) => {
+        if (
+            $body.find('.radix-dialog').length > 0 &&
+            $body.text().includes('Internal Server Error')
+        ) {
+            cy.get('.radix-dialog').should('be.visible');
+            cy.get('.radix-dialog').contains('On It!').click();
+            cy.get('.radix-dialog').should('not.exist');
+        }
+    });
 });
