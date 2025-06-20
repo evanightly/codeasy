@@ -118,7 +118,12 @@ const DashboardSidebarUser = () => {
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                            <Link data-testid="logout-button" method='post' href={route('logout')} className='w-full'>
+                            <Link
+                                method='post'
+                                href={route('logout')}
+                                data-testid='logout-button'
+                                className='w-full'
+                            >
                                 <LogOut />
                                 {t('components.dashboard_sidebar.user.log_out')}
                             </Link>
