@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import { defineConfig } from 'cypress';
 
 export default defineConfig({
@@ -17,6 +18,50 @@ export default defineConfig({
         screenshotsFolder: 'screenshots',
         videosFolder: 'videos',
         downloadsFolder: 'downloads',
+        setupNodeEvents(on, _config) {
+            // Database reset task
+            on('task', {
+                resetDatabase() {
+                    return new Promise((resolve) => {
+                        try {
+                            const startTime = Date.now();
+
+                            console.log('Starting database reset...');
+
+                            // Use Docker exec to run the command in the Laravel container
+                            // Run from the project root where dc.sh is located
+                            console.log('Running cypress:reset-db command via Docker...');
+                            const result = execSync('./dc.sh artisan cypress:reset-db', {
+                                cwd: '/home/evanity/Projects/codeasy',
+                                encoding: 'utf-8',
+                                stdio: 'pipe',
+                            });
+
+                            const duration = Date.now() - startTime;
+                            console.log(`Database reset completed successfully in ${duration}ms`);
+                            console.log('Command output:', result);
+
+                            resolve({
+                                success: true,
+                                duration,
+                                output: result,
+                                message: 'Database reset completed successfully',
+                            });
+                        } catch (error) {
+                            console.error('Database reset failed:', error);
+                            const errorMessage =
+                                error instanceof Error ? error.message : String(error);
+
+                            resolve({
+                                success: false,
+                                error: errorMessage,
+                                message: 'Database reset failed',
+                            });
+                        }
+                    });
+                },
+            });
+        },
     },
     component: {
         devServer: {

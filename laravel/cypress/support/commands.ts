@@ -15,6 +15,7 @@ export {};
 
 // Extend Cypress interface using interface merging
 interface CustomCommands {
+    resetDatabase(): void;
     login(): void;
     setMobileViewport(): void;
     setTabletViewport(): void;
@@ -202,6 +203,38 @@ Cypress.Commands.add('closeHttp500ErrorDialog', () => {
             cy.get('.radix-dialog').should('be.visible');
             cy.get('.radix-dialog').contains('On It!').click();
             cy.get('.radix-dialog').should('not.exist');
+        }
+    });
+});
+
+// Reset the database to a clean state using migrate:fresh and Cypress seeder
+Cypress.Commands.add('resetDatabase', () => {
+    cy.log('Resetting database with migrate:fresh and Cypress seeder');
+
+    // Use HTTP endpoint approach which is more reliable in containerized environments
+    cy.request({
+        method: 'POST',
+        url: '/cypress/reset-database',
+        headers: {
+            'X-Cypress-Test': 'true',
+        },
+        timeout: 30000, // 30 seconds timeout for database operations
+        failOnStatusCode: false, // Don't fail immediately on non-200 status
+    }).then((response) => {
+        cy.log('Database reset HTTP response:', response.body);
+
+        if (response.status === 200 && response.body && response.body.success) {
+            cy.log(`✅ Database reset completed successfully in ${response.body.duration}ms`);
+            if (response.body.output) {
+                cy.log('Command output:', response.body.output);
+            }
+        } else {
+            const errorMsg =
+                response.body?.message ||
+                response.body?.error ||
+                `HTTP ${response.status}: Database reset failed`;
+            cy.log(`❌ Database reset failed: ${errorMsg}`);
+            cy.log(' Please run: ./dc.sh artisan cypress:reset-db before tests');
         }
     });
 });

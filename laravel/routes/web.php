@@ -175,4 +175,15 @@ Route::middleware('auth')->group(function () {
 
 Route::resource('schools', SchoolController::class)->only(['index']);
 
+// Cypress Testing Routes - Available in testing/development or when X-Cypress-Test header is present
+if (env('CYPRESS_TESTING', false) ||
+    env('APP_ENV') === 'testing' ||
+    env('APP_ENV') === 'local' ||
+    request()->hasHeader('X-Cypress-Test')) {
+    Route::prefix('cypress')->name('cypress.')->group(function () {
+        Route::post('/reset-database', [\App\Http\Controllers\Cypress\CypressDatabaseController::class, 'resetDatabase'])->name('reset-database');
+        Route::get('/status', [\App\Http\Controllers\Cypress\CypressDatabaseController::class, 'status'])->name('status');
+    });
+}
+
 require __DIR__ . '/auth.php';

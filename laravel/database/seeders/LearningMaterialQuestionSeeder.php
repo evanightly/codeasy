@@ -24,11 +24,15 @@ class LearningMaterialQuestionSeeder extends Seeder {
             return;
         }
 
-        // Skip seeding if courses were imported from Excel
-        if ($this->wasExcelImportUsed()) {
+        // Skip seeding if courses were imported from Excel (unless forcing dev seeding)
+        if ($this->wasExcelImportUsed() && !$forceDevSeeding) {
             $this->info('Skipping learning material questions seeding as courses were imported from Excel.');
 
             return;
+        }
+
+        if ($forceDevSeeding) {
+            $this->info('Forcing development seeding for learning material questions...');
         }
 
         $this->seedDevelopmentData();

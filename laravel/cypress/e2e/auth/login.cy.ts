@@ -11,6 +11,9 @@ describe('User Login Flow', () => {
     });
 
     beforeEach(() => {
+        // Reset database to ensure clean state for each test
+        cy.resetDatabase();
+
         // Clear any existing session
         cy.clearCookies();
         cy.clearLocalStorage();

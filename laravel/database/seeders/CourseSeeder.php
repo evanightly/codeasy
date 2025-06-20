@@ -28,18 +28,24 @@ class CourseSeeder extends Seeder {
             return;
         }
 
-        // Check if we have an Excel file to import
+        // Check if we have an Excel file to import (but skip if forcing dev seeding)
         $excelPath = $this->getExcelImportPath();
 
-        if ($excelPath && file_exists($excelPath)) {
+        if ($excelPath && file_exists($excelPath) && !$forceDevSeeding) {
             $this->info('Found Excel import file. Importing courses from Excel...');
-            $this->importFromExcel($excelPath);
+            $result = $this->importFromExcel($excelPath);
+
+            // If Excel import fails, fall back to development seeding
+            if (!$result) {
+                $this->info('Excel import failed. Falling back to development seeding...');
+                $this->seedDevelopmentData();
+            }
 
             return;
         }
 
-        // Fall back to default seeding if no Excel file is found
-        $this->info('No Excel import file found. Using default seeding data...');
+        // Fall back to default seeding if no Excel file is found or dev seeding is forced
+        $this->info($forceDevSeeding ? 'Forcing development seeding (Excel import skipped)...' : 'No Excel import file found. Using default seeding data...');
         $this->seedDevelopmentData();
     }
 
@@ -47,7 +53,7 @@ class CourseSeeder extends Seeder {
         // Production data would go here if needed
     }
 
-    private function importFromExcel($filePath): void {
+    private function importFromExcel($filePath): bool {
         $importer = app(CourseImportService::class);
         $result = $importer->import($filePath);
 
@@ -57,12 +63,16 @@ class CourseSeeder extends Seeder {
             $this->info("- {$result['stats']['materials']} learning materials");
             $this->info("- {$result['stats']['questions']} questions");
             $this->info("- {$result['stats']['testCases']} test cases");
-        } else {
-            $this->error('Excel import failed: ' . $result['message']);
-            foreach ($result['errors'] as $error) {
-                $this->warn("- {$error}");
-            }
+
+            return true;
         }
+        $this->error('Excel import failed: ' . $result['message']);
+        foreach ($result['errors'] as $error) {
+            $this->warn("- {$error}");
+        }
+
+        return false;
+
     }
 
     private function seedDevelopmentData(): void {
