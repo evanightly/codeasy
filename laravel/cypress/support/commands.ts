@@ -228,6 +228,11 @@ Cypress.Commands.add('resetDatabase', () => {
             if (response.body.output) {
                 cy.log('Command output:', response.body.output);
             }
+            
+            // Clear session data after database reset to prevent CSRF token issues
+            cy.log('🧹 Clearing session data to prevent CSRF token mismatches...');
+            cy.clearCookies();
+            cy.clearLocalStorage();
         } else {
             const errorMsg =
                 response.body?.message ||

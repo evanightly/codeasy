@@ -14,9 +14,7 @@ describe('User Login Flow', () => {
         // Reset database to ensure clean state for each test
         cy.resetDatabase();
 
-        // Clear any existing session
-        cy.clearCookies();
-        cy.clearLocalStorage();
+        // Visit login page with fresh session
         cy.visit('/login');
         cy.waitForPageLoad();
     });

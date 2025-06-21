@@ -2,10 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Database\Seeders\CypressSeeder;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CypressResetDatabase extends Command {
     /**
@@ -16,7 +15,7 @@ class CypressResetDatabase extends Command {
     /**
      * The console command description.
      */
-    protected $description = 'Reset database for Cypress E2E testing using migrate:fresh and CypressSeeder';
+    protected $description = 'Reset database for Cypress E2E testing by importing SQL dump file';
 
     /**
      * Execute the console command.
@@ -27,16 +26,66 @@ class CypressResetDatabase extends Command {
         $startTime = microtime(true);
 
         try {
-            // Run fresh migrations
-            $this->info('📦 Running migrate:fresh...');
-            Artisan::call('migrate:fresh', ['--force' => true]);
+            // Check if SQL dump file exists
+            if (!Storage::disk('local')->exists('imports/codeasy.sql')) {
+                $this->error('❌ SQL dump file not found at storage/app/imports/codeasy.sql');
 
-            // Seed with Cypress test data
-            $this->info('🌱 Seeding with CypressSeeder...');
-            Artisan::call('db:seed', [
-                '--class' => CypressSeeder::class,
-                '--force' => true,
-            ]);
+                return self::FAILURE;
+            }
+
+            $this->info('📦 Dropping all tables and importing SQL dump...');
+
+            // Get the full path to the SQL file
+            $sqlFilePath = Storage::disk('local')->path('imports/codeasy.sql');
+
+            // Get database configuration
+            $database = config('database.default');
+            $config = config("database.connections.{$database}");
+
+            // First, drop and recreate the database to ensure clean state
+            $dropCommand = sprintf(
+                'mariadb -h %s -P %s -u %s -p%s --ssl=false -e "DROP DATABASE IF EXISTS %s; CREATE DATABASE %s;"',
+                $config['host'],
+                $config['port'],
+                $config['username'],
+                $config['password'],
+                $config['database'],
+                $config['database']
+            );
+
+            $output = [];
+            $returnCode = null;
+            exec($dropCommand . ' 2>&1', $output, $returnCode);
+
+            if ($returnCode !== 0) {
+                $this->error('❌ Database drop/create failed:');
+                $this->error(implode("\n", $output));
+
+                return self::FAILURE;
+            }
+
+            // Then import the SQL dump with foreign key checks disabled
+            $importCommand = sprintf(
+                'mariadb -h %s -P %s -u %s -p%s --ssl=false %s -e "SET FOREIGN_KEY_CHECKS=0; SOURCE %s; SET FOREIGN_KEY_CHECKS=1;"',
+                $config['host'],
+                $config['port'],
+                $config['username'],
+                $config['password'],
+                $config['database'],
+                $sqlFilePath
+            );
+
+            // Execute the import command
+            $output = [];
+            $returnCode = null;
+            exec($importCommand . ' 2>&1', $output, $returnCode);
+
+            if ($returnCode !== 0) {
+                $this->error('❌ SQL import failed:');
+                $this->error(implode("\n", $output));
+
+                return self::FAILURE;
+            }
 
             $duration = round((microtime(true) - $startTime) * 1000, 2);
 

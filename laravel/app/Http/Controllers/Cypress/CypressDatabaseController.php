@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Cypress;
 
 use App\Http\Controllers\Controller;
-use Database\Seeders\CypressSeeder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Cypress Database Management Controller
  *
- * Provides simple, reliable database reset for E2E testing using migrate:fresh and seeding.
+ * Provides simple, reliable database reset for E2E testing by importing SQL dump file.
+ * Only available when CYPRESS_TESTING environment variable is true.
  * Only available when CYPRESS_TESTING environment variable is true.
  */
 class CypressDatabaseController extends Controller {
@@ -41,10 +41,10 @@ class CypressDatabaseController extends Controller {
     }
 
     /**
-     * Reset database to clean state using migrate:fresh and seed with test data
+     * Reset database to clean state by importing SQL dump file
      *
-     * This is the simple, reliable approach - no complex truncation or verification.
-     * Just fresh migrations + Cypress seeder.
+     * This is the simple, reliable approach - imports pre-configured SQL dump.
+     * Much faster than migrations and ensures exact same data state.
      */
     public function resetDatabase(Request $request): JsonResponse {
         if ($validation = $this->validateCypressAccess()) {
@@ -52,18 +52,60 @@ class CypressDatabaseController extends Controller {
         }
 
         try {
-            Log::info('Cypress: Starting database reset with migrate:fresh');
+            Log::info('Cypress: Starting database reset with SQL import');
 
             $startTime = microtime(true);
 
-            // Run fresh migrations - this drops all tables and recreates them
-            Artisan::call('migrate:fresh', ['--force' => true]);
+            // Check if SQL dump file exists
+            if (!Storage::disk('local')->exists('imports/codeasy.sql')) {
+                throw new \Exception('SQL dump file not found at storage/app/imports/codeasy.sql');
+            }
 
-            // Seed with Cypress test data
-            Artisan::call('db:seed', [
-                '--class' => CypressSeeder::class,
-                '--force' => true,
-            ]);
+            // Get the full path to the SQL file
+            $sqlFilePath = Storage::disk('local')->path('imports/codeasy.sql');
+
+            // Get database configuration
+            $database = config('database.default');
+            $config = config("database.connections.{$database}");
+
+            // First, drop and recreate the database to ensure clean state
+            $dropCommand = sprintf(
+                'mariadb -h %s -P %s -u %s -p%s --ssl=false -e "DROP DATABASE IF EXISTS %s; CREATE DATABASE %s;"',
+                $config['host'],
+                $config['port'],
+                $config['username'],
+                $config['password'],
+                $config['database'],
+                $config['database']
+            );
+
+            $output = [];
+            $returnCode = null;
+            exec($dropCommand . ' 2>&1', $output, $returnCode);
+
+            if ($returnCode !== 0) {
+                throw new \Exception('Database drop/create failed: ' . implode("\n", $output));
+            }
+
+            // Then import the SQL dump with foreign key checks disabled
+            $importCommand = sprintf(
+                'mariadb -h %s -P %s -u %s -p%s --ssl=false %s -e "SET FOREIGN_KEY_CHECKS=0; SOURCE %s; SET FOREIGN_KEY_CHECKS=1;"',
+                $config['host'],
+                $config['port'],
+                $config['username'],
+                $config['password'],
+                $config['database'],
+                $sqlFilePath
+            );
+
+            // Execute the import command
+            $output = [];
+            $returnCode = null;
+            exec($importCommand . ' 2>&1', $output, $returnCode);
+
+            if ($returnCode !== 0) {
+                throw new \Exception('SQL import failed: ' . implode("\n", $output));
+            }
 
             $duration = round((microtime(true) - $startTime) * 1000, 2);
 
@@ -73,8 +115,9 @@ class CypressDatabaseController extends Controller {
 
             return response()->json([
                 'success' => true,
-                'message' => 'Database reset successfully with migrate:fresh and Cypress seeder',
-                'duration_ms' => $duration,
+                'message' => 'Database reset successfully with SQL import',
+                'duration' => $duration,
+                'output' => 'Database imported from codeasy.sql',
                 'timestamp' => now()->toISOString(),
             ]);
 
