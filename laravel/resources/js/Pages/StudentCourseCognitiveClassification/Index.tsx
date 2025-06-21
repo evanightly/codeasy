@@ -26,11 +26,12 @@ import {
 } from '@/Components/UI/select';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { courseServiceHook } from '@/Services/courseServiceHook';
+import { studentScoreServiceHook } from '@/Services/studentScoreServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { BarChart2, FileSpreadsheet } from 'lucide-react';
+import { BarChart2, Download, FileSpreadsheet } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -41,12 +42,20 @@ export default function Index() {
     const { t } = useLaravelReactI18n();
     const [reportDialogOpen, setReportDialogOpen] = useState(false);
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
-    const { data: courses, isLoading } = courseServiceHook.useGetAll();
+    const { data: courses, isLoading } = courseServiceHook.useGetAll({
+        filters: { page_size: 'all' },
+    });
+    const exportStudentScores = studentScoreServiceHook.useExportTabularData();
 
     // Form schema for report generation
     const reportFormSchema = z.object({
         course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
         classification_type: z.string().default('topsis'),
+    });
+
+    // Form schema for student scores export
+    const exportFormSchema = z.object({
+        course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
     });
 
     const reportForm = useForm<z.infer<typeof reportFormSchema>>({
@@ -57,9 +66,22 @@ export default function Index() {
         },
     });
 
+    const exportForm = useForm<z.infer<typeof exportFormSchema>>({
+        resolver: zodResolver(exportFormSchema),
+        defaultValues: {
+            course_id: 0,
+        },
+    });
+
     const handleGenerateReport = async (values: z.infer<typeof reportFormSchema>) => {
         setSelectedCourseId(values.course_id);
         setReportDialogOpen(true);
+    };
+
+    const handleExportStudentScores = async (values: z.infer<typeof exportFormSchema>) => {
+        exportStudentScores.mutate({
+            course_id: values.course_id,
+        });
     };
 
     return (
@@ -70,6 +92,98 @@ export default function Index() {
                         {t('pages.student_course_cognitive_classification.index.title')}
                     </h1>
                     <div className='flex flex-wrap gap-2'>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant='outline'>
+                                    <Download className='mr-2 h-4 w-4' />
+                                    {t('pages.student_score.export.dialog.title')}
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        {t('pages.student_score.export.dialog.title')}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        {t('pages.student_score.export.dialog.description')}
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <Form {...exportForm}>
+                                    <form
+                                        onSubmit={exportForm.handleSubmit(
+                                            handleExportStudentScores,
+                                        )}
+                                        className='space-y-4'
+                                    >
+                                        <FormField
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t(
+                                                            'pages.student_score.export.dialog.course_label',
+                                                        )}
+                                                    </FormLabel>
+                                                    <Select
+                                                        onValueChange={(value) =>
+                                                            field.onChange(parseInt(value))
+                                                        }
+                                                        defaultValue={field.value?.toString()}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue
+                                                                    placeholder={t(
+                                                                        'pages.student_score.export.dialog.select_course_placeholder',
+                                                                    )}
+                                                                />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {isLoading ? (
+                                                                <SelectItem value='0' disabled>
+                                                                    {t(
+                                                                        'pages.student_score.export.dialog.loading',
+                                                                    )}
+                                                                </SelectItem>
+                                                            ) : (
+                                                                courses?.data?.map((course) => (
+                                                                    <SelectItem
+                                                                        value={course.id.toString()}
+                                                                        key={course.id}
+                                                                    >
+                                                                        {course.name}
+                                                                    </SelectItem>
+                                                                ))
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                            name='course_id'
+                                            control={exportForm.control}
+                                        />
+
+                                        <DialogFooter>
+                                            <Button
+                                                type='submit'
+                                                disabled={exportStudentScores.isPending}
+                                            >
+                                                {exportStudentScores.isPending
+                                                    ? t(
+                                                          'pages.student_score.export.dialog.buttons.exporting',
+                                                      )
+                                                    : t(
+                                                          'pages.student_score.export.dialog.buttons.export_excel',
+                                                      )}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
+
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button variant='outline'>

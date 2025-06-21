@@ -2619,4 +2619,30 @@ return [
             ],
         ],
     ],
+
+    // Student Score Export
+    'student_score' => [
+        'export' => [
+            'title' => 'Schüler-Bewertungsbericht - Abschlussraten nach Material',
+            'course_label' => 'Kurs',
+            'headers' => [
+                'student_name' => 'Schülername',
+                'student_id' => 'Schüler-ID',
+                'overall_average' => 'Gesamtdurchschnitt (%)',
+                'material_completion' => '(% Abgeschlossen)',
+            ],
+            'filename' => 'schueler_bewertungen_tabular_daten',
+            'dialog' => [
+                'title' => 'Schüler-Bewertungen exportieren',
+                'description' => 'Exportieren Sie eine Excel-Datei mit Abschlussraten für alle Schüler über alle Materialien. Jede Zelle zeigt den Prozentsatz der abgeschlossenen Testfälle.',
+                'course_label' => 'Kurs',
+                'select_course_placeholder' => 'Wählen Sie einen Kurs',
+                'loading' => 'Laden...',
+                'buttons' => [
+                    'export_excel' => 'Excel exportieren',
+                    'exporting' => 'Exportieren...',
+                ],
+            ],
+        ],
+    ],
 ];

@@ -2640,4 +2640,30 @@ return [
             ],
         ],
     ],
+
+    // Student Score Export
+    'student_score' => [
+        'export' => [
+            'title' => 'Laporan Skor Siswa - Tingkat Penyelesaian per Materi',
+            'course_label' => 'Kursus',
+            'headers' => [
+                'student_name' => 'Nama Siswa',
+                'student_id' => 'ID Siswa',
+                'overall_average' => 'Rata-rata Keseluruhan (%)',
+                'material_completion' => '(% Selesai)',
+            ],
+            'filename' => 'data_tabular_skor_siswa',
+            'dialog' => [
+                'title' => 'Ekspor Skor Siswa',
+                'description' => 'Ekspor file Excel yang menunjukkan tingkat penyelesaian untuk semua siswa di seluruh materi. Setiap sel menunjukkan persentase kasus uji yang diselesaikan.',
+                'course_label' => 'Kursus',
+                'select_course_placeholder' => 'Pilih kursus',
+                'loading' => 'Memuat...',
+                'buttons' => [
+                    'export_excel' => 'Ekspor Excel',
+                    'exporting' => 'Mengekspor...',
+                ],
+            ],
+        ],
+    ],
 ];

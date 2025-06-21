@@ -6,6 +6,7 @@ use App\Http\Resources\StudentScoreResource;
 use App\Models\LearningMaterial;
 use App\Models\LearningMaterialQuestion;
 use App\Models\StudentScore;
+use App\Models\User;
 use App\Repositories\StudentScoreRepository;
 use App\Support\Interfaces\Repositories\StudentScoreRepositoryInterface;
 use App\Support\Interfaces\Services\StudentScoreServiceInterface;
@@ -13,6 +14,7 @@ use App\Traits\Services\HandlesPageSizeAll;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class StudentScoreService extends BaseCrudService implements StudentScoreServiceInterface {
@@ -474,5 +476,342 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
         }
 
         return $successCount > 0;
+    }
+
+    /**
+     * Export student scores tabular data to Excel showing completion rates across all materials
+     */
+    public function exportTabularDataToExcel(array $filters = []): \Symfony\Component\HttpFoundation\BinaryFileResponse {
+        // Create a new spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Student Scores Report');
+
+        // Get filters
+        $courseId = $filters['course_id'] ?? null;
+        $learningMaterialId = $filters['learning_material_id'] ?? null;
+
+        // Log::info('StudentScoreService@exportTabularDataToExcel started', [
+        //     'filters' => $filters,
+        //     'courseId' => $courseId,
+        //     'learningMaterialId' => $learningMaterialId,
+        // ]);
+
+        // STEP 1: Get enrolled students for the course (if course filter is applied)
+        $enrolledStudentIds = [];
+        if ($courseId) {
+            // Get students who are enrolled in the course through classroom
+            $enrolledStudentIds = DB::table('users')
+                ->join('class_room_students', 'users.id', '=', 'class_room_students.user_id')
+                ->join('courses', 'class_room_students.class_room_id', '=', 'courses.class_room_id')
+                ->where('courses.id', $courseId)
+                ->pluck('users.id')
+                ->toArray();
+
+            // Log::info('StudentScoreService@exportTabularDataToExcel enrolled students', [
+            //     'courseId' => $courseId,
+            //     'enrolledCount' => count($enrolledStudentIds),
+            //     'enrolledIds' => $enrolledStudentIds,
+            // ]);
+        }
+
+        // STEP 2: Build query for student scores
+        $query = StudentScore::with([
+            'user',
+            'learning_material_question.learning_material.course',
+        ]);
+
+        // Filter by course
+        if ($courseId) {
+            $query->whereHas('learning_material_question.learning_material.course', function ($q) use ($courseId) {
+                $q->where('id', $courseId);
+            });
+
+            // CRUCIAL: Only include enrolled students
+            if (!empty($enrolledStudentIds)) {
+                $query->whereIn('user_id', $enrolledStudentIds);
+            } else {
+                // If no enrolled students found, return empty result
+                Log::warning('No enrolled students found for course', ['courseId' => $courseId]);
+            }
+        }
+
+        // Filter by learning material
+        if ($learningMaterialId) {
+            $query->whereHas('learning_material_question', function ($q) use ($learningMaterialId) {
+                $q->where('learning_material_id', $learningMaterialId);
+            });
+        }
+
+        // Log::info('StudentScoreService@exportTabularDataToExcel query built', [
+        //     'sql' => $query->toRawSql(),
+        // ]);
+
+        $scores = $query->get();
+
+        // Log::info('StudentScoreService@exportTabularDataToExcel scores retrieved', [
+        //     'scoresCount' => $scores->count(),
+        // ]);
+
+        // STEP 3: Get correct student names - ALWAYS FRESH FROM DATABASE
+        $uniqueStudentIds = $scores->pluck('user_id')->unique();
+        $students = User::whereIn('id', $uniqueStudentIds)->get(['id', 'name']);
+        $studentNames = [];
+        foreach ($students as $student) {
+            $studentNames[$student->id] = $student->name;
+        }
+
+        // If course filter is applied, also ensure we have names for all enrolled students
+        if (!empty($enrolledStudentIds)) {
+            $enrolledStudents = User::whereIn('id', $enrolledStudentIds)->get(['id', 'name']);
+            foreach ($enrolledStudents as $student) {
+                // Only add if not already present (prioritize actual score data)
+                if (!isset($studentNames[$student->id])) {
+                    $studentNames[$student->id] = $student->name;
+                }
+            }
+        }
+
+        // Log::info('StudentScoreService@exportTabularDataToExcel student names', [
+        //     'studentNamesCount' => count($studentNames),
+        //     'uniqueStudentIds' => $uniqueStudentIds->toArray(),
+        //     'studentNames' => $studentNames,
+        // ]);
+
+        // STEP 4: Group data by student and material
+        $studentsData = [];
+        $materialsData = [];
+
+        // Log::info('StudentScoreService@exportTabularDataToExcel processing scores', [
+        //     'totalScores' => $scores->count(),
+        //     'uniqueStudentIds' => $scores->pluck('user_id')->unique()->values()->toArray(),
+        //     'uniqueStudentCount' => $scores->pluck('user_id')->unique()->count(),
+        //     'scoresByStudent' => $scores->groupBy('user_id')->map(function ($group) {
+        //         return [
+        //             'count' => $group->count(),
+        //             'first_name' => $group->first()->user->name ?? 'N/A',
+        //             'score_ids' => $group->pluck('id')->toArray(),
+        //         ];
+        //     })->toArray(),
+        // ]);
+
+        foreach ($scores as $score) {
+            $studentId = $score->user_id;
+            $studentName = $studentNames[$studentId] ?? ('Unknown Student ID: ' . $studentId);
+            $materialId = $score->learning_material_question->learning_material_id;
+            $materialTitle = $score->learning_material_question->learning_material->title ?? 'Unknown Material';
+            $courseName = $score->learning_material_question->learning_material->course->name ?? 'Unknown Course';
+
+            // Log::info('StudentScoreService@exportTabularDataToExcel processing score', [
+            //     'scoreId' => $score->id,
+            //     'studentId' => $studentId,
+            //     'studentNameFromArray' => $studentName,
+            //     'studentNameFromRelation' => $score->user->name ?? 'N/A',
+            //     'materialId' => $materialId,
+            //     'questionId' => $score->learning_material_question_id,
+            // ]);
+
+            // CRITICAL FIX: Initialize student data with correct name and NEVER overwrite it
+            if (!isset($studentsData[$studentId])) {
+                $studentsData[$studentId] = [
+                    'name' => $studentName,
+                    'materials' => [],
+                ];
+                // Log::info('StudentScoreService@exportTabularDataToExcel new student added', [
+                //     'studentId' => $studentId,
+                //     'studentName' => $studentName,
+                // ]);
+            }
+            // DO NOT UPDATE NAME AFTER INITIALIZATION - this was causing the overwrite issue
+
+            // Store material info
+            if (!isset($materialsData[$materialId])) {
+                $materialsData[$materialId] = [
+                    'title' => $materialTitle,
+                    'course' => $courseName,
+                    'order' => $score->learning_material_question->learning_material->order_number ?? 0,
+                ];
+            }
+
+            // Store the score data
+            if (!isset($studentsData[$studentId]['materials'][$materialId])) {
+                $studentsData[$studentId]['materials'][$materialId] = [
+                    'total_questions' => 0,
+                    'completed_questions' => 0,
+                    'total_test_cases' => 0,
+                    'completed_test_cases' => 0,
+                    'average_completion_rate' => 0,
+                ];
+            }
+
+            // Aggregate the data
+            $studentsData[$studentId]['materials'][$materialId]['total_questions']++;
+            if ($score->completion_status) {
+                $studentsData[$studentId]['materials'][$materialId]['completed_questions']++;
+            }
+            $studentsData[$studentId]['materials'][$materialId]['total_test_cases'] += $score->test_case_total_count;
+            $studentsData[$studentId]['materials'][$materialId]['completed_test_cases'] += $score->test_case_complete_count;
+        }
+
+        // Log::info('StudentScoreService@exportTabularDataToExcel data grouped', [
+        //     'studentsCount' => count($studentsData),
+        //     'materialsCount' => count($materialsData),
+        //     'studentsDataKeys' => array_keys($studentsData),
+        // ]);
+
+        // Debug specific students that might be duplicating
+        // foreach ($studentsData as $studentId => $studentData) {
+        //     Log::info('StudentScoreService@exportTabularDataToExcel final student data', [
+        //         'studentId' => $studentId,
+        //         'studentName' => $studentData['name'],
+        //         'materialsKeys' => array_keys($studentData['materials']),
+        //         'materialsData' => $studentData['materials'],
+        //     ]);
+        // }
+
+        // Calculate average completion rates for each student-material combination
+        foreach ($studentsData as $studentId => $studentData) {
+            foreach ($studentData['materials'] as $materialId => $materialData) {
+                if ($materialData['total_test_cases'] > 0) {
+                    $studentsData[$studentId]['materials'][$materialId]['average_completion_rate'] = round(
+                        ($materialData['completed_test_cases'] / $materialData['total_test_cases']) * 100,
+                        2
+                    );
+                }
+            }
+        }
+
+        // Sort materials by order
+        uasort($materialsData, function ($a, $b) {
+            return $a['order'] <=> $b['order'];
+        });
+
+        // Set up Excel headers
+        $row = 1;
+        $col = 'A';
+
+        // Title
+        $sheet->setCellValue('A1', 'Student Scores Report - Completion Rates by Material');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->mergeCells('A1:' . chr(65 + count($materialsData) + 2) . '1');
+        $row++;
+
+        // Add course filter info if applicable
+        if ($courseId) {
+            $courseName = $materialsData[array_key_first($materialsData)]['course'] ?? 'Unknown Course';
+            $sheet->setCellValue('A2', 'Course: ' . $courseName);
+            $sheet->getStyle('A2')->getFont()->setBold(true);
+            $row++;
+        }
+        $row++;
+
+        // Headers
+        $sheet->setCellValue('A' . $row, 'Student Name');
+        $sheet->setCellValue('B' . $row, 'Student ID');
+        $col = 'C';
+
+        foreach ($materialsData as $materialId => $materialInfo) {
+            $sheet->setCellValue($col . $row, $materialInfo['title'] . ' (% Complete)');
+            $col++;
+        }
+
+        $sheet->setCellValue($col . $row, 'Overall Average (%)');
+
+        // Style headers
+        $headerRange = 'A' . $row . ':' . $col . $row;
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E2E8F0');
+
+        $row++;
+
+        // Data rows
+        foreach ($studentsData as $studentId => $studentData) {
+            // Log::info('StudentScoreService@exportTabularDataToExcel writing row', [
+            //     'rowNumber' => $row,
+            //     'studentId' => $studentId,
+            //     'studentName' => $studentData['name'],
+            //     'materialsCount' => count($studentData['materials']),
+            // ]);
+
+            $col = 'A';
+            $sheet->setCellValue($col++ . $row, $studentData['name']);
+            $sheet->setCellValue($col++ . $row, $studentId);
+
+            $totalCompletionRate = 0;
+
+            foreach ($materialsData as $materialId => $materialInfo) {
+                $completionRate = 0;
+                if (isset($studentData['materials'][$materialId])) {
+                    $completionRate = $studentData['materials'][$materialId]['average_completion_rate'];
+                }
+                $totalCompletionRate += $completionRate;
+
+                $sheet->setCellValue($col++ . $row, $completionRate . '%');
+            }
+
+            // Calculate overall average based on ALL materials in course, not just ones student worked on
+            $totalMaterialsInCourse = count($materialsData);
+            $overallAverage = $totalMaterialsInCourse > 0 ? round($totalCompletionRate / $totalMaterialsInCourse, 2) : 0;
+            $sheet->setCellValue($col . $row, $overallAverage . '%');
+
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', $col) as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Add color coding for completion rates
+        $this->addCompletionRateColors($sheet, $row - 1, count($materialsData) + 3);
+
+        // Create temporary file
+        $filename = 'student_scores_tabular_data_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $tempPath = storage_path('app/temp/' . $filename);
+
+        // Ensure temp directory exists
+        if (!file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        // Save file
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($tempPath);
+
+        // Return download response
+        return response()->download($tempPath, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend();
+    }
+
+    /**
+     * Add color coding for completion rates in the Excel sheet
+     */
+    private function addCompletionRateColors($sheet, $lastRow, $totalCols): void {
+        // Color code completion rates
+        for ($row = 5; $row <= $lastRow; $row++) {
+            for ($col = 3; $col <= $totalCols; $col++) {
+                $cellValue = $sheet->getCell(chr(64 + $col) . $row)->getValue();
+                $percentage = floatval(str_replace('%', '', $cellValue));
+
+                $color = 'FFFFFF'; // White default
+                if ($percentage >= 80) {
+                    $color = 'D4F6CC'; // Light green
+                } elseif ($percentage >= 60) {
+                    $color = 'FFF2CC'; // Light yellow
+                } elseif ($percentage >= 40) {
+                    $color = 'FFE6CC'; // Light orange
+                } elseif ($percentage > 0) {
+                    $color = 'FFCCCC'; // Light red
+                }
+
+                $sheet->getStyle(chr(64 + $col) . $row)
+                    ->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB($color);
+            }
+        }
     }
 }

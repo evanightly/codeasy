@@ -122,6 +122,34 @@ export const studentScoreServiceHook = {
         });
     },
 
+    /**
+     * Export student scores tabular data to Excel
+     */
+    useExportTabularData: () => {
+        return createMutation({
+            mutationFn: async (filters?: { course_id?: number; learning_material_id?: number }) => {
+                const url = route(`${ROUTES.STUDENT_SCORES}.index`);
+                const params = {
+                    intent: IntentEnum.STUDENT_SCORE_INDEX_EXPORT_TABULAR_DATA,
+                    ...filters,
+                };
+
+                // Create a temporary link element to trigger download
+                const link = document.createElement('a');
+                link.href = `${url}?${new URLSearchParams(params as any).toString()}`;
+                // Use localized filename (the backend will handle the actual filename with timestamp)
+                link.download = `student_scores_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                return { success: true, message: 'Export started successfully' };
+            },
+        });
+    },
+
     customFunctionExample: async () => {
         console.log('custom function');
     },

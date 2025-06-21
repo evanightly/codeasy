@@ -2631,4 +2631,30 @@ return [
             ],
         ],
     ],
+
+    // Student Score Export
+    'student_score' => [
+        'export' => [
+            'title' => 'Student Scores Report - Completion Rates by Material',
+            'course_label' => 'Course',
+            'headers' => [
+                'student_name' => 'Student Name',
+                'student_id' => 'Student ID',
+                'overall_average' => 'Overall Average (%)',
+                'material_completion' => '(% Complete)',
+            ],
+            'filename' => 'student_scores_tabular_data',
+            'dialog' => [
+                'title' => 'Export Student Scores',
+                'description' => 'Export Excel file showing completion rates for all students across materials. Each cell shows the percentage of completed test cases.',
+                'course_label' => 'Course',
+                'select_course_placeholder' => 'Select a course',
+                'loading' => 'Loading...',
+                'buttons' => [
+                    'export_excel' => 'Export Excel',
+                    'exporting' => 'Exporting...',
+                ],
+            ],
+        ],
+    ],
 ];

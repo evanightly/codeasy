@@ -39,6 +39,10 @@ class StudentScoreController extends Controller implements HasMiddleware {
             return inertia('StudentScore/LockedStudents', ['data' => $data]);
         }
 
+        if ($intent === IntentEnum::STUDENT_SCORE_INDEX_EXPORT_TABULAR_DATA->value) {
+            return $this->studentScoreService->exportTabularDataToExcel($request->query());
+        }
+
         $data = StudentScoreResource::collection($this->studentScoreService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {

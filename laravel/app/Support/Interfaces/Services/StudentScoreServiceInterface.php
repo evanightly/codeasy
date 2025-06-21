@@ -69,4 +69,9 @@ interface StudentScoreServiceInterface extends BaseCrudServiceInterface {
      * Allow re-attempt for all questions in a material
      */
     public function allowReAttemptAllQuestions(int $userId, int $materialId): bool;
+
+    /**
+     * Export student scores tabular data to Excel
+     */
+    public function exportTabularDataToExcel(array $filters = []): \Symfony\Component\HttpFoundation\BinaryFileResponse;
 }
