@@ -29,6 +29,11 @@ interface CustomCommands {
     checkLoadingState(): void;
     waitForLoadingStateOptional(timeoutMs?: number): void;
     closeHttp500ErrorDialog(): void;
+    typeWithLoadingRetry(
+        selector: string,
+        text: string,
+        options?: { maxAttempts?: number; delay?: number },
+    ): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
@@ -62,10 +67,9 @@ Cypress.Commands.add('login', () => {
                 // Check for loading state within 2 seconds, proceed if none found
                 cy.waitForLoadingStateOptional(2000);
 
-                cy.get('input[name="password"]')
-                    .should('be.visible')
-                    .clear()
-                    .type(credentials.password);
+                // Use helper function to handle password typing with retry logic
+                cy.typeWithLoadingRetry('input[name="password"]', credentials.password);
+
                 cy.get('button').contains('Sign In').click();
 
                 // Wait for authentication to complete
@@ -228,7 +232,7 @@ Cypress.Commands.add('resetDatabase', () => {
             if (response.body.output) {
                 cy.log('Command output:', response.body.output);
             }
-            
+
             // Clear session data after database reset to prevent CSRF token issues
             cy.log('🧹 Clearing session data to prevent CSRF token mismatches...');
             cy.clearCookies();
@@ -242,4 +246,45 @@ Cypress.Commands.add('resetDatabase', () => {
             cy.log(' Please run: ./dc.sh artisan cypress:reset-db before tests');
         }
     });
+});
+
+// Helper function to type text with retry logic when loading states interfere
+Cypress.Commands.add('typeWithLoadingRetry', (selector: string, text: string, options = {}) => {
+    const { maxAttempts = 3, delay = 50 } = options;
+
+    const typeWithRetry = (attempt = 1) => {
+        cy.log(`Typing attempt ${attempt}/${maxAttempts} for selector: ${selector}`);
+
+        cy.get(selector).clear().type(text, { delay });
+
+        // Check if loading state triggered during typing
+        cy.get('body').then(($body) => {
+            const isLoading =
+                /authenticating|loading|processing/i.test($body.text()) ||
+                $body.find('.animate-spin, .spinner, [data-loading]').length > 0 ||
+                $body.find('button:disabled').length > 0;
+
+            if (isLoading && attempt < maxAttempts) {
+                cy.log(`⚠️ Loading state detected during typing, retrying...`);
+
+                // Wait for loading state to clear
+                cy.get('body').should('satisfy', ($body) => {
+                    const stillLoading =
+                        /authenticating|loading|processing/i.test($body.text()) ||
+                        $body.find('.animate-spin, .spinner, [data-loading]').length > 0 ||
+                        $body.find('button:disabled').length > 0;
+                    return !stillLoading;
+                });
+
+                // Retry typing
+                typeWithRetry(attempt + 1);
+            } else {
+                cy.log(`✅ Text typed successfully: "${text}"`);
+                // Verify the input has the correct value
+                cy.get(selector).should('have.value', text);
+            }
+        });
+    };
+
+    typeWithRetry();
 });

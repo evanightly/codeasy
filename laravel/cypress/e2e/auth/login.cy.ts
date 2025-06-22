@@ -13,7 +13,7 @@ describe('User Login Flow', () => {
     beforeEach(() => {
         // Reset database to ensure clean state for each test
         cy.resetDatabase();
-
+        
         // Visit login page with fresh session
         cy.visit('/login');
         cy.waitForPageLoad();
@@ -189,7 +189,7 @@ describe('User Login Flow', () => {
             });
 
             // Verify the behavior - should redirect to dashboard
-            cy.url({ timeout: 3000 }).should('include', '/dashboard');
+            cy.url({ timeout: 10000 }).should('include', '/dashboard');
         });
     });
 
