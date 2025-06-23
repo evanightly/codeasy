@@ -50,6 +50,27 @@ class UserService extends BaseCrudService implements UserServiceInterface {
         return parent::update($user, ['preferences' => $newPreferences]);
     }
 
+    /**
+     * Get students enrolled in a specific course
+     */
+    public function getStudentsByCourse(?int $courseId): array {
+        if (!$courseId) {
+            return [];
+        }
+
+        // Get students enrolled in the course through classroom relationship
+        $students = $this->repository->findStudentsByCourse($courseId);
+
+        return $students->map(function ($student) {
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'username' => $student->username,
+            ];
+        })->toArray();
+    }
+
     protected function getRepositoryClass(): string {
         return UserRepositoryInterface::class;
     }

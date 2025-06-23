@@ -3,6 +3,7 @@ import { serviceHooksFactory } from '@/Services/serviceHooksFactory';
 import { ROUTES } from '@/Support/Constants/routes';
 import { IntentEnum } from '@/Support/Enums/intentEnum';
 import { UserResource } from '@/Support/Interfaces/Resources';
+import { useQuery } from '@tanstack/react-query';
 
 export const userServiceHook = {
     ...serviceHooksFactory<UserResource>({
@@ -99,6 +100,25 @@ export const userServiceHook = {
                 a.click();
                 window.URL.revokeObjectURL(url);
             },
+        });
+    },
+
+    /**
+     * Get students enrolled in a specific course
+     */
+    useGetStudentsByCourse: (courseId?: number) => {
+        return useQuery({
+            queryKey: ['users', 'students-by-course', courseId],
+            queryFn: async () => {
+                const response = await window.axios.get(route(`${ROUTES.USERS}.index`), {
+                    params: {
+                        intent: IntentEnum.USER_INDEX_STUDENTS_BY_COURSE,
+                        course_id: courseId,
+                    },
+                });
+                return response.data;
+            },
+            enabled: !!courseId,
         });
     },
 };

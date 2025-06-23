@@ -81,6 +81,19 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface {
         return $query;
     }
 
+    /**
+     * Find students enrolled in a specific course
+     */
+    public function findStudentsByCourse(int $courseId) {
+        return User::whereHas('classrooms.courses', function ($query) use ($courseId) {
+            $query->where('courses.id', $courseId);
+        })
+            ->whereHas('roles', function ($query) {
+                $query->where('name', RoleEnum::STUDENT->value);
+            })
+            ->get(['id', 'name', 'email', 'username']);
+    }
+
     protected function getModelClass(): string {
         return User::class;
     }

@@ -74,4 +74,14 @@ interface StudentScoreServiceInterface extends BaseCrudServiceInterface {
      * Export student scores tabular data to Excel
      */
     public function exportTabularDataToExcel(array $filters = []): \Symfony\Component\HttpFoundation\BinaryFileResponse;
+
+    /**
+     * Export enhanced student scores data to Excel with multiple sheets
+     */
+    public function exportEnhancedTabularDataToExcel(array $filters = []): \Symfony\Component\HttpFoundation\BinaryFileResponse;
+
+    /**
+     * Get available classification history dates for a course and classification type
+     */
+    public function getAvailableClassificationHistoryDates(int $courseId, string $classificationType): array;
 }

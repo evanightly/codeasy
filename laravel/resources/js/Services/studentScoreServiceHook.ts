@@ -150,6 +150,64 @@ export const studentScoreServiceHook = {
         });
     },
 
+    /**
+     * Get available classification history dates for a course
+     */
+    useGetClassificationHistoryDates: (courseId?: number, classificationType?: string) => {
+        return useQuery({
+            queryKey: [baseKey, 'classification-history-dates', courseId, classificationType],
+            queryFn: async () => {
+                if (!courseId || !classificationType) return [];
+
+                const response = await fetch(
+                    route(`${ROUTES.STUDENT_SCORES}.index`) +
+                        `?intent=${IntentEnum.STUDENT_SCORE_INDEX_GET_CLASSIFICATION_HISTORY_DATES}&course_id=${courseId}&classification_type=${classificationType}`,
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch classification history dates');
+                }
+
+                return response.json();
+            },
+            enabled: !!courseId && !!classificationType,
+        });
+    },
+
+    /**
+     * Export enhanced student scores data to Excel with multiple sheets
+     */
+    useExportEnhancedData: () => {
+        return createMutation({
+            mutationFn: async (filters?: {
+                course_id?: number;
+                learning_material_id?: number;
+                selected_student_ids?: number[];
+                classification_type?: string;
+                classification_date?: string;
+            }) => {
+                const url = route(`${ROUTES.STUDENT_SCORES}.index`);
+                const params = {
+                    intent: IntentEnum.STUDENT_SCORE_INDEX_EXPORT_ENHANCED_DATA,
+                    ...filters,
+                };
+
+                // Create a temporary link element to trigger download
+                const link = document.createElement('a');
+                link.href = `${url}?${new URLSearchParams(params as any).toString()}`;
+                // Use localized filename (the backend will handle the actual filename with timestamp)
+                link.download = `completion_rate_report_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                return { success: true, message: 'Enhanced export started successfully' };
+            },
+        });
+    },
+
     customFunctionExample: async () => {
         console.log('custom function');
     },

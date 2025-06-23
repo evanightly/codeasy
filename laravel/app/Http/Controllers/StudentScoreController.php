@@ -43,6 +43,24 @@ class StudentScoreController extends Controller implements HasMiddleware {
             return $this->studentScoreService->exportTabularDataToExcel($request->query());
         }
 
+        if ($intent === IntentEnum::STUDENT_SCORE_INDEX_EXPORT_ENHANCED_DATA->value) {
+            return $this->studentScoreService->exportEnhancedTabularDataToExcel($request->query());
+        }
+
+        if ($intent === IntentEnum::STUDENT_SCORE_INDEX_GET_CLASSIFICATION_HISTORY_DATES->value) {
+            $courseId = $request->query('course_id');
+            $classificationType = $request->query('classification_type', 'topsis');
+
+            if (!$courseId) {
+                return response()->json(['error' => 'Course ID is required'], 400);
+            }
+
+            return response()->json($this->studentScoreService->getAvailableClassificationHistoryDates(
+                (int) $courseId,
+                $classificationType
+            ));
+        }
+
         $data = StudentScoreResource::collection($this->studentScoreService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {

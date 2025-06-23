@@ -55,6 +55,10 @@ class UserController extends Controller implements HasMiddleware {
                 return $this->studentImportService->generateExcelTemplate();
             case IntentEnum::USER_INDEX_IMPORT_STUDENTS_CSV_TEMPLATE->value:
                 return $this->studentImportService->generateCsvTemplate();
+            case IntentEnum::USER_INDEX_STUDENTS_BY_COURSE->value:
+                $courseId = $request->get('course_id');
+                $data = $this->userService->getStudentsByCourse($courseId);
+                break;
             default:
                 $data = UserResource::collection($this->userService->getAllPaginated($request->query()));
                 break;
