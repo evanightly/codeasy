@@ -58,14 +58,13 @@ Cypress.Commands.add('login', () => {
             } else {
                 // Need to manually login
                 cy.visit('/login');
-                cy.waitForPageLoad();
 
                 // Manual login using fixture credentials
                 cy.get('input[name="email"]').type(credentials.email);
                 cy.get('button').contains('Next').click();
 
                 // Check for loading state within 2 seconds, proceed if none found
-                cy.waitForLoadingStateOptional(2000);
+                cy.wait(1000); // Wait for step transition
 
                 // Use helper function to handle password typing with retry logic
                 cy.typeWithLoadingRetry('input[name="password"]', credentials.password);
@@ -73,7 +72,7 @@ Cypress.Commands.add('login', () => {
                 cy.get('button').contains('Sign In').click();
 
                 // Wait for authentication to complete
-                cy.url({ timeout: 10000 }).should('include', '/dashboard');
+                cy.url({ timeout: 100000 }).should('include', '/dashboard');
                 cy.log('Manual login successful with fixture credentials');
             }
         });

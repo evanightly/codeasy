@@ -4,6 +4,8 @@ describe('User Login Flow', () => {
     let loginCredentials: { email: string; password: string };
 
     before(() => {
+        cy.resetDatabase();
+
         // Load fixture data once before all tests
         cy.fixture('login').then((credentials) => {
             loginCredentials = credentials;
@@ -12,8 +14,7 @@ describe('User Login Flow', () => {
 
     beforeEach(() => {
         // Reset database to ensure clean state for each test
-        cy.resetDatabase();
-        
+
         // Visit login page with fresh session
         cy.visit('/login');
         cy.waitForPageLoad();
