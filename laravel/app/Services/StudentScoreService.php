@@ -1181,6 +1181,7 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
         // Check if we found any materials
         if (empty($allMaterialIds)) {
             $sheet->setCellValue('A1', 'No materials found in classification history for the selected criteria');
+
             return;
         }
 
@@ -1270,6 +1271,7 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
         // Check if we have student data to display
         if (empty($studentsData)) {
             $sheet->setCellValue('A' . $row, 'No student data available for the selected criteria and classification history');
+
             return;
         }
 
@@ -1306,7 +1308,7 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
             $headerRow = 5; // Headers are always at row 5 in this sheet structure
             $materialStartColumn = 6; // Column F (1-based index) - materials start after basic student info
             $totalColumns = count($headers); // Total number of columns
-            
+
             $this->addMaterialScoreColors($sheet, $lastDataRow, $totalColumns, $materialStartColumn, $headerRow);
         }
     }
@@ -1453,23 +1455,25 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
                 'lastRow' => $lastRow,
                 'totalCols' => $totalCols,
                 'startCol' => $startCol,
-                'headerRow' => $headerRow
+                'headerRow' => $headerRow,
             ]);
+
             return;
         }
 
         // Color code material scores - start from row after header and ensure we have valid data rows
         $dataStartRow = $headerRow + 1;
-        
+
         // Ensure we don't go beyond the actual data
         if ($dataStartRow > $lastRow) {
             Log::info('StudentScoreService: No data rows to color', [
                 'dataStartRow' => $dataStartRow,
-                'lastRow' => $lastRow
+                'lastRow' => $lastRow,
             ]);
+
             return;
         }
-        
+
         for ($row = $dataStartRow; $row <= $lastRow; $row++) {
             // Only color columns that contain material scores (starting from $startCol)
             for ($col = $startCol; $col <= $totalCols; $col++) {
@@ -1477,22 +1481,24 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
                     // Use proper column letter conversion - ensure valid column index
                     if ($col < 1 || $col > 16384) { // Excel limit is column XFD (16384)
                         Log::warning('StudentScoreService: Invalid column index', ['col' => $col]);
+
                         continue;
                     }
-                    
+
                     $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
                     $cellCoordinate = $columnLetter . $row;
-                    
+
                     // Basic validation of cell coordinate format
                     if (empty($columnLetter) || $row < 1) {
                         Log::warning('StudentScoreService: Invalid cell coordinate', [
                             'columnLetter' => $columnLetter,
                             'row' => $row,
-                            'cellCoordinate' => $cellCoordinate
+                            'cellCoordinate' => $cellCoordinate,
                         ]);
+
                         continue;
                     }
-                    
+
                     $cellValue = $sheet->getCell($cellCoordinate)->getValue();
                     $score = floatval($cellValue);
 
@@ -1516,8 +1522,9 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
                         'row' => $row,
                         'col' => $col,
                         'cellCoordinate' => $cellCoordinate ?? 'unknown',
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
+
                     // Continue with next cell instead of breaking
                     continue;
                 }
