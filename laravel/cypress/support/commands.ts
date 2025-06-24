@@ -47,7 +47,7 @@ declare global {
 
 // Login command - handles auto-login or manual login
 Cypress.Commands.add('login', () => {
-    cy.fixture('login').then((credentials) => {
+    cy.fixture('credentials').then((credentials) => {
         cy.visit('/');
 
         // Check if we're already logged in (redirected to dashboard)
@@ -60,14 +60,14 @@ Cypress.Commands.add('login', () => {
                 cy.visit('/login');
 
                 // Manual login using fixture credentials
-                cy.get('input[name="email"]').type(credentials.email);
+                cy.get('input[name="email"]').type(credentials.student.email);
                 cy.get('button').contains('Next').click();
 
                 // Check for loading state within 2 seconds, proceed if none found
                 cy.wait(1000); // Wait for step transition
 
                 // Use helper function to handle password typing with retry logic
-                cy.typeWithLoadingRetry('input[name="password"]', credentials.password);
+                cy.typeWithLoadingRetry('input[name="password"]', credentials.student.password);
 
                 cy.get('button').contains('Sign In').click();
 

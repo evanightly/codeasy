@@ -1,11 +1,11 @@
 /// <reference types="cypress" />
 
 describe('User Logout Flow', () => {
-    let loginCredentials: { email: string; password: string };
+    let loginCredentials: { student: { email: string; password: string } };
 
     before(() => {
         // Load fixture data once before all tests
-        cy.fixture('login').then((credentials) => {
+        cy.fixture('credentials').then((credentials) => {
             loginCredentials = credentials;
         });
     });

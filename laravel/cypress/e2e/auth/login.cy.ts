@@ -1,13 +1,13 @@
 /// <reference types="cypress" />
 
 describe('User Login Flow', () => {
-    let loginCredentials: { email: string; password: string };
+    let loginCredentials: { student: { email: string; password: string } };
 
     before(() => {
         cy.resetDatabase();
 
         // Load fixture data once before all tests
-        cy.fixture('login').then((credentials) => {
+        cy.fixture('credentials').then((credentials) => {
             loginCredentials = credentials;
         });
     });
@@ -66,7 +66,7 @@ describe('User Login Flow', () => {
 
         it('should proceed to password step with valid email', () => {
             // Enter valid email from fixture
-            cy.get('input[name="email"]').type(loginCredentials.email);
+            cy.get('input[name="email"]').type(loginCredentials.student.email);
 
             // Click next button
             cy.get('button').contains('Next').click();
@@ -82,7 +82,7 @@ describe('User Login Flow', () => {
             cy.get('input[type="checkbox"][name="remember"]').should('be.checked');
 
             // Proceed to password step using fixture email
-            cy.get('input[name="email"]').type(loginCredentials.email);
+            cy.get('input[name="email"]').type(loginCredentials.student.email);
             cy.get('button').contains('Next').click();
 
             // Go back to email step
@@ -96,14 +96,14 @@ describe('User Login Flow', () => {
     describe('Password Step', () => {
         beforeEach(() => {
             // Navigate to password step using fixture email
-            cy.get('input[name="email"]').type(loginCredentials.email);
+            cy.get('input[name="email"]').type(loginCredentials.student.email);
             cy.get('button').contains('Next').click();
             cy.get('input[name="password"]').should('be.visible');
         });
 
         it('should show email and back button', () => {
             // Should display the entered email from fixture
-            cy.contains(loginCredentials.email).should('be.visible');
+            cy.contains(loginCredentials.student.email).should('be.visible');
 
             // Should show back button
             cy.get('button[name="back-button"]').should('be.visible');
@@ -115,7 +115,7 @@ describe('User Login Flow', () => {
             // Should be back to email step with fixture email
             cy.get('input[name="email"]')
                 .should('be.visible')
-                .and('have.value', loginCredentials.email);
+                .and('have.value', loginCredentials.student.email);
             cy.get('button').contains('Next').should('be.visible');
         });
 
@@ -165,7 +165,7 @@ describe('User Login Flow', () => {
         });
 
         it('should handle server errors gracefully', () => {
-            cy.get('input[name="email"]').type(loginCredentials.email);
+            cy.get('input[name="email"]').type(loginCredentials.student.email);
             cy.get('button').contains('Next').click();
 
             cy.get('input[name="password"]').type('invalidpassword');
@@ -180,12 +180,12 @@ describe('User Login Flow', () => {
     describe('Auto-fill Functionality', () => {
         it('should handle browser auto-fill', () => {
             // Navigate to password step using fixture email
-            cy.get('input[name="email"]').type(loginCredentials.email);
+            cy.get('input[name="email"]').type(loginCredentials.student.email);
             cy.get('button').contains('Next').click();
 
             // Simulate browser auto-fill by setting fixture password directly
             cy.get('input[name="password"]').then(($input) => {
-                $input.val(loginCredentials.password);
+                $input.val(loginCredentials.student.password);
                 $input.trigger('input');
             });
 
@@ -197,13 +197,13 @@ describe('User Login Flow', () => {
     describe('Keyboard Navigation', () => {
         it('should support Enter key navigation', () => {
             // Enter email and press Enter using fixture data
-            cy.get('input[name="email"]').type(`${loginCredentials.email}{enter}`);
+            cy.get('input[name="email"]').type(`${loginCredentials.student.email}{enter}`);
 
             // Should proceed to password step
             cy.get('input[name="password"]').should('be.visible').and('be.focused');
 
             // Enter password and press Enter using fixture data
-            cy.get('input[name="password"]').type(`${loginCredentials.password}{enter}`);
+            cy.get('input[name="password"]').type(`${loginCredentials.student.password}{enter}`);
 
             // Verify the final result - should redirect to dashboard
             cy.url({ timeout: 10000 }).should('include', '/dashboard');
@@ -222,7 +222,7 @@ describe('User Login Flow', () => {
             cy.get('input[name="email"]').should('be.visible');
 
             // Should be able to complete login flow using fixture data
-            cy.get('input[name="email"]').type(loginCredentials.email);
+            cy.get('input[name="email"]').type(loginCredentials.student.email);
             cy.get('button').contains('Next').click();
             cy.get('input[name="password"]').should('be.visible');
         });
@@ -235,7 +235,7 @@ describe('User Login Flow', () => {
             cy.get('input[name="email"]').should('be.visible');
 
             // Complete login flow using fixture data
-            cy.get('input[name="email"]').type(loginCredentials.email);
+            cy.get('input[name="email"]').type(loginCredentials.student.email);
             cy.get('button').contains('Next').click();
             cy.get('input[name="password"]').should('be.visible');
         });
