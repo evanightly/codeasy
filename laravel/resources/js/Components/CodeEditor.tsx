@@ -78,6 +78,7 @@ interface CodeEditorProps {
     headerChildren?: React.ReactNode;
     containerClassName?: string;
     codeMirrorClassName?: string;
+    'data-testid'?: string;
 }
 
 export default function CodeEditor({
@@ -94,6 +95,7 @@ export default function CodeEditor({
     headerChildren,
     containerClassName,
     codeMirrorClassName,
+    'data-testid': dataTestId,
 }: CodeEditorProps) {
     const [themeComboboxOpen, setThemeComboboxOpen] = useState(false);
     const [selectedThemeName, setSelectedThemeName] = useLocalStorage(
@@ -149,7 +151,7 @@ export default function CodeEditor({
     }, [language]);
 
     return (
-        <div className={ny('flex flex-col gap-3', className)}>
+        <div data-testid={dataTestId} className={ny('flex flex-col gap-3', className)}>
             {label && <label className='text-sm font-medium'>{label}</label>}
             <div className={ny('flex flex-col gap-3', containerClassName)}>
                 {showThemePicker && !compact && (

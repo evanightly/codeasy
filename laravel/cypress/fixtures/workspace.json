@@ -1,0 +1,5 @@
+{
+    "url": "http://laravel:9001/student/courses/4/materials/32/questions/170",
+    "validAnswer": "pd.corr",
+    "invalidAnswer": "wasd"
+}

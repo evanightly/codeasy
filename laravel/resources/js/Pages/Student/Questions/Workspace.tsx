@@ -1432,6 +1432,7 @@ export default function Workspace({
                                                                 isAnswerCompleted ||
                                                                 (isWorkspaceLocked && !canReattempt)
                                                             }
+                                                            data-testid='run-code-button'
                                                         >
                                                             {isCompiling ? (
                                                                 <Loader2 className='animate-spin' />
@@ -1516,6 +1517,7 @@ export default function Workspace({
                                                         )}
                                                     </div>
                                                 }
+                                                data-testid='code-editor'
                                                 className='flex-1 overflow-x-scroll'
                                             />
                                         </div>
@@ -1535,7 +1537,10 @@ export default function Workspace({
                                                 {t('pages.student_questions.workspace.output')}
                                             </h3>
                                         </div>
-                                        <div className='max-h-20 flex-1 overflow-auto p-4 lg:max-h-[calc(100vh-200px)]'>
+                                        <div
+                                            data-testid='output-panel'
+                                            className='max-h-20 flex-1 overflow-auto p-4 lg:max-h-[calc(100vh-200px)]'
+                                        >
                                             {output.length === 0 && !isCompiling ? (
                                                 <div className='flex h-full items-center justify-center text-center text-muted-foreground'>
                                                     <div>
@@ -1597,6 +1602,7 @@ export default function Workspace({
                                                                                     out.success,
                                                                                     out.total_tests,
                                                                                 )}
+                                                                                data-testid='test-results-badge'
                                                                             >
                                                                                 {out.success}/
                                                                                 {out.total_tests}
