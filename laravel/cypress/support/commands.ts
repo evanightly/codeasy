@@ -34,6 +34,7 @@ interface CustomCommands {
         text: string,
         options?: { maxAttempts?: number; delay?: number },
     ): void;
+    suppressWebSocketErrors(): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
@@ -247,6 +248,40 @@ Cypress.Commands.add('resetDatabase', () => {
     });
 });
 
+// Command to suppress WebSocket errors in the browser
+Cypress.Commands.add('suppressWebSocketErrors', () => {
+    cy.window().then((win) => {
+        // Override WebSocket to handle connection failures gracefully
+        const originalWebSocket = win.WebSocket;
+        win.WebSocket = function (...args: any[]) {
+            const ws = new originalWebSocket(args[0], args[1]);
+
+            // Override error handler to suppress console errors
+            ws.addEventListener('error', (event) => {
+                console.log('WebSocket error suppressed:', event);
+                // Prevent the error from bubbling up
+                event.stopPropagation();
+            });
+
+            // Override close handler to suppress close errors
+            ws.addEventListener('close', (event) => {
+                console.log('WebSocket closed:', event.code, event.reason);
+                // Prevent close events from causing issues
+                event.stopPropagation();
+            });
+
+            return ws;
+        } as any;
+
+        // Copy static properties
+        Object.setPrototypeOf(win.WebSocket, originalWebSocket);
+        Object.defineProperty(win.WebSocket, 'CONNECTING', { value: 0 });
+        Object.defineProperty(win.WebSocket, 'OPEN', { value: 1 });
+        Object.defineProperty(win.WebSocket, 'CLOSING', { value: 2 });
+        Object.defineProperty(win.WebSocket, 'CLOSED', { value: 3 });
+    });
+});
+
 // Helper function to type text with retry logic when loading states interfere
 Cypress.Commands.add('typeWithLoadingRetry', (selector: string, text: string, options = {}) => {
     const { maxAttempts = 3, delay = 50 } = options;
@@ -285,5 +320,104 @@ Cypress.Commands.add('typeWithLoadingRetry', (selector: string, text: string, op
         });
     };
 
+    // Start the typing process
     typeWithRetry();
+});
+
+// WebSocket suppression command
+Cypress.Commands.add('suppressWebSocketErrors', () => {
+    // Override WebSocket constructor to prevent connections
+    cy.window().then((win) => {
+        // Store original WebSocket
+        const _OriginalWebSocket = win.WebSocket;
+
+        // Create a mock WebSocket that doesn't actually connect
+        win.WebSocket = class MockWebSocket {
+            constructor(url: string, _protocols?: string | string[]) {
+                console.log(`WebSocket connection blocked: ${url}`);
+                // Create a minimal WebSocket-like object
+                Object.assign(this, {
+                    url,
+                    readyState: 3, // CLOSED
+                    CONNECTING: 0,
+                    OPEN: 1,
+                    CLOSING: 2,
+                    CLOSED: 3,
+                    close: () => {},
+                    send: () => {},
+                    addEventListener: () => {},
+                    removeEventListener: () => {},
+                    dispatchEvent: () => false,
+                });
+
+                // Immediately trigger close event
+                setTimeout(() => {
+                    if (this.onclose) {
+                        this.onclose({
+                            code: 1000,
+                            reason: 'Cypress test - WebSocket disabled',
+                            wasClean: true,
+                        } as CloseEvent);
+                    }
+                }, 0);
+            }
+
+            onopen: ((event: Event) => void) | null = null;
+            onclose: ((event: CloseEvent) => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+            onmessage: ((event: MessageEvent) => void) | null = null;
+
+            readonly url: string = '';
+            readonly readyState: number = 3;
+            readonly CONNECTING = 0;
+            readonly OPEN = 1;
+            readonly CLOSING = 2;
+            readonly CLOSED = 3;
+
+            close() {}
+            send() {}
+            addEventListener() {}
+            removeEventListener() {}
+            dispatchEvent(): boolean {
+                return false;
+            }
+        } as any;
+
+        // Also suppress any EventSource connections
+        if (win.EventSource) {
+            win.EventSource = class MockEventSource {
+                constructor(url: string, _options?: EventSourceInit) {
+                    console.log(`EventSource connection blocked: ${url}`);
+                    this.url = url;
+                    this.readyState = 2; // CLOSED
+
+                    setTimeout(() => {
+                        if (this.onerror) {
+                            this.onerror({
+                                type: 'error',
+                                target: this,
+                            } as unknown as Event);
+                        }
+                    }, 0);
+                }
+
+                readonly url: string = '';
+                readonly readyState: number = 2;
+                readonly CONNECTING = 0;
+                readonly OPEN = 1;
+                readonly CLOSED = 2;
+
+                onopen: ((event: Event) => void) | null = null;
+                onmessage: ((event: MessageEvent) => void) | null = null;
+                onerror: ((event: Event) => void) | null = null;
+
+                close() {}
+                addEventListener() {}
+                removeEventListener() {}
+                dispatchEvent(): boolean {
+                    return false;
+                }
+            } as any;
+        }
+    });
 });

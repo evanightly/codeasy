@@ -18,6 +18,9 @@ describe('User Login Flow', () => {
         // Visit login page with fresh session
         cy.visit('/login');
         cy.waitForPageLoad();
+
+        // Suppress WebSocket errors that occur during testing
+        cy.suppressWebSocketErrors();
     });
 
     describe('Login Page UI', () => {

@@ -18,6 +18,8 @@ export default defineConfig({
         screenshotsFolder: 'screenshots',
         videosFolder: 'videos',
         downloadsFolder: 'downloads',
+        // Disable Chrome web security for WebSocket handling
+        chromeWebSecurity: false,
         setupNodeEvents(on, _config) {
             // Database reset task
             on('task', {
