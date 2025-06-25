@@ -108,7 +108,9 @@ export default function Login({
             });
 
             // Successful login
-            router.visit(route(`${ROUTES.DASHBOARD}.index`));
+            router.visit(route(`${ROUTES.DASHBOARD}.index`), {
+                replace: true,
+            });
             setAutoSubmitted(false);
             setTypedManually(false);
 
