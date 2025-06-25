@@ -231,7 +231,7 @@ export function TeacherCharts() {
 
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* Class Average Bar Chart */}
-                <Card>
+                <Card data-testid='teacher-class-scores-bar-chart'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.teacher.chart_titles.class_scores')}
@@ -258,7 +258,7 @@ export function TeacherCharts() {
                 </Card>
 
                 {/* Module Completion Pie Chart */}
-                <Card>
+                <Card data-testid='teacher-module-completion-pie-chart'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.teacher.chart_titles.module_completion')}
@@ -289,7 +289,7 @@ export function TeacherCharts() {
                 </Card>
 
                 {/* Module Mastery Radar Chart */}
-                <Card>
+                <Card data-testid='teacher-subject-mastery-radar-chart'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.teacher.chart_titles.subject_mastery')}
@@ -319,7 +319,7 @@ export function TeacherCharts() {
                 </Card>
 
                 {/* Top Students Radial Chart */}
-                <Card>
+                <Card data-testid='teacher-top-students-radial-chart'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.teacher.chart_titles.top_students')}
@@ -355,7 +355,7 @@ export function TeacherCharts() {
             </div>
 
             {/* Latest Student Progress Section with Tabs */}
-            <Card className='w-full'>
+            <Card data-testid='teacher-student-progress-section' className='w-full'>
                 <CardHeader>
                     <CardTitle className='flex items-center gap-2'>
                         <Clock className='h-5 w-5' />

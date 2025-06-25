@@ -49,7 +49,7 @@ export function AdminCharts() {
 
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* User Growth Bar Chart */}
-                <Card className='w-full'>
+                <Card data-testid='admin-users-bar-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>{t('pages.dashboard.admin.charts.users_bar.title')}</CardTitle>
                         <CardDescription>
@@ -76,7 +76,7 @@ export function AdminCharts() {
                 </Card>
 
                 {/* Roles Distribution Pie Chart */}
-                <Card className='w-full'>
+                <Card data-testid='admin-roles-pie-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.admin.charts.user_roles_pie.title')}
@@ -141,7 +141,7 @@ export function AdminCharts() {
                 </Card>
 
                 {/* Site Visits Line Chart */}
-                <Card className='w-full'>
+                <Card data-testid='admin-site-visits-line-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.admin.charts.site_visits_line.title')}
@@ -169,7 +169,7 @@ export function AdminCharts() {
                 </Card>
 
                 {/* Activity Radar Chart */}
-                <Card className='w-full'>
+                <Card data-testid='admin-radar-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.admin.charts.radar_example.title')}

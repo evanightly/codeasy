@@ -51,7 +51,7 @@ export function SchoolAdminCharts() {
 
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* Population Bar Chart */}
-                <Card className='w-full'>
+                <Card data-testid='school-admin-population-bar-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.school_admin.charts.population.title')}
@@ -80,7 +80,7 @@ export function SchoolAdminCharts() {
                 </Card>
 
                 {/* Facilities Pie Chart */}
-                <Card className='w-full'>
+                <Card data-testid='school-admin-facilities-pie-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.school_admin.charts.facilities.title')}
@@ -145,7 +145,7 @@ export function SchoolAdminCharts() {
                 </Card>
 
                 {/* Class Development Radar Chart */}
-                <Card className='w-full'>
+                <Card data-testid='school-admin-class-development-radar-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.school_admin.charts.class_development.title')}
@@ -183,7 +183,7 @@ export function SchoolAdminCharts() {
                 </Card>
 
                 {/* Level Performance Radial Chart */}
-                <Card className='w-full'>
+                <Card data-testid='school-admin-level-performance-radial-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.school_admin.charts.level_performance.title')}

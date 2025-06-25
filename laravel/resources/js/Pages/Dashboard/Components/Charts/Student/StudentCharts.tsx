@@ -45,7 +45,7 @@ export function StudentCharts() {
 
             {/* Latest Work Card - New Addition */}
             <div className='mb-4'>
-                <Card className='w-full'>
+                <Card data-testid='student-latest-work-progress' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.student.latest_work_progress.title')}
@@ -163,14 +163,16 @@ export function StudentCharts() {
             </div>
 
             {/* Classification Section */}
-            <StudentClassificationSection
-                isLoading={isCoursesLoading}
-                courses={coursesData?.data || []}
-            />
+            <div data-testid='student-classification-section'>
+                <StudentClassificationSection
+                    isLoading={isCoursesLoading}
+                    courses={coursesData?.data || []}
+                />
+            </div>
 
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {/* Learning Progress Area Chart */}
-                <Card className='w-full'>
+                <Card data-testid='student-learning-progress-area-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.student.charts.learning_progress.title')}
@@ -221,7 +223,7 @@ export function StudentCharts() {
                 </Card>
 
                 {/* Bloom's Taxonomy Levels Pie Chart */}
-                <Card>
+                <Card data-testid='student-cognitive-level-pie-chart'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.student.charts.cognitive_level.title')}
@@ -250,7 +252,7 @@ export function StudentCharts() {
                 </Card>
 
                 {/* Module Progress Bar Chart */}
-                <Card className='w-full'>
+                <Card data-testid='student-module-progress-bar-chart' className='w-full'>
                     <CardHeader>
                         <CardTitle>
                             {t('pages.dashboard.student.charts.module_progress.title')}
