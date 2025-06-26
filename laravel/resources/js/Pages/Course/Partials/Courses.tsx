@@ -107,16 +107,25 @@ const Courses = ({ response, filters, setFilters, baseKey, baseRoute }: CoursesP
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
                             <DropdownMenuItem asChild>
-                                <Link href={route(`${ROUTES.COURSES}.show`, course.id)}>
+                                <Link
+                                    href={route(`${ROUTES.COURSES}.show`, course.id)}
+                                    data-testid={`course-show-${course.id}`}
+                                >
                                     {t('action.show')}
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                                <Link href={route(`${ROUTES.COURSES}.edit`, course.id)}>
+                                <Link
+                                    href={route(`${ROUTES.COURSES}.edit`, course.id)}
+                                    data-testid={`course-edit-${course.id}`}
+                                >
                                     {t('action.edit')}
                                 </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDelete(course)}>
+                            <DropdownMenuItem
+                                onClick={() => handleDelete(course)}
+                                data-testid={`course-delete-${course.id}`}
+                            >
                                 {t('action.delete')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -142,6 +151,7 @@ const Courses = ({ response, filters, setFilters, baseKey, baseRoute }: CoursesP
                     <>
                         <Link
                             href={route(`${ROUTES.COURSES}.create`)}
+                            data-testid='course-create-button'
                             className={buttonVariants({ variant: 'create' })}
                         >
                             {t('pages.course.index.buttons.create')}

@@ -195,6 +195,7 @@ export default function Create() {
                                 type='submit'
                                 loading={createMutation.isPending}
                                 disabled={createMutation.isPending}
+                                data-testid='course-create-submit'
                             >
                                 {t('pages.course.create.buttons.create')}
                             </Button>

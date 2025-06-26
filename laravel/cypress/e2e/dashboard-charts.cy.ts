@@ -9,16 +9,7 @@ describe('Dashboard Charts', () => {
     describe('Student Dashboard', () => {
         beforeEach(() => {
             cy.session('studentSession', () => {
-                cy.fixture('credentials').then((creds) => {
-                    // Login as student using credentials from fixtures
-                    cy.visit('/login');
-                    cy.get('input[name="email"]').type(creds.student.email);
-                    cy.get('button').contains('Next').click();
-                    cy.wait(1000);
-                    cy.get('input[name="password"]').type(creds.student.password);
-                    cy.get('button').contains('Sign In').click();
-                    cy.url({ timeout: 100000 }).should('include', '/dashboard');
-                });
+                cy.login('student');
             });
         });
 
@@ -40,16 +31,8 @@ describe('Dashboard Charts', () => {
     describe('Super Admin Dashboard', () => {
         beforeEach(() => {
             cy.session('superAdminSession', () => {
-                cy.fixture('credentials').then((creds) => {
-                    // Login as super admin using credentials from fixtures
-                    cy.visit('/login');
-                    cy.get('input[name="email"]').type(creds.superAdmin.email);
-                    cy.get('button').contains('Next').click();
-                    cy.wait(1000);
-                    cy.get('input[name="password"]').type(creds.superAdmin.password);
-                    cy.get('button').contains('Sign In').click();
-                    cy.url({ timeout: 100000 }).should('include', '/dashboard');
-                });
+                // Login as super admin using the enhanced login command
+                cy.login('superAdmin');
             });
         });
 
@@ -70,16 +53,8 @@ describe('Dashboard Charts', () => {
     describe('School Admin Dashboard', () => {
         beforeEach(() => {
             cy.session('schoolAdminSession', () => {
-                cy.fixture('credentials').then((creds) => {
-                    // Login as school admin using credentials from fixtures
-                    cy.visit('/login');
-                    cy.get('input[name="email"]').type(creds.schoolAdmin.email);
-                    cy.get('button').contains('Next').click();
-                    cy.wait(1000);
-                    cy.get('input[name="password"]').type(creds.schoolAdmin.password);
-                    cy.get('button').contains('Sign In').click();
-                    cy.url({ timeout: 100000 }).should('include', '/dashboard');
-                });
+                // Login as school admin using the enhanced login command
+                cy.login('schoolAdmin');
             });
         });
 
@@ -104,17 +79,8 @@ describe('Dashboard Charts', () => {
     describe('Teacher Dashboard', () => {
         beforeEach(() => {
             cy.session('teacherSession', () => {
-                cy.fixture('credentials').then((creds) => {
-                    // Login as teacher using credentials from fixtures
-                    cy.visit('/login');
-                    cy.get('input[name="email"]').type(creds.teacher.email);
-                    cy.wait(1000);
-                    cy.get('button').contains('Next').click();
-                    cy.wait(1000);
-                    cy.get('input[name="password"]').type(creds.teacher.password);
-                    cy.get('button').contains('Sign In').click();
-                    cy.url({ timeout: 100000 }).should('include', '/dashboard');
-                });
+                // Login as teacher using the enhanced login command
+                cy.login('teacher');
             });
         });
 

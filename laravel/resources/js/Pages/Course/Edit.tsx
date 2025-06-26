@@ -217,6 +217,7 @@ export default function Edit({ data }: Props) {
                                 type='submit'
                                 loading={updateMutation.isPending}
                                 disabled={updateMutation.isPending}
+                                data-testid='course-edit-submit'
                             >
                                 {t('pages.course.edit.buttons.update')}
                             </Button>

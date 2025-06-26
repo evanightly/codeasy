@@ -16,7 +16,7 @@ export {};
 // Extend Cypress interface using interface merging
 interface CustomCommands {
     resetDatabase(): void;
-    login(): void;
+    login(role?: 'student' | 'teacher' | 'schoolAdmin' | 'superAdmin'): void;
     setMobileViewport(): void;
     setTabletViewport(): void;
     setDesktopViewport(): void;
@@ -46,35 +46,40 @@ declare global {
     }
 }
 
-// Login command - handles auto-login or manual login
-Cypress.Commands.add('login', () => {
+// Login command - handles auto-login or manual login with role support
+Cypress.Commands.add('login', (role = 'student') => {
     cy.fixture('credentials').then((credentials) => {
+        // Get credentials for the specified role, default to student for backward compatibility
+        const userCredentials = credentials[role] || credentials.student;
+
+        cy.log(`Attempting login as ${role} with email: ${userCredentials.email}`);
+
         cy.visit('/');
 
         // Check if we're already logged in (redirected to dashboard)
         cy.url().then((url) => {
             if (url.includes('/dashboard')) {
                 // Already logged in via auto-login
-                cy.log('Auto-login successful');
+                cy.log(`Auto-login successful for ${role}`);
             } else {
                 // Need to manually login
                 cy.visit('/login');
 
-                // Manual login using fixture credentials
-                cy.get('input[name="email"]').type(credentials.student.email);
+                // Manual login using fixture credentials for the specified role
+                cy.get('input[name="email"]').type(userCredentials.email);
                 cy.get('button').contains('Next').click();
 
                 // Check for loading state within 2 seconds, proceed if none found
                 cy.wait(1000); // Wait for step transition
 
                 // Use helper function to handle password typing with retry logic
-                cy.typeWithLoadingRetry('input[name="password"]', credentials.student.password);
+                cy.typeWithLoadingRetry('input[name="password"]', userCredentials.password);
 
                 cy.get('button').contains('Sign In').click();
 
                 // Wait for authentication to complete
                 cy.url({ timeout: 100000 }).should('include', '/dashboard');
-                cy.log('Manual login successful with fixture credentials');
+                cy.log(`Manual login successful for ${role} with fixture credentials`);
             }
         });
     });
