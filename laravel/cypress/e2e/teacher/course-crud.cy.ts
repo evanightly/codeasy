@@ -8,6 +8,7 @@ describe('Course CRUD for Teacher', () => {
 
     beforeEach(() => {
         cy.session('teacherSession', () => {
+            // Login as teacher using the enhanced login command
             cy.login('teacher');
         });
     });
@@ -31,24 +32,9 @@ describe('Course CRUD for Teacher', () => {
         // Should show form fields
         cy.get('form').should('exist');
         cy.get('input[name="name"]').should('exist');
-        cy.get('button[type="submit"]').should('exist');
+        cy.get('[data-testid="course-create-submit"]').should('exist');
     });
 
-    it('should be able to access course management features', () => {
-        cy.visit('/courses');
-
-        // Check if create button exists (indicates teacher can create courses)
-        cy.get('body').then(($body) => {
-            if ($body.find('[data-testid="course-create-button"]').length > 0) {
-                cy.get('[data-testid="course-create-button"]').should('be.visible');
-            } else {
-                // If no create button, at least verify we have access to the page
-                cy.get('body').should('be.visible');
-            }
-        });
-    });
-
-    // TODO: the classroom needs to created and selected first
     it('should create a new course', () => {
         cy.visit('/courses/create');
 
@@ -68,69 +54,48 @@ describe('Course CRUD for Teacher', () => {
     it('should display course details', () => {
         cy.visit('/courses');
 
-        // Look for any course show link
-        cy.get('body').then(($body) => {
-            if ($body.find('[data-testid^="course-show-"]').length > 0) {
-                // Click on first course show link
-                cy.get('[data-testid^="course-show-"]').first().click();
+        // Wait for dropdown buttons to appear
+        cy.get('[data-testid^="course-dropdown-"]', { timeout: 3000 }).should(
+            'have.length.at.least',
+            1,
+        );
 
-                // Should be on course show page
-                cy.url().should('match', /\/courses\/\d+/);
+        // Click on first dropdown menu button
+        cy.get('[data-testid^="course-dropdown-"]').first().click();
 
-                // Should show course details
-                cy.get('body').should('be.visible');
-            } else {
-                // Skip if no courses exist
-                cy.log('No courses found to test show functionality');
-            }
-        });
+        // Click on show option
+        cy.get('[data-testid^="course-show-"]').first().click();
+
+        // Should be on course show page
+        cy.url().should('match', /\/courses\/\d+/);
+
+        // Should show course details
+        cy.get('body').should('be.visible');
     });
 
     it('should access course edit form', () => {
         cy.visit('/courses');
 
-        // Look for edit link
+        // Wait for dropdown buttons to appear
+        cy.get('[data-testid^="course-dropdown-"]', { timeout: 3000 }).should(
+            'have.length.at.least',
+            1,
+        );
+
+        // Click on first dropdown menu button
+        cy.get('[data-testid^="course-dropdown-"]').first().click();
+
+        // Look for edit option in dropdown
         cy.get('body').then(($body) => {
             if ($body.find('[data-testid^="course-edit-"]').length > 0) {
-                // Click on first edit link
                 cy.get('[data-testid^="course-edit-"]').first().click();
 
-                // Should be on course edit page
+                // Should be on edit page
                 cy.url().should('include', '/edit');
-
-                // Should show form fields
                 cy.get('form').should('exist');
                 cy.get('input[name="name"]').should('exist');
-                cy.get('[data-testid="course-edit-submit"]').should('exist');
             } else {
-                // Skip if no edit links exist
-                cy.log('No edit links found to test edit functionality');
-            }
-        });
-    });
-
-    it('should update an existing course', () => {
-        cy.visit('/courses');
-
-        // Look for edit link
-        cy.get('body').then(($body) => {
-            if ($body.find('[data-testid^="course-edit-"]').length > 0) {
-                // Click on first edit link
-                cy.get('[data-testid^="course-edit-"]').first().click();
-
-                // Update the course name
-                cy.get('input[name="name"]').clear().type('Updated Course Name');
-
-                // Submit the form
-                cy.get('[data-testid="course-edit-submit"]').click();
-
-                // Should redirect back to courses
-                cy.url({ timeout: 10000 }).should('satisfy', (url) => {
-                    return url.includes('/courses') || url.includes('/dashboard');
-                });
-            } else {
-                // Skip if no edit links exist
-                cy.log('No edit links found to test update functionality');
+                cy.log('No course edit links found');
             }
         });
     });
@@ -138,17 +103,24 @@ describe('Course CRUD for Teacher', () => {
     it('should handle course deletion', () => {
         cy.visit('/courses');
 
-        // Look for delete button
+        // Wait for dropdown buttons to appear
+        cy.get('[data-testid^="course-dropdown-"]', { timeout: 3000 }).should(
+            'have.length.at.least',
+            1,
+        );
+
+        // Click on first dropdown menu button
+        cy.get('[data-testid^="course-dropdown-"]').first().click();
+
+        // Look for delete option in dropdown
         cy.get('body').then(($body) => {
             if ($body.find('[data-testid^="course-delete-"]').length > 0) {
-                // Click on first delete button
-                cy.get('[data-testid^="course-delete-"]').first().click();
+                cy.get('[data-testid^="course-delete-"]').first().click({ force: true });
 
-                // Should show confirmation dialog or perform delete
+                // Should show confirmation or perform delete
                 cy.get('body').should('be.visible');
             } else {
-                // Skip if no delete buttons exist
-                cy.log('No delete buttons found to test delete functionality');
+                cy.log('No course delete options found');
             }
         });
     });

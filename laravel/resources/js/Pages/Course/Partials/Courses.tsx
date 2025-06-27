@@ -98,7 +98,11 @@ const Courses = ({ response, filters, setFilters, baseKey, baseRoute }: CoursesP
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant='ghost' className='h-8 w-8 p-0'>
+                            <Button
+                                variant='ghost'
+                                data-testid={`course-dropdown-${course.id}`}
+                                className='h-8 w-8 p-0'
+                            >
                                 <span className='sr-only'>
                                     {t('components.dropdown_menu.sr_open_menu')}
                                 </span>

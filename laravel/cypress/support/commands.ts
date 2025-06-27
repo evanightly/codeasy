@@ -35,6 +35,8 @@ interface CustomCommands {
         options?: { maxAttempts?: number; delay?: number },
     ): void;
     suppressWebSocketErrors(): void;
+    typeInCodeMirror(selector: string, text: string): void;
+    mockCodeMirror(fieldName: string, text: string): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
@@ -253,40 +255,6 @@ Cypress.Commands.add('resetDatabase', () => {
     });
 });
 
-// Command to suppress WebSocket errors in the browser
-Cypress.Commands.add('suppressWebSocketErrors', () => {
-    cy.window().then((win) => {
-        // Override WebSocket to handle connection failures gracefully
-        const originalWebSocket = win.WebSocket;
-        win.WebSocket = function (...args: any[]) {
-            const ws = new originalWebSocket(args[0], args[1]);
-
-            // Override error handler to suppress console errors
-            ws.addEventListener('error', (event) => {
-                console.log('WebSocket error suppressed:', event);
-                // Prevent the error from bubbling up
-                event.stopPropagation();
-            });
-
-            // Override close handler to suppress close errors
-            ws.addEventListener('close', (event) => {
-                console.log('WebSocket closed:', event.code, event.reason);
-                // Prevent close events from causing issues
-                event.stopPropagation();
-            });
-
-            return ws;
-        } as any;
-
-        // Copy static properties
-        Object.setPrototypeOf(win.WebSocket, originalWebSocket);
-        Object.defineProperty(win.WebSocket, 'CONNECTING', { value: 0 });
-        Object.defineProperty(win.WebSocket, 'OPEN', { value: 1 });
-        Object.defineProperty(win.WebSocket, 'CLOSING', { value: 2 });
-        Object.defineProperty(win.WebSocket, 'CLOSED', { value: 3 });
-    });
-});
-
 // Helper function to type text with retry logic when loading states interfere
 Cypress.Commands.add('typeWithLoadingRetry', (selector: string, text: string, options = {}) => {
     const { maxAttempts = 3, delay = 50 } = options;
@@ -328,6 +296,78 @@ Cypress.Commands.add('typeWithLoadingRetry', (selector: string, text: string, op
     // Start the typing process
     typeWithRetry();
 });
+
+// Command to type into CodeMirror editors
+Cypress.Commands.add('typeInCodeMirror', (selector: string, text: string) => {
+    cy.get(selector).within(() => {
+        // Try multiple strategies to interact with CodeMirror
+        cy.get('.cm-editor')
+            .should('exist')
+            .then(($editor) => {
+                if ($editor.length > 0) {
+                    // Strategy 1: Try to focus and use the CodeMirror API
+                    cy.window().then((win) => {
+                        const cmEditor = $editor[0];
+                        if ((cmEditor as any).CodeMirror) {
+                            // CodeMirror 5 API
+                            (cmEditor as any).CodeMirror.setValue(text);
+                        } else if ((win as any).cm6) {
+                            // CodeMirror 6 API - try to get the view
+                            const view =
+                                (cmEditor as any).cmView ||
+                                (win as any).cm6.EditorView.findFromDOM(cmEditor);
+                            if (view) {
+                                view.dispatch({
+                                    changes: { from: 0, to: view.state.doc.length, insert: text },
+                                });
+                            }
+                        } else {
+                            // Fallback: try to trigger events manually
+                            cy.wrap($editor).click().type(text, { force: true });
+                        }
+                    });
+                }
+            });
+    });
+});
+
+// Mock CodeMirror by intercepting form submission and setting field values
+Cypress.Commands.add('mockCodeMirror', (fieldName: string, text: string) => {
+    // Intercept the form submission and inject the mocked value
+    cy.window().then((win) => {
+        // Store the mock value on the window for form submission
+        if (!(win as any).cypressMockData) {
+            (win as any).cypressMockData = {};
+        }
+        (win as any).cypressMockData[fieldName] = text;
+
+        // Override form submission to include mock data
+        const originalFetch = win.fetch;
+        win.fetch = function (...args) {
+            const [_url, options] = args;
+
+            // If it's a POST request with FormData or JSON, inject our mock data
+            if (options && options.method === 'POST' && options.body) {
+                if (options.body instanceof FormData) {
+                    options.body.set(fieldName, text);
+                } else if (typeof options.body === 'string') {
+                    try {
+                        const data = JSON.parse(options.body);
+                        data[fieldName] = text;
+                        options.body = JSON.stringify(data);
+                    } catch (_e) {
+                        // Not JSON, skip
+                    }
+                }
+            }
+
+            return originalFetch.apply(this, args);
+        };
+    });
+
+    cy.log(`Mocked CodeMirror field "${fieldName}" with value: "${text}"`);
+});
+
 
 // WebSocket suppression command
 Cypress.Commands.add('suppressWebSocketErrors', () => {
