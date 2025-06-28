@@ -1,0 +1,43 @@
+{
+    "testPermissions": {
+        "basic": [
+            {
+                "id": 1,
+                "name": "users.create",
+                "group": "user"
+            },
+            {
+                "id": 2,
+                "name": "users.read",
+                "group": "user"
+            },
+            {
+                "id": 3,
+                "name": "users.update",
+                "group": "user"
+            },
+            {
+                "id": 4,
+                "name": "users.delete",
+                "group": "user"
+            },
+            {
+                "id": 5,
+                "name": "roles.create",
+                "group": "role"
+            },
+            {
+                "id": 6,
+                "name": "roles.read",
+                "group": "role"
+            }
+        ]
+    },
+    "groups": ["user", "role", "permission", "school", "student", "teacher", "class"],
+    "permissionTypes": ["create", "read", "update", "delete"],
+    "selectors": {
+        "permissionsList": ".permissions-list",
+        "permissionItem": ".permission-item",
+        "permissionGroup": ".permission-group"
+    }
+}

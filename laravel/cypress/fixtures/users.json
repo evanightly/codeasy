@@ -1,0 +1,54 @@
+{
+    "testUsers": {
+        "basic": {
+            "name": "Test User Profile",
+            "username": "testuser",
+            "email": "testprofile@example.com",
+            "password": "password123",
+            "password_confirmation": "password123"
+        },
+        "withRole": {
+            "name": "User with Role",
+            "username": "userrole",
+            "email": "userrole@example.com",
+            "password": "password123",
+            "password_confirmation": "password123",
+            "role": "teacher"
+        },
+        "admin": {
+            "name": "Test Admin User",
+            "username": "testadmin",
+            "email": "admin@example.com",
+            "password": "password123",
+            "password_confirmation": "password123",
+            "role": "admin"
+        }
+    },
+    "formFields": {
+        "name": "input[name=\"name\"]",
+        "username": "input[name=\"username\"]",
+        "email": "input[name=\"email\"]",
+        "password": "input[name=\"password\"]",
+        "password_confirmation": "input[name=\"password_confirmation\"]",
+        "roleSelect": "select[name*=\"role\"]",
+        "roleCombobox": "[role=\"combobox\"]",
+        "roleInput": "input[name*=\"role\"]"
+    },
+    "selectors": {
+        "editButtons": {
+            "textButton": "button:contains(\"Edit\")",
+            "testIdButton": "[data-testid*=\"edit\"]"
+        },
+        "createButton": "button[type=\"submit\"]",
+        "form": "form"
+    },
+    "messages": {
+        "successMessages": [
+            "successfully created",
+            "User created",
+            "Success",
+            "successfully",
+            "created successfully"
+        ]
+    }
+}

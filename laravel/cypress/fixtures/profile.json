@@ -1,0 +1,57 @@
+{
+    "testData": {
+        "profileUpdate": {
+            "name": "Updated Test User",
+            "username": "updated_testuser",
+            "email": "updated@test.com",
+            "originalName": "Test User",
+            "originalUsername": "testuser",
+            "originalEmail": "test@test.com"
+        },
+        "passwordUpdate": {
+            "currentPassword": "password123",
+            "newPassword": "newpassword123",
+            "confirmPassword": "newpassword123",
+            "wrongCurrentPassword": "wrongpassword",
+            "mismatchPassword": "differentpassword"
+        }
+    },
+    "selectors": {
+        "tabs": {
+            "profileTab": "[role='tab']:nth-child(1)",
+            "passwordTab": "[role='tab']:nth-child(2)"
+        },
+        "profileForm": {
+            "form": "[role='tabpanel'][data-state='active'] form",
+            "nameInput": "input[name='name']",
+            "usernameInput": "input[name='username']",
+            "emailInput": "input[name='email']",
+            "submitButton": "[role='tabpanel'][data-state='active'] button[type='submit']",
+            "fileUpload": ".filepond--root, input[type='file']",
+            "avatar": ".avatar, [class*='avatar']"
+        },
+        "passwordForm": {
+            "form": "[role='tabpanel'][data-state='active'] form",
+            "currentPasswordInput": "input[name='current_password']",
+            "newPasswordInput": "input[name='password']",
+            "confirmPasswordInput": "input[name='password_confirmation']",
+            "submitButton": "[role='tabpanel'][data-state='active'] button[type='submit']"
+        }
+    },
+    "messages": {
+        "success": [
+            "successfully updated",
+            "Profile updated",
+            "Password updated",
+            "success",
+            "updated successfully"
+        ],
+        "validation": [
+            "required",
+            "invalid",
+            "must match",
+            "incorrect password",
+            "passwords do not match"
+        ]
+    }
+}

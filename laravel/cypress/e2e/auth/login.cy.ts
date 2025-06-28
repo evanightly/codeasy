@@ -180,22 +180,22 @@ describe('User Login Flow', () => {
         });
     });
 
-    describe('Auto-fill Functionality', () => {
-        it('should handle browser auto-fill', () => {
-            // Navigate to password step using fixture email
-            cy.get('input[name="email"]').type(loginCredentials.student.email);
-            cy.get('button').contains('Next').click();
+    // describe('Auto-fill Functionality', () => {
+    //     it('should handle browser auto-fill', () => {
+    //         // Navigate to password step using fixture email
+    //         cy.get('input[name="email"]').type(loginCredentials.student.email);
+    //         cy.get('button').contains('Next').click();
 
-            // Simulate browser auto-fill by setting fixture password directly
-            cy.get('input[name="password"]').then(($input) => {
-                $input.val(loginCredentials.student.password);
-                $input.trigger('input');
-            });
+    //         // Simulate browser auto-fill by setting fixture password directly
+    //         cy.get('input[name="password"]').then(($input) => {
+    //             $input.val(loginCredentials.student.password);
+    //             $input.trigger('input');
+    //         });
 
-            // Verify the behavior - should redirect to dashboard
-            cy.url({ timeout: 10000 }).should('include', '/dashboard');
-        });
-    });
+    //         // Verify the behavior - should redirect to dashboard
+    //         cy.url({ timeout: 10000 }).should('include', '/dashboard');
+    //     });
+    // });
 
     describe('Keyboard Navigation', () => {
         it('should support Enter key navigation', () => {

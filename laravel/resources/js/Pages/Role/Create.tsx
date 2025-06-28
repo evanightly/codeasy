@@ -150,6 +150,7 @@ export default function Create() {
                                                                             checked as unknown as boolean,
                                                                         )
                                                                     }
+                                                                    data-testid={`group-checkbox-${group.toLowerCase().replace(/\s+/g, '-')}`}
                                                                     checked={perms.every((p) =>
                                                                         field.value.includes(p.id),
                                                                     )}
@@ -184,6 +185,7 @@ export default function Create() {
                                                                                 }
                                                                             }}
                                                                             id={`permission-${permission.id}`}
+                                                                            data-testid={`permission-checkbox-${permission.id}`}
                                                                             checked={field.value.includes(
                                                                                 permission.id,
                                                                             )}

@@ -266,6 +266,12 @@ The intent system routes specific business logic through generic CRUD endpoints:
 20. Do not run anything that will resulting code generation stuck like doing ./dc.sh shell laravel
 21. Do not run build, because those process will stuck
 
+## Test Case E2E Rules
+1. Do not assume, always read and analyze the existing codebase pattern and its flow
+2. Maintain clean code
+3. Direct element selection is preferred.
+3. You are encourage to define data- selector into the element that you want to select in order to do the objective above
+
 ## Crucial Notes
 Warning: above all circumstances, do not remove the old code, your job is to implement a feature, not modify the entire codebase, **this is always happening at all times.**
 

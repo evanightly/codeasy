@@ -1,0 +1,99 @@
+{
+    "testRoles": {
+        "basic": {
+            "name": "Test Role",
+            "description": "Test role description"
+        },
+        "withPermissions": {
+            "name": "Test Role with Permissions",
+            "description": "Test role with selected permissions"
+        },
+        "categoryTest": {
+            "name": "Category Test Role",
+            "description": "Role for testing permission categories"
+        },
+        "allPermissions": {
+            "name": "All Permissions Role",
+            "description": "Role with all permissions"
+        },
+        "verificationTest": {
+            "name": "Verification Test Role",
+            "description": "Role for testing permission verification"
+        },
+        "uncheckTest": {
+            "name": "Uncheck Test Role",
+            "description": "Role for testing permission unchecking"
+        },
+        "toggleTest": {
+            "name": "Toggle Role",
+            "description": "Role for testing permission toggling"
+        },
+        "specificPermissions": {
+            "name": "Specific Permissions Role",
+            "description": "Role for testing specific permission types"
+        },
+        "multiGroup": {
+            "name": "Multi Group Role",
+            "description": "Role for testing multiple permission groups"
+        },
+        "selectAll": {
+            "name": "Select All Role",
+            "description": "Role for testing select all functionality"
+        },
+        "updateTest": {
+            "name": "Update Test Role",
+            "description": "Role for testing update functionality",
+            "updatedName": "Updated Test Role",
+            "updatedDescription": "Updated role description for testing"
+        },
+        "editPermissions": {
+            "name": "Edit Permissions Role",
+            "description": "Role for testing permission editing",
+            "updatedName": "Edited Permissions Role",
+            "updatedDescription": "Updated role with modified permissions"
+        }
+    },
+    "selectors": {
+        "form": "form",
+        "nameInput": "input[name=\"name\"]",
+        "descriptionInput": "input[name=\"description\"]",
+        "descriptionTextarea": "textarea[name=\"description\"]",
+        "submitButton": "button[type=\"submit\"]",
+        "createButton": "button:contains(\"Create\")",
+        "updateButton": "button:contains(\"Update\")",
+        "editButton": "button:contains(\"Edit\")",
+        "editLink": "a:contains(\"Edit\")",
+        "editButtonTestId": "[data-testid*=\"edit\"]",
+        "saveButton": "button:contains(\"Save\")",
+        "permissionCheckboxes": {
+            "dataTestId": "[data-testid^=\"permission-checkbox-\"]",
+            "idPattern": "[id^=\"permission-\"]",
+            "regularCheckbox": "input[type=\"checkbox\"]"
+        },
+        "groupCheckboxes": {
+            "dataTestId": "[data-testid^=\"group-checkbox-\"]",
+            "selectAll": "[data-testid=\"select-all-permissions\"]"
+        }
+    },
+    "permissionCategories": [
+        "user-management",
+        "course-management",
+        "student-management",
+        "report-access",
+        "system-settings"
+    ],
+    "permissionTypes": ["create", "read", "update", "delete"],
+    "expectedGroups": ["user", "permission", "role", "school", "student", "teacher", "class"],
+    "messages": {
+        "successMessages": [
+            "successfully created",
+            "Role created",
+            "Success",
+            "successfully",
+            "created successfully",
+            "successfully updated",
+            "Role updated",
+            "updated successfully"
+        ]
+    }
+}
