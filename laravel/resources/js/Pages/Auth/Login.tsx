@@ -2,14 +2,6 @@ import AnimatedGradientText from '@/Components/UI/animated-gradient-text';
 import { AnimatedGridPattern } from '@/Components/UI/animated-grid-pattern';
 import { Button } from '@/Components/UI/button';
 import { Checkbox } from '@/Components/UI/checkbox';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/Components/UI/form';
 import { Input } from '@/Components/UI/input';
 import { NeonGradientCard } from '@/Components/UI/neon-gradient-card';
 import { Ripple } from '@/Components/UI/ripple';
@@ -17,10 +9,8 @@ import { ShineBorder } from '@/Components/UI/shine-border';
 import SparklesText from '@/Components/UI/sparkles-text';
 import { TextAnimate } from '@/Components/UI/text-animate';
 import { useDarkMode } from '@/Contexts/ThemeContext';
-import { authServiceHook } from '@/Services/authServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
@@ -38,10 +28,8 @@ import {
     Sun,
     UserCheck,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { FormEventHandler, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { z } from 'zod';
 
 type Step = 'emailStep' | 'passwordStep' | 'authing';
 
@@ -58,36 +46,13 @@ export default function Login({
     const [autoSubmitted, setAutoSubmitted] = useState(false);
     const [typedManually, setTypedManually] = useState(false);
     const passwordInputRef = useRef<HTMLInputElement>(null);
-    const loginMutation = authServiceHook.useLogin();
 
-    // Define form schema with Zod
-    const formSchema = z.object({
-        email: z.string().min(1, t('validation.required', { attribute: 'email or username' })),
-        password: z.string().min(1, t('validation.required', { attribute: 'password' })),
-        remember: z.boolean().default(false),
+    // Use Inertia's useForm for proper Laravel session authentication
+    const { data, setData, post, processing, errors, reset } = useForm({
+        email: '',
+        password: '',
+        remember: false as boolean,
     });
-
-    // Setup form with react-hook-form
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            email: '',
-            password: '',
-            remember: false,
-        },
-    });
-
-    const handleNextEmail = () => {
-        const email = form.getValues('email');
-        if (!email) {
-            form.setError('email', {
-                type: 'manual',
-                message: t('validation.required', { attribute: 'email' }),
-            });
-            return;
-        }
-        setStep('passwordStep');
-    };
 
     // Auto focus password input when step changes to passwordStep
     useEffect(() => {
@@ -98,40 +63,32 @@ export default function Login({
         }
     }, [step]);
 
-    const signIn = async () => {
-        setStep('authing');
-        const values = form.getValues();
-
-        try {
-            await loginMutation.mutateAsync({
-                data: values,
-            });
-
-            // Successful login
-            router.visit(route(`${ROUTES.DASHBOARD}.index`), {
-                replace: true,
-            });
-            setAutoSubmitted(false);
-            setTypedManually(false);
-
-            toast.success(t('pages.auth.login.messages.success'));
-        } catch (_error) {
-            // Handle login error
-            setStep('passwordStep');
-            form.reset({ email: values.email, password: '', remember: values.remember });
-
-            toast.error(t('pages.auth.login.messages.error'));
-
-            // // If there are specific field errors, set them
-            // if (error.response?.data?.errors) {
-            //     Object.entries(error.response.data.errors).forEach(([key, messages]) => {
-            //         form.setError(key as any, {
-            //             type: 'manual',
-            //             message: Array.isArray(messages) ? messages[0] : messages,
-            //         });
-            //     });
-            // }
+    const handleNextEmail = () => {
+        if (!data.email) {
+            toast.error(t('validation.required', { attribute: 'email' }));
+            return;
         }
+        setStep('passwordStep');
+    };
+
+    const signIn: FormEventHandler = (e) => {
+        e.preventDefault();
+        setStep('authing');
+
+        post(route('login'), {
+            onFinish: () => {
+                reset('password');
+                setAutoSubmitted(false);
+                setTypedManually(false);
+            },
+            onSuccess: () => {
+                toast.success(t('pages.auth.login.messages.success'));
+            },
+            onError: () => {
+                setStep('passwordStep');
+                toast.error(t('pages.auth.login.messages.error'));
+            },
+        });
     };
 
     // Auto sign in if password is autofilled
@@ -145,15 +102,17 @@ export default function Login({
             const autoFillTimer = setTimeout(() => {
                 const passwordInput = passwordInputRef.current;
                 if (passwordInput?.value && !typedManually && !autoSubmitted) {
-                    form.setValue('password', passwordInput.value);
+                    setData('password', passwordInput.value);
                     setAutoSubmitted(true);
-                    signIn();
+                    // Trigger form submission
+                    const fakeEvent = { preventDefault: () => {} } as any;
+                    signIn(fakeEvent);
                 }
             }, 500);
 
             return () => clearTimeout(autoFillTimer);
         }
-    }, [step]);
+    }, [step, typedManually, autoSubmitted, data, setData, signIn]);
 
     return (
         <div className='light:from-slate-50 light:via-purple-50 light:to-blue-50 relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 dark:from-slate-900 dark:via-purple-900 dark:to-slate-800'>
@@ -321,268 +280,239 @@ export default function Login({
                                 )}
 
                                 {/* Login Form */}
-                                <Form {...form}>
-                                    <form
-                                        onSubmit={(e) => e.preventDefault()}
-                                        className='space-y-6'
-                                    >
-                                        <AnimatePresence mode='wait'>
-                                            {step === 'authing' ? (
-                                                <motion.div
-                                                    key='authing'
-                                                    initial={{ opacity: 0, scale: 0.8 }}
-                                                    exit={{ opacity: 0, scale: 0.8 }}
-                                                    className='flex flex-col items-center justify-center space-y-4 py-12'
-                                                    animate={{ opacity: 1, scale: 1 }}
+                                <form onSubmit={signIn} className='space-y-6'>
+                                    <AnimatePresence mode='wait'>
+                                        {step === 'authing' ? (
+                                            <motion.div
+                                                key='authing'
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                exit={{ opacity: 0, scale: 0.8 }}
+                                                className='flex flex-col items-center justify-center space-y-4 py-12'
+                                                animate={{ opacity: 1, scale: 1 }}
+                                            >
+                                                <div className='relative'>
+                                                    <div className='h-12 w-12 animate-spin rounded-full border-4 border-purple-300 border-t-purple-600'></div>
+                                                    <UserCheck className='absolute inset-0 m-auto h-6 w-6 text-purple-400' />
+                                                </div>
+                                                <p className='text-lg font-semibold text-foreground'>
+                                                    {t('pages.auth.login.messages.authenticating')}
+                                                </p>
+                                                <p className='text-sm text-foreground/50'>
+                                                    {t('pages.auth.login.ui.verifying_credentials')}
+                                                </p>
+                                            </motion.div>
+                                        ) : (
+                                            <motion.div
+                                                key='form'
+                                                initial={{ opacity: 0, y: 20 }}
+                                                exit={{ opacity: 0, y: -20 }}
+                                                className='space-y-6'
+                                                animate={{ opacity: 1, y: 0 }}
+                                            >
+                                                {/* Email Step */}
+                                                <div
+                                                    className={`space-y-4 transition-all duration-500 ${
+                                                        step === 'emailStep'
+                                                            ? 'max-h-96 opacity-100'
+                                                            : 'max-h-0 overflow-hidden opacity-0'
+                                                    }`}
                                                 >
-                                                    <div className='relative'>
-                                                        <div className='h-12 w-12 animate-spin rounded-full border-4 border-purple-300 border-t-purple-600'></div>
-                                                        <UserCheck className='absolute inset-0 m-auto h-6 w-6 text-purple-400' />
-                                                    </div>
-                                                    <p className='text-lg font-semibold text-foreground'>
-                                                        {t(
-                                                            'pages.auth.login.messages.authenticating',
-                                                        )}
-                                                    </p>
-                                                    <p className='text-sm text-foreground/50'>
-                                                        {t(
-                                                            'pages.auth.login.ui.verifying_credentials',
-                                                        )}
-                                                    </p>
-                                                </motion.div>
-                                            ) : (
-                                                <motion.div
-                                                    key='form'
-                                                    initial={{ opacity: 0, y: 20 }}
-                                                    exit={{ opacity: 0, y: -20 }}
-                                                    className='space-y-6'
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                >
-                                                    {/* Email Step */}
-                                                    <div
-                                                        className={`space-y-4 transition-all duration-500 ${
-                                                            step === 'emailStep'
-                                                                ? 'max-h-96 opacity-100'
-                                                                : 'max-h-0 overflow-hidden opacity-0'
-                                                        }`}
-                                                    >
-                                                        <FormField
-                                                            render={({ field }) => (
-                                                                <FormItem>
-                                                                    <FormLabel className='flex items-center gap-2 text-foreground/50'>
-                                                                        <Mail className='h-4 w-4' />
-                                                                        {t(
-                                                                            'pages.auth.login.fields.identifier',
-                                                                        )}
-                                                                    </FormLabel>
-                                                                    <FormControl>
-                                                                        <div className='relative'>
-                                                                            <Input
-                                                                                {...field}
-                                                                                placeholder={t(
-                                                                                    'pages.auth.login.placeholders.identifier',
-                                                                                )}
-                                                                                onKeyDown={(e) => {
-                                                                                    if (
-                                                                                        e.key ===
-                                                                                        'Enter'
-                                                                                    ) {
-                                                                                        e.preventDefault();
-                                                                                        handleNextEmail();
-                                                                                    }
-                                                                                }}
-                                                                                className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-purple-400'
-                                                                                autoFocus
-                                                                                autoComplete='username email'
-                                                                            />
-                                                                            <div className='absolute right-3 top-1/2 -translate-y-1/2'>
-                                                                                <Shield className='h-4 w-4 text-slate-400' />
-                                                                            </div>
-                                                                        </div>
-                                                                    </FormControl>
-                                                                    <FormMessage className='text-red-300' />
-                                                                </FormItem>
+                                                    <div>
+                                                        <label className='mb-2 flex items-center gap-2 text-sm font-medium text-foreground/50'>
+                                                            <Mail className='h-4 w-4' />
+                                                            {t(
+                                                                'pages.auth.login.fields.identifier',
                                                             )}
-                                                            name='email'
-                                                            control={form.control}
-                                                        />
-
-                                                        <FormField
-                                                            render={({ field }) => (
-                                                                <FormItem className='flex items-center space-x-2 space-y-0'>
-                                                                    <FormControl>
-                                                                        <Checkbox
-                                                                            onCheckedChange={
-                                                                                field.onChange
-                                                                            }
-                                                                            name='remember'
-                                                                            className='border-foreground/50 data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600'
-                                                                            checked={field.value}
-                                                                        />
-                                                                    </FormControl>
-                                                                    <FormLabel className='cursor-pointer text-sm font-normal text-foreground/50'>
-                                                                        {t(
-                                                                            'pages.auth.login.fields.remember',
-                                                                        )}
-                                                                    </FormLabel>
-                                                                </FormItem>
-                                                            )}
-                                                            name='remember'
-                                                            control={form.control}
-                                                        />
-
-                                                        <div className='flex items-center justify-between pt-2'>
-                                                            <Link
-                                                                href={route(ROUTES.REGISTER)}
-                                                                className='text-sm text-foreground/50 transition-colors'
-                                                            >
-                                                                {t(
-                                                                    'pages.auth.login.buttons.dont_have_account',
+                                                        </label>
+                                                        <div className='relative'>
+                                                            <Input
+                                                                value={data.email}
+                                                                type='text'
+                                                                placeholder={t(
+                                                                    'pages.auth.login.placeholders.identifier',
                                                                 )}
-                                                            </Link>
-
-                                                            <Button
-                                                                onClick={handleNextEmail}
-                                                                disabled={loginMutation.isPending}
-                                                                className='bg-gradient-to-r from-purple-600 to-blue-600 px-6 text-white hover:from-purple-700 hover:to-blue-700'
-                                                            >
-                                                                {t('pages.auth.login.buttons.next')}
-                                                                <ArrowRight className='ml-2 h-4 w-4' />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Password Step */}
-                                                    <div
-                                                        className={`space-y-4 transition-all duration-500 ${
-                                                            step === 'passwordStep'
-                                                                ? 'max-h-96 opacity-100'
-                                                                : 'max-h-0 overflow-hidden opacity-0'
-                                                        }`}
-                                                    >
-                                                        {/* Back Button & Email Display */}
-                                                        <div className='flex items-center gap-3 text-foreground/50'>
-                                                            <Button
-                                                                variant='ghost'
-                                                                type='button'
-                                                                onClick={() => setStep('emailStep')}
-                                                                name='back-button'
-                                                                disabled={loginMutation.isPending}
-                                                                className='h-8 w-8 p-0 text-foreground/50'
-                                                            >
-                                                                <ArrowLeft />
-                                                            </Button>
-                                                            <div className='flex items-center gap-2'>
-                                                                <Mail className='h-4 w-4 text-foreground/50' />
-                                                                <span className='text-sm font-medium text-foreground/50'>
-                                                                    {form.getValues('email')}
-                                                                </span>
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        handleNextEmail();
+                                                                    }
+                                                                }}
+                                                                onChange={(e) =>
+                                                                    setData('email', e.target.value)
+                                                                }
+                                                                name='email'
+                                                                className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-purple-400'
+                                                                autoFocus
+                                                                autoComplete='username email'
+                                                            />
+                                                            <div className='absolute right-3 top-1/2 -translate-y-1/2'>
+                                                                <Shield className='h-4 w-4 text-slate-400' />
                                                             </div>
                                                         </div>
+                                                        {errors.email && (
+                                                            <div className='mt-1 text-sm text-red-300'>
+                                                                {errors.email}
+                                                            </div>
+                                                        )}
+                                                    </div>
 
-                                                        <FormField
-                                                            render={({ field }) => (
-                                                                <FormItem>
-                                                                    <FormLabel className='flex items-center gap-2 text-foreground'>
-                                                                        <Lock className='h-4 w-4' />
-                                                                        {t(
-                                                                            'pages.auth.login.fields.password',
-                                                                        )}
-                                                                    </FormLabel>
-                                                                    <FormControl>
-                                                                        <div className='relative'>
-                                                                            <Input
-                                                                                {...field}
-                                                                                type='password'
-                                                                                ref={
-                                                                                    passwordInputRef
-                                                                                }
-                                                                                placeholder={t(
-                                                                                    'pages.auth.login.placeholders.password',
-                                                                                )}
-                                                                                onKeyDown={(e) => {
-                                                                                    if (
-                                                                                        e.key ===
-                                                                                            'Enter' &&
-                                                                                        !loginMutation.isPending
-                                                                                    ) {
-                                                                                        e.preventDefault();
-                                                                                        signIn();
-                                                                                    }
-                                                                                }}
-                                                                                onChange={(e) => {
-                                                                                    field.onChange(
-                                                                                        e,
-                                                                                    );
-                                                                                    const inputType =
-                                                                                        (
-                                                                                            e.nativeEvent as InputEvent
-                                                                                        ).inputType;
-                                                                                    if (
-                                                                                        inputType &&
-                                                                                        inputType !==
-                                                                                            'insertFromPaste'
-                                                                                    ) {
-                                                                                        setTypedManually(
-                                                                                            true,
-                                                                                        );
-                                                                                    }
-                                                                                }}
-                                                                                className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-purple-400'
-                                                                                autoFocus
-                                                                                autoComplete='current-password'
-                                                                            />
-                                                                        </div>
-                                                                    </FormControl>
-                                                                    <FormMessage className='text-red-300' />
-                                                                </FormItem>
-                                                            )}
-                                                            name='password'
-                                                            control={form.control}
+                                                    <div className='flex items-center space-x-2'>
+                                                        <Checkbox
+                                                            onCheckedChange={(checked) =>
+                                                                setData('remember', !!checked)
+                                                            }
+                                                            name='remember'
+                                                            id='remember'
+                                                            className='border-foreground/50 data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600'
+                                                            checked={data.remember}
                                                         />
+                                                        <label
+                                                            htmlFor='remember'
+                                                            className='cursor-pointer text-sm font-normal text-foreground/50'
+                                                        >
+                                                            {t('pages.auth.login.fields.remember')}
+                                                        </label>
+                                                    </div>
 
-                                                        <div className='flex items-center justify-between pt-2'>
-                                                            <div className='flex flex-col space-y-1 text-xs'>
-                                                                {canResetPassword && (
-                                                                    <Link
-                                                                        href={route(
-                                                                            ROUTES.PASSWORD_REQUEST,
-                                                                        )}
-                                                                        className='text-foreground/50 transition-colors'
-                                                                    >
-                                                                        {t(
-                                                                            'pages.auth.login.buttons.forgot_password',
-                                                                        )}
-                                                                    </Link>
+                                                    <div className='flex items-center justify-between pt-2'>
+                                                        <Link
+                                                            href={route(ROUTES.REGISTER)}
+                                                            className='text-sm text-foreground/50 transition-colors'
+                                                        >
+                                                            {t(
+                                                                'pages.auth.login.buttons.dont_have_account',
+                                                            )}
+                                                        </Link>
+
+                                                        <Button
+                                                            onClick={handleNextEmail}
+                                                            disabled={processing}
+                                                            className='bg-gradient-to-r from-purple-600 to-blue-600 px-6 text-white hover:from-purple-700 hover:to-blue-700'
+                                                        >
+                                                            {t('pages.auth.login.buttons.next')}
+                                                            <ArrowRight className='ml-2 h-4 w-4' />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Password Step */}
+                                                <div
+                                                    className={`space-y-4 transition-all duration-500 ${
+                                                        step === 'passwordStep'
+                                                            ? 'max-h-96 opacity-100'
+                                                            : 'max-h-0 overflow-hidden opacity-0'
+                                                    }`}
+                                                >
+                                                    {/* Back Button & Email Display */}
+                                                    <div className='flex items-center gap-3 text-foreground/50'>
+                                                        <Button
+                                                            variant='ghost'
+                                                            type='button'
+                                                            onClick={() => setStep('emailStep')}
+                                                            name='back-button'
+                                                            disabled={processing}
+                                                            className='h-8 w-8 p-0 text-foreground/50'
+                                                        >
+                                                            <ArrowLeft />
+                                                        </Button>
+                                                        <div className='flex items-center gap-2'>
+                                                            <Mail className='h-4 w-4 text-foreground/50' />
+                                                            <span className='text-sm font-medium text-foreground/50'>
+                                                                {data.email}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className='mb-2 flex items-center gap-2 text-sm font-medium text-foreground'>
+                                                            <Lock className='h-4 w-4' />
+                                                            {t('pages.auth.login.fields.password')}
+                                                        </label>
+                                                        <div className='relative'>
+                                                            <Input
+                                                                value={data.password}
+                                                                type='password'
+                                                                ref={passwordInputRef}
+                                                                placeholder={t(
+                                                                    'pages.auth.login.placeholders.password',
                                                                 )}
+                                                                onKeyDown={(e) => {
+                                                                    if (
+                                                                        e.key === 'Enter' &&
+                                                                        !processing
+                                                                    ) {
+                                                                        e.preventDefault();
+                                                                        signIn(e);
+                                                                    }
+                                                                }}
+                                                                onChange={(e) => {
+                                                                    setData(
+                                                                        'password',
+                                                                        e.target.value,
+                                                                    );
+                                                                    const inputType = (
+                                                                        e.nativeEvent as InputEvent
+                                                                    ).inputType;
+                                                                    if (
+                                                                        inputType &&
+                                                                        inputType !==
+                                                                            'insertFromPaste'
+                                                                    ) {
+                                                                        setTypedManually(true);
+                                                                    }
+                                                                }}
+                                                                name='password'
+                                                                className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-purple-400'
+                                                                autoFocus
+                                                                autoComplete='current-password'
+                                                            />
+                                                        </div>
+                                                        {errors.password && (
+                                                            <div className='mt-1 text-sm text-red-300'>
+                                                                {errors.password}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className='flex items-center justify-between pt-2'>
+                                                        <div className='flex flex-col space-y-1 text-xs'>
+                                                            {canResetPassword && (
                                                                 <Link
-                                                                    href={route(ROUTES.REGISTER)}
+                                                                    href={route(
+                                                                        ROUTES.PASSWORD_REQUEST,
+                                                                    )}
                                                                     className='text-foreground/50 transition-colors'
                                                                 >
                                                                     {t(
-                                                                        'pages.auth.login.buttons.sign_up',
+                                                                        'pages.auth.login.buttons.forgot_password',
                                                                     )}
                                                                 </Link>
-                                                            </div>
-
-                                                            <Button
-                                                                onClick={signIn}
-                                                                loading={loginMutation.isPending}
-                                                                disabled={loginMutation.isPending}
-                                                                className='bg-gradient-to-r from-purple-600 to-blue-600 px-8 text-white hover:from-purple-700 hover:to-blue-700'
+                                                            )}
+                                                            <Link
+                                                                href={route(ROUTES.REGISTER)}
+                                                                className='text-foreground/50 transition-colors'
                                                             >
-                                                                <LogIn className='mr-2 h-4 w-4' />
                                                                 {t(
-                                                                    'pages.auth.login.buttons.sign_in',
+                                                                    'pages.auth.login.buttons.sign_up',
                                                                 )}
-                                                            </Button>
+                                                            </Link>
                                                         </div>
+
+                                                        <Button
+                                                            type='submit'
+                                                            loading={processing}
+                                                            disabled={processing}
+                                                            className='bg-gradient-to-r from-purple-600 to-blue-600 px-8 text-white hover:from-purple-700 hover:to-blue-700'
+                                                        >
+                                                            <LogIn className='mr-2 h-4 w-4' />
+                                                            {t('pages.auth.login.buttons.sign_in')}
+                                                        </Button>
                                                     </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </form>
-                                </Form>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </form>
                             </div>
                         </NeonGradientCard>
                     </motion.div>
