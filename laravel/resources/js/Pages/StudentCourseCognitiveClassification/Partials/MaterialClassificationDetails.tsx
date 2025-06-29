@@ -103,11 +103,10 @@ export function MaterialClassificationDetails({
               : details.raw_data) as MaterialClassificationRawData)
         : undefined;
 
-    console.log('details', details);
-
     // Render question metrics in a formatted table
     const renderQuestionMetrics = (metrics: MaterialClassificationRawData['question_metrics']) => {
-        if (!metrics || metrics.length === 0) return <p>No question metrics available</p>;
+        if (!metrics || metrics.length === 0)
+            return <p>{t('pages.classification.messages.no_question_metrics')}</p>;
 
         return (
             <div className='overflow-x-auto'>
@@ -204,7 +203,7 @@ export function MaterialClassificationDetails({
     const renderCalculationDetails = (
         details: MaterialClassificationRawData['calculation_details'],
     ) => {
-        if (!details) return <p>No calculation details available</p>;
+        if (!details) return <p>{t('pages.classification.messages.no_calculation_details')}</p>;
 
         // If details is a string (JSON), try to parse it
         const parsedDetails = typeof details === 'string' ? JSON.parse(details) : details;
@@ -214,7 +213,9 @@ export function MaterialClassificationDetails({
                 {/* Criteria section */}
                 {parsedDetails.criteria && (
                     <div className='space-y-2'>
-                        <h4 className='font-semibold'>Criteria Used</h4>
+                        <h4 className='font-semibold'>
+                            {t('pages.classification.messages.criteria_used')}
+                        </h4>
                         <div className='grid grid-cols-2 gap-4'>
                             <div>
                                 <p className='text-sm font-medium'>
@@ -329,241 +330,258 @@ export function MaterialClassificationDetails({
                         <h4 className='font-semibold'>Calculation Steps</h4>
                         <div className='space-y-6'>
                             {/* Step 1: Calculate Column Sums */}
-                            {parsedDetails.steps[0] && (
-                                <div className='rounded border p-3'>
-                                    <p className='font-medium'>1. {parsedDetails.steps[0].name}</p>
-                                    <p className='mb-2 text-sm text-muted-foreground'>
-                                        {parsedDetails.steps[0].description}
-                                    </p>
-                                    <div className='mt-2 overflow-x-auto'>
-                                        <table className='w-full text-sm'>
-                                            <thead>
-                                                <tr className='border-b'>
-                                                    <th className='py-1 text-center'>
-                                                        compile_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        coding_time
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        trial_status
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        completion_status
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        variable_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        function_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        test_case_rate
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    {parsedDetails.steps[0].column_sums.map(
-                                                        (sum: number, index: number) => (
-                                                            <td
-                                                                key={index}
-                                                                className='py-1 text-center'
-                                                            >
-                                                                {formatNumber(sum)}
-                                                            </td>
-                                                        ),
-                                                    )}
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                            {parsedDetails.steps &&
+                                parsedDetails.steps[0] &&
+                                parsedDetails.steps[0].column_sums && (
+                                    <div className='rounded border p-3'>
+                                        <p className='font-medium'>
+                                            1. {parsedDetails.steps[0].name}
+                                        </p>
+                                        <p className='mb-2 text-sm text-muted-foreground'>
+                                            {parsedDetails.steps[0].description}
+                                        </p>
+                                        <div className='mt-2 overflow-x-auto'>
+                                            <table className='w-full text-sm'>
+                                                <thead>
+                                                    <tr className='border-b'>
+                                                        <th className='py-1 text-center'>
+                                                            compile_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            coding_time
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            trial_status
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            completion_status
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            variable_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            function_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            test_case_rate
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        {parsedDetails.steps[0].column_sums.map(
+                                                            (sum: number, index: number) => (
+                                                                <td
+                                                                    key={index}
+                                                                    className='py-1 text-center'
+                                                                >
+                                                                    {formatNumber(sum)}
+                                                                </td>
+                                                            ),
+                                                        )}
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
                             {/* Step 2: Normalize Decision Matrix */}
-                            {parsedDetails.steps[1] && parsedDetails.steps[1].normalized_matrix && (
-                                <div className='rounded border p-3'>
-                                    <p className='font-medium'>2. {parsedDetails.steps[1].name}</p>
-                                    <p className='mb-2 text-sm text-muted-foreground'>
-                                        {parsedDetails.steps[1].description}
-                                    </p>
-                                    <div className='mt-2 overflow-x-auto'>
-                                        <table className='w-full text-sm'>
-                                            <thead>
-                                                <tr className='border-b'>
-                                                    <th className='py-1 text-left'>Question</th>
-                                                    <th className='py-1 text-center'>
-                                                        compile_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        coding_time
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        trial_status
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        completion_status
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        variable_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        function_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        test_case_rate
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {parsedDetails.steps[1].normalized_matrix.map(
-                                                    (row: number[], rowIndex: number) => (
-                                                        <tr key={rowIndex} className='border-b'>
-                                                            <td className='py-1 font-medium'>
-                                                                Question {rowIndex + 1}
-                                                            </td>
-                                                            {row.map(
-                                                                (
-                                                                    value: number,
-                                                                    colIndex: number,
-                                                                ) => (
-                                                                    <td
-                                                                        key={colIndex}
-                                                                        className='py-1 text-center'
-                                                                    >
-                                                                        {formatNumber(value)}
-                                                                    </td>
-                                                                ),
-                                                            )}
-                                                        </tr>
-                                                    ),
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Step 3: Define Weights */}
-                            {parsedDetails.steps[2] && parsedDetails.steps[2].weights && (
-                                <div className='rounded border p-3'>
-                                    <p className='font-medium'>3. {parsedDetails.steps[2].name}</p>
-                                    <p className='mb-2 text-sm text-muted-foreground'>
-                                        {parsedDetails.steps[2].description}
-                                    </p>
-                                    <div className='mt-2 overflow-x-auto'>
-                                        <table className='w-full text-sm'>
-                                            <thead>
-                                                <tr className='border-b'>
-                                                    <th className='py-1 text-center'>
-                                                        compile_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        coding_time
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        trial_status
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        completion_status
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        variable_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        function_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        test_case_rate
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    {parsedDetails.steps[2].weights.map(
-                                                        (weight: number, index: number) => (
-                                                            <td
-                                                                key={index}
-                                                                className='py-1 text-center'
-                                                            >
-                                                                {formatNumber(weight)}
-                                                            </td>
+                            {parsedDetails.steps &&
+                                parsedDetails.steps[1] &&
+                                parsedDetails.steps[1].normalized_matrix && (
+                                    <div className='rounded border p-3'>
+                                        <p className='font-medium'>
+                                            2. {parsedDetails.steps[1].name}
+                                        </p>
+                                        <p className='mb-2 text-sm text-muted-foreground'>
+                                            {parsedDetails.steps[1].description}
+                                        </p>
+                                        <div className='mt-2 overflow-x-auto'>
+                                            <table className='w-full text-sm'>
+                                                <thead>
+                                                    <tr className='border-b'>
+                                                        <th className='py-1 text-left'>Question</th>
+                                                        <th className='py-1 text-center'>
+                                                            compile_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            coding_time
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            trial_status
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            completion_status
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            variable_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            function_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            test_case_rate
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {parsedDetails.steps[1].normalized_matrix.map(
+                                                        (row: number[], rowIndex: number) => (
+                                                            <tr key={rowIndex} className='border-b'>
+                                                                <td className='py-1 font-medium'>
+                                                                    Question {rowIndex + 1}
+                                                                </td>
+                                                                {row.map(
+                                                                    (
+                                                                        value: number,
+                                                                        colIndex: number,
+                                                                    ) => (
+                                                                        <td
+                                                                            key={colIndex}
+                                                                            className='py-1 text-center'
+                                                                        >
+                                                                            {formatNumber(value)}
+                                                                        </td>
+                                                                    ),
+                                                                )}
+                                                            </tr>
                                                         ),
                                                     )}
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+
+                            {/* Step 3: Define Weights */}
+                            {parsedDetails.steps &&
+                                parsedDetails.steps[2] &&
+                                parsedDetails.steps[2].weights && (
+                                    <div className='rounded border p-3'>
+                                        <p className='font-medium'>
+                                            3. {parsedDetails.steps[2].name}
+                                        </p>
+                                        <p className='mb-2 text-sm text-muted-foreground'>
+                                            {parsedDetails.steps[2].description}
+                                        </p>
+                                        <div className='mt-2 overflow-x-auto'>
+                                            <table className='w-full text-sm'>
+                                                <thead>
+                                                    <tr className='border-b'>
+                                                        <th className='py-1 text-center'>
+                                                            compile_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            coding_time
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            trial_status
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            completion_status
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            variable_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            function_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            test_case_rate
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        {parsedDetails.steps[2].weights.map(
+                                                            (weight: number, index: number) => (
+                                                                <td
+                                                                    key={index}
+                                                                    className='py-1 text-center'
+                                                                >
+                                                                    {formatNumber(weight)}
+                                                                </td>
+                                                            ),
+                                                        )}
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
 
                             {/* Step 4: Apply Weights */}
-                            {parsedDetails.steps[3] && parsedDetails.steps[3].weighted_matrix && (
-                                <div className='rounded border p-3'>
-                                    <p className='font-medium'>4. {parsedDetails.steps[3].name}</p>
-                                    <p className='mb-2 text-sm text-muted-foreground'>
-                                        {parsedDetails.steps[3].description}
-                                    </p>
-                                    <div className='mt-2 overflow-x-auto'>
-                                        <table className='w-full text-sm'>
-                                            <thead>
-                                                <tr className='border-b'>
-                                                    <th className='py-1 text-left'>Question</th>
-                                                    <th className='py-1 text-center'>
-                                                        compile_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        coding_time
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        trial_status
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        completion_status
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        variable_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        function_count
-                                                    </th>
-                                                    <th className='py-1 text-center'>
-                                                        test_case_rate
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {parsedDetails.steps[3].weighted_matrix.map(
-                                                    (row: number[], rowIndex: number) => (
-                                                        <tr key={rowIndex} className='border-b'>
-                                                            <td className='py-1 font-medium'>
-                                                                Question {rowIndex + 1}
-                                                            </td>
-                                                            {row.map(
-                                                                (
-                                                                    value: number,
-                                                                    colIndex: number,
-                                                                ) => (
-                                                                    <td
-                                                                        key={colIndex}
-                                                                        className='py-1 text-center'
-                                                                    >
-                                                                        {formatNumber(value)}
-                                                                    </td>
-                                                                ),
-                                                            )}
-                                                        </tr>
-                                                    ),
-                                                )}
-                                            </tbody>
-                                        </table>
+                            {parsedDetails.steps &&
+                                parsedDetails.steps[3] &&
+                                parsedDetails.steps[3].weighted_matrix && (
+                                    <div className='rounded border p-3'>
+                                        <p className='font-medium'>
+                                            4. {parsedDetails.steps[3].name}
+                                        </p>
+                                        <p className='mb-2 text-sm text-muted-foreground'>
+                                            {parsedDetails.steps[3].description}
+                                        </p>
+                                        <div className='mt-2 overflow-x-auto'>
+                                            <table className='w-full text-sm'>
+                                                <thead>
+                                                    <tr className='border-b'>
+                                                        <th className='py-1 text-left'>Question</th>
+                                                        <th className='py-1 text-center'>
+                                                            compile_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            coding_time
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            trial_status
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            completion_status
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            variable_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            function_count
+                                                        </th>
+                                                        <th className='py-1 text-center'>
+                                                            test_case_rate
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {parsedDetails.steps[3].weighted_matrix.map(
+                                                        (row: number[], rowIndex: number) => (
+                                                            <tr key={rowIndex} className='border-b'>
+                                                                <td className='py-1 font-medium'>
+                                                                    Question {rowIndex + 1}
+                                                                </td>
+                                                                {row.map(
+                                                                    (
+                                                                        value: number,
+                                                                        colIndex: number,
+                                                                    ) => (
+                                                                        <td
+                                                                            key={colIndex}
+                                                                            className='py-1 text-center'
+                                                                        >
+                                                                            {formatNumber(value)}
+                                                                        </td>
+                                                                    ),
+                                                                )}
+                                                            </tr>
+                                                        ),
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
                             {/* Step 5: Determine Ideal Solutions */}
-                            {parsedDetails.steps[4] &&
+                            {parsedDetails.steps &&
+                                parsedDetails.steps[4] &&
                                 parsedDetails.steps[4].ideal_best &&
                                 parsedDetails.steps[4].ideal_worst && (
                                     <div className='rounded border p-3'>
@@ -639,7 +657,8 @@ export function MaterialClassificationDetails({
                                 )}
 
                             {/* Step 6: Calculate Separation Measures */}
-                            {parsedDetails.steps[5] &&
+                            {parsedDetails.steps &&
+                                parsedDetails.steps[5] &&
                                 parsedDetails.steps[5].separation_best &&
                                 parsedDetails.steps[5].separation_worst && (
                                     <div className='rounded border p-3'>
@@ -690,7 +709,8 @@ export function MaterialClassificationDetails({
                                 )}
 
                             {/* Step 7: Calculate Performance Score */}
-                            {parsedDetails.steps[6] &&
+                            {parsedDetails.steps &&
+                                parsedDetails.steps[6] &&
                                 parsedDetails.steps[6].performance_scores && (
                                     <div className='rounded border p-3'>
                                         <p className='font-medium'>

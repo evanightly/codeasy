@@ -2716,4 +2716,39 @@ return [
             ],
         ],
     ],
+
+    // Classification pages localization
+    'classification' => [
+        'status' => [
+            'material_error_failed' => 'Failed to load material classification details',
+        ],
+        'table_headers' => [
+            'question' => 'Question',
+            'compiles' => 'Compiles',
+            'time_min' => 'Time (min)',
+            'complete' => 'Complete',
+            'trial' => 'Trial',
+            'variables' => 'Variables',
+            'functions' => 'Functions',
+            'test_cases' => 'Test Cases',
+        ],
+        'labels' => [
+            'benefits' => 'Benefits (Higher = Better)',
+            'costs' => 'Costs (Lower = Better)',
+            'benefit_up' => '↑',
+        ],
+        'cards' => [
+            'material_classification' => 'Material Classification Details',
+            'rule_base_mapping' => 'Rule Base Mapping',
+            'recommendations' => 'Recommendations',
+            'areas_for_improvement' => 'Areas for Improvement',
+            'question_performance' => 'Question Performance Metrics',
+            'additional_information' => 'Additional Information',
+        ],
+        'messages' => [
+            'no_calculation_details' => 'No calculation details available',
+            'no_question_metrics' => 'No question metrics available',
+            'criteria_used' => 'Criteria Used',
+        ],
+    ],
 ];

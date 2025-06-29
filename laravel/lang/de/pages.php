@@ -734,6 +734,34 @@ return [
             'delete_error' => 'Fehler beim Löschen der Klassifikation',
         ],
     ],
+
+    'classification' => [
+        'status' => [
+            'loading' => 'Lädt...',
+            'loading_material_details' => 'Lade Materialdetails...',
+            'material_error_failed' => 'Fehler beim Laden der Materialdetails',
+        ],
+        'table_headers' => [
+            'question' => 'Frage',
+            'compiles' => 'Kompiliert',
+            'time_min' => 'Zeit (Min.)',
+            'complete' => 'Vollständig',
+        ],
+        'labels' => [
+            'criteria_used' => 'Verwendete Kriterien',
+            'question_metrics' => 'Frage-Metriken',
+            'calculation_details' => 'Berechnungsdetails',
+            'material_name' => 'Materialname',
+            'material_performance' => 'Material-Performance',
+        ],
+        'cards' => [
+            'view_details' => 'Details anzeigen',
+        ],
+        'messages' => [
+            'no_calculation_details' => 'Keine Berechnungsdetails verfügbar',
+            'no_question_metrics' => 'Keine Frage-Metriken verfügbar',
+        ],
+    ],
     'classroom' => [
         'common' => [
             'fields' => [

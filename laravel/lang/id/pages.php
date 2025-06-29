@@ -748,6 +748,34 @@ return [
             'delete_error' => 'Gagal menghapus klasifikasi',
         ],
     ],
+
+    'classification' => [
+        'status' => [
+            'loading' => 'Memuat...',
+            'loading_material_details' => 'Memuat detail materi...',
+            'material_error_failed' => 'Gagal memuat detail materi',
+        ],
+        'table_headers' => [
+            'question' => 'Pertanyaan',
+            'compiles' => 'Kompilasi',
+            'time_min' => 'Waktu (menit)',
+            'complete' => 'Selesai',
+        ],
+        'labels' => [
+            'criteria_used' => 'Kriteria yang Digunakan',
+            'question_metrics' => 'Metrik Pertanyaan',
+            'calculation_details' => 'Detail Perhitungan',
+            'material_name' => 'Nama Materi',
+            'material_performance' => 'Performa Materi',
+        ],
+        'cards' => [
+            'view_details' => 'Lihat Detail',
+        ],
+        'messages' => [
+            'no_calculation_details' => 'Tidak ada detail perhitungan tersedia',
+            'no_question_metrics' => 'Tidak ada metrik pertanyaan tersedia',
+        ],
+    ],
     'classroom' => [
         'common' => [
             'fields' => [
