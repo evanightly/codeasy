@@ -64,52 +64,6 @@ export function CourseReportExport({
         }
     };
 
-    const exportToExcel = () => {
-        if (!reportData) return;
-
-        setIsExporting(true);
-        try {
-            // Prepare the data for Excel export
-            const worksheet = XLSX.utils.json_to_sheet(
-                reportData.classifications.map((c: any) => ({
-                    'Student Name': c.user?.name || 'Unknown',
-                    'Cognitive Level': c.classification_level,
-                    Score: parseFloat(c.classification_score.toString()).toFixed(4),
-                })),
-            );
-
-            // Add summary data at the beginning
-            XLSX.utils.sheet_add_aoa(
-                worksheet,
-                [
-                    ['Course Cognitive Classification Report'],
-                    [`Course: ${courseName}`],
-                    [`Classification Type: ${classificationType}`],
-                    [`Total Students: ${reportData.total_students}`],
-                    [''],
-                    ['Level Distribution:'],
-                    ...Object.entries(reportData.level_distribution).map(([level, count]) => [
-                        level,
-                        count,
-                    ]),
-                    [''],
-                    ['Student Details:'],
-                ],
-                { origin: 'A1' },
-            );
-
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Classification Report');
-
-            // Generate Excel file
-            XLSX.writeFile(workbook, `${courseName}_cognitive_classification_report.xlsx`);
-        } catch (error) {
-            console.error('Error exporting to Excel:', error);
-        } finally {
-            setIsExporting(false);
-        }
-    };
-
     return (
         <div className='flex gap-2'>
             <Button
@@ -121,16 +75,6 @@ export function CourseReportExport({
             >
                 <DownloadCloud className='h-4 w-4' />
                 Export PDF
-            </Button>
-            <Button
-                variant='outline'
-                size='sm'
-                onClick={exportToExcel}
-                disabled={isExporting || !reportData}
-                className='flex items-center gap-2'
-            >
-                <FileSpreadsheet className='h-4 w-4' />
-                Export Excel
             </Button>
         </div>
     );
