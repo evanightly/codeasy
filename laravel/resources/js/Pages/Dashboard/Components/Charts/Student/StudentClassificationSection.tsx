@@ -286,7 +286,7 @@ function CourseRecommendationsSection({
     getLevelColor,
 }: CourseRecommendationsSectionProps) {
     const { t } = useLaravelReactI18n();
-    
+
     // Get latest course-level classification with recommendations
     const { data: courseClassification, isLoading } =
         studentCourseCognitiveClassificationServiceHook.useGetCourseClassificationForStudent(
@@ -302,7 +302,9 @@ function CourseRecommendationsSection({
                     <div className='flex items-center justify-center py-4'>
                         <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
                         <span className='ml-2 text-sm'>
-                            {t('pages.dashboard.student.cognitive_classification.dialog.loading_info')}
+                            {t(
+                                'pages.dashboard.student.cognitive_classification.dialog.loading_info',
+                            )}
                         </span>
                     </div>
                 </CardContent>
@@ -334,7 +336,10 @@ function CourseRecommendationsSection({
                 <CardHeader className='pb-3'>
                     <CardTitle className='flex items-center gap-2'>
                         <Award className='h-5 w-5 text-primary' />
-                        {t('pages.dashboard.student.cognitive_classification.dialog.summary_title')} - {courseName}
+                        {t(
+                            'pages.dashboard.student.cognitive_classification.dialog.summary_title',
+                        )}{' '}
+                        - {courseName}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className='space-y-4'>
@@ -343,7 +348,9 @@ function CourseRecommendationsSection({
                             <div className='flex items-center gap-2'>
                                 <Brain className='h-4 w-4 text-muted-foreground' />
                                 <span className='text-sm font-medium'>
-                                    {t('pages.dashboard.student.cognitive_classification.dialog.cognitive_level')}
+                                    {t(
+                                        'pages.dashboard.student.cognitive_classification.dialog.cognitive_level',
+                                    )}
                                 </span>
                             </div>
                             <Badge
@@ -356,7 +363,9 @@ function CourseRecommendationsSection({
                             <div className='flex items-center gap-2'>
                                 <TrendingUp className='h-4 w-4 text-muted-foreground' />
                                 <span className='text-sm font-medium'>
-                                    {t('pages.dashboard.student.cognitive_classification.dialog.classification_score')}
+                                    {t(
+                                        'pages.dashboard.student.cognitive_classification.dialog.classification_score',
+                                    )}
                                 </span>
                             </div>
                             <div className='space-y-1'>
@@ -373,7 +382,9 @@ function CourseRecommendationsSection({
                             <div className='flex items-center gap-2'>
                                 <Calendar className='h-4 w-4 text-muted-foreground' />
                                 <span className='text-sm font-medium'>
-                                    {t('pages.dashboard.student.cognitive_classification.dialog.last_updated')}
+                                    {t(
+                                        'pages.dashboard.student.cognitive_classification.dialog.last_updated',
+                                    )}
                                 </span>
                             </div>
                             <div className='text-sm text-muted-foreground'>
@@ -389,7 +400,9 @@ function CourseRecommendationsSection({
                     {materialClassifications.length > 0 && (
                         <div className='border-t pt-4'>
                             <h4 className='mb-3 text-sm font-medium'>
-                                {t('pages.dashboard.student.cognitive_classification.dialog.material_performance')}
+                                {t(
+                                    'pages.dashboard.student.cognitive_classification.dialog.material_performance',
+                                )}
                             </h4>
                             <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3'>
                                 {materialClassifications.map((material: any, index: number) => (
@@ -403,7 +416,10 @@ function CourseRecommendationsSection({
                                                     `Material ${material.material_id}`}
                                             </div>
                                             <div className='text-xs text-muted-foreground'>
-                                                {t('pages.dashboard.student.cognitive_classification.dialog.score_label')} {(material.score * 100).toFixed(1)}%
+                                                {t(
+                                                    'pages.dashboard.student.cognitive_classification.dialog.score_label',
+                                                )}{' '}
+                                                {(material.score * 100).toFixed(1)}%
                                             </div>
                                         </div>
                                         <Badge
@@ -426,10 +442,14 @@ function CourseRecommendationsSection({
                     <CardHeader className='pb-3'>
                         <CardTitle className='flex items-center gap-2'>
                             <Lightbulb className='h-5 w-5 text-amber-500' />
-                            {t('pages.dashboard.student.cognitive_classification.dialog.recommendations.title')}
+                            {t(
+                                'pages.dashboard.student.cognitive_classification.dialog.recommendations.title',
+                            )}
                         </CardTitle>
                         <CardDescription>
-                            {t('pages.dashboard.student.cognitive_classification.dialog.recommendations.subtitle')}
+                            {t(
+                                'pages.dashboard.student.cognitive_classification.dialog.recommendations.subtitle',
+                            )}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>

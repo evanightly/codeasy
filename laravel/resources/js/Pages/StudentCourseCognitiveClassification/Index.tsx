@@ -41,7 +41,7 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { BarChart2, Download, FileSpreadsheet } from 'lucide-react';
+import { BarChart2, FileSpreadsheet } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';

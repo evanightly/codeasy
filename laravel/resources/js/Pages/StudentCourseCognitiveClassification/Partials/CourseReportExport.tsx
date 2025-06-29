@@ -1,9 +1,8 @@
 import { Button } from '@/Components/UI/button';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { DownloadCloud, FileSpreadsheet } from 'lucide-react';
+import { DownloadCloud } from 'lucide-react';
 import { useState } from 'react';
-import * as XLSX from 'xlsx';
 
 interface CourseReportExportProps {
     reportRef: React.RefObject<HTMLDivElement>;
