@@ -2,6 +2,7 @@
 
 import { Alert, AlertDescription, AlertTitle } from '@/Components/UI/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/Components/UI/chart';
 import {
     Dialog,
     DialogContent,
@@ -14,6 +15,7 @@ import { courseServiceHook } from '@/Services/courseServiceHook';
 import { studentCourseCognitiveClassificationServiceHook } from '@/Services/studentCourseCognitiveClassificationServiceHook';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useMemo, useRef } from 'react';
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
 import { CourseReportExport } from './CourseReportExport';
 
 interface CourseReportProps {
@@ -74,45 +76,94 @@ export function CourseReport({
         [],
     );
 
-    // Convert level distribution to percentage
-    const getLevelPercentages = () => {
-        if (!report) return {};
-
-        const total = report.total_students || 1; // Avoid division by zero
-        const percentages: Record<string, number> = {};
-
-        Object.entries(report.level_distribution || {}).forEach(([level, count]) => {
-            percentages[level] = Math.round((Number(count) / total) * 100);
+    // Chart configuration for shadcn/ui ChartContainer
+    const chartConfig = useMemo(() => {
+        const config: Record<string, { label: string; color: string }> = {};
+        Object.entries(chartColors).forEach(([level, color]) => {
+            config[level] = {
+                label: level,
+                color,
+            };
         });
+        return config;
+    }, [chartColors]);
 
-        return percentages;
-    };
+    // Transform data for BarChart
+    const chartData = useMemo(() => {
+        if (!report?.level_distribution) return [];
 
-    const levelPercentages = getLevelPercentages();
+        return Object.entries(report.level_distribution).map(([level, count]) => ({
+            level,
+            count: Number(count),
+            fill: chartColors[level as keyof typeof chartColors] || 'gray',
+        }));
+    }, [report, chartColors]);
 
     const renderBarChart = () => {
-        if (!report) return null;
+        if (!report || !chartData.length) return null;
 
         return (
-            <div className='mb-4 mt-6 flex h-64 w-full items-end justify-around gap-2'>
-                {Object.entries(report.level_distribution || {}).map(([level, count]) => (
-                    <div key={level} className='flex flex-col items-center'>
-                        <div
-                            title={`${level}: ${count} student${count !== 1 ? 's' : ''} (${levelPercentages[level] || 0}%)`}
-                            style={{
-                                backgroundColor:
-                                    chartColors[level as keyof typeof chartColors] || 'gray',
-                                height: `${Math.max(levelPercentages[level] || 5, 5)}%`,
-                                transition: 'height 0.5s ease-in-out',
-                            }}
-                            className='flex w-16 cursor-pointer items-center justify-center rounded-t-md font-medium text-white hover:brightness-110'
+            <Card className='mb-4 mt-6'>
+                <CardHeader>
+                    <CardTitle className='text-lg font-semibold'>
+                        Cognitive Level Distribution
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={chartConfig} className='h-64 w-full'>
+                        <BarChart
+                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                            data={chartData}
                         >
-                            {String(count)}
-                        </div>
-                        <div className='mt-2 text-xs font-medium'>{level}</div>
-                    </div>
-                ))}
-            </div>
+                            <CartesianGrid strokeDasharray='3 3' className='stroke-muted' />
+                            <XAxis tick={{ fontSize: 12 }} dataKey='level' className='text-sm' />
+                            <YAxis
+                                tick={{ fontSize: 12 }}
+                                label={{
+                                    value: 'Number of Students',
+                                    angle: -90,
+                                    position: 'insideLeft',
+                                }}
+                                className='text-sm'
+                            />
+                            <ChartTooltip
+                                cursor={{ fill: 'rgba(0, 0, 0, 0.1)' }}
+                                content={({ active, payload, label }) => {
+                                    if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        const percentage = Math.round(
+                                            (data.count / report.total_students) * 100,
+                                        );
+                                        return (
+                                            <ChartTooltipContent
+                                                payload={[
+                                                    {
+                                                        name: 'Students',
+                                                        value: `${data.count} (${percentage}%)`,
+                                                        color: data.fill,
+                                                    },
+                                                ]}
+                                                labelKey='level'
+                                                label={`${label}`}
+                                            />
+                                        );
+                                    }
+                                    return null;
+                                }}
+                            />
+                            <Bar
+                                radius={[4, 4, 0, 0]}
+                                dataKey='count'
+                                className='cursor-pointer hover:opacity-80'
+                            >
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ChartContainer>
+                </CardContent>
+            </Card>
         );
     };
 
@@ -210,14 +261,6 @@ export function CourseReport({
             <div className='space-y-6'>
                 <div className='flex flex-wrap items-center justify-between gap-4'>
                     <div className='space-y-2'>
-                        <h2 className='text-2xl font-bold'>
-                            {t(
-                                'pages.classification.section_headers.cognitive_classification_report',
-                            )}
-                        </h2>
-                        <p className='text-muted-foreground'>
-                            {t('pages.classification.labels.course')} {courseName}
-                        </p>
                         <p className='text-muted-foreground'>
                             {report.total_students} student{report.total_students !== 1 ? 's' : ''}{' '}
                             classified using {classificationType.toUpperCase()} method
@@ -237,21 +280,26 @@ export function CourseReport({
                     {renderBarChart()}
 
                     <div className='flex flex-wrap justify-center gap-4'>
-                        {Object.entries(levelPercentages).map(([level, percentage]) => (
-                            <div key={level} className='text-center'>
-                                <div
-                                    style={{
-                                        backgroundColor:
-                                            chartColors[level as keyof typeof chartColors] ||
-                                            'gray',
-                                    }}
-                                    className='mr-1 inline-block h-4 w-4 rounded-full'
-                                ></div>
-                                <span className='text-sm font-medium'>
-                                    {level}: {percentage}%
-                                </span>
-                            </div>
-                        ))}
+                        {Object.entries(report.level_distribution || {}).map(([level, count]) => {
+                            const percentage = Math.round(
+                                (Number(count) / report.total_students) * 100,
+                            );
+                            return (
+                                <div key={level} className='text-center'>
+                                    <div
+                                        style={{
+                                            backgroundColor:
+                                                chartColors[level as keyof typeof chartColors] ||
+                                                'gray',
+                                        }}
+                                        className='mr-1 inline-block h-4 w-4 rounded-full'
+                                    ></div>
+                                    <span className='text-sm font-medium'>
+                                        {level}: {String(count)} ({percentage}%)
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
 
                     {renderStudentList()}
