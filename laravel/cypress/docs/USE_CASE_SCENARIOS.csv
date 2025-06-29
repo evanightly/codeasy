@@ -1,0 +1,375 @@
+Test Suite,Test Category,Test Case ID,Test Case Name,User Role,Description,Preconditions,Test Steps,Expected Results,Priority,Status,Page/Feature,Tags,Epic
+Authentication,Login Flow,AUTH-001,Display login page with correct elements,Guest,"Test that login page displays all required UI elements correctly","User not logged in, Visit /login","1. Visit login page
+2. Verify page title
+3. Check email input field
+4. Check password input field  
+5. Check sign-in button
+6. Check toggle dark mode button
+7. Check register link","All elements should be visible and properly labeled",High,Pass,Login Page,UI/UX,Authentication
+Authentication,Login Flow,AUTH-002,Toggle dark mode,Guest,"Test dark mode toggle functionality on login page","User on login page","1. Click dark mode toggle
+2. Verify UI theme changes
+3. Click toggle again
+4. Verify theme reverts","Dark mode should toggle correctly between light and dark themes",Medium,Pass,Login Page,UI/UX,Authentication
+Authentication,Login Flow,AUTH-003,Navigate to register page,Guest,"Test navigation from login to register page","User on login page","1. Click register link
+2. Verify redirect to /register","Should redirect to register page successfully",Medium,Pass,Login Page
+Authentication,Login Flow,AUTH-004,Validate required email field,Guest,"Test email field validation","User on login page","1. Leave email field empty
+2. Click Next button
+3. Verify validation message","Should show email required validation message",High,Pass,Login Page
+Authentication,Login Flow,AUTH-005,Proceed to password step with valid email,Guest,"Test progression to password step","User on login page","1. Enter valid email
+2. Click Next button
+3. Verify password step appears","Should show password input and hide email step",High,Pass,Login Page
+Authentication,Login Flow,AUTH-006,Remember checkbox state,Guest,"Test remember me checkbox functionality","User on login page","1. Check remember me checkbox
+2. Proceed to password step
+3. Verify checkbox state maintained","Remember me state should persist",Medium,Pass,Login Page
+Authentication,Login Flow,AUTH-007,Show email and back button in password step,Guest,"Test password step UI elements","User on password step","1. Verify email display
+2. Verify back button presence
+3. Verify password input field","Password step should show all required elements",High,Pass,Login Page
+Authentication,Login Flow,AUTH-008,Go back to email step,Guest,"Test back navigation functionality","User on password step","1. Click back button
+2. Verify return to email step","Should return to email input step",Medium,Pass,Login Page
+Authentication,Login Flow,AUTH-009,Validate required password field,Guest,"Test password field validation","User on password step","1. Leave password empty
+2. Click Sign In
+3. Verify validation message","Should show password required validation",High,Pass,Login Page
+Authentication,Login Flow,AUTH-010,Login successfully with valid credentials,Guest,"Test successful login flow","User on password step","1. Enter valid credentials
+2. Click Sign In
+3. Verify redirect to dashboard","Should login and redirect to dashboard",High,Pass,Login Page
+Authentication,Login Flow,AUTH-011,Handle invalid credentials,Guest,"Test login with wrong credentials","User on password step","1. Enter invalid credentials
+2. Click Sign In
+3. Verify error message","Should show authentication error message",High,Pass,Login Page
+Authentication,Login Flow,AUTH-012,Handle server errors gracefully,Guest,"Test error handling for server issues","User on login page","1. Simulate server error
+2. Attempt login
+3. Verify error handling","Should handle errors gracefully without crashing",Medium,Pass,Login Page
+Authentication,Login Flow,AUTH-013,Support Enter key navigation,Guest,"Test keyboard navigation","User on login page","1. Use Enter key to navigate
+2. Test in email step
+3. Test in password step","Enter key should submit forms properly",Medium,Pass,Login Page
+Authentication,Login Flow,AUTH-014,Work on mobile devices,Guest,"Test responsive design on mobile","User on mobile device","1. Set mobile viewport
+2. Test login flow
+3. Verify usability","Should work properly on mobile screens",Medium,Pass,Login Page
+Authentication,Login Flow,AUTH-015,Work on tablet devices,Guest,"Test responsive design on tablet","User on tablet device","1. Set tablet viewport
+2. Test login flow
+3. Verify usability","Should work properly on tablet screens",Medium,Pass,Login Page
+Authentication,Register Flow,AUTH-016,Display register page with correct elements,Guest,"Test register page UI elements","User not logged in","1. Visit /register
+2. Verify all form fields
+3. Check register button
+4. Check login link","All registration elements should be visible",High,Pass,Register Page
+Authentication,Register Flow,AUTH-017,Toggle dark mode on register,Guest,"Test dark mode on register page","User on register page","1. Click dark mode toggle
+2. Verify theme change","Dark mode should work on register page",Medium,Pass,Register Page
+Authentication,Register Flow,AUTH-018,Navigate to login page,Guest,"Test navigation to login","User on register page","1. Click login link
+2. Verify redirect","Should redirect to login page",Medium,Pass,Register Page
+Authentication,Register Flow,AUTH-019,Validate required name field,Guest,"Test name field validation","User on register page","1. Leave name empty
+2. Submit form
+3. Check validation","Should show name required validation",High,Pass,Register Page
+Authentication,Register Flow,AUTH-020,Validate required email field,Guest,"Test email field validation","User on register page","1. Leave email empty
+2. Submit form
+3. Check validation","Should show email required validation",High,Pass,Register Page
+Authentication,Register Flow,AUTH-021,Validate password minimum length,Guest,"Test password length validation","User on register page","1. Enter short password
+2. Submit form
+3. Check validation","Should show minimum length validation",High,Pass,Register Page
+Authentication,Register Flow,AUTH-022,Validate password confirmation,Guest,"Test password confirmation matching","User on register page","1. Enter mismatched passwords
+2. Submit form
+3. Check validation","Should show password mismatch validation",High,Pass,Register Page
+Authentication,Register Flow,AUTH-023,Register teacher successfully,Guest,"Test successful teacher registration","User on register page","1. Fill valid teacher details
+2. Submit form
+3. Verify success","Should register teacher successfully",High,Pass,Register Page
+Authentication,Register Flow,AUTH-024,Register student successfully,Guest,"Test successful student registration","User on register page","1. Fill valid student details
+2. Submit form
+3. Verify success","Should register student successfully",High,Pass,Register Page
+Authentication,Register Flow,AUTH-025,Handle registration errors,Guest,"Test registration error handling","User on register page","1. Submit invalid data
+2. Verify error handling","Should handle registration errors gracefully",Medium,Pass,Register Page
+Authentication,Register Flow,AUTH-026,Handle server errors gracefully,Guest,"Test server error handling","User on register page","1. Simulate server error
+2. Submit form
+3. Verify handling","Should handle server errors without crashing",Medium,Pass,Register Page
+Authentication,Register Flow,AUTH-027,Show loading state during registration,Guest,"Test loading state display","User on register page","1. Submit form
+2. Verify loading indicator","Should show loading state during submission",Medium,Pass,Register Page
+Authentication,Register Flow,AUTH-028,Work on mobile devices,Guest,"Test mobile responsiveness","User on mobile","1. Test on mobile viewport
+2. Complete registration","Should work on mobile devices",Medium,Pass,Register Page
+Authentication,Register Flow,AUTH-029,Work on tablet devices,Guest,"Test tablet responsiveness","User on tablet","1. Test on tablet viewport
+2. Complete registration","Should work on tablet devices",Medium,Pass,Register Page
+Authentication,Register Flow,AUTH-030,Have proper form labels,Guest,"Test accessibility labels","User on register page","1. Check form labels
+2. Verify accessibility","Should have proper form labels for accessibility",Low,Pass,Register Page
+Authentication,Register Flow,AUTH-031,Support keyboard navigation,Guest,"Test keyboard navigation","User on register page","1. Navigate using keyboard
+2. Complete form with keyboard","Should support full keyboard navigation",Medium,Pass,Register Page
+Authentication,Register Flow,AUTH-032,Complete full registration flow,Guest,"Test end-to-end registration","User on register page","1. Complete entire flow
+2. Verify all steps work","Complete registration flow should work",High,Pass,Register Page
+Authentication,Logout Flow,AUTH-033,Logout successfully from navigation menu,Authenticated User,"Test logout functionality","User logged in","1. Click logout from menu
+2. Verify redirect to login
+3. Check session cleared","Should logout and redirect to login page",High,Pass,Navigation Menu
+Profile Management,Navigation,PROF-001,Navigate to profile settings,SuperAdmin,"Test navigation to profile page","SuperAdmin logged in","1. Visit /profile
+2. Check URL includes /profile
+3. Verify page contains Profile text","Should navigate to profile page successfully",High,Pass,Profile Page
+Profile Management,Navigation,PROF-002,See profile form fields,SuperAdmin,"Test profile form field visibility","SuperAdmin on profile page","1. Click profile tab
+2. Verify form exists
+3. Check name input visible
+4. Check email input visible
+5. Check username input if exists
+6. Check submit button visible","All profile form fields should be visible",High,Pass,Profile Page
+Profile Management,Navigation,PROF-003,See profile tabs,SuperAdmin,"Test profile tabs display","SuperAdmin on profile page","1. Verify profile tab exists
+2. Verify password tab exists
+3. Check tab switching works","Profile and password tabs should be visible and functional",High,Pass,Profile Page
+Profile Management,Information Update,PROF-004,Update profile information,SuperAdmin,"Test profile information update","SuperAdmin on profile page","1. Click profile tab
+2. Fill form with test data
+3. Submit form
+4. Verify success message","Profile information should update successfully",High,Pass,Profile Page
+Profile Management,Information Update,PROF-005,Validate required profile fields,SuperAdmin,"Test profile field validation","SuperAdmin on profile page","1. Clear required fields
+2. Submit form
+3. Check validation messages","Should show validation for required fields",High,Pass,Profile Page
+Profile Management,Information Update,PROF-006,Test profile image upload,SuperAdmin,"Test profile image upload functionality","SuperAdmin on profile page","1. Select profile image
+2. Upload image
+3. Verify upload success","Profile image should upload successfully",Medium,Pass,Profile Page
+Profile Management,Password Update,PROF-007,Navigate to password tab,SuperAdmin,"Test password tab navigation","SuperAdmin on profile page","1. Click password tab
+2. Verify password form visible","Should navigate to password tab successfully",High,Pass,Profile Page
+Profile Management,Password Update,PROF-008,Update password successfully,SuperAdmin,"Test successful password update","SuperAdmin on password tab","1. Fill current password
+2. Fill new password
+3. Confirm new password
+4. Submit form
+5. Verify success","Password should update successfully",High,Pass,Profile Page
+Profile Management,Password Update,PROF-009,Validate password confirmation mismatch,SuperAdmin,"Test password mismatch validation","SuperAdmin on password tab","1. Fill current password
+2. Fill new password
+3. Fill different confirmation
+4. Submit form
+5. Check validation","Should show password mismatch validation",High,Pass,Profile Page
+Profile Management,Password Update,PROF-010,Validate current password requirement,SuperAdmin,"Test current password validation","SuperAdmin on password tab","1. Leave current password empty
+2. Fill other fields
+3. Submit form
+4. Check validation","Should require current password",High,Pass,Profile Page
+Profile Management,Password Update,PROF-011,Validate incorrect current password,SuperAdmin,"Test wrong current password handling","SuperAdmin on password tab","1. Fill wrong current password
+2. Fill new password fields
+3. Submit form
+4. Check error message","Should show incorrect password error",High,Pass,Profile Page
+Profile Management,Password Update,PROF-012,Clear password form after successful update,SuperAdmin,"Test form clearing after success","SuperAdmin on password tab","1. Complete password update
+2. Wait for success
+3. Check form fields cleared","Password form should clear after successful update",Medium,Fail,Profile Page
+Profile Management,Integration,PROF-013,Switch between profile and password tabs,SuperAdmin,"Test tab switching functionality","SuperAdmin on profile page","1. Switch to password tab
+2. Verify password form visible
+3. Switch back to profile tab
+4. Verify profile form visible","Tab switching should work correctly",High,Pass,Profile Page
+Profile Management,Integration,PROF-014,Maintain form state when switching tabs,SuperAdmin,"Test form state persistence","SuperAdmin on profile page","1. Fill profile form
+2. Switch to password tab
+3. Switch back to profile tab
+4. Verify data maintained","Form state should persist when switching tabs",High,Pass,Profile Page
+User Management,SuperAdmin,USER-001,Access users management page,SuperAdmin,"Test access to user management","SuperAdmin logged in","1. Visit /users
+2. Verify page loads
+3. Check user list visible","Should access user management page",High,Pass,Users Page
+User Management,SuperAdmin,USER-002,See user list and edit buttons,SuperAdmin,"Test user list display","SuperAdmin on users page","1. Verify user table exists
+2. Check edit buttons visible
+3. Verify user data displayed","User list should display with edit options",High,Pass,Users Page
+User Management,SuperAdmin,USER-003,Access user create page,SuperAdmin,"Test user creation page access","SuperAdmin logged in","1. Visit /users/create
+2. Verify page loads
+3. Check form elements","Should access user creation page",High,Pass,User Create Page
+User Management,SuperAdmin,USER-004,Fill user creation form,SuperAdmin,"Test user creation form filling","SuperAdmin on create page","1. Fill name field
+2. Fill email field
+3. Fill username field
+4. Fill password fields
+5. Select role","Should be able to fill all user form fields",High,Pass,User Create Page
+User Management,SuperAdmin,USER-005,Validate required fields in user creation form,SuperAdmin,"Test user form validation","SuperAdmin on create page","1. Submit empty form
+2. Check validation messages","Should show validation for required fields",High,Pass,User Create Page
+User Management,SuperAdmin,USER-006,Validate password confirmation matching,SuperAdmin,"Test password confirmation","SuperAdmin on create page","1. Enter mismatched passwords
+2. Submit form
+3. Check validation","Should validate password confirmation matching",High,Pass,User Create Page
+User Management,SuperAdmin,USER-007,Successfully create a user and verify creation,SuperAdmin,"Test complete user creation","SuperAdmin on create page","1. Fill valid user data
+2. Submit form
+3. Verify success
+4. Check user in list","Should create user successfully",High,Pass,User Create Page
+User Management,SuperAdmin,USER-008,Access user edit page with role options,SuperAdmin,"Test user editing functionality","SuperAdmin logged in","1. Navigate to user edit
+2. Verify form loads
+3. Check role options available","Should access user edit with role options",High,Pass,User Edit Page
+User Management,SuperAdmin,USER-009,See role selection in user form,SuperAdmin,"Test role selection display","SuperAdmin on create page","1. Check role dropdown exists
+2. Verify role options
+3. Test role selection","Role selection should be available",High,Pass,User Create Page
+User Management,SuperAdmin,USER-010,Assign role to user during creation,SuperAdmin,"Test role assignment","SuperAdmin on create page","1. Select user role
+2. Complete user creation
+3. Verify role assigned","Should assign role during user creation",High,Pass,User Create Page
+Role Management,SuperAdmin,ROLE-001,Access roles management page,SuperAdmin,"Test role management access","SuperAdmin logged in","1. Visit /roles
+2. Verify page loads
+3. Check role list","Should access role management page",High,Pass,Roles Page
+Role Management,SuperAdmin,ROLE-002,See role list,SuperAdmin,"Test role list display","SuperAdmin on roles page","1. Verify role table
+2. Check role data
+3. Verify action buttons","Role list should display correctly",High,Pass,Roles Page
+Role Management,SuperAdmin,ROLE-003,Access role create page,SuperAdmin,"Test role creation access","SuperAdmin logged in","1. Visit /roles/create
+2. Verify page loads
+3. Check form elements","Should access role creation page",High,Pass,Role Create Page
+Role Management,SuperAdmin,ROLE-004,Fill role creation form,SuperAdmin,"Test role form filling","SuperAdmin on create page","1. Fill role name
+2. Fill guard name
+3. Select permissions","Should fill role creation form",High,Pass,Role Create Page
+Role Management,SuperAdmin,ROLE-005,Access permissions page,SuperAdmin,"Test permissions page access","SuperAdmin logged in","1. Visit /permissions
+2. Verify page loads
+3. Check permissions list","Should access permissions page",High,Pass,Permissions Page
+Role Management,SuperAdmin,ROLE-006,See permissions list,SuperAdmin,"Test permissions display","SuperAdmin on permissions page","1. Verify permissions table
+2. Check permission data
+3. Verify action options","Permissions list should display",High,Pass,Permissions Page
+Role Management,SuperAdmin,ROLE-007,Create role with permission checkboxes,SuperAdmin,"Test role creation with permissions","SuperAdmin on create page","1. Fill role name
+2. Select permissions via checkboxes
+3. Submit form
+4. Verify creation","Should create role with selected permissions",High,Pass,Role Create Page
+Role Management,SuperAdmin,ROLE-008,Interact with specific permission categories,SuperAdmin,"Test permission category interaction","SuperAdmin on create page","1. Test permission grouping
+2. Select category permissions
+3. Verify selections","Should handle permission categories correctly",Medium,Pass,Role Create Page
+Role Management,SuperAdmin,ROLE-009,Select all permissions using select all checkbox,SuperAdmin,"Test select all functionality","SuperAdmin on create page","1. Click select all checkbox
+2. Verify all permissions selected
+3. Test unselect all","Select all permissions should work",Medium,Pass,Role Create Page
+Role Management,SuperAdmin,ROLE-010,Verify permission checkboxes are properly checked,SuperAdmin,"Test checkbox state verification","SuperAdmin on create page","1. Select permissions
+2. Verify checkbox states
+3. Check visual indicators","Permission checkboxes should indicate state correctly",Medium,Pass,Role Create Page
+Role Management,SuperAdmin,ROLE-011,Uncheck selected permissions,SuperAdmin,"Test permission deselection","SuperAdmin on create page","1. Select permissions
+2. Uncheck some permissions
+3. Verify state changes","Should be able to uncheck permissions",Medium,Pass,Role Create Page
+Role Management,SuperAdmin,ROLE-012,Successfully create a complete role and verify creation,SuperAdmin,"Test complete role creation","SuperAdmin on create page","1. Fill complete role data
+2. Select permissions
+3. Submit form
+4. Verify in list","Should create complete role successfully",High,Pass,Role Create Page
+Role Management,SuperAdmin,ROLE-013,Access role edit page,SuperAdmin,"Test role editing access","SuperAdmin logged in","1. Visit role edit page
+2. Verify form loads
+3. Check existing data","Should access role edit page",High,Pass,Role Edit Page
+Role Management,SuperAdmin,ROLE-014,Fill and update role information,SuperAdmin,"Test role information update","SuperAdmin on edit page","1. Modify role name
+2. Update permissions
+3. Submit changes
+4. Verify updates","Should update role information",High,Pass,Role Edit Page
+Role Management,SuperAdmin,ROLE-015,Update role permissions,SuperAdmin,"Test role permission updates","SuperAdmin on edit page","1. Change permission selections
+2. Submit form
+3. Verify permission changes","Should update role permissions",High,Pass,Role Edit Page
+Role Management,SuperAdmin,ROLE-016,Validate required fields in role update form,SuperAdmin,"Test role update validation","SuperAdmin on edit page","1. Clear required fields
+2. Submit form
+3. Check validation","Should validate required fields in updates",High,Pass,Role Edit Page
+Role Management,SuperAdmin,ROLE-017,Cancel role update and return to roles list,SuperAdmin,"Test role update cancellation","SuperAdmin on edit page","1. Make changes
+2. Click cancel
+3. Verify return to list","Should cancel and return to roles list",Medium,Pass,Role Edit Page
+Role Management,Access Control,ROLE-018,Prevent access to roles page for non-admin users,Teacher,"Test role access restrictions","Teacher logged in","1. Attempt to visit /roles
+2. Verify access denied","Non-admin should not access roles page",High,Pass,Access Control
+Role Management,Access Control,ROLE-019,Prevent access to permissions page for non-admin users,Teacher,"Test permission access restrictions","Teacher logged in","1. Attempt to visit /permissions
+2. Verify access denied","Non-admin should not access permissions page",High,Pass,Access Control
+Role Management,Access Control,ROLE-020,Allow admin to access roles page,SuperAdmin,"Test admin role access","SuperAdmin logged in","1. Visit /roles
+2. Verify access granted","Admin should access roles page",High,Pass,Access Control
+Role Management,Access Control,ROLE-021,Allow admin to access permissions page,SuperAdmin,"Test admin permission access","SuperAdmin logged in","1. Visit /permissions
+2. Verify access granted","Admin should access permissions page",High,Pass,Access Control
+Role Management,Access Control,ROLE-022,Show access denied for restricted user on direct role edit URL,Teacher,"Test direct URL access restriction","Teacher logged in","1. Visit role edit URL directly
+2. Verify access denied","Should deny direct access to role edit",High,Pass,Access Control
+Role Management,Access Control,ROLE-023,Show access denied for restricted user on direct permission edit URL,Teacher,"Test direct permission edit restriction","Teacher logged in","1. Visit permission edit URL
+2. Verify access denied","Should deny direct access to permission edit",High,Pass,Access Control
+Student Classification,Export,CLASS-001,Display student cognitive classifications page,SuperAdmin,"Test classifications page access","SuperAdmin logged in","1. Visit /student-cognitive-classifications
+2. Verify page loads
+3. Check page elements","Should display classifications page",High,Pass,Classifications Page
+Student Classification,Export,CLASS-002,Show export excel button and be clickable,SuperAdmin,"Test export button functionality","SuperAdmin on classifications page","1. Verify export button exists
+2. Test button clickability
+3. Check button state","Export button should be functional",High,Pass,Classifications Page
+Student Classification,Export,CLASS-003,Show run classification button and dialog,SuperAdmin,"Test classification dialog","SuperAdmin on classifications page","1. Click run classification
+2. Verify dialog opens
+3. Check dialog elements","Classification dialog should open",Medium,Pass,Classifications Page
+Student Classification,Export,CLASS-004,Show export raw data button and dialog,SuperAdmin,"Test raw data export","SuperAdmin on classifications page","1. Click export raw data
+2. Verify dialog opens
+3. Check export options","Raw data export dialog should work",Medium,Pass,Classifications Page
+Student Classification,Export,CLASS-005,Display student course cognitive classifications page,SuperAdmin,"Test course classifications page","SuperAdmin logged in","1. Visit course classifications page
+2. Verify page loads
+3. Check content","Course classifications page should display",High,Pass,Course Classifications Page
+Student Classification,Export,CLASS-006,Show view report button and dialog,SuperAdmin,"Test report viewing","SuperAdmin on course page","1. Click view report
+2. Verify dialog opens
+3. Check report options","Report dialog should open",Medium,Pass,Course Classifications Page
+Student Classification,Export,CLASS-007,Show export student scores button and dialog,SuperAdmin,"Test student scores export","SuperAdmin on course page","1. Click export scores
+2. Verify dialog opens
+3. Check export options","Student scores export should work",Medium,Pass,Course Classifications Page
+Student Classification,Export,CLASS-008,Show enhanced export button and dialog,SuperAdmin,"Test enhanced export functionality","SuperAdmin on course page","1. Click enhanced export
+2. Verify dialog opens
+3. Check enhanced options","Enhanced export should be available",Medium,Pass,Course Classifications Page
+Student Classification,Export,CLASS-009,Handle export excel click without errors,SuperAdmin,"Test export error handling","SuperAdmin on classifications page","1. Click export excel
+2. Verify no errors
+3. Check process completion","Export should complete without errors",High,Pass,Classifications Page
+Student Classification,Export,CLASS-010,Handle export functions in course classifications,SuperAdmin,"Test course export functions","SuperAdmin on course page","1. Test various export options
+2. Verify functionality
+3. Check error handling","Course exports should work properly",High,Pass,Course Classifications Page
+Student Classification,Navigation,CLASS-011,Have proper navigation access as superadmin,SuperAdmin,"Test navigation permissions","SuperAdmin logged in","1. Check dashboard access
+2. Test classifications navigation
+3. Verify course classifications access","SuperAdmin should have full navigation access",High,Pass,Navigation
+Student Classification,Navigation,CLASS-012,Maintain session across page visits,SuperAdmin,"Test session persistence","SuperAdmin logged in","1. Visit classifications page
+2. Navigate to course classifications
+3. Verify session maintained","Session should persist across pages",Medium,Pass,Session Management
+Course Management,Teacher,COURSE-001,Display courses index page,Teacher,"Test course list display","Teacher logged in","1. Visit /courses
+2. Verify page loads
+3. Check course list","Courses index should display",High,Pass,Courses Page
+Course Management,Teacher,COURSE-002,Display course create form,Teacher,"Test course creation form","Teacher logged in","1. Visit /courses/create
+2. Verify form loads
+3. Check form fields","Course create form should display",High,Pass,Course Create Page
+Course Management,Teacher,COURSE-003,Create a new course,Teacher,"Test course creation","Teacher on create page","1. Fill course details
+2. Submit form
+3. Verify creation success","Should create new course successfully",High,Pass,Course Create Page
+Course Management,Teacher,COURSE-004,Display course details,Teacher,"Test course detail view","Teacher with courses","1. Navigate to course details
+2. Verify course information
+3. Check course elements","Course details should display correctly",High,Pass,Course Details Page
+Course Management,Teacher,COURSE-005,Access course edit form,Teacher,"Test course editing","Teacher with courses","1. Navigate to course edit
+2. Verify form loads
+3. Check existing data","Should access course edit form",High,Pass,Course Edit Page
+Course Management,Teacher,COURSE-006,Handle course deletion,Teacher,"Test course deletion","Teacher with courses","1. Initiate course deletion
+2. Confirm deletion
+3. Verify removal","Should handle course deletion properly",Medium,Pass,Courses Page
+Learning Materials,Teacher,MAT-001,Display learning materials index page,Teacher,"Test materials list display","Teacher with courses","1. Navigate to materials
+2. Verify materials list
+3. Check materials display","Materials index should display",High,Pass,Materials Page
+Learning Materials,Teacher,MAT-002,Display learning material create form,Teacher,"Test material creation form","Teacher on materials page","1. Click create material
+2. Verify form loads
+3. Check form fields","Material create form should display",High,Pass,Material Create Page
+Learning Materials,Teacher,MAT-003,Create a new learning material,Teacher,"Test material creation","Teacher on create form","1. Fill material details
+2. Submit form
+3. Verify creation","Should create new material successfully",High,Pass,Material Create Page
+Learning Materials,Teacher,MAT-004,Display learning material details,Teacher,"Test material detail view","Teacher with materials","1. Navigate to material details
+2. Verify material information
+3. Check material elements","Material details should display",High,Pass,Material Details Page
+Learning Materials,Teacher,MAT-005,Access learning material edit form,Teacher,"Test material editing","Teacher with materials","1. Navigate to material edit
+2. Verify form loads
+3. Check existing data","Should access material edit form",High,Pass,Material Edit Page
+Learning Materials,Teacher,MAT-006,Handle learning material deletion,Teacher,"Test material deletion","Teacher with materials","1. Initiate deletion
+2. Confirm deletion
+3. Verify removal","Should handle material deletion",Medium,Pass,Materials Page
+Learning Material Questions,Teacher,QUEST-001,Display learning material questions page,Teacher,"Test questions page display","Teacher with materials","1. Navigate to questions
+2. Verify questions list
+3. Check question display","Questions page should display",High,Pass,Questions Page
+Learning Material Questions,Teacher,QUEST-002,Display question create form,Teacher,"Test question creation form","Teacher on questions page","1. Click create question
+2. Verify form loads
+3. Check form fields","Question create form should display",High,Pass,Question Create Page
+Learning Material Questions,Teacher,QUEST-003,Create a new question,Teacher,"Test question creation","Teacher on create form","1. Fill question details
+2. Submit form
+3. Verify creation","Should create new question successfully",High,Pass,Question Create Page
+Learning Material Questions,Teacher,QUEST-004,Display question details,Teacher,"Test question detail view","Teacher with questions","1. Navigate to question details
+2. Verify question information
+3. Check question elements","Question details should display",High,Pass,Question Details Page
+Learning Material Questions,Teacher,QUEST-005,Handle question edit and delete,Teacher,"Test question management","Teacher with questions","1. Test question editing
+2. Test question deletion
+3. Verify operations","Should handle question management",High,Pass,Questions Page
+Test Cases,Teacher,TEST-001,Display test cases page,Teacher,"Test cases page display","Teacher with questions","1. Navigate to test cases
+2. Verify test cases list
+3. Check test case display","Test cases page should display",High,Pass,Test Cases Page
+Test Cases,Teacher,TEST-002,Display test case create form,Teacher,"Test case creation form","Teacher on test cases page","1. Click create test case
+2. Verify form loads
+3. Check form fields","Test case create form should display",High,Pass,Test Case Create Page
+Test Cases,Teacher,TEST-003,Create a new test case,Teacher,"Test case creation","Teacher on create form","1. Fill test case details
+2. Submit form
+3. Verify creation","Should create new test case successfully",High,Pass,Test Case Create Page
+Test Cases,Teacher,TEST-004,Display test case details,Teacher,"Test case detail view","Teacher with test cases","1. Navigate to test case details
+2. Verify test case information
+3. Check test case elements","Test case details should display",High,Pass,Test Case Details Page
+Test Cases,Teacher,TEST-005,Handle test case file upload,Teacher,"Test file upload functionality","Teacher on test case form","1. Select file for upload
+2. Upload file
+3. Verify upload success","File upload should work for test cases",Medium,Pass,Test Case Form
+Test Cases,Teacher,TEST-006,Handle test case edit and delete,Teacher,"Test case management","Teacher with test cases","1. Test case editing
+2. Test case deletion
+3. Verify operations","Should handle test case management",High,Pass,Test Cases Page
+Student Workspace,Student,WORK-001,Load the workspace page and show run button,Student,"Test workspace page loading","Student with course access","1. Navigate to workspace
+2. Verify page loads
+3. Check run button visible","Workspace should load with run button",High,Pass,Workspace Page
+Student Workspace,Student,WORK-002,Show test case failed for invalid code,Student,"Test invalid code execution","Student in workspace","1. Enter invalid code
+2. Click run button
+3. Verify failure message","Should show test case failure for invalid code",High,Pass,Workspace Page
+Student Workspace,Student,WORK-003,Show test case passed for valid code,Student,"Test valid code execution","Student in workspace","1. Enter valid code
+2. Click run button
+3. Verify success message","Should show test case success for valid code",High,Pass,Workspace Page
+Dashboard,Charts,DASH-001,Display dashboard charts,All Users,"Test dashboard chart display","User logged in","1. Visit dashboard
+2. Verify charts load
+3. Check chart data","Dashboard charts should display correctly",Medium,Pass,Dashboard Page
+WebSocket,Error Handling,WS-001,Handle WebSocket errors gracefully,All Users,"Test WebSocket error handling","User on any page","1. Simulate WebSocket error
+2. Verify error handling
+3. Check page functionality","WebSocket errors should not break functionality",Medium,Pass,All Pages
+WebSocket,Error Handling,WS-002,Verify WebSocket suppression is working,All Users,"Test WebSocket suppression","User on login page","1. Test WebSocket suppression
+2. Verify suppression active
+3. Check error prevention","WebSocket suppression should prevent errors",Medium,Pass,All Pages
+Database,System,DB-001,Reset database using migrate:fresh and Cypress seeder,System,"Test database reset functionality","System operation","1. Execute database reset
+2. Verify reset completion
+3. Check seeded data","Database should reset successfully",High,Pass,System Operation
+Database,System,DB-002,Handle multiple consecutive resets without errors,System,"Test multiple database resets","System operation","1. Perform multiple resets
+2. Verify each reset success
+3. Check system stability","Multiple resets should work without errors",Medium,Pass,System Operation
