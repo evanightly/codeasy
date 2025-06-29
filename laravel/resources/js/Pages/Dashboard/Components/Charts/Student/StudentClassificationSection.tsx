@@ -15,7 +15,7 @@ import { studentCourseCognitiveClassificationServiceHook } from '@/Services/stud
 import { usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { Brain, Download } from 'lucide-react';
+import { Award, Brain, Calendar, Download, Lightbulb, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 
 interface StudentClassificationSectionProps {
@@ -129,7 +129,7 @@ export function StudentClassificationSection({
 
             {/* Course Classification History Dialog */}
             <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
-                <DialogContent className='max-h-[90vh] max-w-screen-xl overflow-y-auto'>
+                <DialogContent className='max-h-[90vh] max-w-screen-xl space-y-4 overflow-y-auto'>
                     <DialogHeader>
                         <DialogTitle>
                             {t(
@@ -143,6 +143,17 @@ export function StudentClassificationSection({
                             )}
                         </DialogDescription>
                     </DialogHeader>
+
+                    {/* Course Recommendations and Information Section */}
+                    {selectedCourse && currentUserId && (
+                        <CourseRecommendationsSection
+                            userId={currentUserId}
+                            courseId={selectedCourse.id}
+                            courseName={selectedCourse.name}
+                            getLevelColor={getLevelColor}
+                        />
+                    )}
+
                     {selectedCourse && currentUserId && (
                         <StudentCourseCognitiveClassificationHistoryViewer
                             userId={currentUserId}
@@ -255,5 +266,184 @@ function SimpleCourseCard({
                 )}
             </CardContent>
         </Card>
+    );
+}
+
+interface CourseRecommendationsSectionProps {
+    userId: number;
+    courseId: number;
+    courseName: string;
+    getLevelColor: (level: string) => string;
+}
+
+/**
+ * Component to display course recommendations and current classification information
+ */
+function CourseRecommendationsSection({
+    userId,
+    courseId,
+    courseName,
+    getLevelColor,
+}: CourseRecommendationsSectionProps) {
+    const { t } = useLaravelReactI18n();
+    
+    // Get latest course-level classification with recommendations
+    const { data: courseClassification, isLoading } =
+        studentCourseCognitiveClassificationServiceHook.useGetCourseClassificationForStudent(
+            userId,
+            courseId,
+            'topsis',
+        );
+
+    if (isLoading) {
+        return (
+            <Card className='mb-6'>
+                <CardContent className='pt-6'>
+                    <div className='flex items-center justify-center py-4'>
+                        <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
+                        <span className='ml-2 text-sm'>
+                            {t('pages.dashboard.student.cognitive_classification.dialog.loading_info')}
+                        </span>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    if (!courseClassification) {
+        return (
+            <Card className='mb-6'>
+                <CardContent className='pt-6'>
+                    <div className='py-4 text-center'>
+                        <p className='text-sm text-muted-foreground'>
+                            {t('pages.dashboard.student.cognitive_classification.dialog.no_data')}
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    const recommendations = courseClassification.raw_data?.recommendations || [];
+    const materialClassifications = courseClassification.raw_data?.material_classifications || [];
+
+    return (
+        <div className='mb-6 space-y-4'>
+            {/* Current Classification Summary */}
+            <Card>
+                <CardHeader className='pb-3'>
+                    <CardTitle className='flex items-center gap-2'>
+                        <Award className='h-5 w-5 text-primary' />
+                        {t('pages.dashboard.student.cognitive_classification.dialog.summary_title')} - {courseName}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                    <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+                        <div className='space-y-2'>
+                            <div className='flex items-center gap-2'>
+                                <Brain className='h-4 w-4 text-muted-foreground' />
+                                <span className='text-sm font-medium'>
+                                    {t('pages.dashboard.student.cognitive_classification.dialog.cognitive_level')}
+                                </span>
+                            </div>
+                            <Badge
+                                className={getLevelColor(courseClassification.classification_level)}
+                            >
+                                {courseClassification.classification_level}
+                            </Badge>
+                        </div>
+                        <div className='space-y-2'>
+                            <div className='flex items-center gap-2'>
+                                <TrendingUp className='h-4 w-4 text-muted-foreground' />
+                                <span className='text-sm font-medium'>
+                                    {t('pages.dashboard.student.cognitive_classification.dialog.classification_score')}
+                                </span>
+                            </div>
+                            <div className='space-y-1'>
+                                <div className='text-lg font-semibold'>
+                                    {(courseClassification.classification_score * 100).toFixed(1)}%
+                                </div>
+                                <Progress
+                                    value={courseClassification.classification_score * 100}
+                                    className='h-2'
+                                />
+                            </div>
+                        </div>
+                        <div className='space-y-2'>
+                            <div className='flex items-center gap-2'>
+                                <Calendar className='h-4 w-4 text-muted-foreground' />
+                                <span className='text-sm font-medium'>
+                                    {t('pages.dashboard.student.cognitive_classification.dialog.last_updated')}
+                                </span>
+                            </div>
+                            <div className='text-sm text-muted-foreground'>
+                                {format(
+                                    new Date(courseClassification.classified_at),
+                                    'dd MMM yyyy, HH:mm',
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Material Performance Summary */}
+                    {materialClassifications.length > 0 && (
+                        <div className='border-t pt-4'>
+                            <h4 className='mb-3 text-sm font-medium'>
+                                {t('pages.dashboard.student.cognitive_classification.dialog.material_performance')}
+                            </h4>
+                            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3'>
+                                {materialClassifications.map((material: any, index: number) => (
+                                    <div
+                                        key={material.id || index}
+                                        className='flex items-center justify-between rounded-md border p-2'
+                                    >
+                                        <div className='min-w-0 flex-1'>
+                                            <div className='truncate text-xs font-medium'>
+                                                {material.material_name ||
+                                                    `Material ${material.material_id}`}
+                                            </div>
+                                            <div className='text-xs text-muted-foreground'>
+                                                {t('pages.dashboard.student.cognitive_classification.dialog.score_label')} {(material.score * 100).toFixed(1)}%
+                                            </div>
+                                        </div>
+                                        <Badge
+                                            variant='secondary'
+                                            className={`ml-2 text-xs ${getLevelColor(material.level)}`}
+                                        >
+                                            {material.level}
+                                        </Badge>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Recommendations */}
+            {recommendations.length > 0 && (
+                <Card>
+                    <CardHeader className='pb-3'>
+                        <CardTitle className='flex items-center gap-2'>
+                            <Lightbulb className='h-5 w-5 text-amber-500' />
+                            {t('pages.dashboard.student.cognitive_classification.dialog.recommendations.title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('pages.dashboard.student.cognitive_classification.dialog.recommendations.subtitle')}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ul className='space-y-2'>
+                            {recommendations.map((recommendation: string, index: number) => (
+                                <li key={index} className='flex items-start gap-2'>
+                                    <div className='mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500' />
+                                    <span className='text-sm'>{recommendation}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </CardContent>
+                </Card>
+            )}
+        </div>
     );
 }

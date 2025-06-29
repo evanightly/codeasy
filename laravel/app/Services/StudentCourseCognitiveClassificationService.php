@@ -54,6 +54,9 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
         );
 
         if ($existingClassification) {
+            // Enrich material names if missing
+            $this->enrichMaterialNamesInClassification($existingClassification);
+
             return $existingClassification;
         }
 
@@ -68,7 +71,12 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
             // Create a record in StudentCourseCognitiveClassification for consistency
             // but only if a classification already exists elsewhere
             // TODO: might be cause issue regarding classification creation
-            return $this->createFromCourseClassification($courseClassification);
+            $newClassification = $this->createFromCourseClassification($courseClassification);
+
+            // Enrich material names if missing
+            $this->enrichMaterialNamesInClassification($newClassification);
+
+            return $newClassification;
         }
 
         // Return null if no classification exists
@@ -667,5 +675,39 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
             'raw_data' => $classification->raw_data,
             'classified_at' => $classification->classified_at ?? Carbon::now(),
         ]);
+    }
+
+    /**
+     * Enrich material names in classification raw_data if they are missing
+     */
+    private function enrichMaterialNamesInClassification(StudentCourseCognitiveClassification $classification): void {
+        if (!$classification->raw_data || !isset($classification->raw_data['material_classifications'])) {
+            return;
+        }
+
+        $rawData = $classification->raw_data;
+        $materialClassifications = $rawData['material_classifications'];
+        $needsUpdate = false;
+
+        foreach ($materialClassifications as $index => $materialClassification) {
+            // Check if material_name is missing or null
+            if (!isset($materialClassification['material_name']) || $materialClassification['material_name'] === null) {
+                if (isset($materialClassification['material_id'])) {
+                    // Fetch the material name
+                    $learningMaterial = \App\Models\LearningMaterial::find($materialClassification['material_id']);
+
+                    if ($learningMaterial) {
+                        $rawData['material_classifications'][$index]['material_name'] = $learningMaterial->title;
+                        $needsUpdate = true;
+                    }
+                }
+            }
+        }
+
+        // Update the classification if we enriched any material names
+        if ($needsUpdate) {
+            $classification->raw_data = $rawData;
+            $classification->save();
+        }
     }
 }
