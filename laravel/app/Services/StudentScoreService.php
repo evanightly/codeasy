@@ -1373,22 +1373,21 @@ class StudentScoreService extends BaseCrudService implements StudentScoreService
             }
 
             // Aggregate metrics
-            $studentData = &$aggregatedData[$materialId]['students'][$studentId];
-            $studentData['total_compile_count'] += $score->compile_count;
-            $studentData['total_coding_time'] += $score->coding_time;
-            $studentData['total_questions']++;
+            $aggregatedData[$materialId]['students'][$studentId]['total_compile_count'] += $score->compile_count;
+            $aggregatedData[$materialId]['students'][$studentId]['total_coding_time'] += $score->coding_time;
+            $aggregatedData[$materialId]['students'][$studentId]['total_questions']++;
 
             if ($score->completion_status) {
-                $studentData['total_completed_questions']++;
+                $aggregatedData[$materialId]['students'][$studentId]['total_completed_questions']++;
             }
 
-            $studentData['total_test_cases_completed'] += $score->test_case_complete_count;
-            $studentData['total_test_cases'] += $score->test_case_total_count;
+            $aggregatedData[$materialId]['students'][$studentId]['total_test_cases_completed'] += $score->test_case_complete_count;
+            $aggregatedData[$materialId]['students'][$studentId]['total_test_cases'] += $score->test_case_total_count;
 
             // Add execution result data if available
             if ($score->completedExecutionResult) {
-                $studentData['total_variable_count'] += $score->completedExecutionResult->variable_count ?? 0;
-                $studentData['total_function_count'] += $score->completedExecutionResult->function_count ?? 0;
+                $aggregatedData[$materialId]['students'][$studentId]['total_variable_count'] += $score->completedExecutionResult->variable_count ?? 0;
+                $aggregatedData[$materialId]['students'][$studentId]['total_function_count'] += $score->completedExecutionResult->function_count ?? 0;
             }
         }
 
