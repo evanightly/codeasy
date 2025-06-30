@@ -28,10 +28,12 @@ import {
     Sun,
     UserCheck,
 } from 'lucide-react';
-import { FormEventHandler, useEffect, useRef, useState } from 'react';
+import { FormEventHandler, memo, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 type Step = 'emailStep' | 'passwordStep' | 'authing';
+
+const MemoizedTextAnimate = memo(TextAnimate);
 
 export default function Login({
     status,
@@ -45,6 +47,7 @@ export default function Login({
     const [step, setStep] = useState<Step>('emailStep');
     const [autoSubmitted, setAutoSubmitted] = useState(false);
     const [typedManually, setTypedManually] = useState(false);
+    const [autoLoginDisabled, setAutoLoginDisabled] = useState(false);
     const passwordInputRef = useRef<HTMLInputElement>(null);
 
     // Use Inertia's useForm for proper Laravel session authentication
@@ -68,6 +71,7 @@ export default function Login({
             toast.error(t('validation.required', { attribute: 'email' }));
             return;
         }
+        setAutoLoginDisabled(false); // Reset when moving to password step
         setStep('passwordStep');
     };
 
@@ -83,9 +87,11 @@ export default function Login({
             },
             onSuccess: () => {
                 toast.success(t('pages.auth.login.messages.success'));
+                setAutoLoginDisabled(false); // Reset on success
             },
             onError: () => {
                 setStep('passwordStep');
+                setAutoLoginDisabled(true); // Disable auto login on error
                 toast.error(t('pages.auth.login.messages.error'));
             },
         });
@@ -94,17 +100,19 @@ export default function Login({
     // Auto sign in if password is autofilled
     useEffect(() => {
         if (step === 'passwordStep') {
-            // Reset state when entering password step
             setTypedManually(false);
             setAutoSubmitted(false);
 
-            // Delay to wait for browser autofill
             const autoFillTimer = setTimeout(() => {
                 const passwordInput = passwordInputRef.current;
-                if (passwordInput?.value && !typedManually && !autoSubmitted) {
+                if (
+                    passwordInput?.value &&
+                    !typedManually &&
+                    !autoSubmitted &&
+                    !autoLoginDisabled // Prevent auto login if disabled
+                ) {
                     setData('password', passwordInput.value);
                     setAutoSubmitted(true);
-                    // Trigger form submission
                     const fakeEvent = { preventDefault: () => {} } as any;
                     signIn(fakeEvent);
                 }
@@ -112,7 +120,12 @@ export default function Login({
 
             return () => clearTimeout(autoFillTimer);
         }
-    }, [step, typedManually, autoSubmitted, data, setData, signIn]);
+    }, [step, typedManually, autoSubmitted, data, setData, signIn, autoLoginDisabled]);
+
+    // Reset autoLoginDisabled if user changes email
+    useEffect(() => {
+        setAutoLoginDisabled(false);
+    }, [data.email]);
 
     return (
         <div className='light:from-slate-50 light:via-purple-50 light:to-blue-50 relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 dark:from-slate-900 dark:via-purple-900 dark:to-slate-800'>
@@ -180,16 +193,16 @@ export default function Login({
                                 className='bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-6xl font-bold text-transparent'
                             />
 
-                            <TextAnimate
+                            <MemoizedTextAnimate
                                 once
                                 className='text-xl leading-relaxed text-slate-300'
                                 by='word'
                                 animation='fadeIn'
                             >
                                 {t('pages.auth.login.subtitle')}
-                            </TextAnimate>
+                            </MemoizedTextAnimate>
 
-                            <TextAnimate
+                            <MemoizedTextAnimate
                                 once
                                 delay={0.5}
                                 className='text-lg text-slate-400'
@@ -197,7 +210,7 @@ export default function Login({
                                 animation='slideUp'
                             >
                                 {t('pages.auth.login.description')}
-                            </TextAnimate>
+                            </MemoizedTextAnimate>
                         </div>
 
                         {/* Feature Highlights */}

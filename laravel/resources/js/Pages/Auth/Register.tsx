@@ -48,10 +48,12 @@ import {
     UserPlus,
     Users,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+
+const MemoizedTextAnimate = memo(TextAnimate);
 
 export default function Register() {
     const { t } = useLaravelReactI18n();
@@ -230,16 +232,16 @@ export default function Register() {
                                 className='bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-5xl font-bold text-transparent'
                             />
 
-                            <TextAnimate
+                            <MemoizedTextAnimate
                                 once
                                 className='text-xl leading-relaxed text-slate-300'
                                 by='word'
                                 animation='fadeIn'
                             >
                                 {t('pages.auth.register.subtitle')}
-                            </TextAnimate>
+                            </MemoizedTextAnimate>
 
-                            <TextAnimate
+                            <MemoizedTextAnimate
                                 once
                                 delay={0.5}
                                 className='text-lg text-slate-400'
@@ -247,7 +249,7 @@ export default function Register() {
                                 animation='slideUp'
                             >
                                 {t('pages.auth.register.description')}
-                            </TextAnimate>
+                            </MemoizedTextAnimate>
                         </div>
 
                         {/* Feature Highlights */}
