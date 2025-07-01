@@ -31,7 +31,9 @@ import { StudentClassificationSection } from './StudentClassificationSection';
 export function StudentCharts() {
     const { t } = useLaravelReactI18n();
     const { data: latestWorkData, isLoading } = dashboardServiceHook.useGetStudentLatestWork();
-    const { data: coursesData, isLoading: isCoursesLoading } = courseServiceHook.useGetAll();
+    // Only fetch enrolled courses for the student using the new intent system
+    const { data: coursesData, isPending: isCoursesLoading } =
+        courseServiceHook.useGetAllEnrolled();
 
     return (
         <>

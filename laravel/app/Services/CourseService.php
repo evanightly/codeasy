@@ -648,4 +648,23 @@ class CourseService extends BaseCrudService implements CourseServiceInterface {
             return $materialArr;
         })->toArray();
     }
+
+    public function getEnrolledCoursesForCurrentUser(array $search = [], int $pageSize = 15) {
+        $user = Auth::user();
+
+        if (!$user || !$user->classrooms || $user->classrooms->count() === 0) {
+            return collect();
+        }
+
+        // Get all courses from the user's classrooms
+        $courses = [];
+        foreach ($user->classrooms as $classroom) {
+            foreach ($classroom->courses as $course) {
+                $courses[] = $course;
+            }
+        }
+
+        // Remove duplicates and return as collection
+        return collect($courses)->unique('id')->values();
+    }
 }

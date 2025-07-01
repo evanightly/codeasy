@@ -12,6 +12,7 @@ import {
 import { Progress } from '@/Components/UI/progress';
 import { StudentCourseCognitiveClassificationHistoryViewer } from '@/Pages/StudentCourseCognitiveClassification/Partials/StudentCourseCognitiveClassificationHistoryViewer';
 import { studentCourseCognitiveClassificationServiceHook } from '@/Services/studentCourseCognitiveClassificationServiceHook';
+import { CourseResource } from '@/Support/Interfaces/Resources';
 import { usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
@@ -20,10 +21,7 @@ import { useState } from 'react';
 
 interface StudentClassificationSectionProps {
     /** List of courses the student is enrolled in */
-    courses: Array<{
-        id: number;
-        name: string;
-    }>;
+    courses: Array<CourseResource>;
     /** Loading state for courses data */
     isLoading?: boolean;
 }

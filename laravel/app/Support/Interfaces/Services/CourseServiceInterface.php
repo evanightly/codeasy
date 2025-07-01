@@ -26,6 +26,11 @@ interface CourseServiceInterface extends BaseCrudServiceInterface {
     public function previewImport(Request $request);
 
     /**
+     * Get enrolled courses for the current user.
+     */
+    public function getEnrolledCoursesForCurrentUser(array $search = [], int $pageSize = 15);
+
+    /**
      * Get student progress percentage for each course.
      *
      * @param  array|\Illuminate\Support\Collection  $courses

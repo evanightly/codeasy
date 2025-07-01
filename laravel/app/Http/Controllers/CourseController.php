@@ -32,7 +32,6 @@ class CourseController extends Controller implements HasMiddleware {
 
     public function index(Request $request) {
         $intent = $request->get('intent');
-        $data = CourseResource::collection($this->courseService->getAllPaginated($request->query()));
 
         if ($this->ajax()) {
             switch ($intent) {
@@ -40,7 +39,13 @@ class CourseController extends Controller implements HasMiddleware {
                     return $this->courseService->downloadTemplate();
                 case IntentEnum::COURSE_INDEX_IMPORT_MATERIAL_TEMPLATE->value:
                     return $this->courseService->downloadMaterialTemplate();
+                case IntentEnum::COURSE_INDEX_ENROLLED_STUDENT->value:
+                    $enrolledCourses = $this->courseService->getEnrolledCoursesForCurrentUser($request->query());
+
+                    return CourseResource::collection($enrolledCourses);
             }
+
+            $data = CourseResource::collection($this->courseService->getAllPaginated($request->query()));
 
             return $data;
         }
