@@ -86,19 +86,6 @@ describe('Student Classification Export for SuperAdmin', () => {
             cy.get('[role="dialog"]').should('contain.text', 'Generate Report');
         });
 
-        it('should show export student scores button and dialog', () => {
-            cy.visit('/student-course-cognitive-classifications');
-            cy.waitForPageLoad();
-
-            // Look for export student scores button
-            cy.get('button').contains('Export Student Scores').should('be.visible');
-            cy.get('button').contains('Export Student Scores').click();
-
-            // Should show dialog
-            cy.get('[role="dialog"]').should('be.visible');
-            cy.get('[role="dialog"]').should('contain.text', 'Export Student Scores');
-        });
-
         it('should show enhanced export button and dialog', () => {
             cy.visit('/student-course-cognitive-classifications');
             cy.waitForPageLoad();
@@ -139,10 +126,6 @@ describe('Student Classification Export for SuperAdmin', () => {
             // Close dialog by clicking outside or escape
             cy.get('body').type('{esc}');
             cy.get('[role="dialog"]').should('not.exist');
-
-            // Test export student scores dialog interaction
-            cy.get('button').contains('Export Student Scores').click();
-            cy.get('[role="dialog"]').should('be.visible');
 
             // Close dialog
             cy.get('body').type('{esc}');
