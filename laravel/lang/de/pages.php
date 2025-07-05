@@ -484,6 +484,7 @@ return [
                 'no_administrators' => 'Keine Administratoren zugewiesen',
                 'no_teachers' => 'Keine Lehrer zugewiesen',
                 'no_students' => 'Keine Schüler eingeschrieben',
+                'no_schools' => 'Keine Schulen zugewiesen',
             ],
         ],
         'index' => [
@@ -522,6 +523,30 @@ return [
             'buttons' => [
                 'back' => 'Zurück zu den Schulen',
             ],
+            'dialogs' => [
+                'assign_student' => [
+                    'title' => 'Schüler zuweisen',
+                    'description' => 'Wählen Sie Schüler aus, die dieser Schule zugewiesen werden sollen',
+                    'buttons' => [
+                        'assign' => 'Schüler zuweisen',
+                    ],
+                ],
+            ],
+            'bulk_actions' => [
+                'title' => 'Massenaktionen',
+                'selected' => ':count ausgewählt',
+                'buttons' => [
+                    'assign_selected' => 'Ausgewählte zuweisen',
+                ],
+                'placeholders' => [
+                    'search' => 'Benutzer suchen...',
+                    'no_data' => 'Keine Benutzer verfügbar',
+                ],
+                'empty_state' => [
+                    'title' => 'Keine Benutzer gefunden',
+                    'description' => 'Versuchen Sie, Ihre Suchkriterien zu ändern',
+                ],
+            ],
         ],
         'assign_admin' => [
             'title' => 'Schuladministrator zuweisen',
@@ -529,20 +554,6 @@ return [
             'buttons' => [
                 'assign' => 'Administrator zuweisen',
                 'cancel' => 'Abbrechen',
-            ],
-        ],
-        'assign_student' => [
-            'title' => 'Schüler zuweisen',
-            'description' => 'Wählen Sie Schüler aus, die dieser Schule zugewiesen werden sollen',
-            'buttons' => [
-                'assign' => 'Schüler zuweisen',
-            ],
-        ],
-        'assign_student' => [
-            'title' => 'Schüler zuweisen',
-            'description' => 'Wählen Sie einen Schüler aus, der dieser Schule zugewiesen werden soll',
-            'buttons' => [
-                'assign' => 'Schüler zuweisen',
             ],
         ],
     ],
@@ -872,6 +883,7 @@ return [
             ],
             'empty_states' => [
                 'no_students' => 'Keine Schüler diesem Klassenraum zugewiesen',
+                'no_classrooms' => 'Keine Klassenräume zugewiesen',
             ],
             'dialogs' => [
                 'assign_student' => [
@@ -880,6 +892,21 @@ return [
                     'buttons' => [
                         'assign' => 'Schüler zuweisen',
                     ],
+                ],
+            ],
+            'bulk_actions' => [
+                'title' => 'Massenaktionen',
+                'selected' => ':count ausgewählt',
+                'buttons' => [
+                    'assign_selected' => 'Ausgewählte zuweisen',
+                ],
+                'placeholders' => [
+                    'search' => 'Benutzer suchen...',
+                    'no_data' => 'Keine Benutzer verfügbar',
+                ],
+                'empty_state' => [
+                    'title' => 'Keine Benutzer gefunden',
+                    'description' => 'Versuchen Sie, Ihre Suchkriterien zu ändern',
                 ],
             ],
         ],

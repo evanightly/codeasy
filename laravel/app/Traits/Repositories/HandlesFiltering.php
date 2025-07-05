@@ -102,11 +102,34 @@ trait HandlesFiltering {
             $relation = $config['relation'] ?? $paramKey;  // Default to param key if not specified
             $column = $config['column'] ?? 'name';  // Default to 'name' if not specified
 
-            // Apply whereHas filter with table prefix for column to avoid ambiguity
-            $query->whereHas($relation, function ($subQuery) use ($column, $values) {
-                $table = $subQuery->getModel()->getTable();
-                $subQuery->whereIn("{$table}.{$column}", $values);
-            });
+            // Separate inclusion and exclusion values
+            $includeValues = [];
+            $excludeValues = [];
+
+            foreach ($values as $value) {
+                if (is_string($value) && str_starts_with($value, '!')) {
+                    // Remove the '!' prefix and add to exclusion list
+                    $excludeValues[] = substr($value, 1);
+                } else {
+                    $includeValues[] = $value;
+                }
+            }
+
+            // Apply inclusion filters
+            if (!empty($includeValues)) {
+                $query->whereHas($relation, function ($subQuery) use ($column, $includeValues) {
+                    $table = $subQuery->getModel()->getTable();
+                    $subQuery->whereIn("{$table}.{$column}", $includeValues);
+                });
+            }
+
+            // Apply exclusion filters
+            if (!empty($excludeValues)) {
+                $query->whereDoesntHave($relation, function ($subQuery) use ($column, $excludeValues) {
+                    $table = $subQuery->getModel()->getTable();
+                    $subQuery->whereIn("{$table}.{$column}", $excludeValues);
+                });
+            }
         }
 
         return $query;

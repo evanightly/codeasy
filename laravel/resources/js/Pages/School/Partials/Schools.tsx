@@ -59,13 +59,13 @@ export function Schools({ response, filters, setFilters, baseKey, baseRoute }: S
         });
     };
 
-    const handleAssignAdmin = async (userId: number) => {
+    const handleAssignAdmin = async (userIds: number[]) => {
         if (!selectedSchool) return;
 
         toast.promise(
             assignAdminMutation.mutateAsync({
                 id: selectedSchool.id,
-                data: { user_id: userId },
+                data: { user_ids: userIds },
             }),
             {
                 loading: t('pages.school.common.messages.pending.assign_admin'),

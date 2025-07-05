@@ -118,6 +118,30 @@ return [
         'search_theme' => 'Cari tema...',
         'no_theme_found' => 'Tidak ada tema ditemukan',
     ],
+    'assign_user_dialog' => [
+        'columns' => [
+            'name' => 'Nama',
+            'email' => 'Email',
+            'username' => 'Nama Pengguna',
+            'role' => 'Peran',
+            'school' => 'Sekolah',
+            'classroom' => 'Kelas',
+        ],
+        'empty_states' => [
+            'no_username' => 'Tidak ada nama pengguna',
+            'no_roles' => 'Tidak ada peran ditetapkan',
+            'no_schools' => 'Tidak ada sekolah ditetapkan',
+            'no_classrooms' => 'Tidak ada kelas ditetapkan',
+        ],
+        'actions' => [
+            'select_all' => 'Pilih semua',
+            'select_row' => 'Pilih baris',
+        ],
+        'search' => [
+            'placeholder' => 'Cari pengguna...',
+            'no_data' => 'Tidak ada pengguna tersedia',
+        ],
+    ],
     'data_table' => [
         'search' => 'Cari...',
         'per_page' => 'Per halaman',

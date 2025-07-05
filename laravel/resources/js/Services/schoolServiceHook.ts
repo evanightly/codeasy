@@ -14,12 +14,12 @@ export const schoolServiceHook = {
     }),
     useAssignAdmin: () => {
         return createMutation({
-            mutationFn: async (params: { id: number; data: { user_id: number } }) => {
+            mutationFn: async (params: { id: number; data: { user_ids: number[] } }) => {
                 return mutationApi({
                     method: 'put',
                     url: route(`${ROUTES.SCHOOLS}.update`, params.id),
                     data: params.data,
-                    params: { intent: IntentEnum.SCHOOL_UPDATE_ASSIGN_ADMIN },
+                    params: { intent: IntentEnum.SCHOOL_UPDATE_ASSIGN_BULK_ADMINS },
                 });
             },
             invalidateQueryKeys: [{ queryKey: [baseKey], exact: false }],

@@ -186,4 +186,29 @@ class SchoolService extends BaseCrudService implements SchoolServiceInterface {
         //     }
         // }
     }
+
+    public function assignBulkSchoolAdmins(School $school, array $validatedRequest): void {
+        $userIds = $validatedRequest['user_ids'];
+
+        foreach ($userIds as $userId) {
+            // Check if user is already an admin of this school
+            if ($school->administrators()->where('user_id', $userId)->exists()) {
+                continue; // Skip if already assigned
+            }
+
+            // Remove any existing admin role for this school if exists
+            $school->administrators()->detach($userId);
+
+            // Attach the new admin
+            $school->users()->attach($userId, [
+                'role' => RoleEnum::SCHOOL_ADMIN->value,
+            ]);
+
+            // Assign the School Admin role if they don't have it
+            $user = $this->userService->findOrFail($userId);
+            if (!$user->hasRole(RoleEnum::SCHOOL_ADMIN->value)) {
+                $user->assignRole(RoleEnum::SCHOOL_ADMIN->value);
+            }
+        }
+    }
 }

@@ -492,6 +492,7 @@ return [
                 'no_administrators' => 'Tidak ada administrator yang ditetapkan',
                 'no_teachers' => 'Tidak ada guru yang ditetapkan',
                 'no_students' => 'Tidak ada siswa yang terdaftar',
+                'no_schools' => 'Tidak ada sekolah yang ditetapkan',
             ],
         ],
         'index' => [
@@ -549,8 +550,19 @@ return [
             ],
         ],
         'bulk_actions' => [
-            'selected_count' => ':count dipilih',
-            'unassign_selected' => 'Lepas yang Dipilih',
+            'title' => 'Aksi Massal',
+            'selected' => ':count dipilih',
+            'buttons' => [
+                'assign_selected' => 'Tetapkan yang Dipilih',
+            ],
+            'placeholders' => [
+                'search' => 'Cari pengguna...',
+                'no_data' => 'Tidak ada pengguna tersedia',
+            ],
+            'empty_state' => [
+                'title' => 'Tidak ada pengguna ditemukan',
+                'description' => 'Coba ubah kriteria pencarian Anda',
+            ],
         ],
         'assign_student' => [
             'title' => 'Tetapkan Siswa',
@@ -890,6 +902,7 @@ return [
             ],
             'empty_states' => [
                 'no_students' => 'Tidak ada siswa yang ditetapkan ke kelas ini',
+                'no_classrooms' => 'Tidak ada kelas yang ditetapkan',
             ],
             'dialogs' => [
                 'assign_student' => [
@@ -901,8 +914,19 @@ return [
                 ],
             ],
             'bulk_actions' => [
-                'selected_count' => ':count dipilih',
-                'unassign_selected' => 'Lepas yang Dipilih',
+                'title' => 'Aksi Massal',
+                'selected' => ':count dipilih',
+                'buttons' => [
+                    'assign_selected' => 'Tetapkan yang Dipilih',
+                ],
+                'placeholders' => [
+                    'search' => 'Cari pengguna...',
+                    'no_data' => 'Tidak ada pengguna tersedia',
+                ],
+                'empty_state' => [
+                    'title' => 'Tidak ada pengguna ditemukan',
+                    'description' => 'Coba ubah kriteria pencarian Anda',
+                ],
             ],
         ],
     ],

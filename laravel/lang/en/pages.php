@@ -7,6 +7,9 @@ return [
             'updated_at' => 'Updated At',
             'timestamps' => 'Time Information',
         ],
+        'bulk_actions' => [
+            'selected_count' => ':count selected',
+        ],
     ],
     'login' => [
         'title' => 'Welcome Back!',
@@ -497,6 +500,7 @@ return [
                 'no_administrators' => 'No administrators assigned',
                 'no_teachers' => 'No teachers assigned',
                 'no_students' => 'No students enrolled',
+                'no_schools' => 'No schools assigned',
             ],
             'bulk_actions' => [
                 'selected_count' => ':count selected',
@@ -550,10 +554,10 @@ return [
             ],
         ],
         'assign_admin' => [
-            'title' => 'Assign School Administrator',
-            'description' => 'Select a user to assign as school administrator',
+            'title' => 'Assign School Administrators',
+            'description' => 'Select users to assign as school administrators',
             'buttons' => [
-                'assign' => 'Assign Administrator',
+                'assign' => 'Assign Administrators',
                 'cancel' => 'Cancel',
             ],
         ],
@@ -865,6 +869,7 @@ return [
             ],
             'empty_states' => [
                 'no_students' => 'No students assigned to this classroom',
+                'no_classrooms' => 'No classrooms assigned',
             ],
             'dialogs' => [
                 'assign_student' => [

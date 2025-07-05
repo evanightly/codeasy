@@ -35,6 +35,12 @@ class UserResource extends JsonResource {
             'profile_image_url' => $profileImageUrl,
             'preferences' => $this->preferences,
             'roles' => RoleResource::collection($this->whenLoaded('roles')),
+            'schools' => $this->when($this->relationLoaded('schools'), function () {
+                return SchoolResource::collection($this->schools);
+            }),
+            'classrooms' => $this->when($this->relationLoaded('classrooms'), function () {
+                return ClassRoomResource::collection($this->classrooms);
+            }),
         ];
 
         return $this->filterData($request, $dataSource);

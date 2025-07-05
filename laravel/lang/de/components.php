@@ -118,6 +118,30 @@ return [
         'search_theme' => 'Theme suchen...',
         'no_theme_found' => 'Kein Theme gefunden',
     ],
+    'assign_user_dialog' => [
+        'columns' => [
+            'name' => 'Name',
+            'email' => 'E-Mail',
+            'username' => 'Benutzername',
+            'role' => 'Rolle',
+            'school' => 'Schule',
+            'classroom' => 'Klassenraum',
+        ],
+        'empty_states' => [
+            'no_username' => 'Kein Benutzername gesetzt',
+            'no_roles' => 'Keine Rollen zugewiesen',
+            'no_schools' => 'Keine Schulen zugewiesen',
+            'no_classrooms' => 'Keine Klassenräume zugewiesen',
+        ],
+        'actions' => [
+            'select_all' => 'Alle auswählen',
+            'select_row' => 'Zeile auswählen',
+        ],
+        'search' => [
+            'placeholder' => 'Benutzer suchen...',
+            'no_data' => 'Keine Benutzer verfügbar',
+        ],
+    ],
     'data_table' => [
         'search' => 'Suchen...',
         'per_page' => 'Pro Seite',

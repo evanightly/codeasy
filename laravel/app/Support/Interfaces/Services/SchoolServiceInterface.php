@@ -14,6 +14,14 @@ interface SchoolServiceInterface extends BaseCrudServiceInterface {
     public function assignSchoolAdmin(School $school, array $validatedRequest): void;
 
     /**
+     * Assign multiple users as school admins
+     *
+     * request needed:
+     * - user_ids
+     */
+    public function assignBulkSchoolAdmins(School $school, array $validatedRequest): void;
+
+    /**
      * Unassign a user as a school admin
      *
      * request needed:
