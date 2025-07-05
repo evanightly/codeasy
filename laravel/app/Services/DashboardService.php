@@ -1326,22 +1326,22 @@ class DashboardService implements DashboardServiceInterface {
             if ($a['completion_rate'] !== $b['completion_rate']) {
                 return $b['completion_rate'] <=> $a['completion_rate'];
             }
-            
+
             // Secondary: average score (higher is better)
             if ($a['average_score'] !== $b['average_score']) {
                 return $b['average_score'] <=> $a['average_score'];
             }
-            
+
             // Tertiary: total questions completed (more is better)
             if ($a['questions_completed'] !== $b['questions_completed']) {
                 return $b['questions_completed'] <=> $a['questions_completed'];
             }
-            
+
             // Quaternary: total time spent (less is better, more efficient)
             if ($a['total_time'] !== $b['total_time']) {
                 return $a['total_time'] <=> $b['total_time'];
             }
-            
+
             // Final tiebreaker: user ID for consistency
             return $a['user_id'] <=> $b['user_id'];
         })->values();
@@ -1365,22 +1365,22 @@ class DashboardService implements DashboardServiceInterface {
             if ($a['completion_rate'] !== $b['completion_rate']) {
                 return $b['completion_rate'] <=> $a['completion_rate'];
             }
-            
+
             // Secondary: average score (higher is better)
             if ($a['average_score'] !== $b['average_score']) {
                 return $b['average_score'] <=> $a['average_score'];
             }
-            
+
             // Tertiary: total questions completed (more is better)
             if ($a['questions_completed'] !== $b['questions_completed']) {
                 return $b['questions_completed'] <=> $a['questions_completed'];
             }
-            
+
             // Quaternary: total time spent (less is better, more efficient)
             if ($a['total_time'] !== $b['total_time']) {
                 return $a['total_time'] <=> $b['total_time'];
             }
-            
+
             // Final tiebreaker: user ID for consistency
             return $a['user_id'] <=> $b['user_id'];
         })->values();
@@ -1403,7 +1403,7 @@ class DashboardService implements DashboardServiceInterface {
 
         // Calculate percentile: (students ranked below / total students) * 100
         $studentsBelow = count($sortedStats) - $studentPosition - 1;
-        
+
         return count($sortedStats) > 1 ? round(($studentsBelow / (count($sortedStats) - 1)) * 100, 2) : 100.0;
     }
 
