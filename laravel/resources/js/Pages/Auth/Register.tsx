@@ -228,8 +228,8 @@ export default function Register() {
                                 text={t('pages.auth.register.hero_title')}
                                 sparklesCount={12}
                                 colors={{
-                                    first: 'hsl(var(--tertiary))',
-                                    second: 'hsl(var(--quaternary))',
+                                    first: 'hsl(var(--primary))',
+                                    second: 'hsl(var(--secondary))',
                                 }}
                                 className='bg-gradient-to-r from-info via-tertiary to-quaternary bg-clip-text text-5xl font-bold text-transparent'
                             />
@@ -301,8 +301,8 @@ export default function Register() {
                     >
                         <NeonGradientCard
                             neonColors={{
-                                firstColor: 'hsl(var(--tertiary))',
-                                secondColor: 'hsl(var(--quaternary))',
+                                firstColor: 'hsl(var(--primary))',
+                                secondColor: 'hsl(var(--secondary))',
                             }}
                             className='light:bg-white/90 bg-white/10 backdrop-blur-xl dark:bg-white/10'
                             borderSize={2}
