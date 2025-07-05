@@ -52,6 +52,7 @@ import { memo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { AuthThemeSelector } from './Components/AuthThemeSelector';
 
 const MemoizedTextAnimate = memo(TextAnimate);
 
@@ -167,11 +168,12 @@ export default function Register() {
     );
 
     return (
-        <div className='light:from-slate-50 light:via-purple-50 light:to-blue-50 relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 dark:from-slate-900 dark:via-purple-900 dark:to-slate-800'>
+        <div className='relative min-h-screen overflow-hidden bg-gradient-to-br from-primary/20 via-tertiary/20 to-primary/10 dark:from-primary/10 dark:via-tertiary/10 dark:to-primary/5'>
             <Head title={t('pages.auth.register.title')} />
 
-            {/* Dark Mode Toggle - Top Right */}
-            <div className='absolute right-6 top-6 z-20'>
+            {/* Dark Mode Toggle & Theme Selector - Top Right */}
+            <div className='absolute right-6 top-6 z-20 flex items-center gap-3'>
+                <AuthThemeSelector />
                 <button
                     title={
                         isDarkMode
@@ -183,12 +185,12 @@ export default function Register() {
                 >
                     <div className='relative overflow-hidden'>
                         <Sun
-                            className={`h-5 w-5 text-amber-300 transition-all duration-500 ${
+                            className={`h-5 w-5 text-amber-500 transition-all duration-500 ${
                                 isDarkMode ? 'rotate-90 scale-0' : 'rotate-0 scale-100'
                             }`}
                         />
                         <Moon
-                            className={`absolute inset-0 h-5 w-5 text-slate-300 transition-all duration-500 ${
+                            className={`absolute inset-0 h-5 w-5 text-foreground transition-all duration-500 ${
                                 isDarkMode ? 'rotate-0 scale-100' : '-rotate-90 scale-0'
                             }`}
                         />
@@ -226,15 +228,15 @@ export default function Register() {
                                 text={t('pages.auth.register.hero_title')}
                                 sparklesCount={12}
                                 colors={{
-                                    first: '#60A5FA',
-                                    second: '#A855F7',
+                                    first: 'hsl(var(--tertiary))',
+                                    second: 'hsl(var(--quaternary))',
                                 }}
-                                className='bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-5xl font-bold text-transparent'
+                                className='bg-gradient-to-r from-info via-tertiary to-quaternary bg-clip-text text-5xl font-bold text-transparent'
                             />
 
                             <MemoizedTextAnimate
                                 once
-                                className='text-xl leading-relaxed text-slate-300'
+                                className='text-xl leading-relaxed text-foreground'
                                 by='word'
                                 animation='fadeIn'
                             >
@@ -244,7 +246,7 @@ export default function Register() {
                             <MemoizedTextAnimate
                                 once
                                 delay={0.5}
-                                className='text-lg text-slate-400'
+                                className='text-lg text-foreground/80'
                                 by='character'
                                 animation='slideUp'
                             >
@@ -257,10 +259,10 @@ export default function Register() {
                             <motion.div
                                 transition={{ delay: 1, duration: 0.6 }}
                                 initial={{ opacity: 0, y: 20 }}
-                                className='flex items-center gap-3 text-slate-300'
+                                className='flex items-center gap-3 text-foreground'
                                 animate={{ opacity: 1, y: 0 }}
                             >
-                                <Brain className='h-6 w-6 text-purple-400' />
+                                <Brain className='h-6 w-6 text-tertiary' />
                                 <span>
                                     {t('pages.auth.register.features.intelligent_assessment')}
                                 </span>
@@ -269,17 +271,17 @@ export default function Register() {
                             <motion.div
                                 transition={{ delay: 1.2, duration: 0.6 }}
                                 initial={{ opacity: 0, y: 20 }}
-                                className='flex items-center gap-3 text-slate-300'
+                                className='flex items-center gap-3 text-foreground'
                                 animate={{ opacity: 1, y: 0 }}
                             >
-                                <GraduationCap className='h-6 w-6 text-blue-400' />
+                                <GraduationCap className='h-6 w-6 text-info' />
                                 <span>{t('pages.auth.register.features.progress_tracking')}</span>
                             </motion.div>
 
                             <motion.div
                                 transition={{ delay: 1.4, duration: 0.6 }}
                                 initial={{ opacity: 0, y: 20 }}
-                                className='flex items-center gap-3 text-slate-300'
+                                className='flex items-center gap-3 text-foreground'
                                 animate={{ opacity: 1, y: 0 }}
                             >
                                 <BookOpen className='h-6 w-6 text-pink-400' />
@@ -299,8 +301,8 @@ export default function Register() {
                     >
                         <NeonGradientCard
                             neonColors={{
-                                firstColor: '#3B82F6',
-                                secondColor: '#8B5CF6',
+                                firstColor: 'hsl(var(--tertiary))',
+                                secondColor: 'hsl(var(--quaternary))',
                             }}
                             className='light:bg-white/90 bg-white/10 backdrop-blur-xl dark:bg-white/10'
                             borderSize={2}
@@ -343,7 +345,7 @@ export default function Register() {
                                                             placeholder={t(
                                                                 'pages.auth.register.placeholders.name',
                                                             )}
-                                                            className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-purple-400'
+                                                            className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-tertiary'
                                                             autoFocus
                                                             autoComplete='name'
                                                         />
@@ -370,7 +372,7 @@ export default function Register() {
                                                             placeholder={t(
                                                                 'pages.auth.register.placeholders.email',
                                                             )}
-                                                            className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-purple-400'
+                                                            className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-tertiary'
                                                             autoComplete='username'
                                                         />
                                                     </FormControl>
@@ -402,7 +404,7 @@ export default function Register() {
                                                         }}
                                                     >
                                                         <FormControl>
-                                                            <SelectTrigger className='border-foreground/50 text-foreground transition-colors focus:border-purple-400'>
+                                                            <SelectTrigger className='border-foreground/50 text-foreground transition-colors focus:border-tertiary'>
                                                                 <SelectValue
                                                                     placeholder={t(
                                                                         'pages.auth.register.fields.select_role',
@@ -458,7 +460,7 @@ export default function Register() {
                                                                 )}
                                                             </FormLabel>
                                                             <FormControl>
-                                                                <div className='[&_button:focus]:border-purple-400 [&_button]:border-foreground/50 [&_button]:text-foreground [&_button]:transition-colors'>
+                                                                <div className='[&_button:focus]:border-tertiary [&_button]:border-foreground/50 [&_button]:text-foreground [&_button]:transition-colors'>
                                                                     <GenericDataSelector<SchoolResource>
                                                                         setSelectedData={(id) =>
                                                                             field.onChange(id)
@@ -498,7 +500,7 @@ export default function Register() {
                                                             placeholder={t(
                                                                 'pages.auth.register.placeholders.password',
                                                             )}
-                                                            className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-purple-400'
+                                                            className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-tertiary'
                                                             autoComplete='new-password'
                                                         />
                                                     </FormControl>
@@ -526,7 +528,7 @@ export default function Register() {
                                                             placeholder={t(
                                                                 'pages.auth.register.placeholders.password_confirmation',
                                                             )}
-                                                            className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-purple-400'
+                                                            className='border-foreground/50 text-foreground transition-colors placeholder:text-foreground/50 focus:border-tertiary'
                                                             autoComplete='new-password'
                                                         />
                                                     </FormControl>
@@ -577,7 +579,7 @@ export default function Register() {
                         rotate: [0, 5, 0],
                     }}
                 >
-                    <Sparkles className='h-8 w-8 text-blue-400 opacity-60' />
+                    <Sparkles className='h-8 w-8 text-info opacity-60' />
                 </motion.div>
             </div>
 
@@ -594,7 +596,7 @@ export default function Register() {
                         rotate: [0, -5, 0],
                     }}
                 >
-                    <GraduationCap className='h-6 w-6 text-purple-400 opacity-40' />
+                    <GraduationCap className='h-6 w-6 text-tertiary opacity-40' />
                 </motion.div>
             </div>
         </div>
