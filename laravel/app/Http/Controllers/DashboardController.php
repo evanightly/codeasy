@@ -73,6 +73,100 @@ class DashboardController extends Controller {
 
                 return response()->json($data);
 
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_LEARNING_PROGRESS->value:
+                $filters = [
+                    'start_date' => $request->get('start_date'),
+                    'end_date' => $request->get('end_date'),
+                    'course_id' => $request->get('course_id'),
+                ];
+                $data = $this->dashboardService->getStudentLearningProgressData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_COGNITIVE_LEVELS->value:
+                $filters = [
+                    'course_id' => $request->get('course_id'),
+                    'start_date' => $request->get('start_date'),
+                    'end_date' => $request->get('end_date'),
+                ];
+                $data = $this->dashboardService->getStudentCognitiveLevelsData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_MODULE_PROGRESS->value:
+                $filters = [
+                    'course_id' => $request->get('course_id'),
+                ];
+                $data = $this->dashboardService->getStudentModuleProgressData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_DAILY_ACTIVITY->value:
+                $filters = [
+                    'start_date' => $request->get('start_date'),
+                    'end_date' => $request->get('end_date'),
+                    'course_id' => $request->get('course_id'),
+                ];
+                $data = $this->dashboardService->getStudentDailyActivityData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_WEEKLY_STREAK->value:
+                $filters = [
+                    'start_date' => $request->get('start_date'),
+                    'end_date' => $request->get('end_date'),
+                    'course_id' => $request->get('course_id'),
+                ];
+                $data = $this->dashboardService->getStudentWeeklyStreakData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_SCORE_TRENDS->value:
+                $filters = [
+                    'start_date' => $request->get('start_date'),
+                    'end_date' => $request->get('end_date'),
+                    'course_id' => $request->get('course_id'),
+                ];
+                $data = $this->dashboardService->getStudentScoreTrendsData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_TIME_ANALYSIS->value:
+                $filters = [
+                    'start_date' => $request->get('start_date'),
+                    'end_date' => $request->get('end_date'),
+                    'course_id' => $request->get('course_id'),
+                ];
+                $data = $this->dashboardService->getStudentTimeAnalysisData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_DIFFICULTY_PROGRESS->value:
+                $filters = [
+                    'start_date' => $request->get('start_date'),
+                    'end_date' => $request->get('end_date'),
+                    'course_id' => $request->get('course_id'),
+                ];
+                $data = $this->dashboardService->getStudentDifficultyProgressData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_COMPARISON_STATS->value:
+                $filters = [
+                    'course_id' => $request->get('course_id'),
+                ];
+                $data = $this->dashboardService->getStudentComparisonStatsData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
+            case IntentEnum::DASHBOARD_INDEX_GET_STUDENT_ACHIEVEMENT_SUMMARY->value:
+                $filters = [
+                    'course_id' => $request->get('course_id'),
+                ];
+                $data = $this->dashboardService->getStudentAchievementSummaryData($user->id, array_filter($filters));
+
+                return response()->json($data);
+
             case IntentEnum::DASHBOARD_INDEX_GET_DATA->value:
             default:
                 $dashboardData = $this->dashboardService->getDashboardData($user);

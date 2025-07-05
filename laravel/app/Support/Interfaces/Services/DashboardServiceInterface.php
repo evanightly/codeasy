@@ -59,4 +59,54 @@ interface DashboardServiceInterface {
      * Get currently active users grouped by roles.
      */
     public function getActiveUsers(int $minutesThreshold = 15): array;
+
+    /**
+     * Get student learning progress chart data with time filtering.
+     */
+    public function getStudentLearningProgressData(int $userId, array $filters = []): array;
+
+    /**
+     * Get student cognitive levels distribution data.
+     */
+    public function getStudentCognitiveLevelsData(int $userId, array $filters = []): array;
+
+    /**
+     * Get student module progress data.
+     */
+    public function getStudentModuleProgressData(int $userId, array $filters = []): array;
+
+    /**
+     * Get student daily activity data showing coding sessions and time spent.
+     */
+    public function getStudentDailyActivityData(int $userId, array $filters = []): array;
+
+    /**
+     * Get student weekly streak data showing consecutive learning days.
+     */
+    public function getStudentWeeklyStreakData(int $userId, array $filters = []): array;
+
+    /**
+     * Get student score trends over time for performance analysis.
+     */
+    public function getStudentScoreTrendsData(int $userId, array $filters = []): array;
+
+    /**
+     * Get student time analysis data showing coding efficiency and patterns.
+     */
+    public function getStudentTimeAnalysisData(int $userId, array $filters = []): array;
+
+    /**
+     * Get student difficulty progression showing improvement across complexity levels.
+     */
+    public function getStudentDifficultyProgressData(int $userId, array $filters = []): array;
+
+    /**
+     * Get student comparison stats relative to class average.
+     */
+    public function getStudentComparisonStatsData(int $userId, array $filters = []): array;
+
+    /**
+     * Get student achievement summary including badges, milestones, and accomplishments.
+     */
+    public function getStudentAchievementSummaryData(int $userId, array $filters = []): array;
 }

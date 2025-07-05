@@ -188,3 +188,122 @@ export interface ActiveUsersData {
     last_updated: string;
     threshold_minutes: number;
 }
+
+// Chart Data Interfaces
+export interface StudentLearningProgressData {
+    date: string;
+    progress: number;
+    completed_today: number;
+    total_today: number;
+}
+
+export interface StudentCognitiveLevelData {
+    level: string;
+    value: number;
+    fill: string;
+}
+
+export interface StudentModuleProgressData {
+    modul: string;
+    done: number;
+    total: number;
+    progress_percentage: number;
+}
+
+// Chart Filter Interfaces
+export interface ChartFilters {
+    start_date?: string;
+    end_date?: string;
+    course_id?: number;
+    period?: 'week' | 'month' | 'quarter' | 'year';
+}
+
+// Additional Student Chart Data Interfaces
+export interface StudentDailyActivityData {
+    date: string;
+    total_time: number; // in minutes
+    sessions: number;
+    completed_questions: number;
+    avg_time_per_session: number;
+}
+
+export interface StudentWeeklyStreakData {
+    weekly_activity: {
+        week: string;
+        active_days: number;
+        streak_maintained: boolean;
+    }[];
+    current_streak: number;
+    longest_streak: number;
+    total_active_days: number;
+}
+
+export interface StudentScoreTrendData {
+    date: string;
+    average_score: number;
+    questions_completed: number;
+    perfect_scores: number;
+}
+
+export interface StudentTimeAnalysisData {
+    time_by_hour: {
+        hour: string;
+        total_time: number;
+        sessions: number;
+    }[];
+    time_by_day: {
+        day: string;
+        total_time: number;
+        sessions: number;
+    }[];
+    efficiency_analysis: {
+        time_spent: number;
+        success_rate: number;
+        attempts: number;
+    }[];
+    total_coding_time: number; // in hours
+    average_session_time: number; // in minutes
+}
+
+export interface StudentDifficultyProgressData {
+    difficulty: string;
+    completed: number;
+    total_attempted: number;
+    completion_rate: number;
+    average_score: number;
+}
+
+export interface StudentComparisonStatsData {
+    student_stats: {
+        completion_rate: number;
+        average_score: number;
+        total_time: number;
+        questions_completed: number;
+    };
+    class_average: {
+        completion_rate: number;
+        average_score: number;
+        total_time: number;
+        questions_completed: number;
+    };
+    ranking: number;
+    percentile: number;
+}
+
+export interface StudentAchievementSummaryData {
+    total_questions_completed: number;
+    total_courses_enrolled: number;
+    perfect_scores: number;
+    coding_time_hours: number;
+    current_streak: number;
+    milestones: {
+        name: string;
+        threshold: number;
+        achieved: boolean;
+    }[];
+    badges: {
+        name: string;
+        description: string;
+        icon: string;
+    }[];
+}
