@@ -180,7 +180,14 @@ export default function Register() {
                             ? t('pages.auth.register.ui.switch_to_light')
                             : t('pages.auth.register.ui.switch_to_dark')
                     }
-                    onClick={toggleDarkMode}
+                    onClick={(event) => {
+                        const rect = event.currentTarget.getBoundingClientRect();
+                        const origin = {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top + rect.height / 2,
+                        };
+                        toggleDarkMode(origin);
+                    }}
                     className='group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-white/20'
                 >
                     <div className='relative overflow-hidden'>
