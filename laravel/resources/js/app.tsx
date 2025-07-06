@@ -1,4 +1,5 @@
 import { Toaster as SonnerToaster } from '@/Components/UI/sonner';
+import { ThemeWaveTransitionStyles } from '@/Components/UI/theme-wave-transition';
 import { DarkModeProvider } from '@/Contexts/ThemeContext';
 import { createInertiaApp } from '@inertiajs/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -48,6 +49,7 @@ createInertiaApp({
             >
                 <QueryClientProvider client={queryClient}>
                     <DarkModeProvider>
+                        <ThemeWaveTransitionStyles />
                         <ConfirmationDialogProvider>
                             <SonnerToaster
                                 toastOptions={

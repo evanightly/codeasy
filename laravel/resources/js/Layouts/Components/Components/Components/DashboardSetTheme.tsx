@@ -8,7 +8,19 @@ import { useTheme } from '@/Contexts/ThemeContext';
 import { Check, SwatchBook } from 'lucide-react';
 
 export const DashboardSetTheme = () => {
-    const { isDarkMode, currentTheme, availableThemes, toggleDarkMode, setTheme } = useTheme();
+    const { currentTheme, availableThemes, setTheme } = useTheme();
+
+    const handleThemeChange = (theme: any, event: React.MouseEvent) => {
+        // Get the click position relative to the viewport
+        const rect = event.currentTarget.getBoundingClientRect();
+        const origin = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        setTheme(theme, origin);
+    };
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -22,7 +34,7 @@ export const DashboardSetTheme = () => {
                     <DropdownMenuItem
                         onClick={(e) => {
                             e.preventDefault();
-                            setTheme(theme);
+                            handleThemeChange(theme, e);
                         }}
                         key={theme.name}
                     >

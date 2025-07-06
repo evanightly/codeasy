@@ -2,16 +2,29 @@ import { useDarkMode } from '@/Contexts/ThemeContext';
 
 const DashboardDarkModeToggler = () => {
     const { isDarkMode, toggleDarkMode } = useDarkMode();
+
+    const handleToggle = (event: React.MouseEvent<HTMLLabelElement>) => {
+        // Get the click position relative to the viewport
+        const rect = event.currentTarget.getBoundingClientRect();
+        const origin = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        toggleDarkMode(origin);
+    };
+
     return (
         <>
             <input
                 type='checkbox'
-                onChange={toggleDarkMode}
+                readOnly
                 id='dn-toggle-bs'
                 className='peer absolute -left-[65rem]'
                 checked={isDarkMode}
             />
             <label
+                onClick={handleToggle}
                 htmlFor='dn-toggle-bs'
                 className='toggle relative inline-block h-6 w-12 cursor-pointer overflow-clip rounded-full border border-sky-300 bg-sky-300 transition-colors duration-200 peer-checked:border-blue-500 peer-checked:bg-blue-500 peer-disabled:cursor-not-allowed peer-checked:[&_.crater]:opacity-100 peer-checked:[&_.star-1]:left-2 peer-checked:[&_.star-1]:top-3 peer-checked:[&_.star-1]:h-0.5 peer-checked:[&_.star-1]:w-0.5 peer-checked:[&_.star-2]:left-4 peer-checked:[&_.star-2]:top-1.5 peer-checked:[&_.star-2]:h-1 peer-checked:[&_.star-2]:w-1 peer-checked:[&_.star-3]:left-4 peer-checked:[&_.star-3]:top-4 peer-checked:[&_.star-3]:h-0.5 peer-checked:[&_.star-3]:w-0.5 peer-checked:[&_.toggle-handler]:-left-4 peer-checked:[&_.toggle-handler]:translate-x-10 peer-checked:[&_.toggle-handler]:rotate-0 peer-checked:[&_.toggle-handler]:bg-amber-100'
             >
