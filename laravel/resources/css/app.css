@@ -162,63 +162,63 @@
         animation-duration: 0.6s;
         animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     /* Horizontal wave transition (right to left) */
-    [data-wave-direction="horizontal"] ::view-transition-old(root) {
+    [data-wave-direction='horizontal'] ::view-transition-old(root) {
         clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 0% 0%);
         animation-name: wave-exit-horizontal;
     }
-    
-    [data-wave-direction="horizontal"] ::view-transition-new(root) {
+
+    [data-wave-direction='horizontal'] ::view-transition-new(root) {
         clip-path: polygon(0% 0%, 0% 100%, 0% 100%, 0% 0%);
         animation-name: wave-enter-horizontal;
     }
-    
+
     /* Vertical wave transition (top to bottom) */
-    [data-wave-direction="vertical"] ::view-transition-old(root) {
+    [data-wave-direction='vertical'] ::view-transition-old(root) {
         clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%);
         animation-name: wave-exit-vertical;
     }
-    
-    [data-wave-direction="vertical"] ::view-transition-new(root) {
+
+    [data-wave-direction='vertical'] ::view-transition-new(root) {
         clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
         animation-name: wave-enter-vertical;
     }
-    
+
     /* Radial wave transition (default) */
     ::view-transition-old(root) {
         clip-path: circle(100% at var(--wave-x, 50%) var(--wave-y, 50%));
     }
-    
+
     ::view-transition-new(root) {
         clip-path: circle(0% at var(--wave-x, 50%) var(--wave-y, 50%));
         animation-name: wave-expand;
     }
-    
+
     @keyframes wave-expand {
         to {
             clip-path: circle(100% at var(--wave-x, 50%) var(--wave-y, 50%));
         }
     }
-    
+
     @keyframes wave-exit-horizontal {
         to {
             clip-path: polygon(0% 0%, 0% 100%, 0% 100%, 0% 0%);
         }
     }
-    
+
     @keyframes wave-enter-horizontal {
         to {
             clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 0% 0%);
         }
     }
-    
+
     @keyframes wave-exit-vertical {
         to {
             clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
         }
     }
-    
+
     @keyframes wave-enter-vertical {
         to {
             clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
@@ -252,7 +252,7 @@
         transition: none !important;
         animation: none !important;
     }
-    
+
     ::view-transition-old(root),
     ::view-transition-new(root) {
         animation-duration: 0.1s !important;
