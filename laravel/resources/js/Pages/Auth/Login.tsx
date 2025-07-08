@@ -348,8 +348,8 @@ export default function Login({
                                                 animate={{ opacity: 1, scale: 1 }}
                                             >
                                                 <div className='relative'>
-                                                    <div className='h-12 w-12 animate-spin rounded-full border-4 border-purple-300 border-t-purple-600'></div>
-                                                    <UserCheck className='absolute inset-0 m-auto h-6 w-6 text-tertiary' />
+                                                    <div className='h-12 w-12 animate-spin rounded-full border-4 border-primary/30 border-t-primary'></div>
+                                                    <UserCheck className='absolute inset-0 m-auto h-6 w-6 text-primary' />
                                                 </div>
                                                 <p className='text-lg font-semibold text-foreground'>
                                                     {t('pages.auth.login.messages.authenticating')}
@@ -420,7 +420,7 @@ export default function Login({
                                                             }
                                                             name='remember'
                                                             id='remember'
-                                                            className='border-foreground/50 data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600'
+                                                            className='border-foreground/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary'
                                                             checked={data.remember}
                                                         />
                                                         <label
