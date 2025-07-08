@@ -117,15 +117,12 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
             // Check if View Transitions API is supported
             if ('startViewTransition' in document) {
+                const waveX = `50%`;
+                const waveY = `50%`;
                 // Set CSS custom properties and direction for the animation
-                document.documentElement.style.setProperty(
-                    '--wave-x',
-                    `${(finalOrigin.x / window.innerWidth) * 100}%`,
-                );
-                document.documentElement.style.setProperty(
-                    '--wave-y',
-                    `${(finalOrigin.y / window.innerHeight) * 100}%`,
-                );
+                document.documentElement.style.setProperty('--wave-x', waveX);
+                document.documentElement.style.setProperty('--wave-y', waveY);
+
                 document.documentElement.setAttribute('data-wave-direction', 'horizontal');
 
                 document
