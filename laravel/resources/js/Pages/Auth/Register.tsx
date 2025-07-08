@@ -559,7 +559,7 @@ export default function Register() {
                                                 type='submit'
                                                 loading={registerMutation.isPending}
                                                 disabled={registerMutation.isPending}
-                                                className='bg-gradient-to-r from-purple-600 to-blue-600 px-8 text-white hover:from-purple-700 hover:to-blue-700'
+                                                className='bg-gradient-to-r from-primary to-secondary px-8 text-primary-foreground hover:from-primary/80 hover:to-secondary/80'
                                             >
                                                 <UserPlus className='mr-2 h-4 w-4' />
                                                 {t('pages.auth.register.buttons.register')}
