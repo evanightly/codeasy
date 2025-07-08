@@ -111,18 +111,52 @@ export default function Login({
                     passwordInput?.value &&
                     !typedManually &&
                     !autoSubmitted &&
-                    !autoLoginDisabled // Prevent auto login if disabled
+                    !autoLoginDisabled && // Prevent auto login if disabled
+                    !processing // Prevent auto login if already processing
                 ) {
                     setData('password', passwordInput.value);
                     setAutoSubmitted(true);
-                    const fakeEvent = { preventDefault: () => {} } as any;
-                    signIn(fakeEvent);
+
+                    // Use a more robust approach for auto-submit
+                    setTimeout(() => {
+                        if (!processing) {
+                            setStep('authing');
+                            post(route('login'), {
+                                onFinish: () => {
+                                    reset('password');
+                                    setAutoSubmitted(false);
+                                    setTypedManually(false);
+                                },
+                                onSuccess: () => {
+                                    toast.success(t('pages.auth.login.messages.success'));
+                                    setAutoLoginDisabled(false);
+                                },
+                                onError: () => {
+                                    setStep('passwordStep');
+                                    setAutoLoginDisabled(true);
+                                    toast.error(t('pages.auth.login.messages.error'));
+                                },
+                            });
+                        }
+                    }, 100);
                 }
             }, 500);
 
             return () => clearTimeout(autoFillTimer);
         }
-    }, [step, typedManually, autoSubmitted, data, setData, signIn, autoLoginDisabled]);
+    }, [
+        step,
+        typedManually,
+        autoSubmitted,
+        data,
+        setData,
+        processing,
+        autoLoginDisabled,
+        post,
+        reset,
+        t,
+        toast,
+    ]);
 
     // Reset autoLoginDisabled if user changes email
     useEffect(() => {
@@ -410,7 +444,7 @@ export default function Login({
                                                         <Button
                                                             onClick={handleNextEmail}
                                                             disabled={processing}
-                                                            className='bg-gradient-to-r from-purple-600 to-blue-600 px-6 text-white hover:from-purple-700 hover:to-blue-700'
+                                                            className='bg-gradient-to-r from-primary to-secondary px-6 text-primary-foreground hover:from-primary/80 hover:to-secondary/80'
                                                         >
                                                             {t('pages.auth.login.buttons.next')}
                                                             <ArrowRight className='ml-2 h-4 w-4' />
@@ -525,7 +559,7 @@ export default function Login({
                                                             type='submit'
                                                             loading={processing}
                                                             disabled={processing}
-                                                            className='bg-gradient-to-r from-purple-600 to-blue-600 px-8 text-white hover:from-purple-700 hover:to-blue-700'
+                                                            className='bg-gradient-to-r from-primary to-secondary px-6 text-primary-foreground hover:from-primary/80 hover:to-secondary/80'
                                                         >
                                                             <LogIn className='mr-2 h-4 w-4' />
                                                             {t('pages.auth.login.buttons.sign_in')}
