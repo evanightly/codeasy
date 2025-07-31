@@ -10,7 +10,7 @@ import SparklesText from '@/Components/UI/sparkles-text';
 import { TextAnimate } from '@/Components/UI/text-animate';
 import { useDarkMode } from '@/Contexts/ThemeContext';
 import { ROUTES } from '@/Support/Constants/routes';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import {
@@ -53,7 +53,7 @@ export default function Login({
     const passwordInputRef = useRef<HTMLInputElement>(null);
 
     // Use Inertia's useForm for proper Laravel session authentication
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, processing, errors, reset } = useForm({
         email: '',
         password: '',
         remember: false as boolean,
@@ -81,7 +81,7 @@ export default function Login({
         e.preventDefault();
         setStep('authing');
 
-        post(route('login'), {
+        router.post(route('login'), data, {
             onFinish: () => {
                 reset('password');
                 setAutoSubmitted(false);
@@ -121,7 +121,7 @@ export default function Login({
                     setTimeout(() => {
                         if (!processing) {
                             setStep('authing');
-                            post(route('login'), {
+                            router.post(route('login'), data, {
                                 onFinish: () => {
                                     reset('password');
                                     setAutoSubmitted(false);
@@ -152,7 +152,6 @@ export default function Login({
         setData,
         processing,
         autoLoginDisabled,
-        post,
         reset,
         t,
         toast,
