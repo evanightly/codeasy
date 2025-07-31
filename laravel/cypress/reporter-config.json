@@ -1,0 +1,17 @@
+{
+    "reporterEnabled": "cypress-multi-reporters",
+    "cypressMultiReportersReporterOptions": {
+        "reporterEnabled": "mochawesome,mocha-junit-reporter",
+        "mochawesomeReporterOptions": {
+            "reportDir": "reports/html",
+            "reportFilename": "[name]-[datetime]",
+            "overwrite": false,
+            "html": false,
+            "json": true,
+            "timestamp": "isoDateTime"
+        },
+        "mochaJunitReporterReporterOptions": {
+            "mochaFile": "reports/xml/test-results-[hash].xml"
+        }
+    }
+}

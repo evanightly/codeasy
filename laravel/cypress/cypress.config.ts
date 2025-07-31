@@ -18,6 +18,10 @@ export default defineConfig({
         screenshotsFolder: 'screenshots',
         videosFolder: 'videos',
         downloadsFolder: 'downloads',
+        // Test results output configuration
+        reporterOptions: {
+            configFile: 'reporter-config.json',
+        },
         // Disable Chrome web security for WebSocket handling
         chromeWebSecurity: false,
         setupNodeEvents(on, _config) {
