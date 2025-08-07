@@ -36,6 +36,7 @@ import {
     LearningMaterialQuestionTestCaseResource,
     LearningMaterialResource,
 } from '@/Support/Interfaces/Resources';
+import { exportOutputToPDF } from '@/Support/Utils/pdfExport';
 import { Link, router } from '@inertiajs/react';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import axios from 'axios';
@@ -50,6 +51,7 @@ import {
     Clock,
     Columns2,
     Columns3,
+    Download,
     FileQuestion,
     FileText,
     GripVertical,
@@ -477,6 +479,40 @@ export default function Workspace({
     // Toggle layout between stacked and side-by-side
     const toggleLayout = () => {
         setLayoutMode((prevMode) => (prevMode === 'stacked' ? 'side-by-side' : 'stacked'));
+    };
+
+    // Export output to PDF
+    const handleExportPDF = async () => {
+        try {
+            // Transform FastApiOutput to OutputItem format
+            const transformedOutput = output.map((item): any => {
+                if (item.type === 'test_stats') {
+                    return {
+                        type: 'test_stats',
+                        content:
+                            item.total_tests && item.success !== undefined
+                                ? `Test Results: ${item.success}/${item.total_tests} passed`
+                                : 'Test Results: Processing...',
+                    };
+                }
+
+                // Ensure content is always a string
+                return {
+                    ...item,
+                    content: item.content || '',
+                };
+            });
+
+            await exportOutputToPDF(code, transformedOutput, {
+                filename: `workspace-${(question.data.title || 'question').replace(/[^a-z0-9]/gi, '-')}`,
+                title: `${course.data.name} - ${material.data.title}`,
+                subtitle: `Question: ${question.data.title || 'Untitled'}`,
+            });
+            toast.success('PDF exported successfully!');
+        } catch (error) {
+            console.error('Export error:', error);
+            toast.error('Failed to export PDF. Please try again.');
+        }
     };
 
     // Handle navigation to next or previous question
@@ -1532,10 +1568,21 @@ export default function Workspace({
                                     defaultSize={layoutMode === 'stacked' ? 40 : 35}
                                 >
                                     <div className='flex h-full flex-col'>
-                                        <div className='border-b bg-muted/30 px-4 py-2'>
+                                        <div className='flex items-center justify-between border-b bg-muted/30 px-4 py-2'>
                                             <h3 className='font-medium'>
                                                 {t('pages.student_questions.workspace.output')}
                                             </h3>
+                                            {output.length > 0 && (
+                                                <Button
+                                                    variant='outline'
+                                                    size='sm'
+                                                    onClick={handleExportPDF}
+                                                    className='h-7 px-2 text-xs'
+                                                >
+                                                    <Download className='mr-1 h-3 w-3' />
+                                                    Export PDF
+                                                </Button>
+                                            )}
                                         </div>
                                         <div
                                             data-testid='output-panel'

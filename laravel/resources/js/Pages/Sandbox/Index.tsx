@@ -7,6 +7,7 @@ import { SparkleHover } from '@/Components/UI/sparkle-hover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/UI/tooltip';
 import { useDarkMode } from '@/Contexts/ThemeContext';
 import { ProgrammingLanguageEnum } from '@/Support/Enums/programmingLanguageEnum';
+import { exportOutputToPDF } from '@/Support/Utils/pdfExport';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -19,6 +20,7 @@ import {
     Code2,
     Columns2,
     Columns3,
+    Download,
     Ellipsis,
     FlaskConical,
     Github,
@@ -29,6 +31,7 @@ import {
     Share2,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 // Default code sample that looks impressive
 const DEFAULT_CODE = `import matplotlib.pyplot as plt
@@ -114,6 +117,116 @@ plt.grid(axis='y', alpha=0.3)
 # Show the plot
 plt.tight_layout()
 plt.show()`,
+    },
+    {
+        name: 'Random Forest Classifier',
+        icon: <Brain className='h-5 w-5' />,
+        code: `import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Generate synthetic dataset for classification
+print("Generating synthetic dataset...")
+X, y = make_classification(
+    n_samples=1000,
+    n_features=10,
+    n_informative=8,
+    n_redundant=2,
+    n_clusters_per_class=1,
+    random_state=42
+)
+
+# Convert to DataFrame for better handling
+feature_names = [f'Feature_{i+1}' for i in range(X.shape[1])]
+df = pd.DataFrame(X, columns=feature_names)
+df['Target'] = y
+
+print(f"Dataset shape: {df.shape}")
+print(f"Target distribution:")
+print(df['Target'].value_counts())
+
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+print(f"\\nTraining set size: {X_train.shape[0]}")
+print(f"Test set size: {X_test.shape[0]}")
+
+# Create and train Random Forest model
+print("\\nTraining Random Forest Classifier...")
+rf_classifier = RandomForestClassifier(
+    n_estimators=100,
+    max_depth=10,
+    min_samples_split=5,
+    min_samples_leaf=2,
+    random_state=42
+)
+
+# Train the model
+rf_classifier.fit(X_train, y_train)
+
+# Make predictions
+y_pred = rf_classifier.predict(X_test)
+y_pred_proba = rf_classifier.predict_proba(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f"\\nModel Performance:")
+print(f"Accuracy: {accuracy:.4f}")
+
+print("\\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+# Feature importance
+feature_importance = pd.DataFrame({
+    'Feature': feature_names,
+    'Importance': rf_classifier.feature_importances_
+}).sort_values('Importance', ascending=False)
+
+print("\\nTop 5 Most Important Features:")
+print(feature_importance.head())
+
+# Visualizations
+fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+
+# 1. Feature Importance Plot
+axes[0, 0].bar(feature_importance['Feature'][:5], feature_importance['Importance'][:5])
+axes[0, 0].set_title('Top 5 Feature Importances')
+axes[0, 0].set_xlabel('Features')
+axes[0, 0].set_ylabel('Importance')
+axes[0, 0].tick_params(axis='x', rotation=45)
+
+# 2. Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=axes[0, 1])
+axes[0, 1].set_title('Confusion Matrix')
+axes[0, 1].set_xlabel('Predicted')
+axes[0, 1].set_ylabel('Actual')
+
+# 3. Prediction Probability Distribution
+axes[1, 0].hist(y_pred_proba[:, 1], bins=20, alpha=0.7, color='skyblue')
+axes[1, 0].set_title('Prediction Probability Distribution (Class 1)')
+axes[1, 0].set_xlabel('Probability')
+axes[1, 0].set_ylabel('Frequency')
+
+# 4. Feature Correlation Heatmap (top features)
+top_features = feature_importance.head(5)['Feature'].tolist()
+corr_matrix = df[top_features].corr()
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0, ax=axes[1, 1])
+axes[1, 1].set_title('Top Features Correlation Matrix')
+
+plt.tight_layout()
+plt.show()
+
+print("\\nRandom Forest training and evaluation completed!")
+print(f"Model trained with {rf_classifier.n_estimators} trees")
+print(f"Out-of-bag score: {rf_classifier.oob_score_:.4f}" if hasattr(rf_classifier, 'oob_score_') else "OOB score not available")`,
     },
     //     {
     //         name: 'Factorial Calculator',
@@ -303,6 +416,21 @@ export default function Index() {
         setLayoutMode((prevMode) => (prevMode === 'stacked' ? 'side-by-side' : 'stacked'));
     };
 
+    // Export output to PDF
+    const handleExportPDF = async () => {
+        try {
+            await exportOutputToPDF(code, output, {
+                filename: 'python-sandbox-output',
+                title: 'Python Sandbox - Code Execution Output',
+                subtitle: 'Interactive Python Code Editor Results',
+            });
+            toast.success('PDF exported successfully!');
+        } catch (error) {
+            console.error('Export error:', error);
+            toast.error('Failed to export PDF. Please try again.');
+        }
+    };
+
     return (
         <>
             <Head title='Python Sandbox - Interactive Code Editor' />
@@ -428,6 +556,14 @@ export default function Index() {
                                             : 'Stacked View'}
                                     </span>
                                 </button>
+                                <button
+                                    onClick={handleExportPDF}
+                                    disabled={output.length === 0}
+                                    className='flex w-full items-center space-x-2 rounded-md px-3 py-2 text-sm hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50'
+                                >
+                                    <Download className='h-5 w-5' />
+                                    <span>Export PDF</span>
+                                </button>
                             </div>
                         </div>
 
@@ -551,19 +687,34 @@ export default function Index() {
                                         <h2 className='flex items-center text-lg font-semibold'>
                                             <Code2 className='mr-2 h-5 w-5' /> Output
                                         </h2>
-                                        {output.length > 0 && !waitingForInput && (
-                                            <Button
-                                                variant='outline'
-                                                size='sm'
-                                                onClick={() => {
-                                                    setOutput([]);
-                                                    setExecutionId(null);
-                                                    setWaitingForInput(false);
-                                                }}
-                                            >
-                                                Clear
-                                            </Button>
-                                        )}
+                                        <div className='flex items-center space-x-2'>
+                                            {output.length > 0 && (
+                                                <>
+                                                    <Button
+                                                        variant='outline'
+                                                        size='sm'
+                                                        onClick={handleExportPDF}
+                                                        className='text-xs'
+                                                    >
+                                                        <Download className='mr-1 h-3 w-3' />
+                                                        Export PDF
+                                                    </Button>
+                                                    {!waitingForInput && (
+                                                        <Button
+                                                            variant='outline'
+                                                            size='sm'
+                                                            onClick={() => {
+                                                                setOutput([]);
+                                                                setExecutionId(null);
+                                                                setWaitingForInput(false);
+                                                            }}
+                                                        >
+                                                            Clear
+                                                        </Button>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div className='max-h-[700px] overflow-auto rounded-lg border bg-muted/30 p-4'>
