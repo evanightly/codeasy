@@ -255,9 +255,9 @@ export function MaterialClassificationDetails({
                                         {/* Cost criteria */}
                                         <th className='py-2 text-center'>compile_count</th>
                                         <th className='py-2 text-center'>coding_time</th>
-                                        <th className='py-2 text-center'>trial_status</th>
                                         {/* Benefit criteria */}
                                         <th className='py-2 text-center'>completion_status</th>
+                                        <th className='py-2 text-center'>trial_status</th>
                                         <th className='py-2 text-center'>variable_count</th>
                                         <th className='py-2 text-center'>function_count</th>
                                         <th className='py-2 text-center'>test_case_rate</th>
@@ -270,8 +270,8 @@ export function MaterialClassificationDetails({
                                         <th className='py-1 text-center text-destructive'>
                                             Cost ↓
                                         </th>
-                                        <th className='py-1 text-center text-destructive'>
-                                            Cost ↓
+                                        <th className='py-1 text-center text-success'>
+                                            {t('pages.classification.labels.benefit_up')}
                                         </th>
                                         <th className='py-1 text-center text-success'>
                                             {t('pages.classification.labels.benefit_up')}
@@ -351,10 +351,10 @@ export function MaterialClassificationDetails({
                                                             coding_time
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            trial_status
+                                                            completion_status
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            completion_status
+                                                            trial_status
                                                         </th>
                                                         <th className='py-1 text-center'>
                                                             variable_count
@@ -409,10 +409,10 @@ export function MaterialClassificationDetails({
                                                             coding_time
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            trial_status
+                                                            completion_status
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            completion_status
+                                                            trial_status
                                                         </th>
                                                         <th className='py-1 text-center'>
                                                             variable_count
@@ -476,10 +476,10 @@ export function MaterialClassificationDetails({
                                                             coding_time
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            trial_status
+                                                            completion_status
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            completion_status
+                                                            trial_status
                                                         </th>
                                                         <th className='py-1 text-center'>
                                                             variable_count
@@ -534,10 +534,10 @@ export function MaterialClassificationDetails({
                                                             coding_time
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            trial_status
+                                                            completion_status
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            completion_status
+                                                            trial_status
                                                         </th>
                                                         <th className='py-1 text-center'>
                                                             variable_count
@@ -603,10 +603,10 @@ export function MaterialClassificationDetails({
                                                             coding_time
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            trial_status
+                                                            completion_status
                                                         </th>
                                                         <th className='py-1 text-center'>
-                                                            completion_status
+                                                            trial_status
                                                         </th>
                                                         <th className='py-1 text-center'>
                                                             variable_count

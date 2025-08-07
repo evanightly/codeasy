@@ -167,7 +167,7 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
                         'compile_count' => $studentScore ? $studentScore->compile_count : 0, // cost
                         'coding_time' => $codingTimeInMinutes, // cost - now in minutes instead of seconds
                         'completion_status' => $studentScore ? (int) $studentScore->completion_status : 0, // benefit
-                        'trial_status' => $studentScore ? (int) $studentScore->trial_status : 0, // cost
+                        'trial_status' => $studentScore ? (int) $studentScore->trial_status : 0, // benefit
                         'variable_count' => $executionResult ? $executionResult->variable_count : 0, // benefit
                         'function_count' => $executionResult ? $executionResult->function_count : 0, // benefit
                         'test_case_complete_count' => $studentScore ? $studentScore->test_case_complete_count : 0, // benefit

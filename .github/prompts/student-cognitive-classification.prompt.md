@@ -13,7 +13,7 @@
 5. You basically need 2 model that holds different data
    - [StudentScore](laravel/app/Models/StudentScore.php)
     - completion_status: benefit
-    - trial_status: cost
+    - trial_status: benefit
     - compile_count: cost
    - [ExecutionResult](laravel/app/Models/ExecutionResult.php)
     - variable_count: benefit

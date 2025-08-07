@@ -615,18 +615,18 @@ def calculate_topsis_by_material(decision_matrix, question_count):
         # Define criteria types for each metric (benefits and costs)
         # Each row is a question with metrics in this order: 
         # compile_count(cost), coding_time(cost), completion_status(benefit), 
-        # trial_status(cost), variable_count(benefit), function_count(benefit),
+        # trial_status(benefit), variable_count(benefit), function_count(benefit),
         # test_case_completion_rate(benefit)
-        benefits = [2, 4, 5, 6]  # completion_status, variable_count, function_count, test_case_completion_rate
-        costs = [0, 1, 3]     # compile_count, coding_time, trial_status
+        benefits = [2, 3, 4, 5, 6]  # completion_status, trial_status, variable_count, function_count, test_case_completion_rate
+        costs = [0, 1]     # compile_count, coding_time
         
         # Convert to numpy array for calculations
         decision_matrix = np.array(decision_matrix)
         
         calculation_details = {
             "criteria": {
-                "benefits": ["completion_status", "variable_count", "function_count", "test_case_completion_rate"],
-                "costs": ["compile_count", "coding_time", "trial_status"]
+                "benefits": ["completion_status", "trial_status", "variable_count", "function_count", "test_case_completion_rate"],
+                "costs": ["compile_count", "coding_time"]
             },
             "decision_matrix": decision_matrix.tolist(),
             "steps": []
@@ -794,22 +794,16 @@ def calculate_topsis(metrics_list):
         
         # Updated order: compile, coding_time, completion_status, trial_status, variable_count, function_count
         costs = ['compile_count', 'coding_time']
-        benefits = ['completion_status']
-        costs.append('trial_status')
-        benefits.extend(['variable_count', 'function_count'])
+        benefits = ['completion_status', 'trial_status', 'variable_count', 'function_count']
         
         decision_matrix = []
         for metrics in metrics_list:
             row = []
             # Add costs first
-            for cost in costs[:2]:  # compile_count and coding_time
+            for cost in costs:  # compile_count and coding_time
                 row.append(float(metrics.get(cost, 0)))
             # Then benefits
-            row.append(float(metrics.get('completion_status', 0)))
-            # Then costs
-            row.append(float(metrics.get('trial_status', 0)))
-            # Then remaining benefits
-            for benefit in benefits[1:]:  # variable_count and function_count
+            for benefit in benefits:  # completion_status, trial_status, variable_count, function_count
                 row.append(float(metrics.get(benefit, 0)))
                 
             decision_matrix.append(row)
@@ -820,8 +814,8 @@ def calculate_topsis(metrics_list):
         decision_matrix = np.array(decision_matrix)
         calculation_details = {
             "criteria": {
-                "benefits": ['completion_status', 'variable_count', 'function_count'],
-                "costs": ['compile_count', 'coding_time', 'trial_status']
+                "benefits": ['completion_status', 'trial_status', 'variable_count', 'function_count'],
+                "costs": ['compile_count', 'coding_time']
             },
             "decision_matrix": decision_matrix.tolist(),
             "steps": []
@@ -868,13 +862,15 @@ def calculate_topsis(metrics_list):
         })
         ideal_best = np.zeros(num_criteria)
         ideal_worst = np.zeros(num_criteria)
-        for i in range(len(benefits)):
-            ideal_best[i] = np.max(weighted_matrix[:, i])
-            ideal_worst[i] = np.min(weighted_matrix[:, i])
+        # First handle costs (compile_count, coding_time)
         for i in range(len(costs)):
-            j = i + len(benefits)
-            ideal_best[j] = np.min(weighted_matrix[:, j])
-            ideal_worst[j] = np.max(weighted_matrix[:, j])
+            ideal_best[i] = np.min(weighted_matrix[:, i])
+            ideal_worst[i] = np.max(weighted_matrix[:, i])
+        # Then handle benefits (completion_status, trial_status, variable_count, function_count)
+        for i in range(len(benefits)):
+            j = i + len(costs)
+            ideal_best[j] = np.max(weighted_matrix[:, j])
+            ideal_worst[j] = np.min(weighted_matrix[:, j])
         calculation_details["steps"].append({
             "name": "Determine Ideal Solutions",
             "description": "Best values (max for benefits, min for costs) and worst values (min for benefits, max for costs)",
@@ -955,8 +951,8 @@ def calculate_neural_network(metrics_list):
             return "Remember", 0.0
             
         # Extract benefit and cost criteria
-        benefits = ['completion_status', 'variable_count', 'function_count']
-        costs = ['trial_status', 'compile_count', 'coding_time']
+        benefits = ['completion_status', 'trial_status', 'variable_count', 'function_count']
+        costs = ['compile_count', 'coding_time']
         
         # Create feature matrix
         X = []
