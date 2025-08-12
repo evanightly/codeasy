@@ -57,6 +57,10 @@ case "$1" in
     echo "Restarting containers..."
     docker compose -f docker-compose.dev.yml --env-file laravel/.env restart
     ;;
+  "restart-prod")
+    echo "Restarting containers..."
+    docker compose -f docker-compose.prod.yml --env-file laravel/.env restart
+    ;;
   "logs")
     service=${2:-laravel}
     echo "Showing logs for $service..."
@@ -92,6 +96,7 @@ case "$1" in
     echo "  build-prod   Build production images"
     echo "  down         Stop all containers"
     echo "  restart      Restart all containers"
+    echo "  restart-prod Restart production containers"
     echo "  logs [svc]   Show logs (default: laravel)"
     echo "  shell [svc]  Open shell (default: laravel)"
     echo "  artisan      Run Laravel Artisan commands"
