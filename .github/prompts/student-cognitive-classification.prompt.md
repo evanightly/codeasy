@@ -114,3 +114,25 @@ Represent material questions
     Note: since this is breaking changes, you need to adjust the affected service files, like student code compilation and student cognitive calculation, you have to work on the [ExecutionResultService](laravel/app/Services/ExecutionResultService.php) or related services process such as classification calculation in [StudentCognitiveClassificationService](laravel/app/Services/StudentCognitiveClassificationService.php) 
 2. Add history table to hold the classification result [student_course_cognitive_classification_histories](laravel/database/migrations/2025_05_20_134237_create_student_course_cognitive_classification_histories_table.php)
     This table will hold the history of the classification result, so you can track the changes over time, you may adjust it if the mechanism is not suitable for your needs
+
+## Revision 3
+### Brief
+There will be new classification calculation, the breaking changes will be like this:
+1. each test case has its own cognitive levels, the cognitive level would be level 1 - 6, each level represent bloom taxonomy level
+2. cognitive level in each test case will be different and based on the specific learning objectives of the test case, it could be one or more than one cognitive level, for example:
+`self.assertIn("read_csv", student_code)` 
+the code above has C1, and C2, the explanation is as follows:
+C1: Remembering - The student needs to remember the syntax of the `read_csv` function.
+C2: Understanding - The student needs to understand how the `read_csv` function works and what it does.
+3. If the student passed those test case, the student will automatically hold cognitive level that defined in the respective test case
+4. The classification process in each student is explained below:
+- Material Level:
+each material will be calculated based on the average cognitive level of all test cases in that material
+- Course Level:
+each material will be calculated based on the average cognitive level of all materials in that course
+
+### Implementation Steps
+1. update LearningMaterialQuestionTestCase and learning_material_question_test_cases migration to include cognitive_levels as a json
+2. update edit form for LearningMaterialQuestionTestCase and learning_material_question_test_cases to support cognitive_levels, tips: you can use C1 - C6 as a checkbox
+3. when the admin execute classification, the system will ask whether use cognitive level test case based or the one that defined, note: this process is crucial
+4. update the classification logic to accommodate the new cognitive_levels structure
