@@ -132,7 +132,20 @@ each material will be calculated based on the average cognitive level of all tes
 each material will be calculated based on the average cognitive level of all materials in that course
 
 ### Implementation Steps
-1. update LearningMaterialQuestionTestCase and learning_material_question_test_cases migration to include cognitive_levels as a json
-2. update edit form for LearningMaterialQuestionTestCase and learning_material_question_test_cases to support cognitive_levels, tips: you can use C1 - C6 as a checkbox
-3. when the admin execute classification, the system will ask whether use cognitive level test case based or the one that defined, note: this process is crucial
-4. update the classification logic to accommodate the new cognitive_levels structure
+1. update LearningMaterialQuestionTestCase and learning_material_question_test_cases migration to include cognitive_levels as a json ✔️
+2. update execution_results to store the achieved test case ids as a json
+3. update edit form for LearningMaterialQuestionTestCase and learning_material_question_test_cases to support cognitive_levels, tips: you can use C1 - C6 as a checkbox ✔️
+4. (crucial) add a page to bulk changes all test case in a course ✔️
+5. when the admin execute classification, the system will ask whether use cognitive level test case based or the one that defined (✔️ using dropdown), note: this process is crucial, after that the process is explained below
+    A. Student test assertion, this is to define which test case is achieved by student:
+        a1. Get each student final score, you can search it within StudentScore completed_execution_result_id, after that you can look up the execution_id and get the student score
+        a2. After you get the student code, perform test assertion in each code to get which test case is completed
+        a3. After that, you will get which test case id that student completed, store that in the execution_result under achieved_test_case column you created in the number 2
+    B. Student cognitive level calculation, this is to define the course cognitive_level and material cognitive_level:
+        b1. Get the cognitive level of each test case from the LearningMaterialQuestionTestCase model in each materials
+        b2. Map the achieved test case ids from execution result, and count which cognitive levels are achieved by the student and adding average and the highest cognitive_level achieved by total cognitive_levels that material has
+        b3. To get the course classification result, use the average and the highest cognitive level of all materials in that course
+        b4. Just like topsis classification does, do record all classification steps so the user will know how to interpret the results, and it will show perfectly in the StudentCourseCognitiveClassificationDetails.tsx
+        b5. Store complete calculation in the student_course_cognitive_classification_histories from student, student code, test case, until final course classification result
+    Note: this process may take long time, make sure to log the progress
+6. update the classification logic to accommodate the new cognitive_levels structure
