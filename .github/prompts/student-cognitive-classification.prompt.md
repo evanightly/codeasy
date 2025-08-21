@@ -131,6 +131,19 @@ each material will be calculated based on the average cognitive level of all tes
 - Course Level:
 each material will be calculated based on the average cognitive level of all materials in that course
 
+### Study Case
+Student: A
+Modul: Introduction
+Cognitive Level | Achieved Cognitive Level | Total Cognitive Level in Material | Average
+C1 | 1 | 5 | 0.2
+C2 | 5 | 10 | 0.5
+C3 | 5 | 10 | 0.5
+C4 | 2 | 8 | 0.25
+C5 | 1 | 5 | 0.2
+C6 | 0 | 3 | 0.0
+
+Final Result in a material: C3 (Apply), Average: 0.5 (Highest rate and highest cognitive level)
+
 ### Implementation Steps
 1. update LearningMaterialQuestionTestCase and learning_material_question_test_cases migration to include cognitive_levels as a json ✔️
 2. update execution_results to store the achieved test case ids as a json
@@ -149,3 +162,16 @@ each material will be calculated based on the average cognitive level of all mat
         b5. Store complete calculation in the student_course_cognitive_classification_histories from student, student code, test case, until final course classification result
     Note: this process may take long time, make sure to log the progress
 6. update the classification logic to accommodate the new cognitive_levels structure
+7. About the detail page in each students:
+7a. (Material Level) MaterialClassifications.tsx and ClassificationDetails.tsx need to adjust:
+    - Material information (title, ID, etc.)
+    - Cognitive levels for each test case in the material
+    - Achieved cognitive levels for each test case in the material
+    - Overall cognitive level for the material
+    - History of cognitive classification steps for the material
+7b. (Course Level) StudentCourseCognitiveClassificationDetails.tsx need to adjust:
+    - Student information (name, ID, etc.)
+    - Course information (title, ID, etc.)
+    - Material classifications with their cognitive levels
+    - Overall cognitive level for the course
+    - History of cognitive classification steps
