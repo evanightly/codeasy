@@ -33,7 +33,14 @@ class LearningMaterialQuestionTestCaseController extends Controller implements H
                 PermissionEnum::LEARNING_MATERIAL_READ->value,
                 PermissionEnum::LEARNING_MATERIAL_QUESTION_READ->value,
                 PermissionEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_READ->value,
-            ], ['index', 'show', 'create', 'edit']),
+            ], ['index', 'show', 'create', 'edit', 'allTestCases']),
+
+            self::createPermissionMiddleware([
+                PermissionEnum::COURSE_UPDATE->value,
+                PermissionEnum::LEARNING_MATERIAL_UPDATE->value,
+                PermissionEnum::LEARNING_MATERIAL_QUESTION_UPDATE->value,
+                PermissionEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_UPDATE->value,
+            ], ['bulkUpdateCognitiveLevels']),
         ];
     }
 
@@ -187,5 +194,63 @@ class LearningMaterialQuestionTestCaseController extends Controller implements H
         //     'learningMaterial' => $learningMaterial,
         //     'question' => $question,
         // ]);
+    }
+
+    /**
+     * Display all test cases in a course with their cognitive levels
+     */
+    public function allTestCases(Course $course, Request $request) {
+        $testCases = LearningMaterialQuestionTestCase::whereHas('learning_material_question.learning_material', function ($query) use ($course) {
+            $query->where('course_id', $course->id);
+        })
+            ->with([
+                'learning_material_question' => function ($query) {
+                    $query->select('id', 'title', 'learning_material_id');
+                },
+                'learning_material_question.learning_material' => function ($query) {
+                    $query->select('id', 'title', 'course_id');
+                },
+            ])
+            ->get();
+
+        return Inertia::render('Course/TestCaseCognitiveLevels/Index', [
+            'course' => new CourseResource($course),
+            'testCases' => LearningMaterialQuestionTestCaseResource::collection($testCases),
+        ]);
+    }
+
+    /**
+     * Bulk update cognitive levels for multiple test cases
+     * TODO: refactor using service
+     */
+    public function bulkUpdateCognitiveLevels(Course $course, Request $request) {
+        $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|integer|exists:learning_material_question_test_cases,id',
+            'updates.*.cognitive_levels' => 'nullable|array',
+            'updates.*.cognitive_levels.*' => 'string|in:C1,C2,C3,C4,C5,C6',
+        ]);
+
+        $updates = collect($request->input('updates'));
+
+        foreach ($updates as $update) {
+            $testCase = LearningMaterialQuestionTestCase::whereHas('learning_material_question.learning_material', function ($query) use ($course) {
+                $query->where('course_id', $course->id);
+            })->findOrFail($update['id']);
+
+            $testCase->update([
+                'cognitive_levels' => $update['cognitive_levels'] ?? [],
+            ]);
+        }
+
+        if ($this->ajax()) {
+            return response()->json([
+                'message' => 'Cognitive levels updated successfully',
+                'updated_count' => $updates->count(),
+            ]);
+        }
+
+        return redirect()->route('courses.test-cases.cognitive-levels', $course)
+            ->with('success', 'Cognitive levels updated successfully');
     }
 }

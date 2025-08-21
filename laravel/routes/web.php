@@ -136,6 +136,12 @@ Route::middleware('auth')->group(function () {
 
     // Context-specific nested resources (viewing only)
     Route::prefix('courses/{course}')->name('courses.')->group(function () {
+        // Course-wide test cases cognitive levels management
+        Route::get('test-cases-cognitive-levels', [CourseLearningMaterialQuestionTestCaseController::class, 'allTestCases'])
+            ->name('test-cases.cognitive-levels');
+        Route::patch('test-cases-cognitive-levels/bulk-update', [CourseLearningMaterialQuestionTestCaseController::class, 'bulkUpdateCognitiveLevels'])
+            ->name('test-cases.cognitive-levels.bulk-update');
+            
         // Learning Materials in context of a Course (view only)
         Route::resource('learning-materials', CourseLearningMaterialController::class)
             ->only(['index', 'show', 'create', 'edit']);

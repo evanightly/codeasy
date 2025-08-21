@@ -6,6 +6,7 @@ import { TestCaseExamples } from '@/Components/TestCaseExamples';
 import { TestCaseInfoTooltip } from '@/Components/TestCaseInfoTooltip';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
+import { Checkbox } from '@/Components/UI/checkbox';
 import {
     Form,
     FormControl,
@@ -32,6 +33,10 @@ import {
     ProgrammingLanguageEnum,
     programmingLanguageLabels,
 } from '@/Support/Enums/programmingLanguageEnum';
+import {
+    CognitiveLevelEnum,
+    cognitiveLevelLabels,
+} from '@/Support/Enums/cognitiveLevelEnum';
 import {
     CourseResource,
     LearningMaterialQuestionResource,
@@ -90,6 +95,7 @@ export default function Create({ question, course, learningMaterial }: Props) {
         language: z.nativeEnum(ProgrammingLanguageEnum).default(ProgrammingLanguageEnum.PYTHON),
         hidden: z.boolean().default(false),
         active: z.boolean().default(true),
+        cognitive_levels: z.array(z.nativeEnum(CognitiveLevelEnum)).optional(),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -102,6 +108,7 @@ export default function Create({ question, course, learningMaterial }: Props) {
             language: ProgrammingLanguageEnum.PYTHON,
             hidden: false,
             active: true,
+            cognitive_levels: [],
         },
     });
 
@@ -149,6 +156,13 @@ export default function Create({ question, course, learningMaterial }: Props) {
         formData.append('language', values.language);
         formData.append('hidden', values.hidden ? '1' : '0');
         formData.append('active', values.active ? '1' : '0');
+        
+        // Handle cognitive levels
+        if (values.cognitive_levels && values.cognitive_levels.length > 0) {
+            values.cognitive_levels.forEach((level, index) => {
+                formData.append(`cognitive_levels[${index}]`, level);
+            });
+        }
 
         // Handle file upload
         if (values.expected_output_file instanceof File) {
@@ -540,6 +554,60 @@ export default function Create({ question, course, learningMaterial }: Props) {
                                     </FormItem>
                                 )}
                                 name='active'
+                                control={form.control}
+                            />
+
+                            <FormField
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            {t(
+                                                'pages.learning_material_question_test_case.common.fields.cognitive_levels',
+                                                { defaultValue: 'Cognitive Levels' },
+                                            )}
+                                        </FormLabel>
+                                        <FormDescription>
+                                            {t(
+                                                'pages.learning_material_question_test_case.common.help.cognitive_levels',
+                                                {
+                                                    defaultValue:
+                                                        'Select the cognitive levels that this test case evaluates based on Bloom\'s taxonomy.',
+                                                },
+                                            )}
+                                        </FormDescription>
+                                        <div className='grid grid-cols-2 gap-4 rounded-lg border p-4'>
+                                            {Object.values(CognitiveLevelEnum).map((level) => (
+                                                <div
+                                                    key={level}
+                                                    className='flex items-center space-x-2'
+                                                >
+                                                    <Checkbox
+                                                        onCheckedChange={(checked) => {
+                                                            const currentLevels = field.value || [];
+                                                            if (checked) {
+                                                                field.onChange([...currentLevels, level]);
+                                                            } else {
+                                                                field.onChange(
+                                                                    currentLevels.filter((l) => l !== level),
+                                                                );
+                                                            }
+                                                        }}
+                                                        id={`cognitive-level-${level}`}
+                                                        checked={field.value?.includes(level) || false}
+                                                    />
+                                                    <label
+                                                        htmlFor={`cognitive-level-${level}`}
+                                                        className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                                                    >
+                                                        {cognitiveLevelLabels[level]}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                                name='cognitive_levels'
                                 control={form.control}
                             />
 

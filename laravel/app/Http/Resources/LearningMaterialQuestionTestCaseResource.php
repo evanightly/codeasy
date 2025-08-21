@@ -26,6 +26,7 @@ class LearningMaterialQuestionTestCaseResource extends JsonResource {
             'hidden' => $this->hidden,
             'active' => $this->active,
             'learning_material_question' => LearningMaterialQuestionResource::make($this->whenLoaded('learning_material_question')),
+            'cognitive_levels' => $this->cognitive_levels,
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
         ];

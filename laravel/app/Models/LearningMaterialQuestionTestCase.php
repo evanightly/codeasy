@@ -27,6 +27,7 @@ class LearningMaterialQuestionTestCase extends Model {
         'language', // Programming language defined in the CodeEditor.tsx
         'hidden',
         'active',
+        'cognitive_levels',
     ];
 
     /**
@@ -38,6 +39,7 @@ class LearningMaterialQuestionTestCase extends Model {
         'language' => ProgrammingLanguageEnum::class,
         'hidden' => 'boolean',
         'active' => 'boolean',
+        'cognitive_levels' => 'array',
     ];
 
     /**

@@ -6,6 +6,7 @@ import { TestCaseExamples } from '@/Components/TestCaseExamples';
 import { TestCaseInfoTooltip } from '@/Components/TestCaseInfoTooltip';
 import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
+import { Checkbox } from '@/Components/UI/checkbox';
 import {
     Form,
     FormControl,
@@ -28,6 +29,7 @@ import { Textarea } from '@/Components/UI/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { learningMaterialQuestionTestCaseServiceHook } from '@/Services/learningMaterialQuestionTestCaseServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { CognitiveLevelEnum, cognitiveLevelLabels } from '@/Support/Enums/cognitiveLevelEnum';
 import {
     ProgrammingLanguageEnum,
     programmingLanguageLabels,
@@ -92,6 +94,7 @@ export default function Edit({ course, learningMaterial, question, testCase }: P
         hidden: z.boolean().default(false),
         active: z.boolean().default(true),
         language: z.nativeEnum(ProgrammingLanguageEnum).default(ProgrammingLanguageEnum.PYTHON),
+        cognitive_levels: z.array(z.nativeEnum(CognitiveLevelEnum)).optional(),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -105,6 +108,7 @@ export default function Edit({ course, learningMaterial, question, testCase }: P
             active: testCase.active,
             language:
                 (testCase.language as ProgrammingLanguageEnum) || ProgrammingLanguageEnum.PYTHON,
+            cognitive_levels: (testCase.cognitive_levels as CognitiveLevelEnum[]) || [],
         },
     });
 
@@ -132,6 +136,7 @@ export default function Edit({ course, learningMaterial, question, testCase }: P
                 language:
                     (testCase.language as ProgrammingLanguageEnum) ||
                     ProgrammingLanguageEnum.PYTHON,
+                cognitive_levels: (testCase.cognitive_levels as CognitiveLevelEnum[]) || [],
             });
         }
     }, [testCase, form]);
@@ -186,6 +191,13 @@ export default function Edit({ course, learningMaterial, question, testCase }: P
         formData.append('language', values.language);
         formData.append('hidden', values.hidden ? '1' : '0');
         formData.append('active', values.active ? '1' : '0');
+
+        // Handle cognitive levels
+        if (values.cognitive_levels && values.cognitive_levels.length > 0) {
+            values.cognitive_levels.forEach((level, index) => {
+                formData.append(`cognitive_levels[${index}]`, level);
+            });
+        }
 
         if (values.expected_output_file instanceof File) {
             formData.append('expected_output_file', values.expected_output_file);
@@ -598,6 +610,67 @@ export default function Edit({ course, learningMaterial, question, testCase }: P
                                     </FormItem>
                                 )}
                                 name='active'
+                                control={form.control}
+                            />
+
+                            <FormField
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            {t(
+                                                'pages.learning_material_question_test_case.common.fields.cognitive_levels',
+                                                { defaultValue: 'Cognitive Levels' },
+                                            )}
+                                        </FormLabel>
+                                        <FormDescription>
+                                            {t(
+                                                'pages.learning_material_question_test_case.common.help.cognitive_levels',
+                                                {
+                                                    defaultValue:
+                                                        "Select the cognitive levels that this test case evaluates based on Bloom's taxonomy.",
+                                                },
+                                            )}
+                                        </FormDescription>
+                                        <div className='grid grid-cols-2 gap-4 rounded-lg border p-4'>
+                                            {Object.values(CognitiveLevelEnum).map((level) => (
+                                                <div
+                                                    key={level}
+                                                    className='flex items-center space-x-2'
+                                                >
+                                                    <Checkbox
+                                                        onCheckedChange={(checked) => {
+                                                            const currentLevels = field.value || [];
+                                                            if (checked) {
+                                                                field.onChange([
+                                                                    ...currentLevels,
+                                                                    level,
+                                                                ]);
+                                                            } else {
+                                                                field.onChange(
+                                                                    currentLevels.filter(
+                                                                        (l) => l !== level,
+                                                                    ),
+                                                                );
+                                                            }
+                                                        }}
+                                                        id={`cognitive-level-${level}`}
+                                                        checked={
+                                                            field.value?.includes(level) || false
+                                                        }
+                                                    />
+                                                    <label
+                                                        htmlFor={`cognitive-level-${level}`}
+                                                        className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                                                    >
+                                                        {cognitiveLevelLabels[level]}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                                name='cognitive_levels'
                                 control={form.control}
                             />
 

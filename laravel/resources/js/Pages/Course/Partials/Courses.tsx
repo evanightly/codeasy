@@ -120,6 +120,17 @@ const Courses = ({ response, filters, setFilters, baseKey, baseRoute }: CoursesP
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link
+                                    href={route(
+                                        `${ROUTES.COURSES}.test-cases.cognitive-levels`,
+                                        course.id,
+                                    )}
+                                    data-testid={`course-cognitive-levels-${course.id}`}
+                                >
+                                    Manage Cognitive Levels
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link
                                     href={route(`${ROUTES.COURSES}.edit`, course.id)}
                                     data-testid={`course-edit-${course.id}`}
                                 >

@@ -228,6 +228,15 @@ export default function Index() {
                                                                     'pages.student_cognitive_classification.classification_types.fuzzy',
                                                                 )}
                                                             </SelectItem>
+                                                            <SelectItem value='cognitive_levels'>
+                                                                {t(
+                                                                    'pages.student_cognitive_classification.classification_types.cognitive_levels',
+                                                                    {
+                                                                        defaultValue:
+                                                                            'Cognitive Levels',
+                                                                    },
+                                                                )}
+                                                            </SelectItem>
                                                             <SelectItem value='neural'>
                                                                 {t(
                                                                     'pages.student_cognitive_classification.classification_types.neural',

@@ -1,3 +1,4 @@
+import { Button } from '@/Components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -6,7 +7,9 @@ import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { ServiceFilterOptions } from '@/Support/Interfaces/Others';
 import { CourseResource } from '@/Support/Interfaces/Resources';
+import { router } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { Brain } from 'lucide-react';
 import { useState } from 'react';
 import { LearningMaterials } from './LearningMaterial/Partials/LearningMaterials';
 import { CourseDetails } from './Partials/CourseDetails';
@@ -39,7 +42,22 @@ export default function Show({ data: course }: Props) {
         <AuthenticatedLayout title={t('pages.course.show.title')}>
             <Card>
                 <CardHeader>
-                    <CardTitle>{course.name}</CardTitle>
+                    <div className='flex items-center justify-between'>
+                        <CardTitle>{course.name}</CardTitle>
+                        <Button
+                            variant='outline'
+                            size='sm'
+                            onClick={() => {
+                                router.visit(
+                                    route(ROUTES.COURSE_TEST_CASES_COGNITIVE_LEVELS, course.id),
+                                );
+                            }}
+                            className='flex items-center gap-2'
+                        >
+                            <Brain className='h-4 w-4' />
+                            <span>Manage Cognitive Levels</span>
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue='details'>

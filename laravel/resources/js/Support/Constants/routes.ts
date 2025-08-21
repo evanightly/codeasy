@@ -20,6 +20,7 @@ export const ROUTES = {
     COURSE_LEARNING_MATERIALS: 'courses.learning-materials',
     COURSE_LEARNING_MATERIAL_QUESTIONS: 'courses.learning-materials.questions',
     COURSE_LEARNING_MATERIAL_QUESTION_TEST_CASES: 'courses.learning-materials.questions.test-cases',
+    COURSE_TEST_CASES_COGNITIVE_LEVELS: 'courses.test-cases.cognitive-levels',
     STUDENT_SCORES: 'student-scores',
     EXECUTION_RESULTS: 'execution-results',
     STUDENT_COURSES: 'student.courses',

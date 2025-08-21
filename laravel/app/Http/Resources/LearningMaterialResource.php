@@ -21,8 +21,8 @@ class LearningMaterialResource extends JsonResource {
             'type' => $this->type,
             'order_number' => $this->order_number,
             'active' => $this->active,
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
+            'created_at' => $this->created_at?->toDateTimeString(),
+            'updated_at' => $this->updated_at?->toDateTimeString(),
             'course' => new CourseResource($this->whenLoaded('course')),
         ];
 

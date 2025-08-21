@@ -10,4 +10,5 @@ export interface LearningMaterialQuestionTestCase extends Model {
     order_number?: number;
     hidden?: boolean;
     active?: boolean;
+    cognitive_levels?: string[]; // Array of cognitive levels (C1, C2, C3, C4, C5, C6)
 }

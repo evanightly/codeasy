@@ -25,8 +25,8 @@ class LearningMaterialQuestionResource extends JsonResource {
             'active' => $this->active,
             'learning_material' => LearningMaterialResource::make($this->whenLoaded('learning_material')),
             'learning_material_question_test_cases' => LearningMaterialQuestionTestCaseResource::collection($this->whenLoaded('learning_material_question_test_cases')),
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
+            'created_at' => $this->created_at?->toDateTimeString(),
+            'updated_at' => $this->updated_at?->toDateTimeString(),
         ];
 
         return $this->filterData($request, $dataSource);

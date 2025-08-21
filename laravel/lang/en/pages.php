@@ -677,6 +677,7 @@ return [
             'student' => 'Student',
             'course' => 'Course',
             'classification_type' => 'Classification Method',
+            'cognitive_levels' => 'Cognitive Levels',
             'classification_level' => 'Cognitive Level',
             'classification_score' => 'Score',
             'classified_at' => 'Classification Date',
@@ -702,6 +703,7 @@ return [
         'placeholders' => [
             'select_course' => 'Select a course',
             'select_classification_type' => 'Select classification method',
+            'select_cognitive_levels' => 'Select cognitive levels (optional)',
         ],
         'dialogs' => [
             'report' => [
@@ -721,10 +723,12 @@ return [
                 'description' => 'Export comprehensive student score data with classification history and aggregated metrics.',
                 'course_label' => 'Course',
                 'classification_type_label' => 'Classification Type',
+                'cognitive_levels_label' => 'Cognitive Levels',
                 'classification_date_label' => 'Classification Date (Optional)',
                 'select_students_label' => 'Select Students',
                 'select_course_placeholder' => 'Select a course...',
                 'select_classification_type_placeholder' => 'Select classification type...',
+                'select_cognitive_levels_placeholder' => 'Select cognitive levels (optional)...',
                 'loading_dates' => 'Loading dates...',
                 'latest_classification' => 'Latest classification (default)',
                 'select_all' => 'Select All',
@@ -2328,6 +2332,7 @@ return [
             'topsis' => 'TOPSIS Method',
             'fuzzy' => 'Fuzzy Logic',
             'neural' => 'Neural Network',
+            'cognitive_levels' => 'Cognitive Levels',
         ],
     ],
     'test_case_change_tracker' => [

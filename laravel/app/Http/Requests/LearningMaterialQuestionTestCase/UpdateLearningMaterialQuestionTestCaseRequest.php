@@ -16,6 +16,8 @@ class UpdateLearningMaterialQuestionTestCaseRequest extends FormRequest {
             'description' => ['nullable', 'string'],
             'hidden' => ['boolean'],
             'active' => ['boolean'],
+            'cognitive_levels' => ['nullable', 'array'],
+            'cognitive_levels.*' => ['string', 'in:C1,C2,C3,C4,C5,C6'],
         ];
     }
 }
