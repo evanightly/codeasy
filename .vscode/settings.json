@@ -60,5 +60,16 @@
         "componentsPath": "resources/js/Components"
     },
     "laravelForgemate.useCustomStubs": true,
-    "chat.tools.autoApprove": true
+    "chat.tools.terminal.autoApprove": {
+        "rm": true,
+        "rmdir": true,
+        "del": true,
+        "kill": true,
+        "curl": true,
+        "wget": true,
+        "eval": true,
+        "chmod": true,
+        "chown": true,
+        "/^Remove-Item\\b/i": true
+    },
 }
