@@ -2,6 +2,7 @@ import { Toaster as SonnerToaster } from '@/Components/UI/sonner';
 import { ThemeWaveTransitionStyles } from '@/Components/UI/theme-wave-transition';
 import { DarkModeProvider } from '@/Contexts/ThemeContext';
 import { createInertiaApp } from '@inertiajs/react';
+import { configureEcho } from '@laravel/echo-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LaravelReactI18nProvider } from 'laravel-react-i18n';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -13,6 +14,16 @@ import '../css/app.css';
 import './bootstrap';
 import { ConfirmationDialogProvider } from './Contexts/ConfirmationDialogContext';
 import { addRippleEffect } from './Helpers';
+
+configureEcho({
+    broadcaster: 'reverb',
+    // key: import.meta.env.VITE_REVERB_APP_KEY,
+    // wsHost: import.meta.env.VITE_REVERB_HOST,
+    // wsPort: import.meta.env.VITE_REVERB_PORT,
+    // wssPort: import.meta.env.VITE_REVERB_PORT,
+    // forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+    // enabledTransports: ['ws', 'wss'],
+});
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

@@ -11,8 +11,10 @@
     "require": {
         "php": "^8.2",
         "adobrovolsky97/laravel-repository-service-pattern": "^2.2",
+        "fakerphp/faker": "^1.23",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^11.31",
+        "laravel/reverb": "^1.5",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "phpoffice/phpspreadsheet": "^4.2",
@@ -22,8 +24,7 @@
         "smalot/pdfparser": "^2.12",
         "spatie/laravel-backup": "^9.2",
         "spatie/laravel-permission": "^6.15",
-        "tightenco/ziggy": "^2.0",
-        "fakerphp/faker": "^1.23"
+        "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
         "laravel/breeze": "^2.3",

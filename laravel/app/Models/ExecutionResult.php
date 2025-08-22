@@ -19,6 +19,7 @@ class ExecutionResult extends Model {
         'function_count',
         'test_case_complete_count',
         'test_case_total_count',
+        'achieved_test_case_ids',
     ];
 
     /**
@@ -32,6 +33,7 @@ class ExecutionResult extends Model {
         'function_count' => 'integer',
         'test_case_complete_count' => 'integer',
         'test_case_total_count' => 'integer',
+        'achieved_test_case_ids' => 'array',
     ];
 
     /**

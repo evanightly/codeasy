@@ -16,5 +16,11 @@ if [ ! -d node_modules ]; then
   npm install
 fi
 
+# Check if the argument is to run supervisor for background services
+if [ "$1" = "supervisor" ]; then
+  echo "[Entrypoint] Starting Supervisor to manage queue workers and Reverb server..."
+  exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+fi
+
 # Start the main process (passed as CMD)
 exec "$@"

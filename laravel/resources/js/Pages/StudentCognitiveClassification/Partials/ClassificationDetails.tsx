@@ -135,7 +135,7 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
 
     // Render decision matrix directly from materials object
     const renderDecisionMatrixFromMaterials = () => {
-        console.log(details?.data?.raw_data?.materials);
+        // console.log(details?.data?.raw_data?.materials);
 
         const rawData = details?.data?.raw_data;
         const materials = rawData?.materials;
@@ -274,7 +274,7 @@ export function ClassificationDetails({ classificationId }: { classificationId: 
             </div>
         );
     };
-    console.log(details?.data);
+    // console.log(details?.data);
 
     const renderCriteriaInfo = () => {
         const criteria = getCriteriaLabels();

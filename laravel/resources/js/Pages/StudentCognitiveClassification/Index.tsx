@@ -33,6 +33,7 @@ import { studentCognitiveClassificationServiceHook } from '@/Services/studentCog
 import { ROUTES } from '@/Support/Constants/routes';
 import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEcho } from '@laravel/echo-react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Database, FileSpreadsheet, FileUp } from 'lucide-react';
 import { useState } from 'react';
@@ -55,7 +56,15 @@ export default function Index() {
         course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
         classification_type: z.string().optional(),
     });
-
+    useEcho(
+        `test-channel`,
+        'TestEvent',
+        (e) => {
+            console.log(e);
+        },
+        [],
+        'public',
+    );
     const rawDataFormSchema = z.object({
         course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
         export_format: z.string().default('raw'),

@@ -24,91 +24,14 @@ use App\Http\Controllers\StudentScoreController;
 use App\Http\Controllers\TestCaseChangeTrackerController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-})->name('welcome');
-
-Route::get('/test-fastapi', function () {
-    // Contoh data payload, seharusnya diisi dengan kode siswa dan testcase yang sesuai
-    $payload = [
-        'type' => 'sandbox',
-        'code' => "def add_numbers(a, b):\n    return a + b\n\nprint('Result:', add_numbers(2, 3))",
-        'testcases' => [
-            'self.assertEqual(add_numbers(2, 3), 5)',
-        ],
-    ];
-
-    try {
-        $response = Http::post('http://fastapi:8001/test', $payload);
-        if ($response->successful()) {
-            return $response->json();
-        }
-
-        return response()->json([$response->json(), $response->status()], 500);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-        ], 500);
-    }
-});
-
-Route::inertia('/sandbox', 'Sandbox/Index')->name('sandbox.index');
-
-Route::post('/sandbox', function (\Illuminate\Http\Request $request) {
-    $payload = $request->all();
-
-    logger($payload);
-    try {
-        $response = Http::post('http://fastapi:8001/test', $payload);
-
-        if ($response->successful()) {
-            $fastApiData = $response->json();
-            $fullData = array_map(function ($item) {
-                if ($item['type'] === 'image') {
-                    // Ambil prefix dari env('APP_URL') atau env('NGINX_URL')
-                    // misal env('NGINX_URL') = 'http://127.0.0.1:8080'
-                    $nginxUrl = env('NGINX_URL', env('APP_URL'));
-                    $item['content'] = rtrim($nginxUrl, '/') . $item['content'];
-                }
-
-                return $item;
-            }, $fastApiData);
-
-            return response()->json($fullData);
-        }
-
-        return response()->json(['message' => 'Failed to call FastAPI', 'response' => $response], 500);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
-})->name('sandbox.store');
-
-// Add a new route for test case debugging
-Route::post('/api/debug-test-case', function (\Illuminate\Http\Request $request) {
-    $payload = $request->all();
-
-    try {
-        $response = Http::post('http://fastapi:8001/debug-test-case', $payload);
-
-        if ($response->successful()) {
-            return response()->json($response->json());
-        }
-
-        return response()->json(['message' => 'Failed to call FastAPI', 'response' => $response], 500);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
-})->name('api.debug-test-case');
+Route::inertia('/', 'Welcome', [
+    'canLogin' => Route::has('login'),
+    'canRegister' => Route::has('register'),
+    'laravelVersion' => Application::VERSION,
+    'phpVersion' => PHP_VERSION,
+])->name('welcome');
 
 Route::middleware('auth')->group(function () {
     Route::resource('dashboard', DashboardController::class);
@@ -141,7 +64,7 @@ Route::middleware('auth')->group(function () {
             ->name('test-cases.cognitive-levels');
         Route::patch('test-cases-cognitive-levels/bulk-update', [CourseLearningMaterialQuestionTestCaseController::class, 'bulkUpdateCognitiveLevels'])
             ->name('test-cases.cognitive-levels.bulk-update');
-            
+
         // Learning Materials in context of a Course (view only)
         Route::resource('learning-materials', CourseLearningMaterialController::class)
             ->only(['index', 'show', 'create', 'edit']);
@@ -181,15 +104,6 @@ Route::middleware('auth')->group(function () {
 
 Route::resource('schools', SchoolController::class)->only(['index']);
 
-// Cypress Testing Routes - Available in testing/development or when X-Cypress-Test header is present
-if (env('CYPRESS_TESTING', false) ||
-    env('APP_ENV') === 'testing' ||
-    env('APP_ENV') === 'local' ||
-    request()->hasHeader('X-Cypress-Test')) {
-    Route::prefix('cypress')->name('cypress.')->group(function () {
-        Route::post('/reset-database', [\App\Http\Controllers\Cypress\CypressDatabaseController::class, 'resetDatabase'])->name('reset-database');
-        Route::get('/status', [\App\Http\Controllers\Cypress\CypressDatabaseController::class, 'status'])->name('status');
-    });
-}
-
 require __DIR__ . '/auth.php';
+require __DIR__ . '/test.php';
+require __DIR__ . '/sandbox.php';

@@ -50,6 +50,27 @@ services:
       redis:
         condition: service_healthy
 
+  # Supervisor service for managing queue workers and Reverb server in production
+  supervisor:
+    build:
+      context: .
+      dockerfile: docker/laravel.prod.Dockerfile
+    container_name: laravel_supervisor
+    command: supervisor
+    volumes:
+      - ./laravel:/var/www/html
+    ports:
+      - "8080:8080"  # Reverb WebSocket server
+    networks:
+      - app-network
+    depends_on:
+      laravel:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   scheduler:
     build:
       context: .
