@@ -19,6 +19,7 @@ app = FastAPI()
 class CodeInput(BaseModel):
     code: str
     testcases: Optional[List[str]] = None
+    testcase_ids: Optional[List[int]] = None  # Add test case IDs for tracking
     type: Optional[str] = None
     question_id: Optional[int] = None
     student_id: Optional[int] = None  # Add student ID for isolation
@@ -310,14 +311,24 @@ async def test_code(input: CodeInput):
             # Escape the student code properly
             escaped_code = input.code.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
             
-            # Build test methods dynamically
+            # Build test methods dynamically with tracking
             test_methods = []
+            test_case_ids = input.testcase_ids if input.testcase_ids else list(range(len(input.testcases)))
+            
             for i, tc in enumerate(input.testcases):
+                test_case_id = test_case_ids[i] if i < len(test_case_ids) else i
                 test_method = f"""
     def test_{i}(self):
         # The test case can access student_code directly
         # student_code contains the raw code as a string for string-based assertions
-        {tc}"""
+        global passed_test_case_ids
+        try:
+            {tc}
+            # If test passes, record the test case ID
+            passed_test_case_ids.append({test_case_id})
+        except Exception as e:
+            # Test failed, don't add to passed list
+            raise e"""
                 test_methods.append(test_method)
             
             # Combine all test code into a single execution block
@@ -326,6 +337,9 @@ import unittest
 import io
 import sys
 import json
+
+# Global list to track passed test case IDs
+passed_test_case_ids = []
 
 # Store student code in a variable for tests to access
 student_code = '''{escaped_code}'''
@@ -345,7 +359,8 @@ combined_results = {{
         "type": "test_stats", 
         "total_tests": result.testsRun,
         "success": result.testsRun - len(result.failures) - len(result.errors),
-        "fail": len(result.failures) + len(result.errors)
+        "fail": len(result.failures) + len(result.errors),
+        "passed_test_case_ids": passed_test_case_ids
     }},
     "results": {{
         "type": "test_result",

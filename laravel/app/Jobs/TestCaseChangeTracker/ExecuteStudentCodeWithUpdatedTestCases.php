@@ -65,6 +65,7 @@ class ExecuteStudentCodeWithUpdatedTestCases implements ShouldQueue {
 
             // Prepare test case inputs for the FastAPI service
             $testCaseInputs = $testCases->pluck('input')->toArray();
+            $testCaseIds = $testCases->pluck('id')->toArray();
 
             // Get affected students
             $affectedStudentIds = $this->tracker->affected_student_ids;
@@ -121,7 +122,7 @@ class ExecuteStudentCodeWithUpdatedTestCases implements ShouldQueue {
                 }
 
                 // Re-execute the code with new test cases only for non-completed student scores
-                $result = $this->executeCode($executionResult->code, $testCaseInputs, $question->id, $studentId);
+                $result = $this->executeCode($executionResult->code, $testCaseInputs, $testCaseIds, $question->id, $studentId);
                 $executionDetails['processed']++;
 
                 // Update student score based on results
@@ -129,15 +130,24 @@ class ExecuteStudentCodeWithUpdatedTestCases implements ShouldQueue {
                 $somePassed = false;
                 $testCaseSuccess = 0;
                 $testCaseTotal = 0;
+                $achievedTestCaseIds = [];
 
                 foreach ($result as $item) {
                     if (isset($item['type']) && $item['type'] === 'test_stats') {
                         $testCaseSuccess = $item['success'] ?? 0;
                         $testCaseTotal = $item['total_tests'] ?? 0;
+                        $achievedTestCaseIds = $item['passed_test_case_ids'] ?? [];
                         $somePassed = $testCaseSuccess > 0; // Check if at least one test passes
                         break;
                     }
                 }
+
+                // Update the existing execution result with new test case results
+                $executionResult->update([
+                    'test_case_complete_count' => $testCaseSuccess,
+                    'test_case_total_count' => $testCaseTotal,
+                    'achieved_test_case_ids' => $achievedTestCaseIds,
+                ]);
 
                 // Update the student score based on the results
                 if ($somePassed) {
@@ -184,7 +194,7 @@ class ExecuteStudentCodeWithUpdatedTestCases implements ShouldQueue {
     /**
      * Execute code against the FastAPI service.
      */
-    protected function executeCode(string $code, array $testCaseInputs, int $questionId, int $studentId): array {
+    protected function executeCode(string $code, array $testCaseInputs, array $testCaseIds, int $questionId, int $studentId): array {
         try {
             // Call the FastAPI service
             $fastApiUrl = config('services.fastapi.url') . '/test';
@@ -192,6 +202,7 @@ class ExecuteStudentCodeWithUpdatedTestCases implements ShouldQueue {
                 'type' => 'test',
                 'code' => $code,
                 'testcases' => $testCaseInputs,
+                'testcase_ids' => $testCaseIds,
                 'question_id' => $questionId,
                 'student_id' => $studentId, // Pass student ID for isolation
             ]);

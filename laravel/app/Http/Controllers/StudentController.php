@@ -327,6 +327,7 @@ class StudentController extends Controller {
 
         // Prepare test cases for FastAPI
         $testCaseInputs = $testCases->pluck('input')->toArray();
+        $testCaseIds = $testCases->pluck('id')->toArray();
 
         try {
             // Call the FastAPI service
@@ -335,6 +336,7 @@ class StudentController extends Controller {
                 'type' => 'test',
                 'code' => $code,
                 'testcases' => $testCaseInputs,
+                'testcase_ids' => $testCaseIds,
                 'question_id' => $question->id,
                 'student_id' => $user->id, // Pass student ID for isolation
             ]);
@@ -373,12 +375,14 @@ class StudentController extends Controller {
                 $somePassed = false;
                 $testCaseSuccess = 0;
                 $testCaseTotal = 0;
+                $achievedTestCaseIds = [];
 
                 // Extract test statistics
                 foreach ($results as $result) {
                     if (isset($result['type']) && $result['type'] === 'test_stats') {
                         $testCaseSuccess = $result['success'] ?? 0;
                         $testCaseTotal = $result['total_tests'] ?? 0;
+                        $achievedTestCaseIds = $result['passed_test_case_ids'] ?? [];
                         $somePassed = $testCaseSuccess > 0;
                         break;
                     }
@@ -392,6 +396,7 @@ class StudentController extends Controller {
                         'function_count' => $functionCount,
                         'test_case_complete_count' => $testCaseSuccess,
                         'test_case_total_count' => $testCaseTotal,
+                        'achieved_test_case_ids' => $achievedTestCaseIds,
                     ]);
 
                     // Update student score with test case metrics only (no automatic completion)

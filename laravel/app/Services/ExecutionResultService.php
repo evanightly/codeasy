@@ -97,10 +97,12 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
             $imageUrl = null;
             $variableCount = 0;
             $functionCount = 0;
+            $achievedTestCaseIds = [];
 
             foreach ($output as $item) {
                 if ($item['type'] === 'test_stats') {
                     $testStats = $item;
+                    $achievedTestCaseIds = $item['passed_test_case_ids'] ?? [];
                 }
                 if ($item['type'] === 'image') {
                     $imageUrl = $item['content'];
@@ -153,6 +155,7 @@ class ExecutionResultService extends BaseCrudService implements ExecutionResultS
                 'function_count' => $functionCount,
                 'test_case_complete_count' => $testCaseSuccess,
                 'test_case_total_count' => $testCaseTotal,
+                'achieved_test_case_ids' => $achievedTestCaseIds,
             ]);
 
             // Update score if there are test results
