@@ -150,7 +150,7 @@ Final Result in a material: C3 (Apply), Average: 0.5 (Highest rate and highest c
 3. update edit form for LearningMaterialQuestionTestCase and learning_material_question_test_cases to support cognitive_levels, tips: you can use C1 - C6 as a checkbox ✔️
 4. (crucial) add a page to bulk changes all test case in a course ✔️
 5. when the admin execute classification, the system will ask whether use cognitive level test case based or the one that defined (✔️ using dropdown), note: this process is crucial, after that the process is explained below
-    5A. (Student code cognitive level syncronization). Student test assertion, this is to define which test case is achieved by student:
+    5A. (Student code cognitive level syncronization). Student test assertion, this is to define which test case is achieved by student ✔️:
         5a1. Get each student final score, you can search it within StudentScore completed_execution_result_id, after that you can look up the execution_id and get the execution result, TLDR: to get the student code, get it by StudentScore->completed_execution_result, those execution result is the student code that you should be focused
         5a2. After you get the execution result, perform test assertion in those code to get which test case is completed, the process is the same as in the main.py @app.post("/test")
         5a3. After that, you will get which test case id that student completed, in @app.post("/test") it will return passed_test_case_ids, update the respective execution result and put that in the execution_result under achieved_test_case_ids column you created in the number 2
