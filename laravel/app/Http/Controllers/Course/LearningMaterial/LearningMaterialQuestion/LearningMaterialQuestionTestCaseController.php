@@ -12,6 +12,7 @@ use App\Models\Course;
 use App\Models\LearningMaterial;
 use App\Models\LearningMaterialQuestion;
 use App\Models\LearningMaterialQuestionTestCase;
+use App\Services\LearningMaterialQuestionTestCase\CognitiveLevelsTemplateService;
 use App\Services\LearningMaterialQuestionTestCaseService;
 use App\Support\Enums\IntentEnum;
 use App\Support\Enums\PermissionEnum;
@@ -21,9 +22,14 @@ use Inertia\Inertia;
 
 class LearningMaterialQuestionTestCaseController extends Controller implements HasMiddleware {
     protected $testCaseService;
+    protected $templateService;
 
-    public function __construct(LearningMaterialQuestionTestCaseService $testCaseService) {
+    public function __construct(
+        LearningMaterialQuestionTestCaseService $testCaseService,
+        CognitiveLevelsTemplateService $templateService
+    ) {
         $this->testCaseService = $testCaseService;
+        $this->templateService = $templateService;
     }
 
     public static function middleware(): array {
@@ -33,7 +39,7 @@ class LearningMaterialQuestionTestCaseController extends Controller implements H
                 PermissionEnum::LEARNING_MATERIAL_READ->value,
                 PermissionEnum::LEARNING_MATERIAL_QUESTION_READ->value,
                 PermissionEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_READ->value,
-            ], ['index', 'show', 'create', 'edit', 'allTestCases']),
+            ], ['index', 'show', 'create', 'edit', 'allTestCases', 'downloadCognitiveLevelsTemplate']),
 
             self::createPermissionMiddleware([
                 PermissionEnum::COURSE_UPDATE->value,
@@ -200,6 +206,25 @@ class LearningMaterialQuestionTestCaseController extends Controller implements H
      * Display all test cases in a course with their cognitive levels
      */
     public function allTestCases(Course $course, Request $request) {
+        $intent = $request->get('intent');
+
+        // Handle export filtered test cases
+        if ($intent === IntentEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_ALL_TEST_CASES_EXPORT_FILTERED->value) {
+            // Process the filters properly
+            $filters = $request->all();
+
+            // Decode the selectedMaterialIds from JSON string to array
+            if (!empty($filters['selectedMaterialIds'])) {
+                $selectedMaterialIds = json_decode($filters['selectedMaterialIds'], true);
+                $filters['selectedMaterialIds'] = is_array($selectedMaterialIds) ? $selectedMaterialIds : [];
+            } else {
+                $filters['selectedMaterialIds'] = [];
+            }
+
+            return $this->testCaseService->exportFilteredTestCases($course, $filters);
+        }
+
+        // Default behavior - show the page
         $testCases = LearningMaterialQuestionTestCase::whereHas('learning_material_question.learning_material', function ($query) use ($course) {
             $query->where('course_id', $course->id);
         })
@@ -252,5 +277,65 @@ class LearningMaterialQuestionTestCaseController extends Controller implements H
 
         return redirect()->route('courses.test-cases.cognitive-levels', $course)
             ->with('success', 'Cognitive levels updated successfully');
+    }
+
+    /**
+     * Download Excel template for cognitive levels import
+     */
+    public function downloadCognitiveLevelsTemplate(Course $course, Request $request) {
+        // Check if this is a sequence validation export request
+        $intent = $request->input('intent');
+
+        if ($intent === IntentEnum::LEARNING_MATERIAL_QUESTION_TEST_CASE_ALL_TEST_CASES_EXPORT_SEQUENCE_VALIDATION->value) {
+            // Handle sequence validation export
+            $validationData = $request->input('validation_data');
+            if (is_string($validationData)) {
+                $validationData = json_decode($validationData, true);
+            }
+
+            $materials = $request->input('materials');
+            if (is_string($materials)) {
+                $materials = json_decode($materials, true);
+            }
+
+            $filters = [
+                'selectedMaterialIds' => $materials ?: [],
+                'searchQuery' => $request->input('search_query', ''),
+            ];
+
+            return $this->testCaseService->exportSequenceValidation($course, $validationData, $filters);
+        }
+
+        // Default: Download template
+        $templatePath = $this->templateService->generateTemplate();
+
+        return response()->download($templatePath, 'cognitive-levels-template.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    /**
+     * Export sequence validation report via POST request
+     */
+    public function exportSequenceValidation(Course $course, Request $request)
+    {
+        // Decode the validation data from JSON
+        $validationData = $request->input('validationData');
+        if (is_string($validationData)) {
+            $validationData = json_decode($validationData, true);
+        }
+
+        // Decode the materials data
+        $materials = $request->input('materials');
+        if (is_string($materials)) {
+            $materials = json_decode($materials, true);
+        }
+
+        $filters = [
+            'selectedMaterialIds' => $materials ?: [],
+            'searchQuery' => $request->input('searchQuery', ''),
+        ];
+
+        return $this->testCaseService->exportSequenceValidation($course, $validationData, $filters);
     }
 }

@@ -1,10 +1,10 @@
 import { LearningMaterialQuestionTestCase } from '@/Support/Interfaces/Models';
-import { Resource } from '@/Support/Interfaces/Resources';
+import { LearningMaterialQuestionResource, Resource } from '@/Support/Interfaces/Resources';
 
 export interface LearningMaterialQuestionTestCaseResource
     extends Resource,
         LearningMaterialQuestionTestCase {
-    learning_material_question?: LearningMaterialQuestionTestCaseResource;
+    learning_material_question?: LearningMaterialQuestionResource;
     expected_output_file_url?: string;
     title?: string; // Title displayed in the UI
     output?: string; // Expected output content

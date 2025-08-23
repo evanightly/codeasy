@@ -64,6 +64,10 @@ Route::middleware('auth')->group(function () {
             ->name('test-cases.cognitive-levels');
         Route::patch('test-cases-cognitive-levels/bulk-update', [CourseLearningMaterialQuestionTestCaseController::class, 'bulkUpdateCognitiveLevels'])
             ->name('test-cases.cognitive-levels.bulk-update');
+        Route::get('test-cases-cognitive-levels/download-template', [CourseLearningMaterialQuestionTestCaseController::class, 'downloadCognitiveLevelsTemplate'])
+            ->name('test-cases.cognitive-levels.download-template');
+        Route::post('test-cases-cognitive-levels/export-sequence-validation', [CourseLearningMaterialQuestionTestCaseController::class, 'exportSequenceValidation'])
+            ->name('test-cases.cognitive-levels.export-sequence-validation');
 
         // Learning Materials in context of a Course (view only)
         Route::resource('learning-materials', CourseLearningMaterialController::class)

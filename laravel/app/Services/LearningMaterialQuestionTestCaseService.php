@@ -353,6 +353,312 @@ class LearningMaterialQuestionTestCaseService extends BaseCrudService implements
         return in_array($value, ['true', '1', 'yes', 'on'], true);
     }
 
+    /**
+     * Export filtered test cases with their cognitive levels to Excel
+     */
+    public function exportFilteredTestCases($course, array $filters): BinaryFileResponse {
+        // Debug: Log the filters being applied
+        Log::info('Export filters received:', $filters);
+
+        // Build the query for filtered test cases
+        $query = LearningMaterialQuestionTestCase::whereHas('learning_material_question.learning_material', function ($query) use ($course) {
+            $query->where('course_id', $course->id);
+        })
+            ->with([
+                'learning_material_question' => function ($query) {
+                    $query->select('id', 'title', 'learning_material_id');
+                },
+                'learning_material_question.learning_material' => function ($query) {
+                    $query->select('id', 'title', 'course_id');
+                },
+            ]);
+
+        // Apply material filters if provided
+        if (!empty($filters['selectedMaterialIds']) && is_array($filters['selectedMaterialIds']) && count($filters['selectedMaterialIds']) > 0) {
+            $materialIds = array_map('intval', $filters['selectedMaterialIds']);
+            Log::info('Applying material filter for IDs:', $materialIds);
+            $query->whereHas('learning_material_question.learning_material', function ($query) use ($materialIds) {
+                $query->whereIn('id', $materialIds);
+            });
+        } else {
+            Log::info('No material filter applied - exporting all materials');
+        }
+
+        // Apply search filter if provided
+        if (!empty($filters['searchQuery'])) {
+            $searchQuery = trim($filters['searchQuery']);
+            Log::info('Applying search filter:', ['query' => $searchQuery]);
+            $query->where(function ($query) use ($searchQuery) {
+                $query->where('title', 'like', "%{$searchQuery}%")
+                    ->orWhere('description', 'like', "%{$searchQuery}%")
+                    ->orWhere('input', 'like', "%{$searchQuery}%")
+                    ->orWhereHas('learning_material_question', function ($query) use ($searchQuery) {
+                        $query->where('title', 'like', "%{$searchQuery}%");
+                    })
+                    ->orWhereHas('learning_material_question.learning_material', function ($query) use ($searchQuery) {
+                        $query->where('title', 'like', "%{$searchQuery}%");
+                    });
+            });
+        }
+
+        $testCases = $query->get();
+
+        Log::info('Export query results:', ['count' => $testCases->count(), 'course' => $course->title]);
+
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $headers = [
+            'Material ID',
+            'Material Title',
+            'Question Title',
+            'Test Case ID',
+            'Test Case Title',
+            'Test Case Input',
+            'Cognitive Levels',
+        ];
+
+        $sheet->fromArray([$headers], null, 'A1');
+
+        // Prepare data rows
+        $dataRows = [];
+        foreach ($testCases as $testCase) {
+            $material = $testCase->learning_material_question?->learning_material;
+            $question = $testCase->learning_material_question;
+
+            $cognitiveLevels = is_array($testCase->cognitive_levels)
+                ? implode(', ', $testCase->cognitive_levels)
+                : '';
+
+            $dataRows[] = [
+                $material?->id ?? '',
+                $material?->title ?? 'Unknown Material',
+                $question?->title ?? 'Unknown Question',
+                $testCase->id,
+                $testCase->title ?? '',
+                $testCase->input ?? '',
+                $cognitiveLevels,
+            ];
+        }
+
+        // Sort by material ID to match the frontend grouping
+        usort($dataRows, function ($a, $b) {
+            return $a[0] <=> $b[0]; // Sort by Material ID
+        });
+
+        $sheet->fromArray($dataRows, null, 'A2');
+
+        // Auto-size columns
+        foreach (range('A', 'G') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Style the header row
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E2E8F0'],
+            ],
+        ];
+        $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
+
+        // Add some styling for better readability
+        $sheet->getStyle('A1:G' . (count($dataRows) + 1))->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'filtered_test_cases_' . $course->title . '_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $tempFile = tempnam(sys_get_temp_dir(), $fileName);
+
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Export sequence validation results with problematic rows highlighted
+     */
+    public function exportSequenceValidation($course, array $validationData, array $filters): BinaryFileResponse {
+        Log::info('Export sequence validation:', ['course' => $course->title, 'validation_count' => count($validationData['materialGroups'] ?? [])]);
+
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $headers = [
+            'Row',
+            'Status',
+            'Material ID',
+            'Material Title',
+            'Test Case ID',
+            'Test Case Title',
+            'Excel Pattern',
+            'Test Case Input',
+            'Excel Cognitive Levels',
+            'Test Case Cognitive Levels',
+            'Match Status',
+            'Issue Description',
+        ];
+
+        $sheet->fromArray([$headers], null, 'A1');
+
+        // Prepare data rows with validation information
+        $dataRows = [];
+
+        if (isset($validationData['materialGroups'])) {
+            foreach ($validationData['materialGroups'] as $group) {
+                foreach ($group['matches'] as $match) {
+                    $testCase = null;
+                    $material = null;
+
+                    // Try to find the actual test case and material from the match data
+                    if (isset($match['testCase'])) {
+                        $testCase = $match['testCase'];
+                        if (isset($testCase['learning_material_question']['learning_material'])) {
+                            $material = $testCase['learning_material_question']['learning_material'];
+                        }
+                    }
+
+                    $isMatch = $match['isMatch'] ?? false;
+                    $excelPattern = $match['excelPattern'] ?? '';
+                    $testCaseInput = $testCase['input'] ?? '';
+
+                    // Get cognitive levels from both sources
+                    $excelCognitiveLevels = '';
+                    $testCaseCognitiveLevels = '';
+
+                    // Try to find the original excel data for this match
+                    if (isset($validationData['excelData'])) {
+                        $excelIndex = $match['index'] ?? 0;
+                        if (isset($validationData['excelData'][$excelIndex])) {
+                            $excelCognitiveLevels = $validationData['excelData'][$excelIndex]['cognitiveLevels'] ?? '';
+                        }
+                    }
+
+                    // Get test case cognitive levels
+                    if (isset($testCase['cognitive_levels']) && is_array($testCase['cognitive_levels'])) {
+                        $testCaseCognitiveLevels = implode(', ', $testCase['cognitive_levels']);
+                    }
+
+                    // Determine issue description
+                    $issueDescription = '';
+                    if (!$isMatch) {
+                        if (empty($excelPattern) && empty($testCaseInput)) {
+                            $issueDescription = 'Both Excel pattern and test case input are empty';
+                        } elseif (empty($excelPattern)) {
+                            $issueDescription = 'Excel pattern is empty';
+                        } elseif (empty($testCaseInput)) {
+                            $issueDescription = 'Test case input is empty';
+                        } else {
+                            $issueDescription = 'Excel pattern does not match test case input';
+                        }
+                    } else {
+                        $issueDescription = 'Perfect match';
+                    }
+
+                    $dataRows[] = [
+                        $match['index'] + 1, // Row number (1-based)
+                        $isMatch ? '✅ MATCH' : '❌ MISMATCH',
+                        $material['id'] ?? $group['materialId'] ?? '',
+                        $material['title'] ?? $group['materialTitle'] ?? 'Unknown Material',
+                        $testCase['id'] ?? '',
+                        $testCase['title'] ?? '',
+                        $excelPattern,
+                        $testCaseInput,
+                        $excelCognitiveLevels,
+                        $testCaseCognitiveLevels,
+                        $isMatch ? 'MATCH' : 'MISMATCH',
+                        $issueDescription,
+                    ];
+                }
+            }
+        }
+
+        // Sort by row number to maintain sequence order
+        usort($dataRows, function ($a, $b) {
+            return $a[0] <=> $b[0];
+        });
+
+        $sheet->fromArray($dataRows, null, 'A2');
+
+        // Auto-size columns
+        foreach (range('A', 'L') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Style the header row
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E2E8F0'],
+            ],
+        ];
+        $sheet->getStyle('A1:L1')->applyFromArray($headerStyle);
+
+        // Style rows based on match status
+        $rowCount = count($dataRows) + 1; // +1 for header
+        for ($i = 2; $i <= $rowCount; $i++) {
+            $statusCell = $sheet->getCell("B{$i}")->getValue();
+            if (strpos($statusCell, 'MISMATCH') !== false) {
+                // Red background for mismatches
+                $sheet->getStyle("A{$i}:L{$i}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'FEE2E2'], // Light red
+                    ],
+                ]);
+            } else {
+                // Green background for matches
+                $sheet->getStyle("A{$i}:L{$i}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'DCFCE7'], // Light green
+                    ],
+                ]);
+            }
+        }
+
+        // Add borders for better readability
+        $sheet->getStyle("A1:L{$rowCount}")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Add a summary at the top
+        $sheet->insertNewRowBefore(1, 2);
+        $totalRows = count($dataRows);
+        $mismatchedRows = count(array_filter($dataRows, function ($row) {
+            return strpos($row[1], 'MISMATCH') !== false;
+        }));
+        $matchedRows = $totalRows - $mismatchedRows;
+
+        $sheet->setCellValue('A1', 'Sequence Validation Report');
+        $sheet->setCellValue('A2', "Course: {$course->title} | Total: {$totalRows} rows | Matches: {$matchedRows} | Mismatches: {$mismatchedRows}");
+
+        // Style the summary
+        $sheet->getStyle('A1:L1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'F3F4F6'],
+            ],
+        ]);
+        $sheet->getStyle('A2:L2')->applyFromArray([
+            'font' => ['italic' => true],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'F9FAFB'],
+            ],
+        ]);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'sequence_validation_' . $course->title . '_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $tempFile = tempnam(sys_get_temp_dir(), $fileName);
+
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+    }
+
     /** @var LearningMaterialQuestionTestCaseRepository */
     protected $repository;
 
