@@ -146,7 +146,7 @@ Final Result in a material: C3 (Apply), Average: 0.5 (Highest rate and highest c
 
 ### Implementation Steps
 1. update LearningMaterialQuestionTestCase and learning_material_question_test_cases migration to include cognitive_levels as a json ✔️
-2. update execution_results to store the achieved test case ids as a json
+2. update execution_results to store the achieved test case ids as a json ✔️
 3. update edit form for LearningMaterialQuestionTestCase and learning_material_question_test_cases to support cognitive_levels, tips: you can use C1 - C6 as a checkbox ✔️
 4. (crucial) add a page to bulk changes all test case in a course ✔️
 5. when the admin execute classification, the system will ask whether use cognitive level test case based or the one that defined (✔️ using dropdown), note: this process is crucial, after that the process is explained below
