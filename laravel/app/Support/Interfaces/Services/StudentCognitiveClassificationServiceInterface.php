@@ -17,6 +17,14 @@ interface StudentCognitiveClassificationServiceInterface extends BaseCrudService
     public function runClassification(array $data): array;
 
     /**
+     * Synchronize student code cognitive levels by performing test assertions
+     *
+     * @param  array  $data  Contains course_id and other parameters
+     * @return array Result of the synchronization process
+     */
+    public function syncStudentCodeCognitiveLevels(array $data): array;
+
+    /**
      * Export classifications to Excel
      */
     public function exportToExcel(array $filters = []): Response|BinaryFileResponse;

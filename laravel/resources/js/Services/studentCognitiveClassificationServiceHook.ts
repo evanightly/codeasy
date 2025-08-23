@@ -34,6 +34,27 @@ export const studentCognitiveClassificationServiceHook = {
     },
 
     /**
+     * Synchronize student code cognitive levels
+     */
+    useSyncStudentCode: () => {
+        return createMutation({
+            mutationFn: async (params: { course_id: number }) => {
+                return mutationApi({
+                    method: 'post',
+                    url: route(`${ROUTES.STUDENT_COGNITIVE_CLASSIFICATIONS}.store`),
+                    data: params,
+                    params: {
+                        intent: IntentEnum.STUDENT_COGNITIVE_CLASSIFICATION_STORE_SYNC_STUDENT_CODE,
+                    },
+                });
+            },
+            invalidateQueryKeys: [
+                { queryKey: [TANSTACK_QUERY_KEYS.STUDENT_COGNITIVE_CLASSIFICATIONS], exact: false },
+            ],
+        });
+    },
+
+    /**
      * Export cognitive classifications as Excel
      */
     useExportExcel: () => {

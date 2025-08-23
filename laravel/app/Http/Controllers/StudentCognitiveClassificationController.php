@@ -108,6 +108,10 @@ class StudentCognitiveClassificationController extends Controller implements Has
             return $this->studentCognitiveClassificationService->runClassification($request->validated());
         }
 
+        if ($intent === IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_STORE_SYNC_STUDENT_CODE->value) {
+            return $this->studentCognitiveClassificationService->syncStudentCodeCognitiveLevels($request->validated());
+        }
+
         if ($this->ajax()) {
             return $this->studentCognitiveClassificationService->create($request->validated());
         }

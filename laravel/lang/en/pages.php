@@ -2293,8 +2293,15 @@ return [
             'export_excel' => 'Export Classifications',
             'export_raw_data' => 'Export Raw Data',
             'start_export' => 'Start Export',
+            'sync_student_code' => 'Sync Student Codes',
+            'start_sync' => 'Start Sync',
+            'syncing' => 'Syncing...',
         ],
         'dialogs' => [
+            'sync_student_code' => [
+                'title' => 'Sync Student Codes',
+                'description' => 'This will synchronize student codes across all materials and questions.',
+            ],
             'classification' => [
                 'title' => 'Run Cognitive Classification',
                 'description' => 'Select a course and classification type to run the cognitive classification process for all students in the course.',
@@ -2321,6 +2328,7 @@ return [
             'deleting' => 'Deleting classification...',
             'delete_success' => 'Classification deleted successfully',
             'delete_error' => 'Error deleting classification',
+            'sync_running' => 'Syncing student codes...',
         ],
         'sections' => [
             'classifications' => 'Cognitive Classifications',

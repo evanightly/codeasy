@@ -21,6 +21,7 @@ class LearningMaterialQuestionTestCase extends Model {
     protected $fillable = [
         'learning_material_question_id',
         'input',
+        'assertion', // For test assertions
         'expected_output_file',
         'expected_output_file_extension',
         'description',

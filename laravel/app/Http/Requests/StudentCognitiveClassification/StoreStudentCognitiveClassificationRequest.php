@@ -24,6 +24,12 @@ class StoreStudentCognitiveClassificationRequest extends FormRequest {
                     'classification_type' => ['sometimes', 'string', 'in:topsis,fuzzy,neural,cognitive_levels'],
                 ];
                 break;
+
+            case IntentEnum::STUDENT_COGNITIVE_CLASSIFICATION_STORE_SYNC_STUDENT_CODE->value:
+                $rules = [
+                    'course_id' => ['required', 'integer', 'exists:courses,id'],
+                ];
+                break;
         }
 
         return $rules;

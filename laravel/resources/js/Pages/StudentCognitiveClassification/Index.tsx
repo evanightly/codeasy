@@ -35,7 +35,7 @@ import { TANSTACK_QUERY_KEYS } from '@/Support/Constants/tanstackQueryKeys';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEcho } from '@laravel/echo-react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { Database, FileSpreadsheet, FileUp } from 'lucide-react';
+import { Database, FileSpreadsheet, FileUp, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -47,8 +47,24 @@ export default function Index() {
     const confirmAction = useConfirmation();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [rawDataDialogOpen, setRawDataDialogOpen] = useState(false);
+    const [syncDialogOpen, setSyncDialogOpen] = useState(false);
+    const [syncProgress, setSyncProgress] = useState<{
+        isRunning: boolean;
+        message: string;
+        currentStep: number;
+        totalSteps: number;
+        progressPercentage: number;
+        data?: any;
+    }>({
+        isRunning: false,
+        message: '',
+        currentStep: 0,
+        totalSteps: 0,
+        progressPercentage: 0,
+    });
     const { data: courses, isLoading } = courseServiceHook.useGetAll();
     const runClassification = studentCognitiveClassificationServiceHook.useRunClassification();
+    const syncStudentCode = studentCognitiveClassificationServiceHook.useSyncStudentCode();
     const exportExcel = studentCognitiveClassificationServiceHook.useExportExcel();
     const exportRawDataExcel = studentCognitiveClassificationServiceHook.useExportRawDataExcel();
 
@@ -56,6 +72,11 @@ export default function Index() {
         course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
         classification_type: z.string().optional(),
     });
+
+    const syncFormSchema = z.object({
+        course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
+    });
+
     useEcho(
         `test-channel`,
         'TestEvent',
@@ -65,6 +86,25 @@ export default function Index() {
         [],
         'public',
     );
+
+    // Listen for synchronization progress updates
+    useEcho(
+        'student-code-sync-progress',
+        'StudentCodeSyncProgressEvent',
+        (e: any) => {
+            setSyncProgress({
+                isRunning: e.current_step < e.total_steps,
+                message: e.message,
+                currentStep: e.current_step,
+                totalSteps: e.total_steps,
+                progressPercentage: e.progress_percentage,
+                data: e.data,
+            });
+        },
+        [],
+        'public',
+    );
+
     const rawDataFormSchema = z.object({
         course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
         export_format: z.string().default('raw'),
@@ -88,6 +128,13 @@ export default function Index() {
         },
     });
 
+    const syncForm = useForm<z.infer<typeof syncFormSchema>>({
+        resolver: zodResolver(syncFormSchema),
+        defaultValues: {
+            course_id: 0,
+        },
+    });
+
     const handleRunClassification = async (values: z.infer<typeof formSchema>) => {
         toast.promise(runClassification.mutateAsync(values), {
             loading: t('pages.student_cognitive_classification.messages.classification_running'),
@@ -97,6 +144,52 @@ export default function Index() {
                 return t('pages.student_cognitive_classification.messages.classification_success');
             },
             error: t('pages.student_cognitive_classification.messages.classification_error'),
+        });
+    };
+
+    const handleSyncStudentCode = async (values: z.infer<typeof syncFormSchema>) => {
+        setSyncProgress({
+            isRunning: true,
+            message: 'Starting synchronization...',
+            currentStep: 0,
+            totalSteps: 1,
+            progressPercentage: 0,
+        });
+
+        toast.promise(syncStudentCode.mutateAsync(values), {
+            loading: t('pages.student_cognitive_classification.messages.sync_running', {
+                defaultValue: 'Synchronizing student code cognitive levels...',
+            }),
+            success: () => {
+                setSyncDialogOpen(false);
+                syncForm.reset();
+                setSyncProgress({
+                    isRunning: false,
+                    message: '',
+                    currentStep: 0,
+                    totalSteps: 0,
+                    progressPercentage: 0,
+                });
+                return t('pages.student_cognitive_classification.messages.sync_success', {
+                    defaultValue: 'Student code synchronization completed successfully!',
+                });
+            },
+            error: (err) => {
+                setSyncProgress({
+                    isRunning: false,
+                    message: '',
+                    currentStep: 0,
+                    totalSteps: 0,
+                    progressPercentage: 0,
+                });
+                return (
+                    t('pages.student_cognitive_classification.messages.sync_error', {
+                        defaultValue: 'Synchronization failed',
+                    }) +
+                    ': ' +
+                    (err?.message || 'Unknown error')
+                );
+            },
         });
     };
 
@@ -428,6 +521,143 @@ export default function Index() {
                                                 {t(
                                                     'pages.student_cognitive_classification.buttons.start_export',
                                                 )}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={syncDialogOpen} onOpenChange={setSyncDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant='secondary'>
+                                    <RefreshCw className='mr-2 h-4 w-4' />
+                                    {t(
+                                        'pages.student_cognitive_classification.buttons.sync_student_code',
+                                        { defaultValue: 'Sync Student Code' },
+                                    )}
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        {t(
+                                            'pages.student_cognitive_classification.dialogs.sync_student_code.title',
+                                            {
+                                                defaultValue:
+                                                    'Synchronize Student Code Cognitive Levels',
+                                            },
+                                        )}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        {t(
+                                            'pages.student_cognitive_classification.dialogs.sync_student_code.description',
+                                            {
+                                                defaultValue:
+                                                    'This will perform test assertions on student code to determine which test cases they completed and update the achieved test case IDs.',
+                                            },
+                                        )}
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <Form {...syncForm}>
+                                    <form
+                                        onSubmit={syncForm.handleSubmit(handleSyncStudentCode)}
+                                        className='space-y-4'
+                                    >
+                                        <FormField
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t(
+                                                            'pages.student_cognitive_classification.fields.course',
+                                                        )}
+                                                    </FormLabel>
+                                                    <Select
+                                                        onValueChange={(value) =>
+                                                            field.onChange(parseInt(value))
+                                                        }
+                                                        defaultValue={field.value.toString()}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue
+                                                                    placeholder={t(
+                                                                        'pages.student_cognitive_classification.placeholders.select_course',
+                                                                    )}
+                                                                />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {isLoading ? (
+                                                                <SelectItem value='0' disabled>
+                                                                    {t('action.loading')}
+                                                                </SelectItem>
+                                                            ) : (
+                                                                courses?.data?.map((course) => (
+                                                                    <SelectItem
+                                                                        value={course.id.toString()}
+                                                                        key={course.id}
+                                                                    >
+                                                                        {course.name}
+                                                                    </SelectItem>
+                                                                ))
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                            name='course_id'
+                                            control={syncForm.control}
+                                        />
+
+                                        {syncProgress.isRunning && (
+                                            <div className='space-y-2'>
+                                                <div className='text-sm text-muted-foreground'>
+                                                    {syncProgress.message}
+                                                </div>
+                                                <div className='h-2 w-full rounded-full bg-secondary'>
+                                                    <div
+                                                        style={{
+                                                            width: `${syncProgress.progressPercentage}%`,
+                                                        }}
+                                                        className='h-2 rounded-full bg-primary transition-all duration-300'
+                                                    />
+                                                </div>
+                                                <div className='text-center text-xs text-muted-foreground'>
+                                                    {syncProgress.currentStep} /{' '}
+                                                    {syncProgress.totalSteps} (
+                                                    {syncProgress.progressPercentage.toFixed(1)}%)
+                                                </div>
+                                                {syncProgress.data && (
+                                                    <div className='text-xs text-muted-foreground'>
+                                                        Processing: {syncProgress.data.student_name}{' '}
+                                                        - {syncProgress.data.material_title} -{' '}
+                                                        {syncProgress.data.question_title}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <DialogFooter>
+                                            <Button
+                                                type='submit'
+                                                loading={
+                                                    syncStudentCode.isPending ||
+                                                    syncProgress.isRunning
+                                                }
+                                                disabled={syncProgress.isRunning}
+                                            >
+                                                {syncProgress.isRunning
+                                                    ? t(
+                                                          'pages.student_cognitive_classification.buttons.syncing',
+                                                          { defaultValue: 'Synchronizing...' },
+                                                      )
+                                                    : t(
+                                                          'pages.student_cognitive_classification.buttons.start_sync',
+                                                          { defaultValue: 'Start Synchronization' },
+                                                      )}
                                             </Button>
                                         </DialogFooter>
                                     </form>

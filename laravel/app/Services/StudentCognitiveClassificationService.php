@@ -202,6 +202,273 @@ class StudentCognitiveClassificationService extends BaseCrudService implements S
     }
 
     /**
+     * Synchronize student code cognitive levels by performing test assertions
+     *
+     * This method implements feature 5A from the student cognitive classification requirements.
+     * It performs test assertions on student code to determine which test cases they completed,
+     * then updates the achieved_test_case_ids in the execution results.
+     *
+     * @param  array  $data  Contains course_id and other parameters
+     * @return array Result of the synchronization process
+     */
+    public function syncStudentCodeCognitiveLevels(array $data): array {
+        $courseId = $data['course_id'];
+
+        try {
+            // Get the course and its materials
+            $course = app(CourseServiceInterface::class)->findOrFail($courseId);
+            $learningMaterials = $course->learning_materials()->with([
+                'learning_material_questions.learning_material_question_test_cases',
+                'learning_material_questions.student_scores.completed_execution_result',
+            ])->get();
+
+            if ($learningMaterials->isEmpty()) {
+                return [
+                    'status' => 'error',
+                    'message' => 'No learning materials found for this course',
+                ];
+            }
+
+            // Get all students enrolled in the course
+            $students = $course->classroom->students;
+
+            if ($students->isEmpty()) {
+                return [
+                    'status' => 'error',
+                    'message' => 'No students found for this course',
+                ];
+            }
+
+            // Calculate total steps for progress tracking
+            $totalExecutionResults = 0;
+            foreach ($students as $student) {
+                foreach ($learningMaterials as $material) {
+                    foreach ($material->learning_material_questions as $question) {
+                        $studentScore = $question->student_scores()
+                            ->where('user_id', $student->id)
+                            ->whereNotNull('completed_execution_result_id')
+                            ->first();
+
+                        if ($studentScore && $studentScore->completed_execution_result) {
+                            $totalExecutionResults++;
+                        }
+                    }
+                }
+            }
+
+            if ($totalExecutionResults === 0) {
+                return [
+                    'status' => 'warning',
+                    'message' => 'No completed execution results found for students in this course',
+                ];
+            }
+
+            // Broadcast initial progress
+            event(new \App\Events\StudentCodeSyncProgressEvent(
+                $courseId,
+                'Starting student code cognitive level synchronization...',
+                0,
+                $totalExecutionResults
+            ));
+
+            $currentStep = 0;
+            $syncedResults = [];
+            $errors = [];
+
+            // Process each student
+            foreach ($students as $student) {
+                foreach ($learningMaterials as $material) {
+                    foreach ($material->learning_material_questions as $question) {
+                        // Get the student's completed execution result for this question
+                        $studentScore = $question->student_scores()
+                            ->where('user_id', $student->id)
+                            ->whereNotNull('completed_execution_result_id')
+                            ->first();
+
+                        if (!$studentScore || !$studentScore->completed_execution_result) {
+                            continue;
+                        }
+
+                        $executionResult = $studentScore->completed_execution_result;
+                        $currentStep++;
+
+                        // Skip if execution result doesn't have code
+                        if (!$executionResult->code || empty(trim($executionResult->code))) {
+                            Log::info('Skipping execution result without code', [
+                                'student_id' => $student->id,
+                                'execution_result_id' => $executionResult->id,
+                                'question_id' => $question->id,
+                            ]);
+
+                            continue;
+                        }
+
+                        // Broadcast progress
+                        event(new \App\Events\StudentCodeSyncProgressEvent(
+                            $courseId,
+                            "Processing student {$student->name} - {$material->title} - {$question->title}",
+                            $currentStep,
+                            $totalExecutionResults,
+                            [
+                                'student_id' => $student->id,
+                                'student_name' => $student->name,
+                                'material_id' => $material->id,
+                                'material_title' => $material->title,
+                                'question_id' => $question->id,
+                                'question_title' => $question->title,
+                            ]
+                        ));
+
+                        try {
+                            // Get test cases for this question
+                            $testCases = $question->learning_material_question_test_cases;
+
+                            if ($testCases->isEmpty()) {
+                                continue;
+                            }
+
+                            // Filter out test cases with null inputs and prepare data for FastAPI
+                            $validTestCases = $testCases->filter(function ($testCase) {
+                                return !is_null($testCase->input) && !empty(trim($testCase->input));
+                            });
+
+                            if ($validTestCases->isEmpty()) {
+                                // No valid test cases, skip this question
+                                Log::info('Skipping question with no valid test cases', [
+                                    'student_id' => $student->id,
+                                    'question_id' => $question->id,
+                                    'total_test_cases' => $testCases->count(),
+                                    'null_assertions' => $testCases->whereNull('input')->count(),
+                                    'empty_assertions' => $testCases->where('input', '')->count(),
+                                ]);
+
+                                continue;
+                            }
+
+                            Log::info('Processing test cases for synchronization', [
+                                'student_id' => $student->id,
+                                'question_id' => $question->id,
+                                'total_test_cases' => $testCases->count(),
+                                'valid_test_cases' => $validTestCases->count(),
+                                'filtered_out' => $testCases->count() - $validTestCases->count(),
+                            ]);
+
+                            $testCasesArray = $validTestCases->pluck('input')->toArray();
+                            $testCaseIds = $validTestCases->pluck('id')->toArray();
+
+                            // Call FastAPI to perform test assertions
+                            $response = Http::timeout(60)->post(config('services.fastapi.url') . '/test', [
+                                'code' => $executionResult->code,
+                                'testcases' => $testCasesArray,
+                                'testcase_ids' => $testCaseIds,
+                                'type' => 'sync',
+                                'question_id' => $question->id,
+                                'student_id' => $student->id,
+                            ]);
+
+                            if ($response->successful()) {
+                                $result = $response->json();
+
+                                // Extract passed test case IDs from the response
+                                $passedTestCaseIds = [];
+                                foreach ($result as $output) {
+                                    if (isset($output['type']) && $output['type'] === 'test_stats' && isset($output['passed_test_case_ids'])) {
+                                        $passedTestCaseIds = $output['passed_test_case_ids'];
+                                        break;
+                                    }
+                                }
+
+                                // Update the execution result with achieved test case IDs
+                                $executionResult->achieved_test_case_ids = $passedTestCaseIds;
+                                $executionResult->save();
+
+                                $syncedResults[] = [
+                                    'student_id' => $student->id,
+                                    'student_name' => $student->name,
+                                    'execution_result_id' => $executionResult->id,
+                                    'question_id' => $question->id,
+                                    'question_title' => $question->title,
+                                    'material_id' => $material->id,
+                                    'material_title' => $material->title,
+                                    'total_test_cases' => count($testCasesArray),
+                                    'passed_test_cases' => count($passedTestCaseIds),
+                                    'achieved_test_case_ids' => $passedTestCaseIds,
+                                ];
+
+                                Log::info('Synchronized student code cognitive levels', [
+                                    'student_id' => $student->id,
+                                    'execution_result_id' => $executionResult->id,
+                                    'question_id' => $question->id,
+                                    'passed_test_cases' => count($passedTestCaseIds),
+                                    'total_test_cases' => count($testCasesArray),
+                                ]);
+
+                            } else {
+                                $errorMsg = "FastAPI request failed for student {$student->id}, question {$question->id}";
+                                $errors[] = $errorMsg;
+                                Log::error($errorMsg, [
+                                    'response' => $response->body(),
+                                    'status' => $response->status(),
+                                ]);
+                            }
+
+                        } catch (Exception $e) {
+                            $errorMsg = "Error processing student {$student->id}, question {$question->id}: " . $e->getMessage();
+                            $errors[] = $errorMsg;
+                            Log::error($errorMsg, [
+                                'exception' => $e->getTraceAsString(),
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            // Broadcast completion
+            event(new \App\Events\StudentCodeSyncProgressEvent(
+                $courseId,
+                'Student code cognitive level synchronization completed',
+                $totalExecutionResults,
+                $totalExecutionResults,
+                [
+                    'synced_count' => count($syncedResults),
+                    'error_count' => count($errors),
+                ]
+            ));
+
+            return [
+                'status' => 'success',
+                'message' => 'Student code cognitive level synchronization completed',
+                'data' => [
+                    'synced_results' => $syncedResults,
+                    'synced_count' => count($syncedResults),
+                    'error_count' => count($errors),
+                    'errors' => $errors,
+                ],
+            ];
+
+        } catch (Exception $e) {
+            Log::error('Error in student code cognitive level synchronization', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'course_id' => $courseId,
+            ]);
+
+            // Broadcast error
+            event(new \App\Events\StudentCodeSyncProgressEvent(
+                $courseId,
+                'Error occurred during synchronization: ' . $e->getMessage(),
+                0,
+                1
+            ));
+
+            return [
+                'status' => 'error',
+                'message' => 'Synchronization process failed: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * Perform classification using FastAPI
      *
      * MODIFIED IN REVISION 1: Updated to reflect per-material classification
