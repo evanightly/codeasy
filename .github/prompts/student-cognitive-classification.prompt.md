@@ -156,8 +156,8 @@ Final Result in a material: C3 (Apply), Average: 0.5 (Highest rate and highest c
         5a3. After that, you will get which test case id that student completed, in @app.post("/test") it will return passed_test_case_ids, update the respective execution result and put that in the execution_result under achieved_test_case_ids column you created in the number 2
         5a4. The button will be located before run classification button in page student-cognitive-classifications
     5B. Student cognitive level calculation, this is to define the course cognitive_level and material cognitive_level:
-        5b1. Get the cognitive level of each test case from the LearningMaterialQuestionTestCase model in each materials
-        5b2. Map the achieved test case ids from execution result, and count which cognitive levels are achieved by the student and adding average and the highest cognitive_level achieved by total cognitive_levels that material has
+        5b1. Get the cognitive level of each test case from the LearningMaterialQuestionTestCase model in each materials, tips: in LearningMaterial, i've defined countCognitiveLevels method to help easen your pain.
+        5b2. Map the achieved test case ids from each student execution result, and count which cognitive levels are achieved by the student and adding average and the highest cognitive_level achieved by total cognitive_levels that material has, the study case example is in the picture .github/prompts/case_study.jpg
         5b3. To get the course classification result, use the average and the highest cognitive level of all materials in that course
         5b4. Just like topsis classification does, do record all classification steps so the user will know how to interpret the results, and it will show perfectly in the StudentCourseCognitiveClassificationDetails.tsx
         5b5. Store complete calculation in the student_course_cognitive_classification_histories from student, student code, test case, until final course classification result
