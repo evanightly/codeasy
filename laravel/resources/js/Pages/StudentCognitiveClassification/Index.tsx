@@ -62,6 +62,23 @@ export default function Index() {
         totalSteps: 0,
         progressPercentage: 0,
     });
+
+    const [classificationProgress, setClassificationProgress] = useState<{
+        isRunning: boolean;
+        message: string;
+        currentStep: number;
+        totalSteps: number;
+        progressPercentage: number;
+        phase: string;
+        data?: any;
+    }>({
+        isRunning: false,
+        message: '',
+        currentStep: 0,
+        totalSteps: 0,
+        progressPercentage: 0,
+        phase: '',
+    });
     const { data: courses, isLoading } = courseServiceHook.useGetAll();
     const runClassification = studentCognitiveClassificationServiceHook.useRunClassification();
     const syncStudentCode = studentCognitiveClassificationServiceHook.useSyncStudentCode();
@@ -105,6 +122,25 @@ export default function Index() {
         'public',
     );
 
+    // Listen for cognitive levels classification progress updates
+    useEcho(
+        'cognitive-levels-classification-progress',
+        'CognitiveLevelsClassificationProgressEvent',
+        (e: any) => {
+            setClassificationProgress({
+                isRunning: e.current_step < e.total_steps,
+                message: e.message,
+                currentStep: e.current_step,
+                totalSteps: e.total_steps,
+                progressPercentage: e.progress_percentage,
+                phase: e.phase,
+                data: e.data,
+            });
+        },
+        [],
+        'public',
+    );
+
     const rawDataFormSchema = z.object({
         course_id: z.coerce.number().min(1, t('validation.required', { attribute: 'course' })),
         export_format: z.string().default('raw'),
@@ -136,14 +172,54 @@ export default function Index() {
     });
 
     const handleRunClassification = async (values: z.infer<typeof formSchema>) => {
+        // If cognitive_levels classification is selected, initialize progress tracking
+        if (values.classification_type === 'cognitive_levels') {
+            setClassificationProgress({
+                isRunning: true,
+                message: 'Starting cognitive levels classification...',
+                currentStep: 0,
+                totalSteps: 1,
+                progressPercentage: 0,
+                phase: 'material',
+            });
+        }
+
         toast.promise(runClassification.mutateAsync(values), {
             loading: t('pages.student_cognitive_classification.messages.classification_running'),
             success: () => {
                 setDialogOpen(false);
                 form.reset();
+                // Reset classification progress on success
+                if (values.classification_type === 'cognitive_levels') {
+                    setClassificationProgress({
+                        isRunning: false,
+                        message: '',
+                        currentStep: 0,
+                        totalSteps: 0,
+                        progressPercentage: 0,
+                        phase: '',
+                    });
+                }
                 return t('pages.student_cognitive_classification.messages.classification_success');
             },
-            error: t('pages.student_cognitive_classification.messages.classification_error'),
+            error: (err) => {
+                // Reset classification progress on error
+                if (values.classification_type === 'cognitive_levels') {
+                    setClassificationProgress({
+                        isRunning: false,
+                        message: '',
+                        currentStep: 0,
+                        totalSteps: 0,
+                        progressPercentage: 0,
+                        phase: '',
+                    });
+                }
+                return (
+                    t('pages.student_cognitive_classification.messages.classification_error') +
+                    ': ' +
+                    (err?.message || 'Unknown error')
+                );
+            },
         });
     };
 
@@ -353,14 +429,63 @@ export default function Index() {
                                             control={form.control}
                                         />
 
+                                        {classificationProgress.isRunning && (
+                                            <div className='space-y-2'>
+                                                <div className='text-sm text-muted-foreground'>
+                                                    {classificationProgress.message}
+                                                </div>
+                                                <div className='h-2 w-full rounded-full bg-secondary'>
+                                                    <div
+                                                        style={{
+                                                            width: `${classificationProgress.progressPercentage}%`,
+                                                        }}
+                                                        className='h-2 rounded-full bg-primary transition-all duration-300'
+                                                    />
+                                                </div>
+                                                <div className='text-center text-xs text-muted-foreground'>
+                                                    {classificationProgress.currentStep} /{' '}
+                                                    {classificationProgress.totalSteps} (
+                                                    {classificationProgress.progressPercentage.toFixed(
+                                                        1,
+                                                    )}
+                                                    %)
+                                                </div>
+                                                <div className='text-xs text-muted-foreground'>
+                                                    Phase:{' '}
+                                                    {classificationProgress.phase === 'material'
+                                                        ? 'Material Level Analysis'
+                                                        : 'Course Level Analysis'}
+                                                </div>
+                                                {classificationProgress.data && (
+                                                    <div className='text-xs text-muted-foreground'>
+                                                        Processing:{' '}
+                                                        {classificationProgress.data.student_name ||
+                                                            'Student'}{' '}
+                                                        {classificationProgress.data
+                                                            .material_title &&
+                                                            `- ${classificationProgress.data.material_title}`}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
                                         <DialogFooter>
                                             <Button
                                                 type='submit'
-                                                loading={runClassification.isPending}
+                                                loading={
+                                                    runClassification.isPending ||
+                                                    classificationProgress.isRunning
+                                                }
+                                                disabled={classificationProgress.isRunning}
                                             >
-                                                {t(
-                                                    'pages.student_cognitive_classification.buttons.start_classification',
-                                                )}
+                                                {classificationProgress.isRunning
+                                                    ? t(
+                                                          'pages.student_cognitive_classification.buttons.classifying',
+                                                          { defaultValue: 'Classifying...' },
+                                                      )
+                                                    : t(
+                                                          'pages.student_cognitive_classification.buttons.start_classification',
+                                                      )}
                                             </Button>
                                         </DialogFooter>
                                     </form>

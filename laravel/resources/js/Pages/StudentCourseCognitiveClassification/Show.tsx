@@ -121,16 +121,96 @@ export default function Show({ data }: ShowPageProps) {
                                         'pages.student_course_cognitive_classification.fields.recommendations',
                                     )}
                                 </h3>
-                                <ul className='list-disc space-y-2 pl-5'>
-                                    {data.raw_data?.recommendations?.map(
-                                        (rec: string, index: number) => (
-                                            <li key={index} className='text-sm'>
-                                                {rec}
-                                            </li>
-                                        ),
-                                    )}
-                                </ul>
+                                {data.classification_type === 'cognitive_levels' &&
+                                data.raw_data?.recommendations ? (
+                                    <div className='space-y-2'>
+                                        {data.raw_data.recommendations.map(
+                                            (rec: any, index: number) => (
+                                                <div
+                                                    key={index}
+                                                    className='flex items-start gap-2 rounded border p-2'
+                                                >
+                                                    <Badge
+                                                        variant={
+                                                            rec.priority === 'high'
+                                                                ? 'destructive'
+                                                                : rec.priority === 'medium'
+                                                                  ? 'secondary'
+                                                                  : 'outline'
+                                                        }
+                                                        className='text-xs'
+                                                    >
+                                                        {rec.priority}
+                                                    </Badge>
+                                                    <div className='flex-1 text-sm'>
+                                                        {rec.message}
+                                                        {rec.level_name && (
+                                                            <div className='mt-1 text-xs text-muted-foreground'>
+                                                                Focus: {rec.level_name}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
+                                ) : (
+                                    <ul className='list-disc space-y-2 pl-5'>
+                                        {data.raw_data?.recommendations?.map(
+                                            (rec: string, index: number) => (
+                                                <li key={index} className='text-sm'>
+                                                    {rec}
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                )}
                             </div>
+
+                            {/* Cognitive Levels Summary */}
+                            {data.classification_type === 'cognitive_levels' &&
+                                data.raw_data?.course_cognitive_analysis && (
+                                    <>
+                                        <Separator className='my-4' />
+                                        <div className='space-y-4'>
+                                            <h3 className='font-semibold'>
+                                                Cognitive Levels Achievement
+                                            </h3>
+                                            <div className='grid grid-cols-2 gap-2'>
+                                                {Object.entries(
+                                                    data.raw_data.course_cognitive_analysis
+                                                        .aggregated_cognitive_levels || {},
+                                                ).map(([level, levelData]: [string, any]) => (
+                                                    <div
+                                                        key={level}
+                                                        className='rounded border p-2 text-center'
+                                                    >
+                                                        <div className='text-xs font-medium'>
+                                                            {level}
+                                                        </div>
+                                                        <div className='text-sm font-bold'>
+                                                            {((levelData.rate || 0) * 100).toFixed(
+                                                                1,
+                                                            )}
+                                                            %
+                                                        </div>
+                                                        <div className='text-xs text-muted-foreground'>
+                                                            {levelData.achieved || 0}/
+                                                            {levelData.total || 0}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className='text-sm text-muted-foreground'>
+                                                Highest Level:{' '}
+                                                <strong>
+                                                    {data.raw_data.course_cognitive_analysis
+                                                        .highest_achieved_level || 'None'}
+                                                </strong>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                         </CardContent>
                     </Card>
 

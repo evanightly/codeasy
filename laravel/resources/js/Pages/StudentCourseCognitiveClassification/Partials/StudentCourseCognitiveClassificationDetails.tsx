@@ -1,6 +1,6 @@
 import { Badge } from '@/Components/UI/badge';
 import { Button } from '@/Components/UI/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/Components/UI/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/UI/card';
 import {
     Dialog,
     DialogContent,
@@ -8,40 +8,40 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/Components/UI/dialog';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/Components/UI/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/UI/tabs';
 import { studentCourseCognitiveClassificationServiceHook } from '@/Services/studentCourseCognitiveClassificationServiceHook';
-import { useLaravelReactI18n } from 'laravel-react-i18n';
-import { Eye } from 'lucide-react';
+import { Brain, Eye, Target, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { StudentCourseCognitiveClassificationHistoryViewer } from './StudentCourseCognitiveClassificationHistoryViewer';
 
-// Define the expected structure of the material classification data in raw_data
-interface MaterialClassification {
-    id: number;
+// Course cognitive levels classification interfaces
+interface CognitiveLevelRate {
+    achieved: number;
+    total: number;
+    rate: number;
+}
+
+interface MaterialBreakdown {
     material_id: number;
-    material_name?: string;
-    level: string;
-    score: number;
+    material_title: string;
+    classification_level: string;
+    classification_score: number;
+    cognitive_level_rates: Record<string, CognitiveLevelRate>;
+    highest_achieved_level: string | null;
 }
 
-interface CalculationDetails {
-    material_count: number;
-    average_score: number;
-}
-
-// Define the expected structure of raw_data in StudentCourseCognitiveClassification
-interface CourseClassificationRawData {
-    material_classifications?: MaterialClassification[];
-    recommendations?: string[];
-    calculation_details?: CalculationDetails;
+interface CourseRecommendation {
+    type: string;
+    message: string;
+    priority: string;
+    level?: string;
+    level_name?: string;
+    achieved?: number;
+    total?: number;
+    current_rate?: number;
+    material_id?: number;
+    material_title?: string;
+    current_level?: string;
+    current_score?: number;
 }
 
 // This defines the shape of our component props
@@ -55,7 +55,6 @@ interface StudentCourseCognitiveClassificationDetailsProps {
 export function StudentCourseCognitiveClassificationDetails({
     classificationId,
 }: StudentCourseCognitiveClassificationDetailsProps) {
-    const { t } = useLaravelReactI18n();
     const [isOpen, setIsOpen] = useState(false);
     const [isPending, setIsPending] = useState<boolean>(false);
     const [isError, setIsError] = useState<boolean>(false);
@@ -96,102 +95,266 @@ export function StudentCourseCognitiveClassificationDetails({
         return '-';
     };
 
-    // Get raw data from the response
-    const rawData = details?.raw_data as CourseClassificationRawData | undefined;
+    // Format percentage
+    const formatPercentage = (num: number) => {
+        return `${(num * 100).toFixed(1)}%`;
+    };
 
-    // Render material classifications
-    const renderMaterialClassifications = () => {
-        const materialClassifications = rawData?.material_classifications;
+    // Get cognitive level display name
+    const getCognitiveLevelName = (level: string): string => {
+        const mapping: Record<string, string> = {
+            C1: 'Remember',
+            C2: 'Understand',
+            C3: 'Apply',
+            C4: 'Analyze',
+            C5: 'Evaluate',
+            C6: 'Create',
+        };
+        return mapping[level] || level;
+    };
 
-        if (!materialClassifications?.length) {
-            return <p>No material classifications available</p>;
+    // Get priority badge variant
+    const getPriorityVariant = (
+        priority: string,
+    ): 'default' | 'secondary' | 'destructive' | 'outline' => {
+        switch (priority) {
+            case 'high':
+                return 'destructive';
+            case 'medium':
+                return 'secondary';
+            case 'low':
+                return 'outline';
+            default:
+                return 'default';
+        }
+    };
+
+    // Check if this is a cognitive levels classification
+    const isCognitiveLevels = details?.classification_type === 'cognitive_levels';
+    const rawData = details?.raw_data;
+
+    // Render cognitive levels analysis for course
+    const renderCourseCognitiveLevelsAnalysis = () => {
+        if (!isCognitiveLevels || !rawData?.course_cognitive_analysis) {
+            return null;
         }
 
+        const analysis = rawData.course_cognitive_analysis;
+        const aggregatedLevels = analysis.aggregated_cognitive_levels || {};
+
         return (
-            <div className='space-y-4'>
-                <h3 className='text-lg font-semibold'>
-                    {t('pages.classification.section_headers.material_classifications')}
-                </h3>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Material Name</TableHead>
-                            <TableHead>Level</TableHead>
-                            <TableHead>Score</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {materialClassifications.map((material: MaterialClassification) => (
-                            <TableRow key={material.id}>
-                                <TableCell>
-                                    {material.material_name || `Material ${material.material_id}`}
-                                </TableCell>
-                                <TableCell>
-                                    <Badge>{material.level}</Badge>
-                                </TableCell>
-                                <TableCell>{formatNumber(material.score)}</TableCell>
-                            </TableRow>
+            <Card>
+                <CardHeader>
+                    <CardTitle className='flex items-center gap-2'>
+                        <Brain className='h-5 w-5' />
+                        Course Cognitive Levels Analysis
+                    </CardTitle>
+                    <CardDescription>
+                        Aggregated cognitive achievement across all materials in the course
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className='space-y-4'>
+                        {Object.entries(aggregatedLevels).map(([level, data]) => {
+                            const levelData = data as CognitiveLevelRate;
+                            return (
+                                <div
+                                    key={level}
+                                    className='flex items-center justify-between rounded-lg border p-3'
+                                >
+                                    <div className='flex items-center gap-3'>
+                                        <Badge
+                                            variant={
+                                                level === analysis.highest_achieved_level
+                                                    ? 'default'
+                                                    : 'outline'
+                                            }
+                                        >
+                                            {level}
+                                        </Badge>
+                                        <div>
+                                            <div className='font-medium'>
+                                                {getCognitiveLevelName(level)}
+                                            </div>
+                                            <div className='text-sm text-muted-foreground'>
+                                                {levelData.achieved} of {levelData.total} achieved
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className='text-right'>
+                                        <div className='font-medium'>
+                                            {formatPercentage(levelData.rate)}
+                                        </div>
+                                        <div className='h-2 w-20 overflow-hidden rounded-full bg-muted'>
+                                            <div
+                                                style={{ width: `${levelData.rate * 100}%` }}
+                                                className={`h-full transition-all ${
+                                                    level === analysis.highest_achieved_level
+                                                        ? 'bg-primary'
+                                                        : 'bg-muted-foreground'
+                                                }`}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className='mt-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
+                        <div className='rounded-lg bg-muted p-3'>
+                            <div className='font-medium'>Final Classification</div>
+                            <div className='text-lg font-bold'>{analysis.final_classification}</div>
+                            <div className='text-sm text-muted-foreground'>
+                                Score: {formatNumber(analysis.final_score)}
+                            </div>
+                        </div>
+
+                        <div className='rounded-lg bg-muted p-3'>
+                            <div className='font-medium'>Highest Level</div>
+                            <div className='text-lg font-bold'>
+                                {getCognitiveLevelName(analysis.highest_achieved_level)}
+                            </div>
+                            <div className='text-sm text-muted-foreground'>
+                                Rate: {formatPercentage(analysis.highest_rate)}
+                            </div>
+                        </div>
+
+                        <div className='rounded-lg bg-muted p-3'>
+                            <div className='font-medium'>Overall Progress</div>
+                            <div className='text-lg font-bold'>
+                                {rawData.calculation_details?.total_achieved || 0} /{' '}
+                                {rawData.calculation_details?.total_cognitive_levels || 0}
+                            </div>
+                            <div className='text-sm text-muted-foreground'>
+                                {formatPercentage(
+                                    rawData.calculation_details?.overall_achievement_rate || 0,
+                                )}{' '}
+                                achieved
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    };
+
+    // Render material breakdowns for cognitive levels
+    const renderMaterialBreakdowns = () => {
+        if (!isCognitiveLevels || !rawData?.material_breakdowns) {
+            return null;
+        }
+
+        const materialBreakdowns = rawData.material_breakdowns;
+
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle className='flex items-center gap-2'>
+                        <Target className='h-5 w-5' />
+                        Material Performance Breakdown
+                    </CardTitle>
+                    <CardDescription>
+                        Cognitive level achievements for each learning material
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className='space-y-4'>
+                        {materialBreakdowns.map((material: MaterialBreakdown) => (
+                            <div key={material.material_id} className='rounded-lg border p-4'>
+                                <div className='mb-3 flex items-center justify-between'>
+                                    <div>
+                                        <h4 className='font-medium'>{material.material_title}</h4>
+                                        <div className='mt-1 flex items-center gap-2'>
+                                            <Badge>{material.classification_level}</Badge>
+                                            <span className='text-sm text-muted-foreground'>
+                                                Score: {formatNumber(material.classification_score)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {material.highest_achieved_level && (
+                                        <Badge variant='outline'>
+                                            Highest:{' '}
+                                            {getCognitiveLevelName(material.highest_achieved_level)}
+                                        </Badge>
+                                    )}
+                                </div>
+
+                                <div className='grid grid-cols-2 gap-2 md:grid-cols-6'>
+                                    {Object.entries(material.cognitive_level_rates).map(
+                                        ([level, data]) => {
+                                            const levelData = data as CognitiveLevelRate;
+                                            return (
+                                                <div
+                                                    key={level}
+                                                    className='rounded bg-muted p-2 text-center'
+                                                >
+                                                    <div className='text-xs font-medium'>
+                                                        {level}
+                                                    </div>
+                                                    <div className='text-sm font-bold'>
+                                                        {levelData.total > 0
+                                                            ? formatPercentage(levelData.rate)
+                                                            : 'N/A'}
+                                                    </div>
+                                                    <div className='text-xs text-muted-foreground'>
+                                                        {levelData.achieved}/{levelData.total}
+                                                    </div>
+                                                </div>
+                                            );
+                                        },
+                                    )}
+                                </div>
+                            </div>
                         ))}
-                    </TableBody>
-                </Table>
-            </div>
+                    </div>
+                </CardContent>
+            </Card>
         );
     };
 
     // Render recommendations
     const renderRecommendations = () => {
-        const recommendations = rawData?.recommendations;
-
-        if (!recommendations?.length) {
-            return <p>No recommendations available</p>;
+        if (!rawData?.recommendations?.length) {
+            return null;
         }
 
-        return (
-            <div className='space-y-4'>
-                <h3 className='text-lg font-semibold'>
-                    {t('pages.classification.cards.recommendations')}
-                </h3>
-                <Card>
-                    <CardContent className='pt-6'>
-                        <ul className='list-disc space-y-2 pl-5'>
-                            {recommendations.map((recommendation: string, index: number) => (
-                                <li key={index}>{recommendation}</li>
-                            ))}
-                        </ul>
-                    </CardContent>
-                </Card>
-            </div>
-        );
-    };
-
-    // Render calculation details
-    const renderCalculationDetails = () => {
-        const calculationDetails = rawData?.calculation_details;
-
-        if (!calculationDetails) {
-            return <p>No calculation details available</p>;
-        }
+        const recommendations = rawData.recommendations;
 
         return (
-            <div className='space-y-4'>
-                <h3 className='text-lg font-semibold'>
-                    {t('pages.classification.section_headers.calculation_details')}
-                </h3>
-                <Card>
-                    <CardContent className='pt-6'>
-                        <div className='grid grid-cols-2 gap-4'>
-                            <div>
-                                <p className='font-medium'>Material Count:</p>
-                                <p>{calculationDetails.material_count}</p>
+            <Card>
+                <CardHeader>
+                    <CardTitle className='flex items-center gap-2'>
+                        <TrendingUp className='h-5 w-5' />
+                        Recommendations
+                    </CardTitle>
+                    <CardDescription>Personalized suggestions for improvement</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className='space-y-3'>
+                        {recommendations.map((rec: CourseRecommendation, index: number) => (
+                            <div key={index} className='flex gap-3 rounded-lg border p-3'>
+                                <Badge variant={getPriorityVariant(rec.priority)}>
+                                    {rec.priority}
+                                </Badge>
+                                <div className='flex-1'>
+                                    <div className='text-sm'>{rec.message}</div>
+                                    {rec.type && (
+                                        <div className='mt-1 text-xs text-muted-foreground'>
+                                            Type: {rec.type.replace(/_/g, ' ')}
+                                        </div>
+                                    )}
+                                    {rec.level_name && (
+                                        <div className='text-xs text-muted-foreground'>
+                                            Focus Area: {rec.level_name}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div>
-                                <p className='font-medium'>Average Score:</p>
-                                <p>{formatNumber(calculationDetails.average_score)}</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
         );
     };
 
@@ -204,9 +367,9 @@ export function StudentCourseCognitiveClassificationDetails({
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className='max-h-[90vh] max-w-screen-lg overflow-y-auto'>
                     <DialogHeader className='mb-4'>
-                        <DialogTitle>{t('pages.classification.course_dialog.title')}</DialogTitle>
+                        <DialogTitle>Course Classification Details</DialogTitle>
                         <DialogDescription>
-                            {t('pages.classification.course_dialog.description')}
+                            Detailed breakdown of course-level cognitive classification
                         </DialogDescription>
                     </DialogHeader>
 
@@ -218,151 +381,77 @@ export function StudentCourseCognitiveClassificationDetails({
 
                     {details && !isPending && !isLoading && !isError && (
                         <div className='space-y-6'>
+                            {/* Course Summary */}
                             <Card>
                                 <CardHeader className='pb-2'>
-                                    <CardTitle>
-                                        {t('pages.classification.cards.classification_overview')}
-                                    </CardTitle>
+                                    <CardTitle>Classification Summary</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className='space-y-2'>
-                                        <div className='flex justify-between'>
-                                            <span className='font-semibold'>Student:</span>
-                                            <span>{details.user?.name}</span>
+                                    <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
+                                        <div>
+                                            <div className='text-sm text-muted-foreground'>
+                                                Student
+                                            </div>
+                                            <div className='font-medium'>{details.user?.name}</div>
                                         </div>
-                                        <div className='flex justify-between'>
-                                            <span className='font-semibold'>Course:</span>
-                                            <span>{details.course?.name}</span>
+                                        <div>
+                                            <div className='text-sm text-muted-foreground'>
+                                                Course
+                                            </div>
+                                            <div className='font-medium'>
+                                                {details.course?.name}
+                                            </div>
                                         </div>
-                                        <div className='flex justify-between'>
-                                            <span className='font-semibold'>Level:</span>
+                                        <div>
+                                            <div className='text-sm text-muted-foreground'>
+                                                Type
+                                            </div>
+                                            <Badge variant='outline'>
+                                                {details.classification_type}
+                                            </Badge>
+                                        </div>
+                                        <div>
+                                            <div className='text-sm text-muted-foreground'>
+                                                Level
+                                            </div>
                                             <Badge>{details.classification_level}</Badge>
                                         </div>
-                                        <div className='flex justify-between'>
-                                            <span className='font-semibold'>Score:</span>
-                                            <span>
-                                                {formatNumber(
-                                                    parseFloat(
-                                                        details.classification_score?.toString(),
-                                                    ),
-                                                )}
-                                            </span>
+                                        <div>
+                                            <div className='text-sm text-muted-foreground'>
+                                                Score
+                                            </div>
+                                            <div className='font-medium'>
+                                                {formatNumber(details.classification_score)}
+                                            </div>
                                         </div>
-                                        <div className='flex justify-between'>
-                                            <span className='font-semibold'>
-                                                Classification Date:
-                                            </span>
-                                            <span>
-                                                {new Date(details.classified_at).toLocaleString()}
-                                            </span>
+                                        <div>
+                                            <div className='text-sm text-muted-foreground'>
+                                                Date
+                                            </div>
+                                            <div className='font-medium'>
+                                                {new Date(
+                                                    details.classified_at,
+                                                ).toLocaleDateString()}
+                                            </div>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <Card>
-                                <CardHeader className='pb-2'>
-                                    <CardTitle>
-                                        {t('pages.classification.cards.rule_base_mapping')}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Level</TableHead>
-                                                <TableHead>Score Range</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            <TableRow
-                                                className={
-                                                    details.classification_level === 'Create'
-                                                        ? 'bg-accent'
-                                                        : ''
-                                                }
-                                            >
-                                                <TableCell>Create</TableCell>
-                                                <TableCell>CC ≥ 0.85</TableCell>
-                                            </TableRow>
-                                            <TableRow
-                                                className={
-                                                    details.classification_level === 'Evaluate'
-                                                        ? 'bg-accent'
-                                                        : ''
-                                                }
-                                            >
-                                                <TableCell>Evaluate</TableCell>
-                                                <TableCell>{'0.70 ≤ CC < 0.85'}</TableCell>
-                                            </TableRow>
-                                            <TableRow
-                                                className={
-                                                    details.classification_level === 'Analyze'
-                                                        ? 'bg-accent'
-                                                        : ''
-                                                }
-                                            >
-                                                <TableCell>Analyze</TableCell>
-                                                <TableCell>{'0.55 ≤ CC < 0.70'}</TableCell>
-                                            </TableRow>
-                                            <TableRow
-                                                className={
-                                                    details.classification_level === 'Apply'
-                                                        ? 'bg-accent'
-                                                        : ''
-                                                }
-                                            >
-                                                <TableCell>Apply</TableCell>
-                                                <TableCell>{'0.40 ≤ CC < 0.55'}</TableCell>
-                                            </TableRow>
-                                            <TableRow
-                                                className={
-                                                    details.classification_level === 'Understand'
-                                                        ? 'bg-accent'
-                                                        : ''
-                                                }
-                                            >
-                                                <TableCell>Understand</TableCell>
-                                                <TableCell>{'0.25 ≤ CC < 0.40'}</TableCell>
-                                            </TableRow>
-                                            <TableRow
-                                                className={
-                                                    details.classification_level === 'Remember'
-                                                        ? 'bg-accent'
-                                                        : ''
-                                                }
-                                            >
-                                                <TableCell>Remember</TableCell>
-                                                <TableCell>{'CC < 0.25'}</TableCell>
-                                            </TableRow>
-                                        </TableBody>
-                                    </Table>
-                                </CardContent>
-                            </Card>
+                            {/* Cognitive Levels Analysis */}
+                            {isCognitiveLevels && renderCourseCognitiveLevelsAnalysis()}
 
+                            {/* Material Breakdowns */}
+                            {isCognitiveLevels && renderMaterialBreakdowns()}
+
+                            {/* Recommendations */}
+                            {renderRecommendations()}
+
+                            {/* History Viewer */}
                             <StudentCourseCognitiveClassificationHistoryViewer
                                 userId={details.user_id}
                                 courseId={details.course_id}
                             />
-
-                            <Tabs defaultValue='materials'>
-                                <TabsList className='grid w-full grid-cols-3'>
-                                    <TabsTrigger value='materials'>Materials</TabsTrigger>
-                                    <TabsTrigger value='recommendations'>
-                                        Recommendations
-                                    </TabsTrigger>
-                                    <TabsTrigger value='calculation'>Calculation</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value='materials' className='pt-4'>
-                                    {renderMaterialClassifications()}
-                                </TabsContent>
-                                <TabsContent value='recommendations' className='pt-4'>
-                                    {renderRecommendations()}
-                                </TabsContent>
-                                <TabsContent value='calculation' className='pt-4'>
-                                    {renderCalculationDetails()}
-                                </TabsContent>
-                            </Tabs>
                         </div>
                     )}
 

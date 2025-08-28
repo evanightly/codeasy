@@ -2290,6 +2290,7 @@ return [
         'buttons' => [
             'run_classification' => 'Run Classification',
             'start_classification' => 'Start Classification',
+            'classifying' => 'Classifying...',
             'export_excel' => 'Export Classifications',
             'export_raw_data' => 'Export Raw Data',
             'start_export' => 'Start Export',
