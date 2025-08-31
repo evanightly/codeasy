@@ -273,6 +273,11 @@ export default function Index() {
                                                             <SelectItem value='topsis'>
                                                                 TOPSIS
                                                             </SelectItem>
+                                                            <SelectItem value='cognitive_levels'>
+                                                                {t(
+                                                                    'pages.student_cognitive_classification.classification_types.cognitive_levels',
+                                                                )}
+                                                            </SelectItem>
                                                             <SelectItem value='fuzzy'>
                                                                 Fuzzy
                                                             </SelectItem>
@@ -412,6 +417,11 @@ export default function Index() {
                                                         <SelectContent>
                                                             <SelectItem value='topsis'>
                                                                 TOPSIS
+                                                            </SelectItem>
+                                                            <SelectItem value='cognitive_levels'>
+                                                                {t(
+                                                                    'pages.student_cognitive_classification.classification_types.cognitive_levels',
+                                                                )}
                                                             </SelectItem>
                                                             <SelectItem value='fuzzy'>
                                                                 Fuzzy

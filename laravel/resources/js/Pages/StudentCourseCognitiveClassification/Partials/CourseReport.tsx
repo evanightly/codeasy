@@ -49,6 +49,19 @@ export function CourseReport({
     // Create a ref for the report content div (for PDF export)
     const reportRef = useRef<HTMLDivElement>(null);
 
+    // Helper function to map classification level to cognitive level code
+    const getCognitiveLevelCode = (classificationLevel: string): string => {
+        const mapping: Record<string, string> = {
+            Remember: 'C1',
+            Understand: 'C2',
+            Apply: 'C3',
+            Analyze: 'C4',
+            Evaluate: 'C5',
+            Create: 'C6',
+        };
+        return mapping[classificationLevel] || classificationLevel;
+    };
+
     const {
         data: report,
         isLoading,
@@ -93,7 +106,8 @@ export function CourseReport({
         if (!report?.level_distribution) return [];
 
         return Object.entries(report.level_distribution).map(([level, count]) => ({
-            level,
+            level: `${level} (${getCognitiveLevelCode(level)})`,
+            originalLevel: level, // Keep original level for filtering
             count: Number(count),
             fill: chartColors[level as keyof typeof chartColors] || 'gray',
         }));
@@ -193,7 +207,8 @@ export function CourseReport({
                                             style={{ backgroundColor: color }}
                                             className='mr-2 h-4 w-4 rounded-full'
                                         ></div>
-                                        {level} ({studentsAtLevel.length})
+                                        {level} ({getCognitiveLevelCode(level)}) -{' '}
+                                        {studentsAtLevel.length} students
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
@@ -202,6 +217,10 @@ export function CourseReport({
                                             <li key={classification.id}>
                                                 {classification.user?.name || 'Unknown'} -{' '}
                                                 <span className='text-muted-foreground'>
+                                                    {getCognitiveLevelCode(
+                                                        classification.classification_level,
+                                                    )}{' '}
+                                                    -{' '}
                                                     {parseFloat(
                                                         classification.classification_score.toString(),
                                                     ).toFixed(2)}
