@@ -133,14 +133,366 @@ export function StudentCourseCognitiveClassificationDetails({
     const isCognitiveLevels = details?.classification_type === 'cognitive_levels';
     const rawData = details?.raw_data;
 
-    // Render cognitive levels analysis for course
+    // Render cognitive levels analysis for course - COMMENTED OUT OLD VERSION
+    // const renderCourseCognitiveLevelsAnalysis = () => {
+    //     if (!isCognitiveLevels || !rawData?.course_cognitive_analysis) {
+    //         return null;
+    //     }
+
+    //     const analysis = rawData.course_cognitive_analysis;
+    //     const aggregatedLevels = analysis.aggregated_cognitive_levels || {};
+
+    //     return (
+    //         <Card>
+    //             <CardHeader>
+    //                 <CardTitle className='flex items-center gap-2'>
+    //                     <Brain className='h-5 w-5' />
+    //                     Course Cognitive Levels Analysis
+    //                 </CardTitle>
+    //                 <CardDescription>
+    //                     Aggregated cognitive achievement across all materials in the course
+    //                 </CardDescription>
+    //             </CardHeader>
+    //             <CardContent>
+    //                 <div className='space-y-4'>
+    //                     {Object.entries(aggregatedLevels).map(([level, data]) => {
+    //                         const levelData = data as CognitiveLevelRate;
+    //                         return (
+    //                             <div
+    //                                 key={level}
+    //                                 className='flex items-center justify-between rounded-lg border p-3'
+    //                             >
+    //                                 <div className='flex items-center gap-3'>
+    //                                     <Badge
+    //                                         variant={
+    //                                             level === analysis.highest_achieved_level
+    //                                                 ? 'default'
+    //                                                 : 'outline'
+    //                                         }
+    //                                     >
+    //                                         {level}
+    //                                     </Badge>
+    //                                     <div>
+    //                                         <div className='font-medium'>
+    //                                             {getCognitiveLevelName(level)}
+    //                                         </div>
+    //                                         <div className='text-sm text-muted-foreground'>
+    //                                             {levelData.achieved} of {levelData.total} achieved
+    //                                         </div>
+    //                                     </div>
+    //                                 </div>
+    //                                 <div className='text-right'>
+    //                                     <div className='font-medium'>
+    //                                         {formatPercentage(levelData.rate)}
+    //                                     </div>
+    //                                     <div className='h-2 w-20 overflow-hidden rounded-full bg-muted'>
+    //                                         <div
+    //                                             style={{ width: `${levelData.rate * 100}%` }}
+    //                                             className={`h-full transition-all ${
+    //                                                 level === analysis.highest_achieved_level
+    //                                                     ? 'bg-primary'
+    //                                                     : 'bg-muted-foreground'
+    //                                             }`}
+    //                                         />
+    //                                     </div>
+    //                                 </div>
+    //                             </div>
+    //                         );
+    //                     })}
+    //                 </div>
+
+    //                 <div className='mt-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
+    //                     <div className='rounded-lg bg-muted p-3'>
+    //                         <div className='font-medium'>Final Classification</div>
+    //                         <div className='text-lg font-bold'>{analysis.final_classification}</div>
+    //                         <div className='text-sm text-muted-foreground'>
+    //                             Score: {formatNumber(analysis.final_score)}
+    //                         </div>
+    //                     </div>
+
+    //                     <div className='rounded-lg bg-muted p-3'>
+    //                         <div className='font-medium'>Highest Level</div>
+    //                         <div className='text-lg font-bold'>
+    //                             {getCognitiveLevelName(analysis.highest_achieved_level)}
+    //                         </div>
+    //                         <div className='text-sm text-muted-foreground'>
+    //                             Rate: {formatPercentage(analysis.highest_rate)}
+    //                         </div>
+    //                     </div>
+
+    //                     <div className='rounded-lg bg-muted p-3'>
+    //                         <div className='font-medium'>Overall Progress</div>
+    //                         <div className='text-lg font-bold'>
+    //                             {rawData.calculation_details?.total_achieved || 0} /{' '}
+    //                             {rawData.calculation_details?.total_cognitive_levels || 0}
+    //                         </div>
+    //                         <div className='text-sm text-muted-foreground'>
+    //                             {formatPercentage(
+    //                                 rawData.calculation_details?.overall_achievement_rate || 0,
+    //                             )}{' '}
+    //                             achieved
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //             </CardContent>
+    //         </Card>
+    //     );
+    // };
+
+    // NEW: Render cognitive levels analysis based on actual data structure
     const renderCourseCognitiveLevelsAnalysis = () => {
-        if (!isCognitiveLevels || !rawData?.course_cognitive_analysis) {
+        if (!isCognitiveLevels || !rawData) {
             return null;
         }
 
-        const analysis = rawData.course_cognitive_analysis;
-        const aggregatedLevels = analysis.aggregated_cognitive_levels || {};
+        // Check if we have course_cognitive_analysis (the detailed breakdown)
+        const courseAnalysis = rawData.course_cognitive_analysis;
+        const materialsData = rawData.material_breakdowns;
+
+        if (!courseAnalysis && !materialsData) {
+            return null;
+        }
+
+        // If we have course_cognitive_analysis, use it for the detailed breakdown
+        if (courseAnalysis && courseAnalysis.aggregated_cognitive_levels) {
+            const aggregatedLevels = courseAnalysis.aggregated_cognitive_levels;
+
+            // Map final classification to cognitive level code for highlighting
+            const finalClassificationLevel = (() => {
+                const mapping: Record<string, string> = {
+                    Remember: 'C1',
+                    Understand: 'C2',
+                    Apply: 'C3',
+                    Analyze: 'C4',
+                    Evaluate: 'C5',
+                    Create: 'C6',
+                };
+                return (
+                    mapping[courseAnalysis.final_classification] ||
+                    courseAnalysis.final_classification
+                );
+            })();
+
+            const highlightedLevel = finalClassificationLevel;
+
+            return (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className='flex items-center gap-2'>
+                            <Brain className='h-5 w-5' />
+                            Course Cognitive Levels Analysis
+                        </CardTitle>
+                        <CardDescription>
+                            Aggregated cognitive achievement across all materials in the course
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className='space-y-4'>
+                            {Object.entries(aggregatedLevels).map(([level, data]) => {
+                                const levelData = data as CognitiveLevelRate;
+                                const isHighlighted = level === highlightedLevel;
+
+                                return (
+                                    <div
+                                        key={level}
+                                        className={`flex items-center justify-between rounded-lg border p-3 ${
+                                            isHighlighted ? 'border-primary bg-primary/5' : ''
+                                        }`}
+                                    >
+                                        <div className='flex items-center gap-3'>
+                                            <Badge
+                                                variant={isHighlighted ? 'default' : 'outline'}
+                                                className={
+                                                    isHighlighted
+                                                        ? 'bg-primary text-primary-foreground'
+                                                        : ''
+                                                }
+                                            >
+                                                {level}
+                                            </Badge>
+                                            <div>
+                                                <div className='font-medium'>
+                                                    {getCognitiveLevelName(level)}
+                                                </div>
+                                                <div className='text-sm text-muted-foreground'>
+                                                    {levelData.achieved} of {levelData.total}{' '}
+                                                    achieved
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className='text-right'>
+                                            <div className='font-medium'>
+                                                {formatPercentage(levelData.rate)}
+                                            </div>
+                                            <div className='h-2 w-20 overflow-hidden rounded-full bg-muted'>
+                                                <div
+                                                    style={{ width: `${levelData.rate * 100}%` }}
+                                                    className={`h-full transition-all ${
+                                                        isHighlighted
+                                                            ? 'bg-primary'
+                                                            : 'bg-muted-foreground'
+                                                    }`}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Material Results Display - if available */}
+                        {materialsData && (
+                            <div className='mt-6 rounded-lg bg-muted/50 p-4'>
+                                <h4 className='mb-3 font-medium'>
+                                    Material Classification Results:
+                                </h4>
+                                <div className='grid grid-cols-1 gap-2 md:grid-cols-2'>
+                                    {materialsData.map(
+                                        (material: MaterialBreakdown, index: number) => (
+                                            <div
+                                                key={index}
+                                                className='flex items-center justify-between rounded bg-background p-2'
+                                            >
+                                                <span className='text-sm font-medium'>
+                                                    {material.material_title}
+                                                </span>
+                                                <Badge
+                                                    variant={
+                                                        material.classification_level === 'Create'
+                                                            ? 'default'
+                                                            : 'outline'
+                                                    }
+                                                    className='text-xs'
+                                                >
+                                                    {material.classification_level}
+                                                </Badge>
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className='mt-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
+                            <div className='rounded-lg bg-muted p-3'>
+                                <div className='font-medium'>Final Classification</div>
+                                <div className='text-lg font-bold'>
+                                    {courseAnalysis.final_classification}
+                                </div>
+                                <div className='text-sm text-muted-foreground'>
+                                    {materialsData
+                                        ? (() => {
+                                              const finalClassificationCount = materialsData.filter(
+                                                  (m: MaterialBreakdown) =>
+                                                      m.classification_level ===
+                                                      courseAnalysis.final_classification,
+                                              ).length;
+                                              return `${finalClassificationCount} / ${materialsData.length} materials are having ${courseAnalysis.final_classification.toLowerCase()} (${finalClassificationLevel})`;
+                                          })()
+                                        : 'No material data'}
+                                </div>
+                            </div>
+
+                            <div className='rounded-lg bg-muted p-3'>
+                                <div className='font-medium'>Highest Level</div>
+                                <div className='text-lg font-bold'>
+                                    {getCognitiveLevelName(courseAnalysis.highest_achieved_level)} (
+                                    {courseAnalysis.highest_achieved_level})
+                                </div>
+                                <div className='text-sm text-muted-foreground'>
+                                    Rate: {formatPercentage(courseAnalysis.highest_rate)}
+                                </div>
+                            </div>
+
+                            <div className='rounded-lg bg-muted p-3'>
+                                <div className='font-medium'>Overall Progress</div>
+                                <div className='text-lg font-bold'>
+                                    {materialsData ? materialsData.length : 0} Materials
+                                </div>
+                                <div className='text-sm text-muted-foreground'>
+                                    {materialsData
+                                        ? `${materialsData.filter((m: MaterialBreakdown) => m.classification_level === 'Create').length} Create levels achieved`
+                                        : 'No material data'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Reasoning */}
+                        <div className='mt-6 rounded-lg border-l-4 border-primary bg-primary/5 p-4'>
+                            <h4 className='font-medium text-primary'>Classification Reasoning:</h4>
+                            <p className='mt-1 text-sm text-muted-foreground'>
+                                {materialsData && courseAnalysis
+                                    ? `Most materials (${materialsData.filter((m: MaterialBreakdown) => m.classification_level === 'Create').length}) achieved Create level, final classification is ${courseAnalysis.final_classification}. Highest cognitive achievement level in course analysis is ${getCognitiveLevelName(courseAnalysis.highest_achieved_level)} (${courseAnalysis.highest_achieved_level}) with ${formatPercentage(courseAnalysis.highest_rate)} achievement rate.`
+                                    : `Final classification ${details?.classification_level} is determined by the course-level analysis.`}
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+            );
+        }
+
+        // Fallback: Use material breakdowns only (previous logic)
+        const materialBreakdowns = rawData.material_breakdowns;
+        if (!materialBreakdowns) return null;
+
+        // Count cognitive levels from actual material results
+        const levelCounts: Record<string, number> = {
+            C1: 0,
+            C2: 0,
+            C3: 0,
+            C4: 0,
+            C5: 0,
+            C6: 0,
+        };
+
+        const materialResults: Array<{ material_title: string; level: string }> = [];
+
+        // Extract level from each material
+        materialBreakdowns.forEach((material: MaterialBreakdown) => {
+            const level = material.classification_level;
+            materialResults.push({
+                material_title: material.material_title,
+                level: level,
+            });
+
+            // Count occurrences - map text levels to codes
+            const levelMapping: Record<string, string> = {
+                Remember: 'C1',
+                Understand: 'C2',
+                Apply: 'C3',
+                Analyze: 'C4',
+                Evaluate: 'C5',
+                Create: 'C6',
+            };
+            const levelCode = levelMapping[level] || level;
+            if (Object.prototype.hasOwnProperty.call(levelCounts, levelCode)) {
+                levelCounts[levelCode]++;
+            }
+        });
+
+        // Calculate total materials
+        const totalMaterials = materialBreakdowns.length;
+
+        // Find mode (most frequent) and highest level
+        let maxCount = 0;
+        let modeLevel = 'C1';
+        let highestLevel = 'C1';
+
+        Object.entries(levelCounts).forEach(([level, count]) => {
+            if (count > maxCount) {
+                maxCount = count;
+                modeLevel = level;
+            }
+            if (count > 0 && level > highestLevel) {
+                highestLevel = level;
+            }
+        });
+
+        // Determine which level should be highlighted (most frequent = Create)
+        const shouldHighlightCreate = levelCounts['C6'] >= levelCounts['C4']; // If Create count >= Analyze count
+        const highlightedLevel = shouldHighlightCreate
+            ? 'C6'
+            : details?.classification_level || 'C4';
 
         return (
             <Card>
@@ -155,19 +507,25 @@ export function StudentCourseCognitiveClassificationDetails({
                 </CardHeader>
                 <CardContent>
                     <div className='space-y-4'>
-                        {Object.entries(aggregatedLevels).map(([level, data]) => {
-                            const levelData = data as CognitiveLevelRate;
+                        {Object.entries(levelCounts).map(([level, count]) => {
+                            const percentage =
+                                totalMaterials > 0 ? (count / totalMaterials) * 100 : 0;
+                            const isHighlighted = level === highlightedLevel;
+
                             return (
                                 <div
                                     key={level}
-                                    className='flex items-center justify-between rounded-lg border p-3'
+                                    className={`flex items-center justify-between rounded-lg border p-3 ${
+                                        isHighlighted ? 'border-primary bg-primary/5' : ''
+                                    }`}
                                 >
                                     <div className='flex items-center gap-3'>
                                         <Badge
-                                            variant={
-                                                level === analysis.highest_achieved_level
-                                                    ? 'default'
-                                                    : 'outline'
+                                            variant={isHighlighted ? 'default' : 'outline'}
+                                            className={
+                                                isHighlighted
+                                                    ? 'bg-primary text-primary-foreground'
+                                                    : ''
                                             }
                                         >
                                             {level}
@@ -177,19 +535,17 @@ export function StudentCourseCognitiveClassificationDetails({
                                                 {getCognitiveLevelName(level)}
                                             </div>
                                             <div className='text-sm text-muted-foreground'>
-                                                {levelData.achieved} of {levelData.total} achieved
+                                                {count} of {totalMaterials} achieved
                                             </div>
                                         </div>
                                     </div>
                                     <div className='text-right'>
-                                        <div className='font-medium'>
-                                            {formatPercentage(levelData.rate)}
-                                        </div>
+                                        <div className='font-medium'>{percentage.toFixed(1)}%</div>
                                         <div className='h-2 w-20 overflow-hidden rounded-full bg-muted'>
                                             <div
-                                                style={{ width: `${levelData.rate * 100}%` }}
+                                                style={{ width: `${percentage}%` }}
                                                 className={`h-full transition-all ${
-                                                    level === analysis.highest_achieved_level
+                                                    isHighlighted
                                                         ? 'bg-primary'
                                                         : 'bg-muted-foreground'
                                                 }`}
@@ -201,38 +557,67 @@ export function StudentCourseCognitiveClassificationDetails({
                         })}
                     </div>
 
+                    {/* Material Results Display */}
+                    <div className='mt-6 rounded-lg bg-muted/50 p-4'>
+                        <h4 className='mb-3 font-medium'>Material Classification Results:</h4>
+                        <div className='grid grid-cols-1 gap-2 md:grid-cols-2'>
+                            {materialResults.map((result, index) => (
+                                <div
+                                    key={index}
+                                    className='flex items-center justify-between rounded bg-background p-2'
+                                >
+                                    <span className='text-sm font-medium'>
+                                        {result.material_title}
+                                    </span>
+                                    <Badge
+                                        variant={result.level === 'Create' ? 'default' : 'outline'}
+                                        className='text-xs'
+                                    >
+                                        {result.level}
+                                    </Badge>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
                     <div className='mt-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
                         <div className='rounded-lg bg-muted p-3'>
                             <div className='font-medium'>Final Classification</div>
-                            <div className='text-lg font-bold'>{analysis.final_classification}</div>
+                            <div className='text-lg font-bold'>{details?.classification_level}</div>
                             <div className='text-sm text-muted-foreground'>
-                                Score: {formatNumber(analysis.final_score)}
+                                Score: {formatNumber(details?.classification_score)}
                             </div>
                         </div>
 
                         <div className='rounded-lg bg-muted p-3'>
-                            <div className='font-medium'>Highest Level</div>
+                            <div className='font-medium'>Most Frequent Level</div>
                             <div className='text-lg font-bold'>
-                                {getCognitiveLevelName(analysis.highest_achieved_level)}
+                                {getCognitiveLevelName(modeLevel)} ({modeLevel})
                             </div>
                             <div className='text-sm text-muted-foreground'>
-                                Rate: {formatPercentage(analysis.highest_rate)}
+                                Appears {maxCount} times
                             </div>
                         </div>
 
                         <div className='rounded-lg bg-muted p-3'>
                             <div className='font-medium'>Overall Progress</div>
-                            <div className='text-lg font-bold'>
-                                {rawData.calculation_details?.total_achieved || 0} /{' '}
-                                {rawData.calculation_details?.total_cognitive_levels || 0}
-                            </div>
+                            <div className='text-lg font-bold'>{totalMaterials} Materials</div>
                             <div className='text-sm text-muted-foreground'>
-                                {formatPercentage(
-                                    rawData.calculation_details?.overall_achievement_rate || 0,
-                                )}{' '}
-                                achieved
+                                {shouldHighlightCreate
+                                    ? `${levelCounts['C6']} Create levels achieved`
+                                    : `Most achieved: ${getCognitiveLevelName(modeLevel)}`}
                             </div>
                         </div>
+                    </div>
+
+                    {/* Reasoning */}
+                    <div className='mt-6 rounded-lg border-l-4 border-primary bg-primary/5 p-4'>
+                        <h4 className='font-medium text-primary'>Classification Reasoning:</h4>
+                        <p className='mt-1 text-sm text-muted-foreground'>
+                            {shouldHighlightCreate
+                                ? `Most materials (${levelCounts['C6']}) achieved Create level, but final classification is ${details?.classification_level} based on course-level analysis algorithm.`
+                                : `Final classification ${details?.classification_level} is determined by the course-level analysis considering all material performances.`}
+                        </p>
                     </div>
                 </CardContent>
             </Card>

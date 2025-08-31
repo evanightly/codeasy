@@ -402,6 +402,87 @@ print("TEST_OUTPUT:" + json.dumps(combined_results))
         print(f"❌ ERROR - Student {input.student_id or 'unknown'}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+def calculate_course_level_classification(material_classifications):
+    """
+    Calculate course-level classification based on mode and highest cognitive level
+    from all material classifications.
+    
+    Args:
+        material_classifications: List of material classification results with 'level' field
+        
+    Returns:
+        dict: Course-level classification with level, score, and reasoning
+    """
+    try:
+        if not material_classifications:
+            return {"level": "Remember", "score": 0.0, "reasoning": "No materials found"}
+        
+        # Extract cognitive levels from materials
+        cognitive_levels = [classification['level'] for classification in material_classifications]
+        
+        # Define cognitive level hierarchy (C1 = lowest, C6 = highest)
+        level_hierarchy = {
+            "Remember": 1,
+            "Understand": 2,  
+            "Apply": 3,
+            "Analyze": 4,
+            "Evaluate": 5,
+            "Create": 6
+        }
+        
+        # Calculate mode (most frequent level)
+        level_counts = {}
+        for level in cognitive_levels:
+            level_counts[level] = level_counts.get(level, 0) + 1
+        
+        # Find the most frequent level(s)
+        max_count = max(level_counts.values())
+        mode_levels = [level for level, count in level_counts.items() if count == max_count]
+        
+        # If there's a tie in mode, pick the higher level
+        mode_level = max(mode_levels, key=lambda x: level_hierarchy.get(x, 0))
+        
+        # Calculate highest cognitive level achieved
+        highest_level = max(cognitive_levels, key=lambda x: level_hierarchy.get(x, 0))
+        
+        # Decision logic: Choose between mode and highest based on your business rule
+        # Based on the case study image, it seems to balance between mode and highest
+        mode_rank = level_hierarchy.get(mode_level, 0)
+        highest_rank = level_hierarchy.get(highest_level, 0)
+        
+        # Business logic: If mode and highest are close (within 1 level), use mode
+        # If highest is significantly higher (2+ levels), use a middle ground
+        if abs(highest_rank - mode_rank) <= 1:
+            final_level = mode_level
+            reasoning = f"{mode_level} is the mode and the highest cognitive level"
+        elif highest_rank - mode_rank == 2:
+            # Use the level between mode and highest
+            middle_rank = (mode_rank + highest_rank) // 2
+            final_level = next(level for level, rank in level_hierarchy.items() if rank == middle_rank)
+            reasoning = f"{final_level} is chosen as a balance between mode ({mode_level}) and highest ({highest_level})"
+        else:
+            # For larger gaps, lean more towards the mode but bump up one level
+            middle_rank = min(mode_rank + 1, 6)
+            final_level = next(level for level, rank in level_hierarchy.items() if rank == middle_rank)
+            reasoning = f"{final_level} is chosen as an advancement from mode ({mode_level}) considering highest ({highest_level})"
+        
+        # Calculate average score across materials for the final score
+        avg_score = sum(classification['score'] for classification in material_classifications) / len(material_classifications)
+        
+        return {
+            "level": final_level,
+            "score": float(avg_score),
+            "reasoning": reasoning,
+            "mode_level": mode_level,
+            "highest_level": highest_level,
+            "material_count": len(material_classifications),
+            "level_distribution": level_counts
+        }
+        
+    except Exception as e:
+        print(f"Course-level classification error: {str(e)}")
+        return {"level": "Remember", "score": 0.0, "reasoning": f"Error: {str(e)}"}
+
 @app.post("/classify", response_model=ClassificationResponse)
 async def classify_students(request: ClassificationRequest):
     try:
@@ -416,6 +497,9 @@ async def classify_students(request: ClassificationRequest):
         for student in student_data:
             user_id = student.user_id
             materials = student.materials
+            
+            # Store material classifications for this student
+            student_material_classifications = []
             
             # Process each material separately (Revision 1)
             for material in materials:
@@ -501,6 +585,14 @@ async def classify_students(request: ClassificationRequest):
                     "weak_areas": weak_areas
                 }
                 
+                # Store for course-level calculation
+                student_material_classifications.append({
+                    "level": level,
+                    "score": float(score),
+                    "material_id": material_id,
+                    "material_name": material_name
+                })
+                
                 # Create classification result for this material
                 classifications.append(
                     ClassificationResult(
@@ -509,6 +601,34 @@ async def classify_students(request: ClassificationRequest):
                         level=level,
                         score=float(score),
                         raw_data=raw_data
+                    )
+                )
+            
+            # Add course-level classification for this student
+            if student_material_classifications:
+                course_classification = calculate_course_level_classification(student_material_classifications)
+                
+                # Create course-level raw data
+                course_raw_data = {
+                    "method": f"{classification_type}_course_level",
+                    "classification_level": course_classification["level"],
+                    "classification_score": course_classification["score"],
+                    "reasoning": course_classification["reasoning"],
+                    "mode_level": course_classification["mode_level"],
+                    "highest_level": course_classification["highest_level"],
+                    "material_count": course_classification["material_count"],
+                    "level_distribution": course_classification["level_distribution"],
+                    "material_classifications": student_material_classifications
+                }
+                
+                # Add course-level classification result (material_id = None indicates course-level)
+                classifications.append(
+                    ClassificationResult(
+                        user_id=user_id,
+                        material_id=None,  # None indicates course-level classification
+                        level=course_classification["level"],
+                        score=course_classification["score"],
+                        raw_data=course_raw_data
                     )
                 )
         
