@@ -11,6 +11,11 @@ interface StudentCourseCognitiveClassificationRepositoryInterface extends BaseRe
     public function getByCourseId(int $courseId, string $classificationType = 'topsis'): Collection;
 
     /**
+     * Get latest classification for each student in a course (deduplicated)
+     */
+    public function getLatestByCourseId(int $courseId, string $classificationType = 'topsis'): Collection;
+
+    /**
      * Get student course cognitive classification for a specific student and course
      */
     public function getByUserAndCourseId(int $userId, int $courseId, string $classificationType = 'topsis'): ?object;

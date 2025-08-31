@@ -10,6 +10,7 @@ use App\Traits\Repositories\HandlesSorting;
 use App\Traits\Repositories\RelationQueryable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class StudentCourseCognitiveClassificationRepository extends BaseRepository implements StudentCourseCognitiveClassificationRepositoryInterface {
     use HandlesFiltering, HandlesRelations, HandlesSorting, RelationQueryable;
@@ -35,6 +36,24 @@ class StudentCourseCognitiveClassificationRepository extends BaseRepository impl
         return $this->getQuery()
             ->where('course_id', $courseId)
             ->where('classification_type', $classificationType)
+            ->with(['user', 'course'])
+            ->get();
+    }
+
+    /**
+     * Get latest classification for each student in a course (deduplicated)
+     */
+    public function getLatestByCourseId(int $courseId, string $classificationType = 'topsis'): Collection {
+        return $this->getQuery()
+            ->where('course_id', $courseId)
+            ->where('classification_type', $classificationType)
+            ->whereIn('id', function ($query) use ($courseId, $classificationType) {
+                $query->select(DB::raw('MAX(id)'))
+                    ->from('student_course_cognitive_classifications')
+                    ->where('course_id', $courseId)
+                    ->where('classification_type', $classificationType)
+                    ->groupBy('user_id');
+            })
             ->with(['user', 'course'])
             ->get();
     }

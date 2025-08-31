@@ -118,8 +118,8 @@ class StudentCourseCognitiveClassificationService extends BaseCrudService implem
         int $courseId,
         string $classificationType = 'topsis'
     ): array {
-        // Get all students in the course
-        $courseClassifications = $this->repository->getByCourseId($courseId, $classificationType);
+        // Get latest classification for each student in the course (deduplicated)
+        $courseClassifications = $this->repository->getLatestByCourseId($courseId, $classificationType);
 
         // Structure by cognitive level
         $levelCounts = [
