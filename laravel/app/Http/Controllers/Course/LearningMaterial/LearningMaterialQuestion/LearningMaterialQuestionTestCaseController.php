@@ -317,8 +317,7 @@ class LearningMaterialQuestionTestCaseController extends Controller implements H
     /**
      * Export sequence validation report via POST request
      */
-    public function exportSequenceValidation(Course $course, Request $request)
-    {
+    public function exportSequenceValidation(Course $course, Request $request) {
         // Decode the validation data from JSON
         $validationData = $request->input('validationData');
         if (is_string($validationData)) {

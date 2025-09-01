@@ -41,6 +41,7 @@ import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
 // Drag and drop imports
+import { IntentEnum } from '@/Support/Enums/intentEnum';
 import {
     closestCenter,
     DndContext,
@@ -57,7 +58,6 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { IntentEnum } from '@/Support/Enums/intentEnum';
 
 interface Props {
     course: CourseResource;

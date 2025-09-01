@@ -29,14 +29,11 @@ import { Textarea } from '@/Components/UI/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { learningMaterialQuestionTestCaseServiceHook } from '@/Services/learningMaterialQuestionTestCaseServiceHook';
 import { ROUTES } from '@/Support/Constants/routes';
+import { CognitiveLevelEnum, cognitiveLevelLabels } from '@/Support/Enums/cognitiveLevelEnum';
 import {
     ProgrammingLanguageEnum,
     programmingLanguageLabels,
 } from '@/Support/Enums/programmingLanguageEnum';
-import {
-    CognitiveLevelEnum,
-    cognitiveLevelLabels,
-} from '@/Support/Enums/cognitiveLevelEnum';
 import {
     CourseResource,
     LearningMaterialQuestionResource,
@@ -156,7 +153,7 @@ export default function Create({ question, course, learningMaterial }: Props) {
         formData.append('language', values.language);
         formData.append('hidden', values.hidden ? '1' : '0');
         formData.append('active', values.active ? '1' : '0');
-        
+
         // Handle cognitive levels
         if (values.cognitive_levels && values.cognitive_levels.length > 0) {
             values.cognitive_levels.forEach((level, index) => {
@@ -571,7 +568,7 @@ export default function Create({ question, course, learningMaterial }: Props) {
                                                 'pages.learning_material_question_test_case.common.help.cognitive_levels',
                                                 {
                                                     defaultValue:
-                                                        'Select the cognitive levels that this test case evaluates based on Bloom\'s taxonomy.',
+                                                        "Select the cognitive levels that this test case evaluates based on Bloom's taxonomy.",
                                                 },
                                             )}
                                         </FormDescription>
@@ -585,15 +582,22 @@ export default function Create({ question, course, learningMaterial }: Props) {
                                                         onCheckedChange={(checked) => {
                                                             const currentLevels = field.value || [];
                                                             if (checked) {
-                                                                field.onChange([...currentLevels, level]);
+                                                                field.onChange([
+                                                                    ...currentLevels,
+                                                                    level,
+                                                                ]);
                                                             } else {
                                                                 field.onChange(
-                                                                    currentLevels.filter((l) => l !== level),
+                                                                    currentLevels.filter(
+                                                                        (l) => l !== level,
+                                                                    ),
                                                                 );
                                                             }
                                                         }}
                                                         id={`cognitive-level-${level}`}
-                                                        checked={field.value?.includes(level) || false}
+                                                        checked={
+                                                            field.value?.includes(level) || false
+                                                        }
                                                     />
                                                     <label
                                                         htmlFor={`cognitive-level-${level}`}
