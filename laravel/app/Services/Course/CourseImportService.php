@@ -1095,7 +1095,18 @@ class CourseImportService implements CourseImportServiceInterface {
      * @return int|false Position of the section or false if not found
      */
     protected function findPertanyaanSectionPosition(string $pdfText): int|false {
-        // Enhanced pattern to avoid conflicts with code sections
+        // First, look for the specific DBSR line pattern
+        $dbsrPattern = '/------------------ DBSR Line ------------------\s*(?:\n|\r\n?)\s*Pertanyaan\s*(?:\n|\r\n?)/mi';
+        if (preg_match($dbsrPattern, $pdfText, $matches, PREG_OFFSET_CAPTURE)) {
+            // Find the position of "Pertanyaan" after the DBSR line
+            $dbsrLineEnd = $matches[0][1] + strlen($matches[0][0]);
+            $pertanyaanPosition = strpos($pdfText, 'Pertanyaan', $matches[0][1]);
+            if ($pertanyaanPosition !== false) {
+                return $pertanyaanPosition;
+            }
+        }
+
+        // Fallback to enhanced pattern matching
         // Look for "Pertanyaan" that's likely a section header (not in code comments)
         $patterns = [
             '/(?:^|\n)\s*(?:Pertanyaan\s*Modul|Pertanyaan)\s*(?:\n|$)/mi',
